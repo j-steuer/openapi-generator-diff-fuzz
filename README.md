@@ -1,0 +1,1 @@
+## Fuzzing Framework for OpenAPI client generators
