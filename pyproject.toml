@@ -12,16 +12,17 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "mitmproxy~=12.2.1"
+    "docker==7.1.0
+    "mitmproxy==12.2.1"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "black",
-    "flake8",
-    "mypy",
-    "pre-commit"
+    "pytest==9.0.3",
+    "black==26.3.1",
+    "flake8==7.3.0",
+    "mypy==1.20.0",
+    "pre-commit==4.5.1"
 ]
 
 [tool.setuptools]
