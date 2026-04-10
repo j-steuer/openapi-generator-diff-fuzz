@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from telephuzz.http_message import Response, Request
+
+from telephuzz.http_message import Request, Response
 
 
 class RequestGenerator(ABC):
