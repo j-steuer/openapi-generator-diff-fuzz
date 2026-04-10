@@ -1,1 +1,2 @@
-## Fuzzing Framework for OpenAPI client generators
+## TelePhuzz
+## A Fuzzing Framework for OpenAPI client generators
