@@ -19,8 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest==9.0.3",
-    "black==26.3.1",
-    "flake8==7.3.0",
+    "ruff==0.15.10",
     "mypy==1.20.0",
     "types-docker==7.1.0.20260409",
     "pre-commit==4.5.1"
@@ -31,3 +30,17 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# -------------------------
+# Ruff configuration
+# -------------------------
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]  # pycodestyle, pyflakes, isort, bugbear
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["telephuzz"]
