@@ -100,6 +100,7 @@ class DiffReport:
         }
 
     def __eq__(self, other):
+        # TODO add request chain once Request has hash
         if not isinstance(other, DiffReport):
             return False
         return (
