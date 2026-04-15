@@ -42,7 +42,7 @@ target-version = "py313"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B"]  # pycodestyle, pyflakes, isort, bugbear
+select = ["E", "F", "I", "B", "D"]
 fixable = ["ALL"]
 
 [tool.ruff.lint.isort]
