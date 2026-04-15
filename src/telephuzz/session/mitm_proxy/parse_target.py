@@ -1,7 +1,10 @@
+"""File for custom request handling in MiTMProxy."""
+
 from mitmproxy import http
 
 
 def request(flow: http.HTTPFlow):
+    """Handle custom encoding to route requests to API targets."""
     path = flow.request.path  # e.g. /server:8000/api/foo
 
     parts = path.lstrip("/").split("/", 1)

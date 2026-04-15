@@ -1,3 +1,5 @@
+"""File for storing the results of an evaluation if a difference is found."""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -7,6 +9,8 @@ from telephuzz.session.client_library import LibraryId
 
 @dataclass
 class DiffReport:
+    """Class for storing and writing the results of an evaluation."""
+
     library_id: LibraryId
     error_id: str
     persistent: bool
@@ -30,6 +34,7 @@ class DiffReport:
             A set of unified DiffReport instances, with one report per unique
             library–error combination. The unique attribute is to False
             if the error also occurs in other libraries.
+
         """
         unified_reports: dict[str, list["DiffReport"]] = dict()
 
@@ -100,6 +105,7 @@ class DiffReport:
         }
 
     def __eq__(self, other):
+        """Eq method."""
         # TODO add request chain once Request has hash
         if not isinstance(other, DiffReport):
             return False
@@ -118,6 +124,7 @@ class DiffReport:
         )
 
     def __hash__(self):
+        """Hash method."""
         return hash(
             (
                 self.library_id,
@@ -129,4 +136,5 @@ class DiffReport:
         )
 
     def to_log(self, log_path: Path) -> None:
+        """Write the information contained in the report to a log file."""
         raise NotImplementedError  # TODO

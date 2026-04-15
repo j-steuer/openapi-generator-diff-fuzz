@@ -92,7 +92,6 @@ def test_unify_detail() -> None:
 
 def test_unique_assignment() -> None:
     """Test correct uniqueness assignment."""
-
     unique_report = DiffReport("1", "1", False, [])
     same_error_report1 = DiffReport("1", "2", False, [])
     same_error_report2 = DiffReport("2", "2", False, [])
