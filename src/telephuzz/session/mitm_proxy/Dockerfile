@@ -1,7 +1,7 @@
 # Use official mitmproxy image as base
 FROM mitmproxy/mitmproxy:latest
 
-# Copy your script into the image
+# Copy the dynamic routing script into the image
 COPY dynamic_router.py /scripts/dynamic_router.py
 
 # Set working directory
