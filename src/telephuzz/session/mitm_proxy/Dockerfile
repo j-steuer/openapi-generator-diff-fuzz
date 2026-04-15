@@ -7,5 +7,5 @@ COPY dynamic_router.py /scripts/dynamic_router.py
 # Set working directory
 WORKDIR /scripts
 
-# Default command
+# Default command TODO change to CLI version
 CMD ["mitmweb","--listen-port", "8080", "--web-port", "8081", "--web-host", "0.0.0.0", "-s", "/scripts/dynamic_router.py", "--set", "web_password=mitm"]
