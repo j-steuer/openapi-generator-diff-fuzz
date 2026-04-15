@@ -1,3 +1,5 @@
+"""File for code relating to request generation."""
+
 from abc import ABC, abstractmethod
 
 from telephuzz.http_message import Request, Response

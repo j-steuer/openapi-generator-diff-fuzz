@@ -1,3 +1,5 @@
+"""File for objects relating to requests and responses."""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Mapping
