@@ -1,6 +1,7 @@
 """File for pytest fixtures."""
 
 import pytest
+from requests.structures import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request
 
@@ -9,10 +10,11 @@ from telephuzz.http_message import HTTPMethod, Request
 def basic_request():
     """Fixture for dummy request if content is not relevant."""
     return Request(
-        headers={"Test": ["test"]},
+        headers=CaseInsensitiveDict({"Test": ["test"]}),
         body=None,
         content_type=None,
         method=HTTPMethod.GET,
-        target="dummytarget.org/test",
-        parameters={},
+        path="dummytarget.org/test",
+        path_parameters={},
+        query_parameters={},
     )

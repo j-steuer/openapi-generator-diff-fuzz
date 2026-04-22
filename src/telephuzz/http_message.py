@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from typing import Any
+
+from requests.structures import CaseInsensitiveDict
 
 
 class HTTPMethod(Enum):
@@ -13,13 +15,23 @@ class HTTPMethod(Enum):
     PUT = "PUT"
     DELETE = "DELETE"
 
+    @classmethod
+    def _missing_(cls, value):
+        """Fix case where input is not capitalized."""
+        if isinstance(value, str):
+            value = value.upper()
+            for member in cls:
+                if member.value == value:
+                    return member
+        return None
+
 
 @dataclass
 class HTTPMessage:
     """Abstract class for shared fields of Request and Response."""
 
-    headers: Mapping[str, list[str]]
-    body: bytes | str | None
+    headers: CaseInsensitiveDict
+    body: Any
     content_type: str | None
 
 
@@ -28,8 +40,9 @@ class Request(HTTPMessage):
     """Class for HTTP request fields relevant for the evaluation."""
 
     method: HTTPMethod
-    target: str
-    parameters: dict[str, list[str]]
+    path: str
+    path_parameters: dict[str, Any]
+    query_parameters: dict[str, Any]
 
 
 @dataclass
