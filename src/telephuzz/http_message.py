@@ -14,6 +14,10 @@ class HTTPMethod(Enum):
     POST = "POST"
     PUT = "PUT"
     DELETE = "DELETE"
+    PATCH = "PATCH"
+    OPTIONS = "OPTIONS"
+    HEAD = "HEAD"
+    TRACE = "TRACE"
 
     @classmethod
     def _missing_(cls, value):
