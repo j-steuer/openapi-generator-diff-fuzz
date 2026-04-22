@@ -1,6 +1,7 @@
 """File for the container with MiTMProxy."""
 
 import pathlib
+from copy import deepcopy
 
 from telephuzz.constants import MITMPROXY
 from telephuzz.docker_helpers import add_container_to_network, create_image
@@ -19,6 +20,10 @@ class MITMProxyContainer:
         # create container
         self.container = add_container_to_network(image=MITMPROXY, name=MITMPROXY)
 
-    def through_proxy(self, request: Request, library_id: LibraryId) -> Request:
+    def through_proxy(
+        self, request: Request, library_id: LibraryId, library_port: int
+    ) -> Request:
         """Make the request target the proxy and encode the target."""
-        raise NotImplementedError
+        new_request = deepcopy(request)
+        new_request.path = f"/{library_id}:{library_port}/{request.path}"
+        return new_request
