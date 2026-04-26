@@ -26,7 +26,7 @@ def _find_all(spec: dict, element: str) -> list[Any]:
     return results
 
 
-class TestPreprocessing:  # TODO add check for collision
+class TestPreprocessing:
     """Tests relating to preprocessing of OpenAPI spec files."""
 
     def test_preprocessing_json(self, basic_oas_json: _TemporaryFileWrapper) -> None:
