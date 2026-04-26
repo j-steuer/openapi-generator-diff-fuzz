@@ -78,3 +78,12 @@ class TestPreprocessing:  # TODO add check for collision
                     count += 1
 
         assert count == len(operation_ids)
+
+    def test_preprocessing_collision(self, basic_oas_json) -> None:
+        """Test that there is no collision with parameter and literal path names."""
+        fuzzer = TelePhuzz(basic_oas_json)
+        method = "GET"
+        base_path = "/test"
+        assert fuzzer._get_operation_id(
+            method, f"{base_path}/id"
+        ) != fuzzer._get_operation_id(method, f"{base_path}/{{id}}")
