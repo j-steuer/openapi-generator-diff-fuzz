@@ -11,7 +11,7 @@ class RequestGenerator(ABC):
 
     @abstractmethod
     def generate(
-        self, previous_responses: list[Response] | None
+        self, previous_responses: list[Response] | None = None
     ) -> list[Request] | None:
         """Abstract method for generating a request chain."""
         raise NotImplementedError
@@ -29,3 +29,9 @@ class SchemathesisGenerator(OASRequestGenerator):
     def __init__(self, oas: Path):
         """Initialize the SchemathesisGenerator."""
         self.oas = oas
+
+    def generate(
+        self, previous_responses: list[Response] | None = None
+    ) -> list[Request] | None:
+        """Generate requests based on Schemathesis."""
+        pass  # TODO
