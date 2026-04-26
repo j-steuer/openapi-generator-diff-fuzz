@@ -87,3 +87,18 @@ class TestPreprocessing:  # TODO add check for collision
         assert fuzzer._get_operation_id(
             method, f"{base_path}/id"
         ) != fuzzer._get_operation_id(method, f"{base_path}/{{id}}")
+
+    def test_deterministic_operation_id(self, basic_oas_json) -> None:
+        """Obtaining the operation id should be deterministic."""
+        fuzzer = TelePhuzz(basic_oas_json)
+        method = "GET"
+        path = "/test/{id}"
+
+        assert fuzzer._get_operation_id(method, path) == fuzzer._get_operation_id(
+            method, path
+        )
+
+        fuzzer2 = TelePhuzz(basic_oas_json)
+        assert fuzzer._get_operation_id(method, path) == fuzzer2._get_operation_id(
+            method, path
+        )
