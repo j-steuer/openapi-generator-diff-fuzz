@@ -9,6 +9,8 @@ import yaml  # type: ignore
 
 from telephuzz.fuzzer import TelePhuzz
 
+OPERATION_ID = "operation_id"
+
 
 def _find_all(spec: dict, element: str) -> list[Any]:
     """Find all instances of element in the spec."""
@@ -24,7 +26,7 @@ def _find_all(spec: dict, element: str) -> list[Any]:
     return results
 
 
-class TestPreprocessing:  # TODO add checks for content, correct names, collision, etc.
+class TestPreprocessing:  # TODO add check for collision
     """Tests relating to preprocessing of OpenAPI spec files."""
 
     def test_preprocessing_json(self, basic_oas_json: _TemporaryFileWrapper) -> None:
@@ -36,8 +38,21 @@ class TestPreprocessing:  # TODO add checks for content, correct names, collisio
             fuzzer._preprocess_oas(path, Path(f.name))
             preprocessed_content = json.load(f)
 
-        operation_ids = _find_all(preprocessed_content, "operation_id")
+        operation_ids = _find_all(preprocessed_content, OPERATION_ID)
         assert len(operation_ids) == 8
+
+        assert isinstance(preprocessed_content, dict)
+        count = 0
+        for oas_path, methods in preprocessed_content.get("paths", {}).items():
+            assert isinstance(methods, dict), "Methods were not loaded as a dict"
+            for method, operation in methods.items():
+                if OPERATION_ID in operation:
+                    assert operation[OPERATION_ID] == fuzzer._get_operation_id(
+                        method, oas_path
+                    )
+                    count += 1
+
+        assert count == len(operation_ids)
 
     def test_preprocessing_yaml(self, basic_oas_yaml: _TemporaryFileWrapper) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
@@ -48,5 +63,18 @@ class TestPreprocessing:  # TODO add checks for content, correct names, collisio
             fuzzer._preprocess_oas(path, Path(f.name))
             preprocessed_content = yaml.safe_load(f)
 
-        operation_ids = _find_all(preprocessed_content, "operation_id")
+        operation_ids = _find_all(preprocessed_content, OPERATION_ID)
         assert len(operation_ids) == 8
+
+        assert isinstance(preprocessed_content, dict)
+        count = 0
+        for oas_path, methods in preprocessed_content.get("paths", {}).items():
+            assert isinstance(methods, dict), "Methods were not loaded as a dict"
+            for method, operation in methods.items():
+                if OPERATION_ID in operation:
+                    assert operation[OPERATION_ID] == fuzzer._get_operation_id(
+                        method, oas_path
+                    )
+                    count += 1
+
+        assert count == len(operation_ids)
