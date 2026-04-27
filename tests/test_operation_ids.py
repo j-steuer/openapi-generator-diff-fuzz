@@ -1,4 +1,4 @@
-"""File for testing operation id related methods."""  #
+"""File for testing operation id related methods."""
 
 from telephuzz.operation_ids import generate_operation_id
 
