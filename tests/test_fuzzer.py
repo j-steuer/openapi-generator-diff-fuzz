@@ -8,6 +8,7 @@ from typing import Any
 import yaml  # type: ignore
 
 from telephuzz.fuzzer import TelePhuzz
+from telephuzz.operation_ids import generate_operation_id
 
 OPERATION_ID = "operation_id"
 
@@ -47,7 +48,7 @@ class TestPreprocessing:
             assert isinstance(methods, dict), "Methods were not loaded as a dict"
             for method, operation in methods.items():
                 if OPERATION_ID in operation:
-                    assert operation[OPERATION_ID] == fuzzer._get_operation_id(
+                    assert operation[OPERATION_ID] == generate_operation_id(
                         method, oas_path
                     )
                     count += 1
@@ -72,33 +73,9 @@ class TestPreprocessing:
             assert isinstance(methods, dict), "Methods were not loaded as a dict"
             for method, operation in methods.items():
                 if OPERATION_ID in operation:
-                    assert operation[OPERATION_ID] == fuzzer._get_operation_id(
+                    assert operation[OPERATION_ID] == generate_operation_id(
                         method, oas_path
                     )
                     count += 1
 
         assert count == len(operation_ids)
-
-    def test_preprocessing_collision(self, basic_oas_json) -> None:
-        """Test that there is no collision with parameter and literal path names."""
-        fuzzer = TelePhuzz(basic_oas_json)
-        method = "GET"
-        base_path = "/test"
-        assert fuzzer._get_operation_id(
-            method, f"{base_path}/id"
-        ) != fuzzer._get_operation_id(method, f"{base_path}/{{id}}")
-
-    def test_deterministic_operation_id(self, basic_oas_json) -> None:
-        """Obtaining the operation id should be deterministic."""
-        fuzzer = TelePhuzz(basic_oas_json)
-        method = "GET"
-        path = "/test/{id}"
-
-        assert fuzzer._get_operation_id(method, path) == fuzzer._get_operation_id(
-            method, path
-        )
-
-        fuzzer2 = TelePhuzz(basic_oas_json)
-        assert fuzzer._get_operation_id(method, path) == fuzzer2._get_operation_id(
-            method, path
-        )
