@@ -1,6 +1,6 @@
 """File for testing operation id related methods."""
 
-from telephuzz.operation_ids import generate_operation_id
+from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 
 
 def test_operation_id_no_collision() -> None:
@@ -18,3 +18,21 @@ def test_operation_id_deterministic() -> None:
     path = "/test/{id}"
 
     assert generate_operation_id(method, path) == generate_operation_id(method, path)
+
+
+def test_transform_case_snake() -> None:
+    """Test transforming operation id to snake case."""
+    operation_id = generate_operation_id("GET", "/test/{id}")
+    assert "get_test_id" in transform_case(operation_id, Case("snake"))
+
+
+def test_transform_case_camel() -> None:
+    """Test transforming operation id to camel case."""
+    operation_id = generate_operation_id("GET", "/test/{id}")
+    assert "getTestId" in transform_case(operation_id, Case("camel"))
+
+
+def test_transform_case_pascal() -> None:
+    """Test transforming operation id to camel pascal."""
+    operation_id = generate_operation_id("GET", "/test/{id}")
+    assert "GetTestId" in transform_case(operation_id, Case("pascal"))
