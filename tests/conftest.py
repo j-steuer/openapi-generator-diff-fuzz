@@ -1,10 +1,12 @@
 """File for pytest fixtures."""
 
 import json
+import subprocess
 import tempfile
+from pathlib import Path
 
 import pytest
-import yaml  # type:ignore
+import yaml  # type: ignore
 from requests.structures import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request
@@ -13,9 +15,8 @@ from telephuzz.http_message import HTTPMethod, Request
 @pytest.fixture
 def basic_oas_json():
     """Fixture for a simple OAS file in JSON."""
-    content = json.loads(
-        """
-    {
+    content = json.loads("""
+        {
     "openapi": "3.0.0",
     "info": {
         "title": "Simple API",
@@ -41,7 +42,10 @@ def basic_oas_json():
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": { "type": "string" },
+            "responses": {
+                "200": { "description": "Patched" }
+            }
             }
         ],
         "get": {
@@ -78,8 +82,7 @@ def basic_oas_json():
         }
     }
     }
-    """
-    )
+    """)
 
     with tempfile.NamedTemporaryFile(mode="w+", suffix=".json", delete=True) as f:
         json.dump(content, f)
@@ -91,8 +94,7 @@ def basic_oas_json():
 @pytest.fixture
 def basic_oas_yaml():
     """Fixture for a simple OAS file in YAML."""
-    content = yaml.safe_load(
-        """
+    content = yaml.safe_load("""
     openapi: 3.0.0
     info:
         title: Simple API
@@ -148,8 +150,7 @@ def basic_oas_yaml():
                 responses:
                     "204":
                         description: No Content
-        """
-    )
+        """)
 
     with tempfile.NamedTemporaryFile(mode="w+", suffix=".yaml", delete=True) as f:
         yaml.safe_dump(content, f)
@@ -170,3 +171,15 @@ def basic_request():
         path_parameters={},
         query_parameters={},
     )
+
+
+# TODO come up with better testing fixture
+@pytest.fixture
+def api():
+    """Fixture for tests needing an API running, runs at port 8000."""
+    api_file = Path(__file__).resolve().parent / "testfiles" / "api.py"
+    proc = subprocess.Popen(["fastapi", "run", api_file])
+
+    yield "http://host.docker.internal:8000"
+
+    proc.terminate()
