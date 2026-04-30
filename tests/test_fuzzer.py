@@ -10,7 +10,7 @@ import yaml  # type: ignore
 from telephuzz.fuzzer import TelePhuzz
 from telephuzz.operation_ids import generate_operation_id
 
-OPERATION_ID = "operation_id"
+OPERATION_ID = "operationId"
 
 
 def _find_all(spec: dict, element: str) -> list[Any]:

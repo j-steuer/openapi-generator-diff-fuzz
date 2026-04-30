@@ -67,7 +67,7 @@ class TelePhuzz:
                 except ValueError:
                     # ignore non-method keys like parameters
                     continue
-                operation["operation_id"] = generate_operation_id(method, path)
+                operation["operationId"] = generate_operation_id(method, path)
 
         with open(output_path, "w") as f:
             if output_path.suffix == ".json":
