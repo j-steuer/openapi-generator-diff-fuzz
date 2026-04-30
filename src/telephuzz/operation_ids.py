@@ -28,7 +28,7 @@ def generate_operation_id(method: str, path: str) -> str:
     path_part = path.strip("/").replace("/", "_").replace("{", "").replace("}", "")
     operation_id = f"{method.lower()}_{path_part}"
     # add hash of full path to avoid collisions
-    operation_id += f"_{hashlib.sha1(path.encode()).hexdigest()[:8]}"
+    operation_id += f"{hashlib.sha1(path.encode()).hexdigest()[:8]}"
 
     return operation_id
 
@@ -40,7 +40,7 @@ def transform_case(operation_id: str, case: Case) -> str:
     pascal_regex = r"^[A-Z][a-z0-9]*([A-Z][a-z0-9]*)*$"
 
     assert re.fullmatch(snake_regex, operation_id), (
-        "Operation ids should be snake case per default."
+        f"Operation ids should be snake case per default, got {operation_id}"
     )
 
     match case:

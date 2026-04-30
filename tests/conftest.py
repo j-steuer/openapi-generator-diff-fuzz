@@ -3,9 +3,11 @@
 import json
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
+import requests
 import yaml  # type: ignore
 from requests.structures import CaseInsensitiveDict
 
@@ -179,6 +181,17 @@ def api():
     """Fixture for tests needing an API running, runs at port 8000."""
     api_file = Path(__file__).resolve().parent / "testfiles" / "api.py"
     proc = subprocess.Popen(["fastapi", "run", api_file])
+
+    # wait for startup
+    for _ in range(30):  # try for ~15 seconds
+        try:
+            r = requests.get("http://localhost:8000/openapi.json")
+            if r.status_code == 200:
+                break
+        except requests.exceptions.ConnectionError:
+            pass
+
+        time.sleep(0.5)
 
     yield "http://host.docker.internal:8000"
 

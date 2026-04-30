@@ -1,3 +1,6 @@
+# clients
+clients/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -7,7 +10,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-.Python
+.Pythonþ
 build/
 develop-eggs/
 dist/

@@ -42,6 +42,10 @@ class TestPreprocessing:
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
         assert len(operation_ids) == 8
 
+        from pprint import pprint
+
+        pprint(preprocessed_content)
+
         assert isinstance(preprocessed_content, dict)
         count = 0
         for oas_path, methods in preprocessed_content.get("paths", {}).items():
