@@ -180,7 +180,7 @@ class PythonCLC(ClientLibraryContainer):
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     RUN pip install {LIB_PATH}/lib
-                    """  # TODO copy library after container is running
+                    """
 
                     with tempfile.TemporaryDirectory() as tmpdir:
                         # copy library into build context
