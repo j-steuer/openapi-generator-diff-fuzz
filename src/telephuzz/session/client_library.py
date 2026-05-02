@@ -93,9 +93,12 @@ class ClientLibraryContainer(ABC):
     def _translate(self, request: Request, api_path: str) -> str | list[str]:
         """Translate the request.
 
-        Translate the request either into a callable or subprocess command to
-        call the target library. Args:
+        Translate the request into a command to call the target library.
+
+        Args:
             request: The request to infer the method name from
+            api_path: The url to call the api.
+
         """
         raise NotImplementedError
 
@@ -152,6 +155,26 @@ class PythonCLC(ClientLibraryContainer):
         )
 
         self.container = container
+
+    @abstractmethod
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        """Return the encoded code string that executes the request."""
+        raise NotImplementedError
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.py")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive("/tmp", tar_stream)
+
+        return "python3 /tmp/request.py"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for python-based libraries."""
@@ -216,9 +239,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
     id = "openapi_generator_python"
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
-        assert self.container is not None, "Container not set"
-
+    def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(
             f"{k}={repr(v)}" for k, v in request.query_parameters.items()
         )
@@ -235,13 +256,4 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         api.{self._get_method_name(request)}({kwargs})
         """).encode()
 
-        tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.py")
-            info.size = len(content)
-            tar.addfile(info, io.BytesIO(content))
-        tar_stream.seek(0)
-
-        self.container.put_archive("/tmp", tar_stream)
-
-        return "python3 /tmp/request.py"
+        return content
