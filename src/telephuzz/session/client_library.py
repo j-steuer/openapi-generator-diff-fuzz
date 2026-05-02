@@ -253,7 +253,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         api = DefaultApi(api_client=client)
 
-        api.{self._get_method_name(request)}({kwargs})
+        print(api.{self._get_method_name(request)}({kwargs}))
         """).encode()
 
         return content
