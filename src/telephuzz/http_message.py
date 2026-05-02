@@ -54,4 +54,4 @@ class Response(HTTPMessage):
     """Class for HTTP response fields relevant for the evaluation."""
 
     status: int
-    text: str
+    text: str | None
