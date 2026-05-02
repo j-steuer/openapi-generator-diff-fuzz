@@ -48,4 +48,23 @@ def test_client_send(api: str, basic_request: Request) -> None:
     basic_request.query_parameters = {"name": "Alice", "age": 30}
 
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        print(clc.send(basic_request, api))
+        response = clc.send(basic_request, api)
+        assert isinstance(response, str)
+        assert "Hello Alice, you are 30 years old!" in response
+
+
+@pytest.mark.skip("TODO implement oauth support")
+@pytest.mark.parametrize("api", ["auth"], indirect=True)
+def test_client_auth(api: str, basic_request: Request) -> None:
+    """Test sending a message with the client to an API."""
+    library_path = OPENAPI_GEN_PYTHON_PATH
+
+    # create request
+    basic_request.path = "/greet"
+    basic_request.method = HTTPMethod("GET")
+    basic_request.query_parameters = {"name": "Alice", "age": 30}
+
+    with OpenAPIGenPythonCLC(library_path=library_path) as clc:
+        response = clc.send(basic_request, api)
+        assert isinstance(response, str)
+        assert "Hello Alice, you are 30 years old!" in response
