@@ -1,6 +1,33 @@
 """File for custom request handling in MiTMProxy."""
 
 from mitmproxy import http
+from requests.structures import CaseInsensitiveDict
+
+from telephuzz.http_message import Response
+
+
+class ResponseParser:
+    """Class for response parsing."""
+
+    def __init__(self):
+        """Initialize response parsing class."""
+        self.unchecked_responses = []
+        self.checked_responses = []
+
+    def response(self, flow: http.HTTPFlow):
+        """Parse the response."""
+        resp = flow.response
+        assert resp is not None
+
+        response = Response(
+            headers=CaseInsensitiveDict(resp.headers),
+            body=resp.content,
+            content_type=resp.headers.get("content-type", None),  # TODO remove field?
+            status=resp.status_code,
+            text=resp.text,
+        )
+        # Do something with it
+        self.unchecked_responses.append(response)
 
 
 def request(flow: http.HTTPFlow):
