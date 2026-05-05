@@ -1,7 +1,9 @@
 """File for objects relating to requests and responses."""
 
+import json
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
 from requests.structures import CaseInsensitiveDict
@@ -48,6 +50,36 @@ class Request(HTTPMessage):
     path_parameters: dict[str, Any]
     query_parameters: dict[str, Any]
 
+    @classmethod
+    def from_json(cls, json_data: Path | str):
+        """Create a request from JSON."""
+        if isinstance(json_data, Path):
+            assert (
+                json_data.exists()
+                and json_data.is_file()
+                and json_data.suffix == ".json"
+            ), "Path must lead to a JSON file."
+
+            with open(json_data, "r") as f:
+                data = json.load(f)
+
+        else:
+            data = json.loads(json_data)
+
+        return Request(
+            headers=CaseInsensitiveDict(data["headers"]),
+            body=data["body"],
+            content_type=(
+                data["content_type"]
+                if "content_type" in data
+                else data["headers"]["content_type"]
+            ),
+            method=HTTPMethod(data["method"]),
+            path=data["path"],
+            path_parameters=data["path_parameters"],
+            query_parameters=data["query_parameters"],
+        )
+
 
 @dataclass
 class Response(HTTPMessage):
@@ -55,3 +87,31 @@ class Response(HTTPMessage):
 
     status: int
     text: str | None
+
+    @classmethod
+    def from_json(cls, json_data: Path | str):
+        """Create a response from JSON."""
+        if isinstance(json_data, Path):
+            assert (
+                json_data.exists()
+                and json_data.is_file()
+                and json_data.suffix == ".json"
+            ), "Path must lead to a JSON file."
+
+            with open(json_data, "r") as f:
+                data = json.load(f)
+
+        else:
+            data = json.loads(json_data)
+
+        return Response(
+            headers=CaseInsensitiveDict(data["headers"]),
+            body=data["body"],
+            content_type=(
+                data["content_type"]
+                if "content_type" in data
+                else data["headers"]["content_type"]
+            ),
+            status=data["status"],
+            text=data["text"],
+        )
