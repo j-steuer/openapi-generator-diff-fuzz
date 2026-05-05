@@ -1,0 +1,1 @@
+docker run --rm -v $(pwd):/local swaggerapi/swagger-codegen-cli-v3 generate -i /local/spec/openapi.json -l python -o /local/clients/swagger-codegen-python-client

@@ -1,0 +1,1 @@
+docker run --rm -u $(id -u):$(id -g) -v # TODO $(pwd):/local mcr.microsoft.com/openapi/kiota generate --language python --openapi /local/spec/openapi.json --output /local/clients/kiota-python-client -c PostsClient -n client

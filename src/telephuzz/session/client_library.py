@@ -178,8 +178,7 @@ class PythonCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for python-based libraries."""
-        # use requirements.txt if available, otherwise pyproject.toml
-        dependency_files = ["requirements.txt", "pyproject.toml"]
+        dependency_files = ["pyproject.toml", "setup.py", "requirements.txt"]
         for file in dependency_files:
             path = Path(os.path.join(library_path, file))
             if path.exists() and path.is_file():
@@ -202,7 +201,7 @@ class PythonCLC(ClientLibraryContainer):
                     FROM python:3.11-slim
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
-                    RUN pip install {LIB_PATH}/lib
+                    RUN pip install -e {LIB_PATH}/lib
                     """
 
                     with tempfile.TemporaryDirectory() as tmpdir:
@@ -237,13 +236,15 @@ class OperationIdBasedCLC(ClientLibraryContainer):
 class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator Python."""
 
-    id = "openapi_generator_python"
+    id = "openapi-generator:python"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(
             f"{k}={repr(v)}" for k, v in request.query_parameters.items()
         )
         content = textwrap.dedent(f"""
+        from pprint import pprint
+
         from openapi_client import Configuration, ApiClient
         from openapi_client.api.default_api import DefaultApi
 
@@ -253,7 +254,66 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         api = DefaultApi(api_client=client)
 
-        print(api.{self._get_method_name(request)}({kwargs}))
+        pprint(api.{self._get_method_name(request)}({kwargs}))
+        """).encode()
+
+        return content
+
+
+class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
+    """Client library class for Swagger Codegen Python."""
+
+    id = "swagger-codegen:python"
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(
+            f"{k}={repr(v)}" for k, v in request.query_parameters.items()
+        )
+
+        content = textwrap.dedent(f"""
+        from pprint import pprint
+
+        import swagger_client
+        from swagger_client.configuration import Configuration
+        from swagger_client.rest import ApiException
+
+        config = Configuration()
+        config.host = "{api_path}"
+        api_instance = swagger_client.DefaultApi(swagger_client.ApiClient(config))
+
+        api_response = api_instance.{self._get_method_name(request)}({kwargs})
+        pprint(api_response)
+        """).encode()
+
+        return content
+
+
+class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
+    """Client library class for openapi-python-generator."""
+
+    def _get_method_name(self, request: Request) -> str:
+        # the hash is seperated
+        method_name = super()._get_method_name(request)
+        return method_name[:-8] + "_" + method_name[-8:]
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        method_name = self._get_method_name(request)
+        kwargs = ", ".join(
+            f"{k}={repr(v)}" for k, v in request.query_parameters.items()
+        )
+
+        content = textwrap.dedent(f"""
+        from pprint import pprint
+
+        from fast_api_client import Client
+        from fast_api_client.api.default import {method_name}
+
+        client = Client("{api_path}")
+
+        with client as client:
+            my_data = {method_name}.sync_detailed(client=client, {kwargs})
+            pprint(my_data)
+
         """).encode()
 
         return content

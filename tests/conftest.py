@@ -175,7 +175,7 @@ def basic_request():
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def api(request):
     """Run a test API for this test."""
     variant = getattr(request, "param", "plain")

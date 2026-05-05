@@ -23,7 +23,7 @@ class Case(Enum):
         return None
 
 
-def generate_operation_id(method: str, path: str) -> str:
+def generate_operation_id(method: str, path: str, seperate_hash=False) -> str:
     """Generate an operation id based on the method and path."""
     path_part = path.strip("/").replace("/", "_").replace("{", "").replace("}", "")
     operation_id = f"{method.lower()}_{path_part}"

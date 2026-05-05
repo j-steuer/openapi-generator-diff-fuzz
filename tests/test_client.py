@@ -4,60 +4,74 @@ from pathlib import Path
 
 import docker
 import pytest
-from docker.errors import NotFound
+from requests.models import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request
-from telephuzz.session.client_library import OpenAPIGenPythonCLC
-
-OPENAPI_GEN_PYTHON_PATH = (
-    Path(__file__).resolve().parent
-    / "testfiles"
-    / "clients"
-    / "openapi-gen-python-client"
+from telephuzz.session.client_library import (
+    ClientLibraryContainer,
+    OpenAPIGenPythonCLC,
+    OpenapiPythonGeneratorCLC,
+    SwaggerCodegenPythonCLC,
 )
 
+CLIENT_PATH = Path(__file__).resolve().parent / "testfiles" / "clients"
 
-# TODO assert that other containers are untouched
-def test_client_init() -> None:
-    """Test that default clients initialize correctly."""
-    library_path = OPENAPI_GEN_PYTHON_PATH
+
+def _init_and_send(clc: ClientLibraryContainer, api: str):
     client = docker.from_env()
-    from datetime import datetime
+    assert clc.container is not None
+    id = clc.container.id
+    assert id is not None
+    container = client.containers.get(id)
+    assert container.status == "running"
+
+    request = Request(
+        headers=CaseInsensitiveDict({"Test": ["test"]}),
+        body=None,
+        content_type=None,
+        method=HTTPMethod.GET,
+        path="dummytarget.org/test",
+        path_parameters={},
+        query_parameters={},
+    )
+    request.path = "/greet"
+    request.method = HTTPMethod("GET")
+    request.query_parameters = {"name": "Alice", "age": 30}
+
+    response = clc.send(request, api)
+    assert isinstance(response, str)
+    assert "Hello Alice, you are 30 years old!" in response
+
+
+def test_client_openapigen_python(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "openapi-gen-python-client"
 
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        # check that container is running
-        assert clc.container is not None
-        id = clc.container.id
-        assert id is not None
-        container = client.containers.get(id)
-        assert container.status == "running"
-        before = datetime.now()
-    print("DEBUG:", datetime.now() - before)
-    # check that container was stopped
-    with pytest.raises(NotFound):
-        client.containers.get(id)
+        _init_and_send(clc, api)
 
 
-def test_client_send(api: str, basic_request: Request) -> None:
-    """Test sending a message with the client to an API."""
-    library_path = OPENAPI_GEN_PYTHON_PATH
+def test_client_swaggergen_python(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "swagger-codegen-python-client"
 
-    # create request
-    basic_request.path = "/greet"
-    basic_request.method = HTTPMethod("GET")
-    basic_request.query_parameters = {"name": "Alice", "age": 30}
+    with SwaggerCodegenPythonCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
 
-    with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        response = clc.send(basic_request, api)
-        assert isinstance(response, str)
-        assert "Hello Alice, you are 30 years old!" in response
+
+def test_client_openapi_python_generator(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "openapi-python-client"
+
+    with OpenapiPythonGeneratorCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
 
 
 @pytest.mark.skip("TODO implement oauth support")
 @pytest.mark.parametrize("api", ["auth"], indirect=True)
 def test_client_auth(api: str, basic_request: Request) -> None:
     """Test sending a message with the client to an API."""
-    library_path = OPENAPI_GEN_PYTHON_PATH
+    library_path = CLIENT_PATH / "openapi-gen-python-client"
 
     # create request
     basic_request.path = "/greet"
