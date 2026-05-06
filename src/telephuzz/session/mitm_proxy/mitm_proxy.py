@@ -1,24 +1,79 @@
 """File for the container with MiTMProxy."""
 
-import pathlib
+import time
 from copy import deepcopy
+from pathlib import Path
 
-from telephuzz.constants import MITMPROXY
-from telephuzz.docker_helpers import add_container_to_network, create_image
+import docker
+import requests
+from docker.models.containers import Container
+
 from telephuzz.http_message import Request
 from telephuzz.session.client_library import LibraryId
+
+PORTS = (8080, 8081)
 
 
 class MITMProxyContainer:
     """Class for the MiTMProxy container."""
 
-    def __init__(self) -> None:
-        """Set up the proxy container and add it to the network."""
-        # create image if it does not exist
-        create_image(path=pathlib.Path(__file__).parent.resolve(), tag=MITMPROXY)
+    container: Container | None
 
-        # create container
-        self.container = add_container_to_network(image=MITMPROXY, name=MITMPROXY)
+    def __init__(
+        self, version: str = "12.2.2", scripts: list[Path] | None = None
+    ) -> None:
+        """Set up the proxy container and add it to the network."""
+        client = docker.from_env()
+        self.listen_port, self.web_port = PORTS
+
+        container = client.containers.run(
+            image=f"mitmproxy/mitmproxy:{version}",
+            command=[
+                "mitmweb",
+                "--mode",
+                "reverse:http://localhost:8000",
+                "--listen-port",
+                str(self.listen_port),
+                "--web-port",
+                str(self.web_port),
+                "--set",
+                "web_password=mitm",
+            ],
+            network_mode="host",  # TODO replace?
+            detach=True,
+        )
+
+        self.container = container
+
+    def _wait_until_ready(self, timeout: float = 10.0) -> None:
+        start = time.time()
+
+        while time.time() - start < timeout:
+            try:
+                # Any response means the proxy is up
+                requests.get("http://localhost:8080", timeout=0.5)
+                return
+            except requests.exceptions.RequestException:
+                time.sleep(0.2)
+
+        # timeout
+        raise RuntimeError("mitmproxy did not become ready in time.")
+
+    def __enter__(self):
+        """Make mitmproxy container a context manager."""
+        self._wait_until_ready()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        """Run close method when context ends."""
+        self.close()
+
+    def close(self) -> None:
+        """Kill the container after context ends."""
+        if self.container is not None:
+            self.container.remove(force=True)
+
+            self.container = None
 
     def through_proxy(
         self, request: Request, library_id: LibraryId, library_port: int
