@@ -28,7 +28,6 @@ def _init_and_send(clc: ClientLibraryContainer, api: str):
     request = Request(
         headers=CaseInsensitiveDict({"Test": ["test"]}),
         body=None,
-        content_type=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",
         path_parameters={},

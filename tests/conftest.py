@@ -167,7 +167,6 @@ def basic_request():
     return Request(
         headers=CaseInsensitiveDict({"Test": ["test"]}),
         body=None,
-        content_type=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",
         path_parameters={},

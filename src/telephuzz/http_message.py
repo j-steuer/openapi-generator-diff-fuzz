@@ -38,7 +38,6 @@ class HTTPMessage:
 
     headers: CaseInsensitiveDict
     body: Any
-    content_type: str | None
 
 
 @dataclass
@@ -69,11 +68,6 @@ class Request(HTTPMessage):
         return Request(
             headers=CaseInsensitiveDict(data["headers"]),
             body=data["body"],
-            content_type=(
-                data["content_type"]
-                if "content_type" in data
-                else data["headers"]["content_type"]
-            ),
             method=HTTPMethod(data["method"]),
             path=data["path"],
             path_parameters=data["path_parameters"],
@@ -107,11 +101,6 @@ class Response(HTTPMessage):
         return Response(
             headers=CaseInsensitiveDict(data["headers"]),
             body=data["body"],
-            content_type=(
-                data["content_type"]
-                if "content_type" in data
-                else data["headers"]["content_type"]
-            ),
             status=data["status"],
             text=data["text"],
         )
