@@ -1,11 +1,11 @@
 """File for the container with MiTMProxy."""
 
+import socket
 import time
 from copy import deepcopy
 from pathlib import Path
 
 import docker
-import requests
 from docker.models.containers import Container
 
 from telephuzz.http_message import Request
@@ -49,13 +49,11 @@ class MITMProxyContainer:
         start = time.time()
 
         while time.time() - start < timeout:
-            try:
-                # Any response means the proxy is up
-                requests.get("http://localhost:8080", timeout=0.5)
-                return
-            except requests.exceptions.RequestException:
-                time.sleep(0.2)
-
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                if s.connect_ex(("localhost", self.listen_port)) == 0:
+                    return
+                else:
+                    time.sleep(0.2)
         # timeout
         raise RuntimeError("mitmproxy did not become ready in time.")
 
