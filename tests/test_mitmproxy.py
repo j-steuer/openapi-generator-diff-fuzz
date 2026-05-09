@@ -19,6 +19,7 @@ def test_mitm_proxy_intercept(api) -> None:
         assert (
             "Hello Alice, you are 30 years old!"
             in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/greet", params=params
+                f"http://localhost:{mitm_proxy.listen_port}/localhost:8000/greet",
+                params=params,
             ).text
         )

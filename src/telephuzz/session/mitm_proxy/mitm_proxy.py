@@ -12,6 +12,7 @@ from telephuzz.http_message import Request
 from telephuzz.session.client_library import LibraryId
 
 DEFAULT_LISTEN_PORT = 8080
+SCRIPTS = (Path(__file__).resolve().parent / "proxy_hooks.py").absolute()
 
 
 class MITMProxyContainer:
@@ -29,17 +30,20 @@ class MITMProxyContainer:
         client = docker.from_env()
         self.listen_port = listen_port
 
+        hooks_path = "/scripts/hooks.py"
+
         container = client.containers.run(
             image=f"mitmproxy/mitmproxy:{version}",
             command=[
                 "mitmdump",
-                "--mode",
-                "reverse:http://localhost:8000",
                 "--listen-port",
                 str(self.listen_port),
+                "--script",
+                hooks_path,
             ],
             network_mode="host",  # TODO replace?
             detach=True,
+            volumes={str(SCRIPTS): {"bind": hooks_path, "mode": "ro"}},
         )
 
         self.container = container
