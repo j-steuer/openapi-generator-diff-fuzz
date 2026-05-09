@@ -1,9 +1,12 @@
 """File for custom request handling in MiTMProxy."""
 
 import json
-import sys
+import os
+import time
 
 from mitmproxy import http
+
+RESPONSE_PATH = "/responses"
 
 
 def request(flow: http.HTTPFlow):
@@ -44,7 +47,7 @@ def response(flow: http.HTTPFlow):
         "request": {
             "method": flow.request.method,
             "url": flow.request.pretty_url,
-            "headers": dict(flow.request.headers),
+            "headers": dict(flow.response.headers),
             "body": flow.request.get_text(),
         },
         "response": {
@@ -54,4 +57,7 @@ def response(flow: http.HTTPFlow):
         },
     }
 
-    print(json.dumps(entry), file=sys.stdout)
+    response_id = time.time_ns()
+    os.makedirs(RESPONSE_PATH, exist_ok=True)
+    with open(RESPONSE_PATH + f"/response_{response_id}.json", "w") as f:
+        json.dump(entry, f)
