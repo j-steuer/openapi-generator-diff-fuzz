@@ -169,7 +169,6 @@ def basic_request():
         body=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",
-        path_parameters={},
         query_parameters={},
     )
 

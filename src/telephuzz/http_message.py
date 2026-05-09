@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from requests.structures import CaseInsensitiveDict
 
@@ -46,7 +47,6 @@ class Request(HTTPMessage):
 
     method: HTTPMethod
     path: str
-    path_parameters: dict[str, Any]
     query_parameters: dict[str, Any]
 
     @classmethod
@@ -60,19 +60,42 @@ class Request(HTTPMessage):
             ), "Path must lead to a JSON file."
 
             with open(json_data, "r") as f:
-                data = json.load(f)
+                try:
+                    data = json.load(f)
+                except json.decoder.JSONDecodeError as e:
+                    f.seek(0)
+                    raise ValueError(
+                        f"File content could not be loaded as JSON "
+                        f"{repr(e)}: {f.read()}"
+                    ) from e
 
         else:
             data = json.loads(json_data)
 
-        return Request(
-            headers=CaseInsensitiveDict(data["headers"]),
-            body=data["body"],
-            method=HTTPMethod(data["method"]),
-            path=data["path"],
-            path_parameters=data["path_parameters"],
-            query_parameters=data["query_parameters"],
-        )
+        if "request" in data:
+            data = data["request"]
+
+        parsed = urlsplit(data["url"])
+
+        path = parsed.path
+        query = parsed.query
+
+        full_path = path
+        if query:
+            full_path += f"?{query}"
+
+        try:
+            return Request(
+                headers=CaseInsensitiveDict(data["headers"]),
+                body=data["body"],
+                method=HTTPMethod(data["method"]),
+                path=full_path,
+                query_parameters=(
+                    data["query_parameters"] if "query_parameters" in data else dict()
+                ),
+            )
+        except KeyError as e:
+            raise ValueError(f"JSON format was not valid ({repr(e)}): {data}") from e
 
 
 @dataclass

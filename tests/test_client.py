@@ -30,7 +30,6 @@ def _init_and_send(clc: ClientLibraryContainer, api: str):
         body=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",
-        path_parameters={},
         query_parameters={},
     )
     request.path = "/greet"

@@ -18,6 +18,7 @@ def response(flow: http.HTTPFlow):
             "url": flow.request.pretty_url,
             "headers": dict(flow.response.headers),
             "body": flow.request.get_text(),
+            "query_parameters": dict(flow.request.query),
         },
         "response": {
             "status_code": flow.response.status_code,
