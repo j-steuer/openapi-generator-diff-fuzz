@@ -24,7 +24,6 @@ class MITMProxyContainer:
         self,
         version: str = "12.2.2",
         listen_port: int = DEFAULT_LISTEN_PORT,
-        scripts: list[Path] | None = None,
     ) -> None:
         """Set up the proxy container and add it to the network."""
         client = docker.from_env()
