@@ -13,7 +13,8 @@ from telephuzz.session.client_library import LibraryId
 from telephuzz.session.mitm_proxy.proxy_hooks import RESPONSE_PATH
 
 DEFAULT_LISTEN_PORT = 8080
-SCRIPTS = (Path(__file__).resolve().parent / "proxy_hooks.py").absolute()
+SCRIPTS_DYNAMIC = (Path(__file__).resolve().parent / "proxy_hooks.py").absolute()
+SCRIPTS_TARGET = (Path(__file__).resolve().parent / "proxy_hooks_target.py").absolute()
 
 
 class MITMProxyContainer:
@@ -26,32 +27,58 @@ class MITMProxyContainer:
         version: str = "12.2.2",
         listen_port: int = DEFAULT_LISTEN_PORT,
         response_output: str = "/tmp/telephuzz-mitmproxy-responses",
+        target: str | None = None,
     ) -> None:
         """Set up the proxy container and add it to the network."""
         self.listen_port = listen_port
         self.response_output = response_output
 
         client = docker.from_env()
-
         hooks_path = "/scripts/hooks.py"
 
-        container = client.containers.run(
-            image=f"mitmproxy/mitmproxy:{version}",
-            command=[
-                "mitmdump",
-                "--listen-port",
-                str(self.listen_port),
-                "--script",
-                hooks_path,
-            ],
-            network_mode="host",  # TODO replace?
-            detach=True,
-            volumes={
-                str(SCRIPTS): {"bind": hooks_path, "mode": "ro"},
-                response_output: {"bind": RESPONSE_PATH, "mode": "rw"},
-            },
-        )
+        if target is None:
+            # dynamic routing mode (used for main fuzzing loop)
+            container = client.containers.run(
+                image=f"mitmproxy/mitmproxy:{version}",
+                command=[
+                    "mitmdump",
+                    "--listen-port",
+                    str(self.listen_port),
+                    "--script",
+                    hooks_path,
+                ],
+                network_mode="host",  # TODO replace?
+                detach=True,
+                volumes={
+                    str(SCRIPTS_DYNAMIC): {"bind": hooks_path, "mode": "ro"},
+                    response_output: {"bind": RESPONSE_PATH, "mode": "rw"},
+                },
+            )
 
+        else:
+            # single target mode (used for pre-generating requests)
+            container = client.containers.run(
+                image=f"mitmproxy/mitmproxy:{version}",
+                command=[
+                    "mitmdump",
+                    "--mode",
+                    f"reverse:{target}",
+                    "--listen-port",
+                    str(self.listen_port),
+                    "--script",
+                    hooks_path,
+                ],
+                network_mode="host",  # TODO replace?
+                detach=True,
+                volumes={
+                    str(SCRIPTS_TARGET): {"bind": hooks_path, "mode": "ro"},
+                    response_output: {"bind": RESPONSE_PATH, "mode": "rw"},
+                },
+            )
+
+        assert container is not None, (
+            "Container should be created and run in detached mode!"
+        )
         self.container = container
 
     def _wait_until_ready(self, timeout: float = 10.0) -> None:
@@ -81,7 +108,7 @@ class MITMProxyContainer:
             return
 
         try:
-            self.container.kill()  # immediate, deterministic
+            self.container.kill()
         finally:
             self.container.remove(force=True)
             self.container = None
