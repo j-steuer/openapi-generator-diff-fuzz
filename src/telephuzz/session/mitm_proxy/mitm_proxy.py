@@ -11,7 +11,7 @@ from docker.models.containers import Container
 from telephuzz.http_message import Request
 from telephuzz.session.client_library import LibraryId
 
-PORTS = (8080, 8081)
+DEFAULT_LISTEN_PORT = 8080
 
 
 class MITMProxyContainer:
@@ -20,24 +20,23 @@ class MITMProxyContainer:
     container: Container | None
 
     def __init__(
-        self, version: str = "12.2.2", scripts: list[Path] | None = None
+        self,
+        version: str = "12.2.2",
+        listen_port: int = DEFAULT_LISTEN_PORT,
+        scripts: list[Path] | None = None,
     ) -> None:
         """Set up the proxy container and add it to the network."""
         client = docker.from_env()
-        self.listen_port, self.web_port = PORTS
+        self.listen_port = listen_port
 
         container = client.containers.run(
             image=f"mitmproxy/mitmproxy:{version}",
             command=[
-                "mitmweb",
+                "mitmdump",
                 "--mode",
                 "reverse:http://localhost:8000",
                 "--listen-port",
                 str(self.listen_port),
-                "--web-port",
-                str(self.web_port),
-                "--set",
-                "web_password=mitm",
             ],
             network_mode="host",  # TODO replace?
             detach=True,
