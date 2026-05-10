@@ -2,7 +2,7 @@
 
 set -e
 
-LANGS=("python", "go")
+LANGS=("python" "go" "java")
 
 for LANG in "${LANGS[@]}"; do
   echo "OpenAPI Generator: Generating $LANG"
