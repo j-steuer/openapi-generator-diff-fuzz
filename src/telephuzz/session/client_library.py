@@ -106,6 +106,45 @@ class ClientLibraryContainer(ABC):
 
             self.container = None
 
+    def _get_image_by_hash(
+        self, library_path: Path, dependency_files: list[str], dockerfile: str
+    ) -> Image | None:
+        """Image creation for python-based libraries."""
+        for file in dependency_files:
+            path = Path(os.path.join(library_path, file))
+            if path.exists() and path.is_file():
+                hash_func = hashlib.new("sha256")
+
+                with open(path, "rb") as f:
+                    while chunk := f.read(8192):
+                        hash_func.update(chunk)
+
+                hash_string = hash_func.hexdigest()
+                tag = f"telephuzz:{hash_string}"
+
+                client = docker.from_env()
+                try:
+                    # return Image if it already exists
+                    return client.images.get(tag)
+                except ImageNotFound:
+                    # create new Image
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        # copy library into build context
+                        lib_dest = os.path.join(tmpdir, "lib")
+                        shutil.copytree(library_path, lib_dest)
+
+                        dockerfile_path = os.path.join(tmpdir, "Dockerfile")
+
+                        with open(dockerfile_path, "w") as f:
+                            f.write(dockerfile)
+
+                        image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
+
+                    return image
+
+        # no fitting file found
+        return None
+
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Define an optional method to store an image of the client library.
 
@@ -187,48 +226,17 @@ class PythonCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for python-based libraries."""
-        dependency_files = ["pyproject.toml", "setup.py", "requirements.txt"]
-        for file in dependency_files:
-            path = Path(os.path.join(library_path, file))
-            if path.exists() and path.is_file():
-                hash_func = hashlib.new("sha256")
-
-                with open(path, "rb") as f:
-                    while chunk := f.read(8192):
-                        hash_func.update(chunk)
-
-                hash_string = hash_func.hexdigest()
-                tag = f"telephuzz:{hash_string}"
-
-                client = docker.from_env()
-                try:
-                    # return Image if it already exists
-                    return client.images.get(tag)
-                except ImageNotFound:
-                    # create new Image
-                    dockerfile = f"""
+        dockerfile = f"""
                     FROM python:3.11-slim
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     RUN pip install -e {LIB_PATH}/lib
                     """
-
-                    with tempfile.TemporaryDirectory() as tmpdir:
-                        # copy library into build context
-                        lib_dest = os.path.join(tmpdir, "lib")
-                        shutil.copytree(library_path, lib_dest)
-
-                        dockerfile_path = os.path.join(tmpdir, "Dockerfile")
-
-                        with open(dockerfile_path, "w") as f:
-                            f.write(dockerfile)
-
-                        image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
-
-                    return image
-
-        # no fitting file found
-        return None
+        return super()._get_image_by_hash(
+            library_path=library_path,
+            dependency_files=["pyproject.toml", "setup.py", "requirements.txt"],
+            dockerfile=dockerfile,
+        )
 
 
 # --- Mixins ---
