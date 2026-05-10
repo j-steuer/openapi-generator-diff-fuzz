@@ -29,6 +29,9 @@ def decode_output(output: bytes | Iterable[bytes]) -> str:
     return output.decode() if isinstance(output, bytes) else str(output)
 
 
+# --- Base Class ---
+
+
 class ClientLibraryContainer(ABC):
     """Abstract class for client library containers."""
 
@@ -36,11 +39,41 @@ class ClientLibraryContainer(ABC):
     container: Container | None
     method_case: Case = Case("snake")
 
-    def __init__(self, library_path: Path):
+    def __init__(
+        self,
+        library_path: Path,
+        base_image: str,
+        depnd_cmd: str,
+    ):
         """Initialize an existing image or create a new one if possible."""
         image = self.get_image_by_hash(library_path)
         if image is None:
-            self.container = None
+            # start up container without image
+            client = docker.from_env()
+
+            container = client.containers.run(
+                image=base_image,
+                command="sleep infinity",  # keep container alive
+                detach=True,
+                volumes={
+                    str(library_path): {
+                        "bind": LIB_PATH,
+                        "mode": "rw",
+                    }
+                },
+                extra_hosts={
+                    "host.docker.internal": "host-gateway"
+                },  # TODO remove once fixture fixed
+            )
+
+            # install library using pip
+            exit_code, output = container.exec_run(depnd_cmd, stdout=True, stderr=True)
+
+            assert exit_code == 0, (
+                f"Error while installing library using pip: {decode_output(output)}"
+            )
+
+            self.container = container
             return
 
         # set up container
@@ -115,46 +148,22 @@ class ClientLibraryContainer(ABC):
         return out  # TODO parse to Response object
 
 
+# --- Language-based Abstractions ---
+
+
 class PythonCLC(ClientLibraryContainer):
     """Abstract class for python-based client library containers."""
 
-    method_case = Case("snake")
+    method_case = Case.SNAKE
 
     def __init__(self, library_path: Path):
         """Initialize a python-based client library."""
-        super().__init__(library_path=library_path)
-        if self.container:
-            # container is already running
-            return
-
-        # start up container without image
-        client = docker.from_env()
-
-        container = client.containers.run(
-            image="python:3.11-slim",
-            command="sleep infinity",  # keep container alive
-            detach=True,
-            volumes={
-                str(library_path): {
-                    "bind": LIB_PATH,
-                    "mode": "rw",
-                }
-            },
-            extra_hosts={
-                "host.docker.internal": "host-gateway"
-            },  # TODO remove once fixture fixed
+        super().__init__(
+            library_path=library_path,
+            base_image="python:3.11-slim",
+            depnd_cmd=f"pip install {LIB_PATH}",
         )
-
-        # install library using pip
-        exit_code, output = container.exec_run(
-            f"pip install {LIB_PATH}", stdout=True, stderr=True
-        )
-
-        assert exit_code == 0, (
-            f"Error while installing library using pip: {decode_output(output)}"
-        )
-
-        self.container = container
+        assert self.container is not None
 
     @abstractmethod
     def _get_code(self, request: Request, api_path: str) -> bytes:
@@ -222,6 +231,9 @@ class PythonCLC(ClientLibraryContainer):
         return None
 
 
+# --- Mixins ---
+
+
 class OperationIdBasedCLC(ClientLibraryContainer):
     """Mixin for containers where methods are named after operation ids."""
 
@@ -231,6 +243,9 @@ class OperationIdBasedCLC(ClientLibraryContainer):
         library_method_name = transform_case(operation_id, self.method_case)
 
         return library_method_name
+
+
+# --- Concrete Client Classes ---
 
 
 class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):

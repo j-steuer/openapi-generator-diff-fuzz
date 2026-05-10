@@ -2,10 +2,10 @@
 
 set -e
 
-LANGS=("python")
+LANGS=("python", "go")
 
 for LANG in "${LANGS[@]}"; do
-  echo "Generating: $LANG"
+  echo "OpenAPI Generator: Generating $LANG"
 
   docker run --rm \
     -v "$(pwd)":/local \
