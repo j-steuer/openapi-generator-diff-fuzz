@@ -2,6 +2,7 @@
 
 import hashlib
 import io
+import json
 import os
 import shutil
 import tarfile
@@ -109,7 +110,6 @@ class ClientLibraryContainer(ABC):
     def _get_image_by_hash(
         self, library_path: Path, dependency_files: list[str], dockerfile: str
     ) -> Image | None:
-        """Image creation for python-based libraries."""
         for file in dependency_files:
             path = Path(os.path.join(library_path, file))
             if path.exists() and path.is_file():
@@ -194,12 +194,13 @@ class PythonCLC(ClientLibraryContainer):
     """Abstract class for python-based client library containers."""
 
     method_case = Case.SNAKE
+    base_image = "python:3.11-slim"
 
     def __init__(self, library_path: Path):
-        """Initialize a python-based client library."""
+        """Initialize a Python-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image="python:3.11-slim",
+            base_image=self.base_image,
             depnd_cmd=f"pip install {LIB_PATH}",
         )
         assert self.container is not None
@@ -225,18 +226,133 @@ class PythonCLC(ClientLibraryContainer):
         return "python3 /tmp/request.py"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for python-based libraries."""
+        """Image creation for Python-based libraries."""
+        dependency_files = ["pyproject.toml", "setup.py", "requirements.txt"]
         dockerfile = f"""
-                    FROM python:3.11-slim
+                    FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     RUN pip install -e {LIB_PATH}/lib
                     """
         return super()._get_image_by_hash(
             library_path=library_path,
-            dependency_files=["pyproject.toml", "setup.py", "requirements.txt"],
+            dependency_files=dependency_files,
             dockerfile=dockerfile,
         )
+
+
+class GoCLC(ClientLibraryContainer):
+    """Abstract class for Go-based client library containers."""
+
+    method_case = Case.PASCAL
+    base_image = "golang:1.26"
+    library_name: str
+
+    def __init__(self, library_path: Path):
+        """Initialize a Go-based client library."""
+        super().__init__(
+            library_path=library_path,
+            base_image=self.base_image,
+            depnd_cmd=f"go work init {LIB_PATH}",
+        )
+        assert self.container is not None
+
+    @abstractmethod
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        """Return the encoded code string that executes the request."""
+        raise NotImplementedError
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.go")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive("/tmp", tar_stream)
+
+        return "go run /tmp/request.go"
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = ["go.mod"]
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+                    RUN go work init {LIB_PATH}/lib
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+
+class JavaCLC(ClientLibraryContainer):
+    """Abstract class for Java-based client library containers."""
+
+    method_case = Case.CAMEL
+    base_image = "eclipse-temurin:21"
+
+    def __init__(self, library_path: Path):
+        """Initialize a Java-based client library."""
+        super().__init__(
+            library_path=library_path,
+            base_image=self.base_image,
+            depnd_cmd="",  # TODO
+        )
+        assert self.container is not None
+
+
+class SwiftCLC(ClientLibraryContainer):
+    """Abstract class for Swift-based client library containers."""
+
+    method_case = Case.CAMEL
+    base_image = "swift:6.3.1"
+
+    def __init__(self, library_path: Path):
+        """Initialize a Swift-based client library."""
+        super().__init__(
+            library_path=library_path,
+            base_image=self.base_image,
+            depnd_cmd="",  # TODO
+        )
+        assert self.container is not None
+
+
+class CsharpCLC(ClientLibraryContainer):
+    """Abstract class for C#-based client library containers."""
+
+    method_case = Case.PASCAL
+    base_image = "mcr.microsoft.com/dotnet/sdk:10.0"
+
+    def __init__(self, library_path: Path):
+        """Initialize a C#-based client library."""
+        super().__init__(
+            library_path=library_path,
+            base_image=self.base_image,
+            depnd_cmd="",  # TODO
+        )
+        assert self.container is not None
+
+
+class TypeScriptCLC(ClientLibraryContainer):
+    """Abstract class for TypeScript-based client library containers."""
+
+    method_case = Case.PASCAL
+    base_image = "node:20-alpine"
+
+    def __init__(self, library_path: Path):
+        """Initialize a TypeScript-based client library."""
+        super().__init__(
+            library_path=library_path,
+            base_image=self.base_image,
+            depnd_cmd="",  # TODO
+        )
+        assert self.container is not None
 
 
 # --- Mixins ---
@@ -253,7 +369,7 @@ class OperationIdBasedCLC(ClientLibraryContainer):
         return library_method_name
 
 
-# --- Concrete Client Classes ---
+# --- Concrete Python Client Classes ---
 
 
 class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
@@ -337,6 +453,58 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
             my_data = {method_name}.sync_detailed(client=client, {kwargs})
             pprint(my_data)
 
+        """).encode()
+
+        return content
+
+
+# --- Concrete Go Client Classes ---
+
+
+class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
+    """Client library class for OpenAPI Generator Go."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        arg_string = ".".join(
+            f"{k.capitalize()}({json.dumps(v)})"
+            for k, v in request.query_parameters.items()
+        )
+        arg_string += "."
+
+        content = textwrap.dedent(f"""
+        package main
+
+        import (
+            "context"
+            "fmt"
+            "log"
+
+            openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+        )
+
+        func main() {{
+            // Create API client configuration
+            cfg := openapiclient.NewConfiguration()
+            cfg.Servers = openapiclient.ServerConfigurations{{
+                {{
+                    URL: "{api_path}", // FastAPI server
+                }},
+            }}
+
+            client := openapiclient.NewAPIClient(cfg)
+
+            // Call the generated API method
+            resp, httpRes, err := client.DefaultAPI.
+                {self._get_method_name(request)}(context.Background()).
+                {arg_string}
+                Execute()
+
+            if err != nil {{
+                log.Fatalf("Error calling API: %v\\nHTTP response: %v", err, httpRes)
+            }}
+
+            fmt.Println(resp)
+        }}
         """).encode()
 
         return content
