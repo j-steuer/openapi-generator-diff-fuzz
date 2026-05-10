@@ -44,12 +44,12 @@ class ClientLibraryContainer(ABC):
         self,
         library_path: Path,
         base_image: str,
-        depnd_cmd: str,
+        depnd_cmd: str | None,
     ):
         """Initialize an existing image or create a new one if possible."""
         image = self.get_image_by_hash(library_path)
         if image is None:
-            # start up container without image
+            # start up container without image TODO remove?
             client = docker.from_env()
 
             container = client.containers.run(
@@ -67,12 +67,15 @@ class ClientLibraryContainer(ABC):
                 },  # TODO remove once fixture fixed
             )
 
-            # install library using pip
-            exit_code, output = container.exec_run(depnd_cmd, stdout=True, stderr=True)
+            # install library if needed
+            if depnd_cmd is not None:
+                exit_code, output = container.exec_run(
+                    depnd_cmd, stdout=True, stderr=True
+                )
 
-            assert exit_code == 0, (
-                f"Error while installing library using pip: {decode_output(output)}"
-            )
+                assert exit_code == 0, (
+                    f"Error while installing library: {decode_output(output)}"
+                )
 
             self.container = container
             return
@@ -338,21 +341,65 @@ class CsharpCLC(ClientLibraryContainer):
         )
         assert self.container is not None
 
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for C#-based libraries."""
+        dependency_files = [".csproj"]  # TODO adjust
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
 
 class TypeScriptCLC(ClientLibraryContainer):
     """Abstract class for TypeScript-based client library containers."""
 
-    method_case = Case.PASCAL
+    method_case = Case.CAMEL
     base_image = "node:20-alpine"
 
     def __init__(self, library_path: Path):
         """Initialize a TypeScript-based client library."""
         super().__init__(
-            library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd="",  # TODO
+            library_path=library_path, base_image=self.base_image, depnd_cmd=None
         )
         assert self.container is not None
+
+    @abstractmethod
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        """Return the encoded code string that executes the request."""
+        raise NotImplementedError
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.ts")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive(LIB_PATH, tar_stream)
+
+        return f"npx tsx {LIB_PATH}/request.ts"
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = ["api.ts"]  # TODO better file / method for inference
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+                    RUN npm install axios
+                    RUN npm i -D tsx
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
 
 
 # --- Mixins ---
@@ -487,7 +534,7 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
             cfg := openapiclient.NewConfiguration()
             cfg.Servers = openapiclient.ServerConfigurations{{
                 {{
-                    URL: "{api_path}", // FastAPI server
+                    URL: "{api_path}",
                 }},
             }}
 
@@ -505,6 +552,41 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
 
             fmt.Println(resp)
         }}
+        """).encode()
+
+        return content
+
+
+# --- Concrete TypeScript Client classes
+
+
+class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
+    """Concrete client library for OpenAPI Generator TypeScript (Axios)."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+
+        content = textwrap.dedent(f"""
+        import {{ Configuration, DefaultApi }} from "./lib";
+
+        const api = new DefaultApi(
+        new Configuration({{
+            basePath: "{api_path}",
+        }})
+        );
+
+        async function main() {{
+        try {{
+            const greetRes = await api.{self._get_method_name(request)}({kwargs});
+
+            console.log(greetRes.data);
+        }} catch (err) {{
+            console.error(err);
+        }}
+        }}
+
+        main();
+
         """).encode()
 
         return content

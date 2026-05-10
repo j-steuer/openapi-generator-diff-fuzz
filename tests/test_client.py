@@ -11,6 +11,7 @@ from telephuzz.session.client_library import (
     ClientLibraryContainer,
     OpenAPIGenGoCLC,
     OpenAPIGenPythonCLC,
+    OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
     SwaggerCodegenPythonCLC,
 )
@@ -55,6 +56,14 @@ def test_client_openapigen_go(api) -> None:
     library_path = CLIENT_PATH / "openapi-gen-go-client"
 
     with OpenAPIGenGoCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_client_openapigen_typescript(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "openapi-gen-typescript-axios-client"
+
+    with OpenAPIGenTypeScriptCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 
