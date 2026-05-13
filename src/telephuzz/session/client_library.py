@@ -110,40 +110,51 @@ class ClientLibraryContainer(ABC):
 
             self.container = None
 
-    def _get_image_by_hash(
-        self, library_path: Path, dependency_files: list[str], dockerfile: str
-    ) -> Image | None:
-        for file in dependency_files:
-            path = Path(os.path.join(library_path, file))
-            if path.exists() and path.is_file():
-                hash_func = hashlib.new("sha256")
+    def _get_image_by_hash(self, library_path: Path, dockerfile: str) -> Image | None:
+        hasher = hashlib.new("sha256")
+        chunk_size = 1024 * 1024
+        for path in sorted(library_path.rglob("*")):
+            rel_path = path.relative_to(library_path).as_posix()
 
-                with open(path, "rb") as f:
-                    while chunk := f.read(8192):
-                        hash_func.update(chunk)
+            # Include path type
+            if path.is_dir():
+                hasher.update(f"dir:{rel_path}\n".encode())
+                continue
 
-                hash_string = hash_func.hexdigest()
-                tag = f"telephuzz:{hash_string}"
+            if path.is_symlink():
+                target = path.readlink()
+                hasher.update(f"symlink:{rel_path}->{target}\n".encode())
+                continue
 
-                client = docker.from_env()
-                try:
-                    # return Image if it already exists
-                    return client.images.get(tag)
-                except ImageNotFound:
-                    # create new Image
-                    with tempfile.TemporaryDirectory() as tmpdir:
-                        # copy library into build context
-                        lib_dest = os.path.join(tmpdir, "lib")
-                        shutil.copytree(library_path, lib_dest)
+            # Include filename/path
+            hasher.update(f"file:{rel_path}\n".encode())
 
-                        dockerfile_path = os.path.join(tmpdir, "Dockerfile")
+            # Include file contents
+            with path.open("rb") as f:
+                while chunk := f.read(chunk_size):
+                    hasher.update(chunk)
 
-                        with open(dockerfile_path, "w") as f:
-                            f.write(dockerfile)
+        tag = f"telephuzz:{hasher.hexdigest()}"
 
-                        image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
+        client = docker.from_env()
+        try:
+            # return Image if it already exists
+            return client.images.get(tag)
+        except ImageNotFound:
+            # create new Image
+            with tempfile.TemporaryDirectory() as tmpdir:
+                # copy library into build context
+                lib_dest = os.path.join(tmpdir, "lib")
+                shutil.copytree(library_path, lib_dest)
 
-                    return image
+                dockerfile_path = os.path.join(tmpdir, "Dockerfile")
+
+                with open(dockerfile_path, "w") as f:
+                    f.write(dockerfile)
+
+                image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
+
+            return image
 
         # no fitting file found
         return None
@@ -230,7 +241,6 @@ class PythonCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Python-based libraries."""
-        dependency_files = ["pyproject.toml", "setup.py", "requirements.txt"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -239,7 +249,6 @@ class PythonCLC(ClientLibraryContainer):
                     """
         return super()._get_image_by_hash(
             library_path=library_path,
-            dependency_files=dependency_files,
             dockerfile=dockerfile,
         )
 
@@ -282,16 +291,13 @@ class GoCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["go.mod"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     RUN go work init {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class JavaCLC(ClientLibraryContainer):
@@ -343,15 +349,12 @@ class CsharpCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
-        dependency_files = [".csproj"]  # TODO adjust
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class TypeScriptCLC(ClientLibraryContainer):
@@ -389,7 +392,6 @@ class TypeScriptCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["api.ts"]  # TODO better file / method for inference
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -397,9 +399,7 @@ class TypeScriptCLC(ClientLibraryContainer):
                     RUN npm install axios
                     RUN npm i -D tsx
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 # --- Mixins ---
