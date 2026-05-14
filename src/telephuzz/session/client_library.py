@@ -793,3 +793,55 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
         """.encode()
 
         return content
+
+
+class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
+    """Concrete client library for orval (Axios)."""
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = ["orval.ts"]  # TODO better file / method for inference
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib/orval.ts
+                    RUN npm install axios
+                    RUN npm i -D tsx
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        arg_string = ",".join(
+            f"{k.lower()}: {json.dumps(v)}" for k, v in request.query_parameters.items()
+        )
+        arg_string += ","
+
+        content = f"""
+        import axios from "axios";
+        import {{ getFastAPI }} from "./lib/orval";
+
+        async function main() {{
+        // Optional: configure base URL globally
+        axios.defaults.baseURL = "{api_path}";
+
+        const api = getFastAPI();
+
+        try {{
+            const response = await api.{self._get_method_name(request)}(
+            {{
+                {arg_string}
+            }}
+            );
+
+            console.log("Response:", response.data);
+        }} catch (err) {{
+            console.error("Request failed:", err);
+        }}
+        }}
+
+        main();
+        """.encode()
+
+        return content

@@ -15,6 +15,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
+    OrvalCLC,
     SwaggerCodegenPythonCLC,
     SwaggerCodegenTypeScriptCLC,
     SwaggerTsAPICLC,
@@ -108,6 +109,14 @@ def test_swagger_typescript_api(api) -> None:
     library_path = CLIENT_PATH / "swagger-typescript-api.ts"
 
     with SwaggerTsAPICLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_orval(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "orval.ts"
+
+    with OrvalCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 
