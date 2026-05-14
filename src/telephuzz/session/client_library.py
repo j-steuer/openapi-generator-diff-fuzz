@@ -43,43 +43,12 @@ class ClientLibraryContainer(ABC):
     def __init__(
         self,
         library_path: Path,
-        base_image: str,
-        depnd_cmd: str | None,
     ):
         """Initialize an existing image or create a new one if possible."""
         image = self.get_image_by_hash(library_path)
         if image is None:
             # start up container without image TODO remove?
             raise ValueError("Hash should be obtainable")
-            client = docker.from_env()
-
-            container = client.containers.run(
-                image=base_image,
-                command="sleep infinity",  # keep container alive
-                detach=True,
-                volumes={
-                    str(library_path): {
-                        "bind": LIB_PATH,
-                        "mode": "rw",
-                    }
-                },
-                extra_hosts={
-                    "host.docker.internal": "host-gateway"
-                },  # TODO remove once fixture fixed
-            )
-
-            # install library if needed
-            if depnd_cmd:
-                exit_code, output = container.exec_run(
-                    depnd_cmd, stdout=True, stderr=True
-                )
-
-                assert exit_code == 0, (
-                    f"Error while installing library: {decode_output(output)}"
-                )
-
-            self.container = container
-            return
 
         # set up container
         client = docker.from_env()
@@ -211,8 +180,6 @@ class PythonCLC(ClientLibraryContainer):
         """Initialize a Python-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd=f"pip install {LIB_PATH}",
         )
         assert self.container is not None
 
@@ -263,8 +230,6 @@ class GoCLC(ClientLibraryContainer):
         """Initialize a Go-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd=f"go work init {LIB_PATH}",
         )
         assert self.container is not None
 
@@ -312,8 +277,6 @@ class JavaCLC(ClientLibraryContainer):
         """Initialize a Java-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd="",  # TODO
         )
         assert self.container is not None
 
@@ -328,8 +291,6 @@ class SwiftCLC(ClientLibraryContainer):
         """Initialize a Swift-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd="",  # TODO
         )
         assert self.container is not None
 
@@ -344,8 +305,6 @@ class CsharpCLC(ClientLibraryContainer):
         """Initialize a C#-based client library."""
         super().__init__(
             library_path=library_path,
-            base_image=self.base_image,
-            depnd_cmd="",  # TODO
         )
         assert self.container is not None
 
@@ -370,9 +329,7 @@ class TypeScriptCLC(ClientLibraryContainer):
 
     def __init__(self, library_path: Path):
         """Initialize a TypeScript-based client library."""
-        super().__init__(
-            library_path=library_path, base_image=self.base_image, depnd_cmd=None
-        )
+        super().__init__(library_path=library_path)
         assert self.container is not None
 
     @abstractmethod
