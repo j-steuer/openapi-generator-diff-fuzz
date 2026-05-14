@@ -15,6 +15,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
     SwaggerCodegenPythonCLC,
+    SwaggerCodegenTypeScriptCLC,
 )
 
 CLIENT_PATH = Path(__file__).resolve().parent / "testfiles" / "clients"
@@ -81,6 +82,14 @@ def test_client_swaggergen_python(api) -> None:
     library_path = CLIENT_PATH / "swagger-codegen-python-client"
 
     with SwaggerCodegenPythonCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_swaggergen_typescript(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "swagger-codegen-typescript-axios-client"
+
+    with SwaggerCodegenTypeScriptCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 

@@ -656,3 +656,37 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
         """).encode()
 
         return content
+
+
+class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
+    """Concrete client library for Swagger Codegen TypeScript (Axios)."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+        method_name = self._get_method_name(request)
+
+        content = f"""
+        // request.ts
+
+        import {{ Configuration, DefaultApi }} from "./lib";
+
+        const api = new DefaultApi(
+        new Configuration({{
+            basePath: "{api_path}",
+        }})
+        );
+
+        async function run() {{
+        try {{
+            const response = await api.{method_name}({kwargs});
+            console.log("Response:", response.data);
+        }} catch (err) {{
+            console.error("Request failed:", err);
+        }}
+        }}
+
+        // Immediately execute
+        run();
+        """.encode()
+
+        return content
