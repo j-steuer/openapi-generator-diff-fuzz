@@ -9,6 +9,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
+    OapiGeneratorCLC,
     OpenAPIGenGoCLC,
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
@@ -56,6 +57,14 @@ def test_client_openapigen_go(api) -> None:
     library_path = CLIENT_PATH / "openapi-gen-go-client"
 
     with OpenAPIGenGoCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_oapi_codegen(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "oapi-codegen-client.go"
+
+    with OapiGeneratorCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 

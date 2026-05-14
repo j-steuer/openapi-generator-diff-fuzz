@@ -50,6 +50,7 @@ class ClientLibraryContainer(ABC):
         image = self.get_image_by_hash(library_path)
         if image is None:
             # start up container without image TODO remove?
+            raise ValueError("Hash should be obtainable")
             client = docker.from_env()
 
             container = client.containers.run(
@@ -114,7 +115,11 @@ class ClientLibraryContainer(ABC):
         self, library_path: Path, dependency_files: list[str], dockerfile: str
     ) -> Image | None:
         for file in dependency_files:
-            path = Path(os.path.join(library_path, file))
+            path = (
+                Path(os.path.join(library_path, file))
+                if library_path.is_dir()
+                else library_path
+            )
             if path.exists() and path.is_file():
                 hash_func = hashlib.new("sha256")
 
@@ -134,7 +139,10 @@ class ClientLibraryContainer(ABC):
                     with tempfile.TemporaryDirectory() as tmpdir:
                         # copy library into build context
                         lib_dest = os.path.join(tmpdir, "lib")
-                        shutil.copytree(library_path, lib_dest)
+                        if library_path.is_dir():
+                            shutil.copytree(library_path, lib_dest)
+                        else:
+                            shutil.copy(library_path, lib_dest)
 
                         dockerfile_path = os.path.join(tmpdir, "Dockerfile")
 
@@ -553,6 +561,85 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
             fmt.Println(resp)
         }}
         """).encode()
+
+        return content
+
+
+class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
+    """Client library class for oapi generator."""
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.go")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive(f"{LIB_PATH}/lib", tar_stream)
+
+        return f"go run {LIB_PATH}/lib/request.go"
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = ["oapi-codegen-client.go"]
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}/lib
+                    COPY lib {LIB_PATH}/lib/oapi-codegen-client.go
+                    
+                    RUN go mod init telephuzz/client
+                    RUN mkdir -p clients/client
+                    RUN mv oapi-codegen-client.go clients/client/client.go
+                    RUN go mod tidy
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        arg_string = ",".join(
+            f"{json.dumps(v)}" for v in request.query_parameters.values()
+        )
+        arg_string += "."
+        method_name = self._get_method_name(request)
+        content = f"""
+        package main
+
+        import (
+            "context"
+            "fmt"
+            "log"
+
+            "telephuzz/client/clients/client"
+        )
+
+        func main() {{
+            ctx := context.Background()
+
+            // Create API client
+            c, err := client.NewClientWithResponses("{api_path}")
+            if err != nil {{
+                log.Fatal(err)
+            }}
+
+            // Call GET /greet
+            resp, err := c.{method_name}WithResponse(ctx, &client.{method_name}Params{{
+                Name: "Alice",
+                Age:  30,
+            }})
+            if err != nil {{
+                log.Fatal(err)
+            }}
+
+            fmt.Println("Status:", resp.Status())
+            fmt.Println("Body:", string(resp.Body))
+        }}
+
+        """.encode()
 
         return content
 
