@@ -276,9 +276,9 @@ class GoCLC(ClientLibraryContainer):
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
-        self.container.put_archive("/tmp", tar_stream)
+        self.container.put_archive("/app", tar_stream)
 
-        return "go run /tmp/request.go"
+        return "go run /app/request.go"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
