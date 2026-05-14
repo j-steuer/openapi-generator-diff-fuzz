@@ -738,3 +738,58 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
         """.encode()
 
         return content
+
+
+class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
+    """Concrete client library for swagger-typescript-api (Axios)."""
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = [
+            "swagger-typescript-api.ts"
+        ]  # TODO better file / method for inference
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib/swagger-typescript-api.ts
+                    RUN npm install axios
+                    RUN npm i -D tsx
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        arg_string = ",".join(
+            f"{k.lower()}: {json.dumps(v)}" for k, v in request.query_parameters.items()
+        )
+        arg_string += ","
+
+        method_name = self._get_method_name(request)
+        method_name = method_name[:-8] + method_name[-8:].upper()  # hash is uppercase
+
+        content = f"""
+        import {{ Api }} from "./lib/swagger-typescript-api";
+
+        async function main() {{
+        // Create API client instance
+        const api = new Api({{
+            baseURL: "{api_path}",
+        }});
+
+        try {{
+            // Call /greet endpoint
+            const response = await api.greet.{method_name}({{
+            {arg_string}
+            }});
+
+            console.log("Response:", response.data);
+        }} catch (err) {{
+            console.error("Request failed:", err);
+        }}
+        }}
+
+        main();
+        """.encode()
+
+        return content
