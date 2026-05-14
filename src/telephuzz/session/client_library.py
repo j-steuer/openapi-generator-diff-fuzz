@@ -68,7 +68,7 @@ class ClientLibraryContainer(ABC):
             )
 
             # install library if needed
-            if depnd_cmd is not None:
+            if depnd_cmd:
                 exit_code, output = container.exec_run(
                     depnd_cmd, stdout=True, stderr=True
                 )
