@@ -9,6 +9,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
+    NswagTypeScriptCLC,
     OapiGeneratorCLC,
     OpenAPIGenGoCLC,
     OpenAPIGenPythonCLC,
@@ -90,6 +91,14 @@ def test_swaggergen_typescript(api) -> None:
     library_path = CLIENT_PATH / "swagger-codegen-typescript-axios-client"
 
     with SwaggerCodegenTypeScriptCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_nswag_typescript(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "nswag-typescript-client.ts"
+
+    with NswagTypeScriptCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 

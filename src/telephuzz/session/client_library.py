@@ -690,3 +690,51 @@ class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
         """.encode()
 
         return content
+
+
+class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
+    """Concrete client library for Nswag TypeScript (Axios)."""
+
+    method_case = Case.SNAKE  # uses operation id as is, default is SNAKE
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = [
+            "nswag-typescript-client.ts"
+        ]  # TODO better file / method for inference
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib/nswag-typescript-client.ts
+                    RUN npm install axios
+                    RUN npm i -D tsx
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+
+        client_type = request.method.value.capitalize()
+        method_name = self._get_method_name(request)
+        method_name = method_name[method_name.find("_") + 1 :]  # cut method
+        method_name = method_name[:-8] + "_" + method_name[-8:]
+
+        # TODO fix client type stuff
+        content = f"""
+        import {{ GetClient }} from "./lib/nswag-typescript-client";
+
+        async function main() {{
+        const client = new {client_type}Client("{api_path}");
+
+        const result = await client.{method_name}({kwargs});
+
+        console.log("Response:", result);
+        }}
+
+        main().catch(console.error);
+
+        """.encode()
+
+        return content
