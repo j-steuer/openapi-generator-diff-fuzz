@@ -522,6 +522,28 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
         return content
 
 
+class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
+    """Client library class for Swagger Codegen Go."""
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Go-based libraries."""
+        dependency_files = ["client.go"]  # TODO
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+
+                    RUN go mod init telephuzz
+                    RUN go mod tidy
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        return b""
+
+
 class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
     """Client library class for oapi generator."""
 
