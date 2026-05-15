@@ -12,6 +12,7 @@ from telephuzz.session.client_library import (
     NswagTypeScriptCLC,
     OapiGeneratorCLC,
     OpenAPIGenGoCLC,
+    OpenAPIGenJavaCLC,
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
@@ -125,6 +126,15 @@ def test_client_openapi_python_generator(api) -> None:
     library_path = CLIENT_PATH / "openapi-python-client"
 
     with OpenapiPythonGeneratorCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_openapi_generator_java(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "openapi-gen-java-client"
+
+    with OpenAPIGenJavaCLC(library_path=library_path) as clc:
+        print("Container up")
         _init_and_send(clc, api)
 
 

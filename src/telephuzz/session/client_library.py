@@ -280,6 +280,56 @@ class JavaCLC(ClientLibraryContainer):
         )
         assert self.container is not None
 
+    @abstractmethod
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        """Return the encoded code string that executes the request."""
+        raise NotImplementedError
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.jsh")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive("/app", tar_stream)
+
+        lib_path = '"lib/target/openapi-java-client-0.1.0.jar:lib/target/lib/*"'
+        return f"jshell --class-path {lib_path} request.jsh"
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Java-based libraries."""
+        dependency_files = ["pom.xml"]
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+
+                    RUN apt-get update && \
+                    apt-get install -y zip unzip
+                    
+                    SHELL ["/bin/bash", "-c"]
+
+                    RUN curl -s "https://get.sdkman.io" | bash && \
+                        source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+                        sdk install maven
+
+                    WORKDIR /app/lib
+
+                    RUN source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+                        mvn package && \
+                        mvn dependency:build-classpath -Dmdep.outputFile=classpath.txt
+
+                    WORKDIR /app
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
 
 class SwiftCLC(ClientLibraryContainer):
     """Abstract class for Swift-based client library containers."""
@@ -843,5 +893,31 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
 
         main();
         """.encode()
+
+        return content
+
+
+# --- Concrete Java Client classes ---
+
+
+class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
+    """Concrete client library for OpenAPI Generator Java."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+
+        content = textwrap.dedent(f"""
+        import org.openapitools.client.ApiClient;
+        import org.openapitools.client.api.DefaultApi;
+
+        var client = new ApiClient();
+        client.setBasePath("{api_path}");
+
+        var api = new DefaultApi(client);
+
+        var response = api.{self._get_method_name(request)}({kwargs});
+
+        System.out.println(response);
+        """).encode()
 
         return content
