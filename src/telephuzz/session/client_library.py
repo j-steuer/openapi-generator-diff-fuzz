@@ -355,15 +355,14 @@ class SwiftCLC(ClientLibraryContainer):
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.jsh")
+            info = tarfile.TarInfo(name="request.swift")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive("/app", tar_stream)
 
-        lib_path = '"lib/target/openapi-java-client-0.1.0.jar:lib/target/lib/*"'
-        return f"jshell --class-path {lib_path} request.jsh"
+        return "swift request.swift"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
@@ -989,3 +988,13 @@ class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
         """).encode()
 
         return content
+
+
+# --- Concrete Swift Client classes ---
+
+
+class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
+    """Concrete client library class for OpenAPI Generator Swift."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        return b""
