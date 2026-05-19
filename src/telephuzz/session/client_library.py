@@ -1116,3 +1116,37 @@ class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
         """).encode()
 
         return content
+
+
+class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
+    """Concrete client library class for Swagger Codegen C#."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+        content = textwrap.dedent(f"""
+        #r "./lib/bin/Debug/net471/IO.Swagger.dll"
+        #r "./lib/bin/Debug/net471/RestSharp.dll"
+
+        using System;
+        using IO.Swagger.Api;
+        using IO.Swagger.Client;
+
+        var baseUrl = "{api_path}";
+
+        var api = new DefaultApi(baseUrl);
+
+        try
+        {{
+            var response = api.{self._get_method_name(request)}({kwargs});
+
+            Console.WriteLine("Response:");
+            Console.WriteLine(response);
+        }}
+        catch (ApiException ex)
+        {{
+            Console.WriteLine("API Error:");
+            Console.WriteLine(ex.Message);
+        }}
+        """).encode()
+
+        return content

@@ -19,6 +19,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
     OrvalCLC,
+    SwaggerCodegenCsharpCLC,
     SwaggerCodegenPythonCLC,
     SwaggerCodegenTypeScriptCLC,
     SwaggerTsAPICLC,
@@ -153,7 +154,14 @@ def test_openapi_generator_csharp(api) -> None:
     library_path = CLIENT_PATH / "openapi-gen-csharp-client"
 
     with OpenAPIGenCsharpCLC(library_path=library_path) as clc:
-        print("Container up")
+        _init_and_send(clc, api)
+
+
+def test_swagger_codegen_csharp(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "swagger-codegen-csharp-client"
+
+    with SwaggerCodegenCsharpCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 
