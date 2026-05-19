@@ -135,16 +135,15 @@ def test_openapi_generator_java(api) -> None:
     library_path = CLIENT_PATH / "openapi-gen-java-client"
 
     with OpenAPIGenJavaCLC(library_path=library_path) as clc:
-        print("Container up")
         _init_and_send(clc, api)
 
 
+@pytest.mark.skip(reason="Not compatible with Linux, will need its own setup on MacOS")
 def test_openapi_generator_swift(api) -> None:
     """Test that default clients initialize correctly."""
     library_path = CLIENT_PATH / "openapi-gen-swift5-client"
 
     with OpenAPIGeneratorSwiftCLC(library_path=library_path) as clc:
-        print("Container up")
         _init_and_send(clc, api)
 
 
