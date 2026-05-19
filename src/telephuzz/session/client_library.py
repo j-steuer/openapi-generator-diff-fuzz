@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import tarfile
 import tempfile
@@ -1147,6 +1148,64 @@ class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
             Console.WriteLine("API Error:");
             Console.WriteLine(ex.Message);
         }}
+        """).encode()
+
+        return content
+
+
+class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
+    """Concrete client library class for Nswag C#."""
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Modify method to create project from scratch with single file cs."""
+        dependency_files = ["nswag-csharp-client.cs"]
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+
+                    RUN dotnet tool install -g dotnet-script
+                    ENV PATH="$PATH:/root/.dotnet/tools"
+                    RUN mkdir -p /tmp/dotnet-script-warmup
+                    RUN echo 'Console.WriteLine("warmup");' > /tmp/warmup.csx
+                    RUN dotnet script /tmp/warmup.csx
+
+                    RUN dotnet new classlib -n ApiClient
+                    COPY lib {LIB_PATH}/ApiClient/nswag-csharp-client.cs
+                    WORKDIR {LIB_PATH}/ApiClient
+                    RUN dotnet add package Newtonsoft.Json
+                    RUN dotnet build
+
+                    WORKDIR {LIB_PATH}
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_method_name(self, request: Request) -> str:
+        name = super()._get_method_name(request)
+        parts = re.findall(r"[A-Z][a-z0-9]*", name)
+        name = "_".join(part for part in parts[1:])
+        return name[:-8] + "_" + name[-8:]
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+        content = textwrap.dedent(f"""
+        #r "nuget: Newtonsoft.Json, 13.0.3"
+        #r "ApiClient/bin/Debug/net10.0/ApiClient.dll"
+
+        using System;
+        using System.Net.Http;
+        using MyCompany.ApiClient;
+
+        var httpClient = new HttpClient();
+
+        var client = new {request.method.value.capitalize()}Client(
+            "{api_path}",
+            httpClient);
+
+        var response = await client.{self._get_method_name(request)}Async({kwargs});
+
+        Console.WriteLine(response);        
         """).encode()
 
         return content
