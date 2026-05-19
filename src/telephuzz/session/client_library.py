@@ -84,11 +84,26 @@ class ClientLibraryContainer(ABC):
         self, library_path: Path, dependency_files: list[str], dockerfile: str
     ) -> Image | None:
         for file in dependency_files:
-            path = (
-                Path(os.path.join(library_path, file))
-                if library_path.is_dir()
-                else library_path
-            )
+            if not file.startswith("."):
+                # use full name
+                path = (
+                    Path(os.path.join(library_path, file))
+                    if library_path.is_dir()
+                    else library_path
+                )
+            else:
+                # search for file with suffix
+                files_with_suffix = [
+                    f for f in os.listdir(library_path) if f.endswith(file)
+                ]
+                if len(files_with_suffix) != 1:
+                    # none or multiple found, skip
+                    continue
+                path = (
+                    Path(os.path.join(library_path, files_with_suffix[0]))
+                    if library_path.is_dir()
+                    else library_path
+                )
             if path.exists() and path.is_file():
                 hash_func = hashlib.new("sha256")
 
@@ -115,8 +130,8 @@ class ClientLibraryContainer(ABC):
 
                         dockerfile_path = os.path.join(tmpdir, "Dockerfile")
 
-                        with open(dockerfile_path, "w") as f:
-                            f.write(dockerfile)
+                        with open(dockerfile_path, "w") as f:  # type: ignore
+                            f.write(dockerfile)  # type: ignore
 
                         image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
 
@@ -390,13 +405,46 @@ class CsharpCLC(ClientLibraryContainer):
         )
         assert self.container is not None
 
+    @abstractmethod
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        """Return the encoded code string that executes the request."""
+        raise NotImplementedError
+
+    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        assert self.container is not None, "Container not set"
+        content = self._get_code(request, api_path)
+
+        tar_stream = io.BytesIO()
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            info = tarfile.TarInfo(name="request.csx")
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        tar_stream.seek(0)
+
+        self.container.put_archive("/app", tar_stream)
+
+        return "dotnet script request.csx"
+
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
-        dependency_files = [".csproj"]  # TODO adjust
+        dependency_files = [".csproj"]  # TODO adjust with regex
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
+
+                    RUN dotnet tool install -g dotnet-script
+                    ENV PATH="$PATH:/root/.dotnet/tools"
+
+                    RUN mkdir -p /tmp/dotnet-script-warmup
+
+                    RUN echo 'Console.WriteLine("warmup");' > /tmp/warmup.csx
+                    RUN dotnet script /tmp/warmup.csx
+
+                    WORKDIR {LIB_PATH}/lib
+                    RUN dotnet build
+
+                    WORKDIR {LIB_PATH}
                     """
         return super()._get_image_by_hash(
             library_path, dependency_files=dependency_files, dockerfile=dockerfile
@@ -998,3 +1046,73 @@ class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         return b""
+
+
+# --- Concrete C# Client classes ---
+
+
+class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
+    """Concrete client library class for OpenAPI Generator C#."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+        method_name = self._get_method_name(request)
+
+        content = textwrap.dedent(f"""
+        #r "./lib/bin/Debug/net10.0/Org.OpenAPITools.dll"
+
+        using System;
+        using System.Net.Http;
+        using System.Text.Json;
+        using Microsoft.Extensions.Logging.Abstractions;
+        using Org.OpenAPITools.Api;
+        using Org.OpenAPITools.Client;
+
+        // HTTP client
+        var httpClient = new HttpClient
+        {{
+            BaseAddress = new Uri("{api_path}")
+        }};
+
+        // JSON options (THIS is the missing piece)
+        var jsonOptions = new JsonSerializerOptions
+        {{
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        }};
+
+        var jsonOptionsProvider = new JsonSerializerOptionsProvider(jsonOptions);
+
+        // DI requirements
+        var logger = NullLogger<DefaultApi>.Instance;
+        var loggerFactory = NullLoggerFactory.Instance;
+        var events = new DefaultApiEvents();
+
+        // API client
+        var api = new DefaultApi(
+            logger,
+            loggerFactory,
+            httpClient,
+            jsonOptionsProvider,
+            events
+        );
+
+        // call endpoint
+        var response = await api.{method_name}OrDefaultAsync({kwargs});
+
+        if (response == null)
+        {{
+            Console.WriteLine("Request failed (null response)");
+            return;
+        }}
+
+        Console.WriteLine("Status:");
+        Console.WriteLine(response.StatusCode);
+
+        var payload = response.Ok();
+
+        Console.WriteLine("Payload:");
+        Console.WriteLine(payload);
+        """).encode()
+
+        return content
