@@ -9,6 +9,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
+    KiotaCSharpCLC,
     KiotaPythonCLC,
     NswagCSharpCLC,
     NswagTypeScriptCLC,
@@ -180,6 +181,14 @@ def test_kiota_python(api) -> None:
     library_path = CLIENT_PATH / "kiota-python-client"
 
     with KiotaPythonCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_kiota_csharp(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "kiota-csharp-client"
+
+    with KiotaCSharpCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 

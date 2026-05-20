@@ -1269,3 +1269,77 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
         """).encode()
 
         return content
+
+
+class KiotaCSharpCLC(CsharpCLC):
+    """Concrete client library class for Kiota C#."""
+
+    def _get_method_name(self, request: Request) -> str:
+        client_method = ".".join(
+            part.capitalize() for part in request.path.strip("/").split("/") if part
+        )
+        client_method += f".{request.method.value.capitalize()}Async"
+
+        return client_method
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        module_name = self._get_method_name(request)
+        module_name = module_name[: module_name.rfind(".")]
+
+        lines = []
+        for key, value in request.query_parameters.items():
+            lines.append(
+                f"config.QueryParameters.{key.capitalize()} = {json.dumps(value)};"
+            )
+        kwargs = "\n".join(lines)
+
+        content = textwrap.dedent(f"""
+        #r "nuget: Microsoft.Kiota.Abstractions, 1.22.1"
+        #r "nuget: Microsoft.Kiota.Http.HttpClientLibrary, 1.22.1"
+        #r "nuget: Microsoft.Kiota.Serialization.Json, 1.22.1"
+        #r "nuget: Microsoft.Kiota.Serialization.Text, 1.22.1"
+        #r "nuget: Microsoft.Kiota.Serialization.Form, 1.22.1"
+        #r "nuget: Microsoft.Kiota.Serialization.Multipart, 1.22.1"
+
+        #r "lib/bin/Debug/net8.0/Client.dll"
+
+        using System;
+        using System.Net.Http;
+        using Microsoft.Kiota.Abstractions.Authentication;
+        using Microsoft.Kiota.Http.HttpClientLibrary;
+        using Microsoft.Kiota.Abstractions.Serialization;
+        using Client;
+        using Client.{module_name};
+
+        var authProvider = new AnonymousAuthenticationProvider();
+
+        var adapter = new HttpClientRequestAdapter(authProvider)
+        {{
+            BaseUrl = "{api_path}"
+        }};
+
+        var client = new PostsClient(adapter);
+
+        var response = await client.{self._get_method_name(request)}(config =>
+        {{
+            {kwargs}
+        }});
+
+        Console.WriteLine(response);
+
+       if (response is UntypedObject obj)
+        {{
+            var dict = obj.GetValue();
+
+            foreach (var kv in dict)
+            {{
+                if (kv.Value is UntypedString str)
+                {{
+                    Console.WriteLine(str.GetValue());
+                }}
+            }}
+        }}
+                                  
+        """).encode()
+
+        return content
