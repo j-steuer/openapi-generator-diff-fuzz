@@ -601,6 +601,66 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
         return content
 
 
+class KiotaPythonCLC(PythonCLC):
+    """Client library class for Kiota Python."""
+
+    def _get_method_name(self, request: Request) -> str:
+        client_method = f"{request.path.strip('/').replace('/', '.')}"
+        client_method += f".{request.method.value.lower()}"
+        return client_method
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        request_builder = "".join(
+            part.capitalize() for part in request.path.split("/") if part
+        )
+        request_builder += "RequestBuilder"
+
+        aauth = "kiota_abstractions.authentication.anonymous_authentication_provider"
+
+        content = textwrap.dedent(f"""
+        import asyncio
+
+        from {aauth} import (
+            AnonymousAuthenticationProvider,
+        )
+
+        from kiota_http.httpx_request_adapter import HttpxRequestAdapter
+        from kiota_abstractions.base_request_configuration import RequestConfiguration
+
+        from my_kiota_client.posts_client import PostsClient
+        from my_kiota_client.greet.greet_request_builder import (
+            {request_builder},
+        )
+
+
+        async def main():
+            auth_provider = AnonymousAuthenticationProvider()
+
+            adapter = HttpxRequestAdapter(auth_provider)
+            adapter.base_url = "{api_path}"
+
+            client = PostsClient(adapter)
+
+            query_params = {request_builder}.{request_builder}GetQueryParameters(
+                name="Alice",
+                age=30,
+            )
+
+            request_config = RequestConfiguration(
+                query_parameters=query_params
+            )
+
+            response = await client.{self._get_method_name(request)}(request_config)
+
+            print(response.decode())
+
+
+        asyncio.run(main())
+                """).encode()
+
+        return content
+
+
 # --- Concrete Go Client Classes ---
 
 

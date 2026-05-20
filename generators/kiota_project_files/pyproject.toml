@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my_kiota_client"
+version = "0.1.0"
+description = "Generated Kiota Python client"
+requires-python = ">=3.10"
+
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+
+dependencies = [
+    "microsoft-kiota-authentication-azure==1.10.1",
+    "microsoft-kiota-bundle==1.10.1"
+]
+
+keywords = ["kiota", "openapi", "client", "sdk"]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+
+[tool.setuptools]
+py-modules = ["posts_client"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["my_kiota_client*"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
