@@ -11,7 +11,7 @@ import requests
 import yaml  # type: ignore
 from requests.structures import CaseInsensitiveDict
 
-from telephuzz.http_message import HTTPMethod, Request
+from telephuzz.http_message import HTTPMethod, Request, Response
 
 
 @pytest.fixture
@@ -163,13 +163,21 @@ def basic_oas_yaml():
 
 @pytest.fixture
 def basic_request():
-    """Fixture for dummy request if content is not relevant."""
+    """Fixture for dummy request."""
     return Request(
         headers=CaseInsensitiveDict({"Test": ["test"]}),
         body=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",
         query_parameters={},
+    )
+
+
+@pytest.fixture
+def basic_response():
+    """Fixture for dummy response."""
+    return Response(
+        headers=CaseInsensitiveDict({"Test": ["test"]}), body=None, status=404, text=""
     )
 
 
