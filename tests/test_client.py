@@ -10,6 +10,7 @@ from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
     KiotaCSharpCLC,
+    KiotaJavaCLC,
     KiotaPythonCLC,
     NswagCSharpCLC,
     NswagTypeScriptCLC,
@@ -189,6 +190,18 @@ def test_kiota_csharp(api) -> None:
     library_path = CLIENT_PATH / "kiota-csharp-client"
 
     with KiotaCSharpCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api)
+
+
+def test_kiota_java(api) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "kiota-java-client"
+
+    with KiotaJavaCLC(library_path=library_path) as clc:
+        print("Container upsie doopsie")
+        from time import sleep
+
+        sleep(10000)
         _init_and_send(clc, api)
 
 

@@ -1343,3 +1343,74 @@ class KiotaCSharpCLC(CsharpCLC):
         """).encode()
 
         return content
+
+
+class KiotaJavaCLC(JavaCLC):
+    """Concrete client library class for Kiota Java."""
+
+    # TODO fix entire class
+    def _get_method_name(self, request: Request) -> str:
+        # split and remove empty segments (handles leading "/")
+        parts = [p for p in request.path.split("/") if p]
+
+        # build chained calls
+        chain = ".".join(f"{p}()" for p in parts)
+
+        # append final method call
+        return f"{chain}.{request.method.value}"
+
+    def get_image_by_hash(self, library_path: Path) -> Image | None:
+        """Image creation for Java-based libraries."""
+        dependency_files = ["pom.xml"]
+        dockerfile = f"""
+                    FROM {self.base_image}
+                    WORKDIR {LIB_PATH}
+                    COPY lib {LIB_PATH}/lib
+                    """
+        return super()._get_image_by_hash(
+            library_path, dependency_files=dependency_files, dockerfile=dockerfile
+        )
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        lines = []
+        for key, value in request.query_parameters.items():
+            lines.append(f"q.{key.lower()} = {json.dumps(value)};")
+        kwargs = "\n".join(lines)
+
+        content = textwrap.dedent(f"""
+        import java.net.http.HttpClient;
+        import com.microsoft.kiota.http.HttpClientRequestAdapter;
+        import com.microsoft.kiota.authentication.AnonymousAuthenticationProvider;
+
+        import client.PostsClient;
+
+        // ----------------------
+        // Setup Kiota adapter
+        // ----------------------
+        var adapter = new HttpClientRequestAdapter(
+            new AnonymousAuthenticationProvider(),
+            HttpClient.newHttpClient()
+        );
+
+        adapter.setBaseUrl("{api_path}");
+
+        // ----------------------
+        // Create client
+        // ----------------------
+        var client = new PostsClient(adapter);
+
+        // ----------------------
+        // Call API
+        // ----------------------
+        var response = client.{self._get_method_name(request)}(cfg -> {{
+            var q = cfg.queryParameters;
+            {kwargs}
+        }});
+
+        // ----------------------
+        // Print result
+        // ----------------------
+        System.out.println(response);
+        """).encode()
+
+        return content

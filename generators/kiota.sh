@@ -29,3 +29,16 @@ docker run --rm \
   generate --language "$LANG" --openapi /local/spec/openapi.json --output /local/clients/kiota-$LANG-client/my_kiota_client -c PostsClient -n client --clean-output
 
 cp "$SCRIPT_DIR/kiota_project_files/MyKiotaClient.csproj" "clients/kiota-csharp-client/Client.csproj"
+
+
+LANG="java"
+echo "Kiota: Generating $LANG"
+
+OUT_DIR="/local/clients/kiota-$LANG-client"
+
+docker run --rm \
+  -v "$(pwd)":/local \
+  telephuzz:kiota \
+  generate --language "$LANG" --openapi /local/spec/openapi.json --output /local/clients/kiota-$LANG-client/client -c PostsClient -n client --clean-output
+
+cp "$SCRIPT_DIR/kiota_project_files/pom.xml" "clients/kiota-java-client/pom.xml"

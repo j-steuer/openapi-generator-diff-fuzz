@@ -1,0 +1,59 @@
+<dependencies>
+
+    <!-- Kiota core abstractions -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-abstractions</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- HTTP transport -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-http</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- JSON serialization (required for JsonParseNodeFactory etc.) -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-serialization-json</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- Text serialization -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-serialization-text</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- Form serialization -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-serialization-form</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- Multipart serialization -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>kiota-serialization-multipart</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- Auth (keep yours) -->
+    <dependency>
+        <groupId>com.microsoft.kiota</groupId>
+        <artifactId>microsoft-kiota-authentication-azure</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!-- annotations -->
+    <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>2.1.1</version>
+    </dependency>
+
+</dependencies>
