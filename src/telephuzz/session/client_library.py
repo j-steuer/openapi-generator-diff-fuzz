@@ -332,7 +332,7 @@ class JavaCLC(ClientLibraryContainer):
 
                     RUN curl -s "https://get.sdkman.io" | bash && \
                         source "$HOME/.sdkman/bin/sdkman-init.sh" && \
-                        sdk install maven
+                        sdk install maven 3.9.15
 
                     WORKDIR /app/lib
 
@@ -576,7 +576,7 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
     def _get_method_name(self, request: Request) -> str:
         # the hash is seperated
         method_name = super()._get_method_name(request)
-        return method_name[:-8] + "_" + method_name[-8:]
+        return method_name[:-8] + method_name[-8:]
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         method_name = self._get_method_name(request)
@@ -910,7 +910,6 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
         client_type = request.method.value.capitalize()
         method_name = self._get_method_name(request)
         method_name = method_name[method_name.find("_") + 1 :]  # cut method
-        method_name = method_name[:-8] + "_" + method_name[-8:]
 
         # TODO fix client type stuff
         content = f"""
@@ -933,6 +932,24 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
 class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for swagger-typescript-api (Axios)."""
+
+    def _get_method_name(self, request: Request) -> str:
+        method_name = super()._get_method_name(request)
+
+        name, hash = method_name[:-8], method_name[-8:]
+        processed_hash: list[str] = [hash[0].upper()]
+        for i in range(1, len(hash)):
+            c = hash[i]
+
+            if c.isalpha():
+                if processed_hash[i - 1].isdigit():
+                    processed_hash.append(c.upper())
+                else:
+                    processed_hash.append(c.lower())
+            else:
+                processed_hash.append(c)
+
+        return name + "".join(processed_hash)
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -957,7 +974,6 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
         arg_string += ","
 
         method_name = self._get_method_name(request)
-        method_name = method_name[:-8] + method_name[-8:].upper()  # hash is uppercase
 
         content = f"""
         import {{ Api }} from "./lib/swagger-typescript-api";
@@ -1245,7 +1261,7 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
         name = super()._get_method_name(request)
         parts = re.findall(r"[A-Z][a-z0-9]*", name)
         name = "_".join(part for part in parts[1:])
-        return name[:-8] + "_" + name[-8:]
+        return name[:-8] + name[-8].lower() + name[-7:]
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())

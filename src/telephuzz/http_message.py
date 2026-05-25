@@ -101,7 +101,7 @@ class Request(HTTPMessage):
         """Hash method."""
         try:
             body = dict(self.body)
-        except TypeError:
+        except (TypeError, ValueError):
             body = self.body
 
         return hash(
@@ -149,7 +149,7 @@ class Response(HTTPMessage):
         """Hash method."""
         try:
             body = dict(self.body)
-        except TypeError:
+        except (TypeError, ValueError):
             body = self.body
 
         return hash(
