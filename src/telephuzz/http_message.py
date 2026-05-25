@@ -97,6 +97,23 @@ class Request(HTTPMessage):
         except KeyError as e:
             raise ValueError(f"JSON format was not valid ({repr(e)}): {data}") from e
 
+    def __hash__(self) -> int:
+        """Hash method."""
+        try:
+            body = dict(self.body)
+        except TypeError:
+            body = self.body
+
+        return hash(
+            (
+                self.method,
+                self.path,
+                json.dumps(self.query_parameters, sort_keys=True),
+                json.dumps(body, sort_keys=True) if body else body,
+                json.dumps(dict(self.headers), sort_keys=True),
+            )
+        )
+
 
 @dataclass
 class Response(HTTPMessage):
@@ -126,4 +143,20 @@ class Response(HTTPMessage):
             body=data["body"],
             status=data["status"],
             text=data["text"],
+        )
+
+    def __hash__(self) -> int:
+        """Hash method."""
+        try:
+            body = dict(self.body)
+        except TypeError:
+            body = self.body
+
+        return hash(
+            (
+                self.status,
+                self.text,
+                (json.dumps(body, sort_keys=True) if body else body),
+                json.dumps(dict(self.headers), sort_keys=True),
+            )
         )

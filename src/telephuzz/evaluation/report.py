@@ -15,6 +15,7 @@ class DiffReport:
     error_id: str
     persistent: bool
     request_chain: list[Request]
+    request_only: bool = True
     unique: bool = True
     detail: str = ""
 
@@ -65,6 +66,7 @@ class DiffReport:
             library_id = sample_report.library_id
             error_id = sample_report.error_id
             persistent = False
+            request_only = True
             request_chain = sample_report.request_chain
             details: list[str] = []
 
@@ -82,6 +84,11 @@ class DiffReport:
                         f"Reports within report set have "
                         f"conflicting request chains: {report_set}"
                     )
+
+                # request only as long as no report contradicts
+                request_only = (
+                    report.request_only if not report.request_only else request_only
+                )
 
                 # unified report is persistent as long as one report claims persistency
                 persistent = report.persistent if report.persistent else persistent
