@@ -6,9 +6,11 @@ import tempfile
 import time
 from pathlib import Path
 
+import docker
 import pytest
 import requests
 import yaml  # type: ignore
+from docker.errors import ImageNotFound
 from requests.structures import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request, Response
@@ -208,3 +210,18 @@ def api(request):
     yield "http://host.docker.internal:8000"
 
     proc.terminate()
+
+
+@pytest.fixture()
+def h2():
+    """Build base h2 image if not already present."""
+    client = docker.from_env()
+    h2 = "h2:latest"
+
+    try:
+        client.images.get(h2)
+    except ImageNotFound:
+        path = str(Path(__file__).resolve().parent / "testfiles" / "dockerfiles")
+        client.images.build(path=path, dockerfile="h2.dockerfile")
+
+    yield h2

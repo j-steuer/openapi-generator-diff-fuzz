@@ -1,64 +1,119 @@
 """File for code relating to API containers."""
 
-import hashlib
+from abc import ABC, abstractmethod
 from pathlib import Path
 
-import docker
-from docker.errors import ImageNotFound
+from docker.models.containers import Container
 
 
 class APIContainer:
     """A container for a target API."""
 
-    def __init__(self, script_path: Path):
+    db_container: Container | None
+
+    def __init__(self, db_container: Container):
         """Initialize the API container."""
-        assert (
-            script_path.exists()
-            and script_path.is_file()
-            and script_path.suffix == ".sh"
-        ), "script_path should lead to .sh file."
+        self.db_container = db_container
 
-        hash_func = hashlib.new("sha256")
+    def __enter__(self):
+        """Make mitmproxy container a context manager."""
+        return self
 
-        with open(script_path, "rb") as f:
-            while chunk := f.read(8192):
-                hash_func.update(chunk)
+    # TODO wait_until_ready
 
-        hash_string = hash_func.hexdigest()
-        tag = f"telephuzz:api-{hash_string}"
+    def __exit__(self, exc_type, exc, tb):
+        """Run close method when context ends."""
+        self.close()
 
-        client = docker.from_env()
+    def close(self) -> None:
+        """Kill the container after context ends."""
+        if self.db_container is None:
+            return
+
         try:
-            image = client.images.get(tag)
-            container = client.containers.run(
-                image=image,
-                command="sleep infinity",  # keep container alive
-                detach=True,
-                extra_hosts={
-                    "host.docker.internal": "host-gateway"
-                },  # TODO remove once fixture fixed
+            self.db_container.kill()
+        finally:
+            self.db_container.remove(force=True)
+            self.db_container = None
+
+
+class APIWithDatabaseContainer(ABC, APIContainer):
+    """Abstract class for an API that uses a database system."""
+
+    @abstractmethod
+    def export_db_state(self, export_file: Path) -> None:
+        """Export the current state of the DB to export_file."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def import_db_state(self, import_file: Path) -> None:
+        """Import the new state of the DB from import_file."""
+        raise NotImplementedError
+
+
+class APIH2DatabaseContainer(APIWithDatabaseContainer):
+    """API Container class using H2 as database."""
+
+    def __init__(self, db_container: Container, jar_path: Path | None = None):
+        """Determine path to H2 jar."""
+        super().__init__(db_container=db_container)
+        assert self.db_container
+
+        if jar_path:
+            self.jar_path = jar_path
+        else:
+            result = self.db_container.exec_run('find / -type f -name "h2.jar"').output
+            assert isinstance(result, bytes), (
+                f"Unexpected output for find command: {result}"
             )
-            assert container is not None
-            self.container = container
+            self.jar_path = Path(result.decode().rstrip())
+        if not self.jar_path:
+            raise ValueError("Could not find the jar path.")
 
-        except ImageNotFound:
-            pass
+    def _get_export_command(self, export_file: Path) -> str:
+        str_command = f"SCRIPT TO '{export_file}';"
+        return str_command
 
-        # set up container
-        client = docker.from_env()
+    def _get_import_command(self, import_file: Path) -> str:
+        str_command = f"RUNSCRIPT FROM '{import_file}';"
+        return str_command
 
-        container = client.containers.run(
-            image=image,
-            command="sleep infinity",  # keep container alive
-            detach=True,
-            extra_hosts={
-                "host.docker.internal": "host-gateway"
-            },  # TODO remove once fixture fixed
-        )
+    def export_db_state(self, export_file: Path) -> None:
+        """Export the current state of the DB to export_file."""
+        assert self.db_container
+        cmnd = self._get_export_command(export_file)
+        cmnd_file = "/tmp/export.sql"
+        self.db_container.exec_run(f'sh -c "echo \\"{cmnd}\\" > {cmnd_file}"')
+        exit_code, output = self.db_container.exec_run(f"""
+        java -cp {str(self.jar_path)} org.h2.tools.RunScript \
+        -url jdbc:h2:/opt/h2/testdb \
+        -user sa \
+        -script {cmnd_file}
+        """)
+        assert exit_code == 0, output
 
-        assert container is not None
-        self.container = container
+    def import_db_state(self, import_file: Path) -> None:
+        """Import the new state of the DB from import_file."""
+        assert self.db_container
+        cmnd = self._get_import_command(import_file)
+        cmnd_file = "/tmp_import.sql"
+        self.db_container.exec_run(f'sh -c "echo \\"{cmnd}\\" > {cmnd_file}"')
+        exit_code, output = self.db_container.exec_run(f"""
+        java -cp {(self.jar_path)} org.h2.tools.RunScript \
+        -url jdbc:h2:/opt/h2/testdb \
+        -user sa \
+        -script {cmnd_file}
+        """)
+        assert exit_code == 0, output
 
-    def get_db_state(self) -> Path:
-        """Get the current state of the database and write it to a file."""
-        raise NotImplementedError  # TODO
+
+class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
+    """API Container class using MongoDB as database."""
+
+    def _get_export_command(self, export_file: Path) -> str:
+        str_command = f"mongodump --db mydb --out {export_file}/"
+        return str_command
+
+    def _get_import_command(self, import_file: Path) -> str:
+        str_command = f"mongorestore --db mydb {import_file}/mydb/"
+        return str_command
