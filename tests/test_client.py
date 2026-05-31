@@ -32,7 +32,7 @@ from telephuzz.session.client_library import (
 CLIENT_PATH = Path(__file__).resolve().parent / "testfiles" / "clients"
 
 
-def _init_and_send(clc: ClientLibraryContainer, api: str):
+def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     client = docker.from_env()
     assert clc.container is not None
     id = clc.container.id
@@ -51,6 +51,9 @@ def _init_and_send(clc: ClientLibraryContainer, api: str):
     request.method = HTTPMethod("GET")
     request.query_parameters = {"name": "Alice", "age": 30}
 
+    if auth:
+        request.headers["Authorization"] = "mock-token"
+
     response = clc.send(request, api)
     assert isinstance(response, str)
     assert "Hello Alice, you are 30 years old!" in response
@@ -62,6 +65,14 @@ def test_client_openapigen_python(api) -> None:
 
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
+
+
+def test_client_openapigen_python_auth(api_oauth) -> None:
+    """Test that default clients initialize correctly."""
+    library_path = CLIENT_PATH / "openapi-gen-python-auth-client"
+
+    with OpenAPIGenPythonCLC(library_path=library_path) as clc:
+        _init_and_send(clc, api_oauth, auth=True)
 
 
 def test_client_openapigen_go(api) -> None:

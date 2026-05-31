@@ -502,13 +502,19 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         kwargs = ", ".join(
             f"{k}={repr(v)}" for k, v in request.query_parameters.items()
         )
+
+        try:
+            auth = f', access_token="{request.headers["Authorization"]}"'
+        except Exception:
+            auth = ""
+
         content = textwrap.dedent(f"""
         from pprint import pprint
 
         from openapi_client import Configuration, ApiClient
         from openapi_client.api.default_api import DefaultApi
 
-        config = Configuration(host="{api_path}")
+        config = Configuration(host="{api_path}"{auth})
 
         client = ApiClient(configuration=config)
 
