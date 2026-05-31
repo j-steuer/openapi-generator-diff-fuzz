@@ -231,12 +231,27 @@ def api_oauth():
 def h2():
     """Build base h2 image if not already present."""
     client = docker.from_env()
-    h2 = "h2:latest"
+    h2 = "telephuzz:h2"
 
     try:
         client.images.get(h2)
     except ImageNotFound:
         path = str(Path(__file__).resolve().parent / "testfiles" / "dockerfiles")
-        client.images.build(path=path, dockerfile="h2.dockerfile")
+        client.images.build(path=path, dockerfile="h2.dockerfile", tag=h2)
 
     yield h2
+
+
+@pytest.fixture()
+def mongodb():
+    """Build base MongoDB image if not already present."""
+    client = docker.from_env()
+    mongodb = "telephuzz:mongodb"
+
+    try:
+        client.images.get(mongodb)
+    except ImageNotFound:
+        path = str(Path(__file__).resolve().parent / "testfiles" / "dockerfiles")
+        client.images.build(path=path, dockerfile="mongodb.dockerfile", tag=mongodb)
+
+    yield mongodb

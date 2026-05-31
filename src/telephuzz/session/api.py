@@ -111,10 +111,21 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
 class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
     """API Container class using MongoDB as database."""
 
-    def _get_export_command(self, export_file: Path) -> str:
-        str_command = f"mongodump --db mydb --out {export_file}/"
-        return str_command
+    def _run_command(self, cmnd: str) -> None:
+        assert self.db_container is not None
+        exit_code, output = self.db_container.exec_run(cmnd)
+        assert exit_code == 0, output
 
-    def _get_import_command(self, import_file: Path) -> str:
-        str_command = f"mongorestore --db mydb {import_file}/mydb/"
-        return str_command
+    def export_db_state(self, export_file: Path) -> None:
+        """Export the current state of the DB to export_file."""
+        str_command = f"mongodump --out {export_file}"
+        self._run_command(str_command)
+
+    def import_db_state(self, import_file: Path) -> None:
+        """Import the new state of the DB from import_file."""
+        str_command = f"mongorestore --drop {import_file}"
+        self._run_command(str_command)
+
+    def get_state(self, out: Path) -> None:
+        """Write the state to a file that can be used for hashing and diff."""
+        pass  # TODO
