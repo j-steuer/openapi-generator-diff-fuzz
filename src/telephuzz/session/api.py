@@ -50,6 +50,11 @@ class APIWithDatabaseContainer(ABC, APIContainer):
         """Import the new state of the DB from import_file."""
         raise NotImplementedError
 
+    @abstractmethod
+    def get_state(self, out: Path) -> None:
+        """Write the state to a file that can be used for hashing and diff."""
+        raise NotImplementedError
+
 
 class APIH2DatabaseContainer(APIWithDatabaseContainer):
     """API Container class using H2 as database."""
@@ -70,32 +75,9 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
         if not self.jar_path:
             raise ValueError("Could not find the jar path.")
 
-    def _get_export_command(self, export_file: Path) -> str:
-        str_command = f"SCRIPT TO '{export_file}';"
-        return str_command
-
-    def _get_import_command(self, import_file: Path) -> str:
-        str_command = f"RUNSCRIPT FROM '{import_file}';"
-        return str_command
-
-    def export_db_state(self, export_file: Path) -> None:
-        """Export the current state of the DB to export_file."""
+    def _run_command(self, cmnd: str) -> None:
+        """Run the provided command."""
         assert self.db_container
-        cmnd = self._get_export_command(export_file)
-        cmnd_file = "/tmp/export.sql"
-        self.db_container.exec_run(f'sh -c "echo \\"{cmnd}\\" > {cmnd_file}"')
-        exit_code, output = self.db_container.exec_run(f"""
-        java -cp {str(self.jar_path)} org.h2.tools.RunScript \
-        -url jdbc:h2:/opt/h2/testdb \
-        -user sa \
-        -script {cmnd_file}
-        """)
-        assert exit_code == 0, output
-
-    def import_db_state(self, import_file: Path) -> None:
-        """Import the new state of the DB from import_file."""
-        assert self.db_container
-        cmnd = self._get_import_command(import_file)
         cmnd_file = "/tmp_import.sql"
         self.db_container.exec_run(f'sh -c "echo \\"{cmnd}\\" > {cmnd_file}"')
         exit_code, output = self.db_container.exec_run(f"""
@@ -105,6 +87,25 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
         -script {cmnd_file}
         """)
         assert exit_code == 0, output
+
+    def export_db_state(self, export_file: Path) -> None:
+        """Export the current state of the DB to export_file."""
+        assert self.db_container
+        cmnd = f"SCRIPT TO '{export_file}';"
+        self._run_command(cmnd)
+
+    def import_db_state(self, import_file: Path) -> None:
+        """Import the new state of the DB from import_file."""
+        assert self.db_container
+        cmnd = f"RUNSCRIPT FROM '{import_file}';"
+        self._run_command(cmnd)
+
+    def get_state(self, out: Path) -> None:
+        """Write the state to a file that can be used for hashing and diff."""
+        # TODO postprocesss, remove SALT and HASH
+        assert self.db_container
+        cmnd = f"SCRIPT SIMPLE TO '{str(out)}';"
+        self._run_command(cmnd)
 
 
 class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):

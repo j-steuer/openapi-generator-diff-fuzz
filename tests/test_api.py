@@ -5,6 +5,7 @@ from pathlib import Path
 from time import sleep
 
 import docker
+import pytest
 from docker.models.containers import Container
 
 from telephuzz.session.api import APIH2DatabaseContainer
@@ -123,3 +124,33 @@ def test_h2_export_import(h2: str):
         assert "bob@example.com" in result_output
         assert "Charlie" in result_output
         assert "charlie@example.com" in result_output
+
+
+def test_h2_state(h2: str):
+    """Test obtaining the state of an H2 db."""
+    db = start_h2(8082, 9092, h2)
+    with APIH2DatabaseContainer(db_container=db) as db_container:
+        db_container.get_state(Path("/state"))
+        exit_code, output = db.exec_run("cat /state")
+        assert exit_code == 0, output
+        print(output)
+
+
+@pytest.mark.skip(reason="Needs postprocessing")
+def test_compare_h2_state_identical(h2: str):
+    """Test that diff file should be identical when dbs are."""
+    db1 = start_h2(8082, 9092, h2)
+    db2 = start_h2(8093, 9093, h2)
+    with (
+        APIH2DatabaseContainer(db_container=db1) as db1_container,
+        APIH2DatabaseContainer(db_container=db2) as db2_container,
+    ):
+        db1_container.get_state(Path("/state"))
+        exit_code, output1 = db1.exec_run("cat /state")
+        assert exit_code == 0, output1
+
+        db2_container.get_state(Path("/state"))
+        exit_code, output2 = db2.exec_run("cat /state")
+        assert exit_code == 0, output2
+
+        assert output1 == output2
