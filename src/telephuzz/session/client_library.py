@@ -9,6 +9,7 @@ import shutil
 import tarfile
 import tempfile
 import textwrap
+from _hashlib import HASH
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Iterable
@@ -81,65 +82,59 @@ class ClientLibraryContainer(ABC):
 
             self.container = None
 
-    def _get_image_by_hash(
-        self, library_path: Path, dependency_files: list[str], dockerfile: str
-    ) -> Image | None:
-        for file in dependency_files:
-            if not file.startswith("."):
-                # use full name
-                path = (
-                    Path(os.path.join(library_path, file))
-                    if library_path.is_dir()
-                    else library_path
-                )
-            else:
-                # search for file with suffix
-                files_with_suffix = [
-                    f for f in os.listdir(library_path) if f.endswith(file)
-                ]
-                if len(files_with_suffix) != 1:
-                    # none or multiple found, skip
-                    continue
-                path = (
-                    Path(os.path.join(library_path, files_with_suffix[0]))
-                    if library_path.is_dir()
-                    else library_path
-                )
-            if path.exists() and path.is_file():
-                hash_func = hashlib.new("sha256")
+    def _hash_file(self, path: Path, hash_func: HASH) -> None:
+        with open(path, "rb") as f:
+            while chunk := f.read(8192):
+                hash_func.update(chunk)
 
-                with open(path, "rb") as f:
-                    while chunk := f.read(8192):
-                        hash_func.update(chunk)
+    def _get_image_by_hash(self, library_path: Path, dockerfile: str) -> Image | None:
 
-                hash_string = hash_func.hexdigest()
-                tag = f"telephuzz:{hash_string}"
+        if not library_path.exists():
+            return None
 
-                client = docker.from_env()
-                try:
-                    # return Image if it already exists
-                    return client.images.get(tag)
-                except ImageNotFound:
-                    # create new Image
-                    with tempfile.TemporaryDirectory() as tmpdir:
-                        # copy library into build context
-                        lib_dest = os.path.join(tmpdir, "lib")
-                        if library_path.is_dir():
-                            shutil.copytree(library_path, lib_dest)
-                        else:
-                            shutil.copy(library_path, lib_dest)
+        hash_func = hashlib.new("sha256")
 
-                        dockerfile_path = os.path.join(tmpdir, "Dockerfile")
+        # Case 1: single file
+        if library_path.is_file():
+            self._hash_file(library_path, hash_func)
 
-                        with open(dockerfile_path, "w") as f:  # type: ignore
-                            f.write(dockerfile)  # type: ignore
+        # Case 2: directory → traverse all files
+        else:
+            all_files = [p for p in library_path.rglob("*") if p.is_file()]
 
-                        image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
+            # sort for deterministic hashing
+            for file_path in sorted(
+                all_files, key=lambda p: str(p.relative_to(library_path))
+            ):
+                # include relative path to avoid collisions
+                hash_func.update(str(file_path.relative_to(library_path)).encode())
+                self._hash_file(file_path, hash_func)
 
-                    return image
+        hash_string = hash_func.hexdigest()
+        tag = f"telephuzz:{hash_string}"
 
-        # no fitting file found
-        return None
+        client = docker.from_env()
+        try:
+            # return Image if it already exists
+            return client.images.get(tag)
+        except ImageNotFound:
+            # create new Image
+            with tempfile.TemporaryDirectory() as tmpdir:
+                # copy library into build context
+                lib_dest = os.path.join(tmpdir, "lib")
+                if library_path.is_dir():
+                    shutil.copytree(library_path, lib_dest)
+                else:
+                    shutil.copy(library_path, lib_dest)
+
+                dockerfile_path = os.path.join(tmpdir, "Dockerfile")
+
+                with open(dockerfile_path, "w") as f:  # type: ignore
+                    f.write(dockerfile)  # type: ignore
+
+                image, _ = client.images.build(path=tmpdir, tag=tag, rm=True)
+
+            return image
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Define an optional method to store an image of the client library.
@@ -221,7 +216,6 @@ class PythonCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Python-based libraries."""
-        dependency_files = ["pyproject.toml", "setup.py", "requirements.txt"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -230,7 +224,6 @@ class PythonCLC(ClientLibraryContainer):
                     """
         return super()._get_image_by_hash(
             library_path=library_path,
-            dependency_files=dependency_files,
             dockerfile=dockerfile,
         )
 
@@ -271,16 +264,13 @@ class GoCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["go.mod"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     RUN go work init {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class JavaCLC(ClientLibraryContainer):
@@ -319,7 +309,6 @@ class JavaCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
-        dependency_files = ["pom.xml"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -342,9 +331,7 @@ class JavaCLC(ClientLibraryContainer):
 
                     WORKDIR /app
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class SwiftCLC(ClientLibraryContainer):
@@ -382,15 +369,12 @@ class SwiftCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
-        dependency_files = ["Package.swift"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class CsharpCLC(ClientLibraryContainer):
@@ -428,7 +412,6 @@ class CsharpCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
-        dependency_files = [".csproj"]  # TODO adjust with regex
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -447,9 +430,7 @@ class CsharpCLC(ClientLibraryContainer):
 
                     WORKDIR {LIB_PATH}
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class TypeScriptCLC(ClientLibraryContainer):
@@ -485,7 +466,6 @@ class TypeScriptCLC(ClientLibraryContainer):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["api.ts"]  # TODO better file / method for inference
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -493,9 +473,7 @@ class TypeScriptCLC(ClientLibraryContainer):
                     RUN npm install axios
                     RUN npm i -D tsx
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 # --- Mixins ---
@@ -718,7 +696,6 @@ class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["client.go"]  # TODO
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -727,9 +704,7 @@ class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
                     RUN go mod init telephuzz
                     RUN go mod tidy
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         return b""
@@ -755,7 +730,6 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["oapi-codegen-client.go"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}/lib
@@ -766,9 +740,7 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
                     RUN mv oapi-codegen-client.go clients/client/client.go
                     RUN go mod tidy
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         arg_string = ",".join(
@@ -890,9 +862,6 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = [
-            "nswag-typescript-client.ts"
-        ]  # TODO better file / method for inference
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -900,9 +869,7 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
                     RUN npm install axios
                     RUN npm i -D tsx
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
@@ -953,9 +920,6 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = [
-            "swagger-typescript-api.ts"
-        ]  # TODO better file / method for inference
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -963,9 +927,7 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
                     RUN npm install axios
                     RUN npm i -D tsx
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         arg_string = ",".join(
@@ -1007,7 +969,6 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
-        dependency_files = ["orval.ts"]  # TODO better file / method for inference
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -1015,9 +976,7 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
                     RUN npm install axios
                     RUN npm i -D tsx
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         arg_string = ",".join(
@@ -1085,15 +1044,12 @@ class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
-        dependency_files = ["pom.xml"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
@@ -1234,7 +1190,6 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Modify method to create project from scratch with single file cs."""
-        dependency_files = ["nswag-csharp-client.cs"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
@@ -1253,9 +1208,7 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
 
                     WORKDIR {LIB_PATH}
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_method_name(self, request: Request) -> str:
         name = super()._get_method_name(request)
@@ -1377,15 +1330,12 @@ class KiotaJavaCLC(JavaCLC):
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
-        dependency_files = ["pom.xml"]
         dockerfile = f"""
                     FROM {self.base_image}
                     WORKDIR {LIB_PATH}
                     COPY lib {LIB_PATH}/lib
                     """
-        return super()._get_image_by_hash(
-            library_path, dependency_files=dependency_files, dockerfile=dockerfile
-        )
+        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         lines = []
