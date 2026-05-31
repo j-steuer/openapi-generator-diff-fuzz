@@ -184,18 +184,11 @@ def basic_response():
 
 
 @pytest.fixture(scope="session")
-def api(request):
+def api():
     """Run a test API for this test."""
-    variant = getattr(request, "param", "plain")
+    api_file = Path(__file__).resolve().parent / "testfiles" / "api.py"
 
-    filename = {
-        "plain": "api.py",
-        "auth": "api_oauth.py",
-    }[variant]
-
-    api_file = Path(__file__).resolve().parent / "testfiles" / filename
-
-    proc = subprocess.Popen(["fastapi", "run", api_file])
+    proc = subprocess.Popen(["fastapi", "run", api_file, "--port", "8000"])
 
     # wait for startup
     for _ in range(30):
@@ -208,6 +201,28 @@ def api(request):
         time.sleep(0.5)
 
     yield "http://host.docker.internal:8000"
+
+    proc.terminate()
+
+
+@pytest.fixture(scope="session")
+def api_oauth():
+    """Run a test API for this test."""
+    api_file = Path(__file__).resolve().parent / "testfiles" / "api_oauth.py"
+
+    proc = subprocess.Popen(["fastapi", "run", api_file, "--port", "8001"])
+
+    # wait for startup
+    for _ in range(30):
+        try:
+            r = requests.get("http://localhost:8001/openapi.json")
+            if r.status_code == 200:
+                break
+        except requests.exceptions.ConnectionError:
+            pass
+        time.sleep(0.5)
+
+    yield "http://host.docker.internal:8001"
 
     proc.terminate()
 
