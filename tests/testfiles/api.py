@@ -31,4 +31,4 @@ def create_user(name: str = Body(...), age: int = Body(..., ge=0)):
 
 
 if __name__ == "__main__":
-    subprocess.run(["fastapi", "run", __file__])
+    subprocess.run(["fastapi", "run", __file__, "--port", "8000"])
