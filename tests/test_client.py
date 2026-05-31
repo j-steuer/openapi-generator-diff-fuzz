@@ -30,6 +30,26 @@ from telephuzz.session.client_library import (
 )
 
 CLIENT_PATH = Path(__file__).resolve().parent / "testfiles" / "clients"
+CLIENT_CASES_NO_AUTH = [
+    (OpenAPIGenCsharpCLC, CLIENT_PATH / "openapi-gen-csharp-client"),
+    (OpenAPIGenGoCLC, CLIENT_PATH / "openapi-gen-go-client"),
+    (OpenAPIGenPythonCLC, CLIENT_PATH / "openapi-gen-python-client"),
+    (OpenAPIGenTypeScriptCLC, CLIENT_PATH / "openapi-gen-typescript-axios-client"),
+    (SwaggerCodegenCsharpCLC, CLIENT_PATH / "swagger-codegen-csharp-client"),
+    (SwaggerCodegenPythonCLC, CLIENT_PATH / "swagger-codegen-python-client"),
+    (
+        SwaggerCodegenTypeScriptCLC,
+        CLIENT_PATH / "swagger-codegen-typescript-axios-client",
+    ),
+    (OapiGeneratorCLC, CLIENT_PATH / "oapi-codegen-client.go"),
+    (NswagCSharpCLC, CLIENT_PATH / "nswag-csharp-client.cs"),
+    (NswagTypeScriptCLC, CLIENT_PATH / "nswag-typescript-client.ts"),
+    (OrvalCLC, CLIENT_PATH / "orval.ts"),
+    (SwaggerTsAPICLC, CLIENT_PATH / "swagger-typescript-api.ts"),
+    (OpenapiPythonGeneratorCLC, CLIENT_PATH / "openapi-python-client"),
+    (KiotaCSharpCLC, CLIENT_PATH / "kiota-csharp-client"),
+    (KiotaPythonCLC, CLIENT_PATH / "kiota-python-client"),
+]
 
 
 def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
@@ -59,12 +79,11 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     assert "Hello Alice, you are 30 years old!" in response
 
 
-def test_client_openapigen_python(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-gen-python-client"
-
-    with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
+@pytest.mark.parametrize("clc_class, library_path", CLIENT_CASES_NO_AUTH)
+def test_clients_noauth(clc_class, library_path, api) -> None:
+    """Basic GET request test without authentication."""
+    with clc_class(library_path=library_path) as clc:
+        _init_and_send(clc, api, auth=False)
 
 
 def test_client_openapigen_python_auth(api_oauth) -> None:
@@ -73,78 +92,6 @@ def test_client_openapigen_python_auth(api_oauth) -> None:
 
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
         _init_and_send(clc, api_oauth, auth=True)
-
-
-def test_client_openapigen_go(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-gen-go-client"
-
-    with OpenAPIGenGoCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_oapi_codegen(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "oapi-codegen-client.go"
-
-    with OapiGeneratorCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_client_openapigen_typescript(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-gen-typescript-axios-client"
-
-    with OpenAPIGenTypeScriptCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_client_swaggergen_python(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "swagger-codegen-python-client"
-
-    with SwaggerCodegenPythonCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_swaggergen_typescript(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "swagger-codegen-typescript-axios-client"
-
-    with SwaggerCodegenTypeScriptCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_nswag_typescript(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "nswag-typescript-client.ts"
-
-    with NswagTypeScriptCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_swagger_typescript_api(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "swagger-typescript-api.ts"
-
-    with SwaggerTsAPICLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_orval(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "orval.ts"
-
-    with OrvalCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_client_openapi_python_generator(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-python-client"
-
-    with OpenapiPythonGeneratorCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
 
 
 @pytest.mark.skip("Fix")
@@ -162,46 +109,6 @@ def test_openapi_generator_swift(api) -> None:
     library_path = CLIENT_PATH / "openapi-gen-swift5-client"
 
     with OpenAPIGeneratorSwiftCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_openapi_generator_csharp(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-gen-csharp-client"
-
-    with OpenAPIGenCsharpCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_swagger_codegen_csharp(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "swagger-codegen-csharp-client"
-
-    with SwaggerCodegenCsharpCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_nswag_csharp(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "nswag-csharp-client.cs"
-
-    with NswagCSharpCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_kiota_python(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "kiota-python-client"
-
-    with KiotaPythonCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api)
-
-
-def test_kiota_csharp(api) -> None:
-    """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "kiota-csharp-client"
-
-    with KiotaCSharpCLC(library_path=library_path) as clc:
         _init_and_send(clc, api)
 
 
