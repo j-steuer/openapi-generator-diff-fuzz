@@ -13,11 +13,10 @@ security = HTTPBearer()
 MOCK_TOKEN = "mock-token"
 
 
-def verify_token(credentials: HTTPAuthorizationCredentials | None = None):
-    """Mock token verification (replace with real OAuth in production)."""
-    if not credentials:
-        credentials = Depends(security)
-    assert credentials is not None
+def verify_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    """Verify the token."""
     token = credentials.credentials
 
     if token != MOCK_TOKEN:
