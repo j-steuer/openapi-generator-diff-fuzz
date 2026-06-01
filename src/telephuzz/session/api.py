@@ -75,18 +75,25 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
         if not self.jar_path:
             raise ValueError("Could not find the jar path.")
 
-    def _run_command(self, cmnd: str) -> None:
-        """Run the provided command."""
+    def _run_command(self, cmnd: str) -> str:
+        """Run the provided command and return the output."""
         assert self.db_container
-        cmnd_file = "/tmp_import.sql"
-        self.db_container.exec_run(f'sh -c "echo \\"{cmnd}\\" > {cmnd_file}"')
+
+        # We use the -sql flag to pass the command directly to the Shell tool
+        # and -silent to remove unnecessary header/footer info if desired.
         exit_code, output = self.db_container.exec_run(f"""
-        java -cp {(self.jar_path)} org.h2.tools.RunScript \
+        java -cp {self.jar_path} org.h2.tools.Shell \
         -url jdbc:h2:/opt/h2/testdb \
         -user sa \
-        -script {cmnd_file}
+        -sql "{cmnd}"
         """)
-        assert exit_code == 0, output
+
+        assert isinstance(output, bytes)
+
+        if exit_code != 0:
+            raise Exception(f"Query failed: {output.decode()}")
+
+        return output.decode("utf-8")
 
     def export_db_state(self, export_file: Path) -> None:
         """Export the current state of the DB to export_file."""
@@ -104,8 +111,19 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
         """Write the state to a file that can be used for hashing and diff."""
         # TODO postprocesss, remove SALT and HASH
         assert self.db_container
-        cmnd = f"SCRIPT SIMPLE TO '{str(out)}';"
-        self._run_command(cmnd)
+
+        tables_string = self._run_command("SHOW TABLES;")
+        # parse tables
+        tables = []
+        for table_row in tables_string.splitlines()[1:][:-1]:
+            table_name = table_row[: table_row.find("|")].strip()
+            tables.append(table_name)
+
+        # write data to file
+        with open(out, "w") as f:
+            for table in tables:
+                rows = self._run_command(f"SELECT * FROM {table};")
+                f.write("".join(rows.splitlines(keepends=True)[:-1]))
 
 
 class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):

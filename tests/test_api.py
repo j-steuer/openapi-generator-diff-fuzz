@@ -4,10 +4,32 @@ import tempfile
 from pathlib import Path
 
 import docker
-import pytest
 from docker.models.containers import Container
 
 from telephuzz.session.api import APIH2DatabaseContainer, APIMongoDBDatabaseContainer
+
+FILL_COMMAND = """
+            CREATE TABLE users1 (
+            id INT PRIMARY KEY,
+            name VARCHAR(255),
+            email VARCHAR(255)
+            );
+                                      
+            CREATE TABLE users2 (
+            id INT PRIMARY KEY,
+            name VARCHAR(255),
+            email VARCHAR(255)
+            );
+                                      
+            INSERT INTO users1 (id, name, email)
+            VALUES
+            (1, 'Alice', 'alice@example.com'),
+            (2, 'Bob', 'bob@example.com');
+                                      
+            INSERT INTO users2 (id, name, email)
+            VALUES
+            (1, 'Charlie', 'charlie@example.com');
+            """
 
 
 class TestH2:
@@ -127,12 +149,20 @@ class TestH2:
         """Test obtaining the state of an H2 db."""
         db = self.start_h2(8082, 9092, h2)
         with APIH2DatabaseContainer(db_container=db) as db_container:
-            db_container.get_state(Path("/state"))
-            exit_code, output = db.exec_run("cat /state")
-            assert exit_code == 0, output
-            print(output)
+            db_container._run_command(FILL_COMMAND)
 
-    @pytest.mark.skip(reason="Needs postprocessing")
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db_container.get_state(Path(f.name))
+                f.seek(0)
+                result = f.read()
+
+            assert "Alice" in result
+            assert "alice@example.com" in result
+            assert "Bob" in result
+            assert "bob@example.com" in result
+            assert "Charlie" in result
+            assert "charlie@example.com" in result
+
     def test_compare_state_identical(self, h2: str):
         """Test that diff file should be identical when dbs are."""
         db1 = self.start_h2(8082, 9092, h2)
@@ -141,15 +171,57 @@ class TestH2:
             APIH2DatabaseContainer(db_container=db1) as db1_container,
             APIH2DatabaseContainer(db_container=db2) as db2_container,
         ):
-            db1_container.get_state(Path("/state"))
-            exit_code, output1 = db1.exec_run("cat /state")
-            assert exit_code == 0, output1
+            # empty DBs should be the same
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result1 = f.read()
 
-            db2_container.get_state(Path("/state"))
-            exit_code, output2 = db2.exec_run("cat /state")
-            assert exit_code == 0, output2
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result2 = f.read()
 
-            assert output1 == output2
+            assert empty_result1 == empty_result2
+
+            # identical DBs should be the same
+            db1_container._run_command(FILL_COMMAND)
+            db2_container._run_command(FILL_COMMAND)
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                filled_result1 = f.read()
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                filled_result2 = f.read()
+
+            assert filled_result1 == filled_result2
+
+    def test_compare_state_diff(self, h2: str):
+        """Test that diff file should be different when dbs are."""
+        db1 = self.start_h2(8082, 9092, h2)
+        db2 = self.start_h2(8093, 9093, h2)
+        with (
+            APIH2DatabaseContainer(db_container=db1) as db1_container,
+            APIH2DatabaseContainer(db_container=db2) as db2_container,
+        ):
+            db1_container._run_command(FILL_COMMAND)
+
+            # should be different
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result1 = f.read()
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result2 = f.read()
+
+            assert empty_result1 != empty_result2
 
 
 class TestMongoDB:
