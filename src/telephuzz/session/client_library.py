@@ -1087,6 +1087,13 @@ class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
         return b""
 
 
+class SwiftOpenAPIGenerator(SwiftCLC, OperationIdBasedCLC):
+    """Concrete client library class for Apple's Swift OpenAPI Generator."""
+
+    def _get_code(self, request: Request, api_path: str) -> bytes:
+        return b""
+
+
 # --- Concrete C# Client classes ---
 
 
