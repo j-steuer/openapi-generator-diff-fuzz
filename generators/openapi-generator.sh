@@ -8,7 +8,7 @@ for LANG in "${LANGS[@]}"; do
   echo "OpenAPI Generator: Generating $LANG"
 
   OUT_DIR="/local/clients/openapi-gen-$LANG-client"
-  OUT_DIR_AUTH="/local/clients/openapi-gen-$LANG-auth-client"
+  OUT_DIR_AUTH="/local/clients/openapi-gen-$LANG-client-auth"
 
   docker run --rm \
     -v "$(pwd)":/local \
@@ -34,9 +34,9 @@ for LANG in "${LANGS[@]}"; do
     TMP_DIR="clients/openapi-gen-csharp-client_temp"
     SRC_DIR="clients/openapi-gen-csharp-client/src/Org.OpenAPITools"
 
-    OUT_DIR_AUTH="clients/openapi-gen-csharp-auth-client"
-    TMP_DIR_AUTH="clients/openapi-gen-csharp-auth-client_temp"
-    SRC_DIR_AUTH="clients/openapi-gen-csharp-auth-client/src/Org.OpenAPITools"
+    OUT_DIR_AUTH="clients/openapi-gen-csharp-client-auth"
+    TMP_DIR_AUTH="clients/openapi-gen-csharp-client_temp-auth"
+    SRC_DIR_AUTH="clients/openapi-gen-csharp-client-auth/src/Org.OpenAPITools"
     
   if [ -e "$SRC_DIR" ]; then
       echo "Moving contents of $SRC_DIR to $OUT_DIR"
