@@ -1,5 +1,6 @@
 """File for code relating to API containers."""
 
+import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -129,19 +130,46 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
 class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
     """API Container class using MongoDB as database."""
 
-    def _run_command(self, cmnd: str) -> None:
+    def __enter__(self):
+        """Verify MongoDB is running before returning."""
+        super().__enter__()
+        self.wait_until_ready()
+        return self
+
+    def wait_until_ready(self, timeout: int = 30) -> None:
+        """Check if the MongoDB server is accepting connections."""
+        assert self.db_container is not None
+
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            # ping the admin database to check liveness
+            exit_code, _ = self.db_container.exec_run(
+                "mongosh --quiet --eval 'db.adminCommand(\"ping\")'"
+            )
+
+            if exit_code == 0:
+                return
+
+            time.sleep(1)
+
+        raise TimeoutError("MongoDB container failed to reach 'ready' state in time.")
+
+    def _run_command(self, cmnd: str) -> str:
         assert self.db_container is not None
         exit_code, output = self.db_container.exec_run(cmnd)
         assert exit_code == 0, output
 
+        assert isinstance(output, bytes)
+        return output.decode()
+
     def export_db_state(self, export_file: Path) -> None:
         """Export the current state of the DB to export_file."""
-        str_command = f"mongodump --out {export_file}"
+        str_command = f"mongodump --archive={export_file}"
         self._run_command(str_command)
 
     def import_db_state(self, import_file: Path) -> None:
         """Import the new state of the DB from import_file."""
-        str_command = f"mongorestore --drop {import_file}"
+        str_command = f"mongorestore --drop --archive={import_file}"
         self._run_command(str_command)
 
     def get_state(self, out: Path) -> None:

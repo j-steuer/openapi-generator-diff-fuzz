@@ -261,17 +261,18 @@ class TestMongoDB:
         })
         """
 
-        db1.exec_run(["mongosh", "--quiet", "--eval", create])
-        db1.exec_run(["mongosh", "--quiet", "--eval", insert])
-
         with (
             APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
             APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
         ):
+            exit_code, output = db1.exec_run(["mongosh", "--quiet", "--eval", create])
+            assert exit_code == 0, output
+            exit_code, output = db1.exec_run(["mongosh", "--quiet", "--eval", insert])
+            assert exit_code == 0, output
             db1_container.export_db_state(Path("/export"))
 
-            # assert export.sql was created
-            exit_code, output = db1.exec_run("test -d /export")
+            # assert export was created
+            exit_code, output = db1.exec_run("test -e /export")
             assert exit_code == 0, output
 
             stream, _ = db1.get_archive("/export")
@@ -282,10 +283,11 @@ class TestMongoDB:
                 temp_file.seek(0)
 
                 db2.put_archive("/", temp_file.read())
-                db2.exec_run("mv /export /import")
+                exit_code, output = db2.exec_run("mv /export /import")
+                assert exit_code == 0, output
 
             # assert import.sql exists
-            exit_code, output = db2.exec_run("test -d /import")
+            exit_code, output = db2.exec_run("test -e /import")
             assert exit_code == 0, output
 
             db2_container.import_db_state(Path("/import"))
@@ -293,7 +295,6 @@ class TestMongoDB:
             exit_code, output = db2.exec_run(
                 ["mongosh", "--quiet", "--eval", "db.users.find()"]
             )
-
             assert exit_code == 0, output
 
             assert isinstance(output, bytes)
@@ -301,3 +302,25 @@ class TestMongoDB:
 
             assert "Alice" in result_output
             assert "alice@example.com" in result_output
+
+    def test_get_state(self, mongodb: str):
+        """Test obtaining the state."""
+        db = self.start_mongodb(27017, mongodb)
+        # seed db with users
+        create = """
+        db.createCollection("users")
+        """
+
+        insert = """
+        db.users.insertOne({
+        name: "Alice",
+        age: 25,
+        email: "alice@example.com"
+        })
+        """
+
+        db.exec_run(["mongosh", "--quiet", "--eval", create])
+        db.exec_run(["mongosh", "--quiet", "--eval", insert])
+
+        with APIMongoDBDatabaseContainer(db_container=db) as db_container:
+            db_container.get_state(Path())
