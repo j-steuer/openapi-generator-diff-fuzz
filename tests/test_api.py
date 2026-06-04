@@ -227,6 +227,17 @@ class TestH2:
 class TestMongoDB:
     """Tests for MongoDB."""
 
+    CREATE_COMMAND = """
+        db.createCollection("users")
+        """
+    INSERT_COMMAND = """
+        db.users.insertOne({
+        name: "Alice",
+        age: 25,
+        email: "alice@example.com"
+        })
+        """
+
     def start_mongodb(self, port: int, image_name: str) -> Container:
         """Start a docker container with an MongoDB instance."""
         client = docker.from_env()
@@ -248,26 +259,17 @@ class TestMongoDB:
         db1 = self.start_mongodb(27017, mongodb)
         db2 = self.start_mongodb(27018, mongodb)
 
-        # seed db1 with users
-        create = """
-        db.createCollection("users")
-        """
-
-        insert = """
-        db.users.insertOne({
-        name: "Alice",
-        age: 25,
-        email: "alice@example.com"
-        })
-        """
-
         with (
             APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
             APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
         ):
-            exit_code, output = db1.exec_run(["mongosh", "--quiet", "--eval", create])
+            exit_code, output = db1.exec_run(
+                ["mongosh", "--quiet", "--eval", self.CREATE_COMMAND]
+            )
             assert exit_code == 0, output
-            exit_code, output = db1.exec_run(["mongosh", "--quiet", "--eval", insert])
+            exit_code, output = db1.exec_run(
+                ["mongosh", "--quiet", "--eval", self.INSERT_COMMAND]
+            )
             assert exit_code == 0, output
             db1_container.export_db_state(Path("/export"))
 
@@ -307,20 +309,78 @@ class TestMongoDB:
         """Test obtaining the state."""
         db = self.start_mongodb(27017, mongodb)
         # seed db with users
-        create = """
-        db.createCollection("users")
-        """
-
-        insert = """
-        db.users.insertOne({
-        name: "Alice",
-        age: 25,
-        email: "alice@example.com"
-        })
-        """
-
-        db.exec_run(["mongosh", "--quiet", "--eval", create])
-        db.exec_run(["mongosh", "--quiet", "--eval", insert])
 
         with APIMongoDBDatabaseContainer(db_container=db) as db_container:
-            db_container.get_state(Path())
+            db.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
+            db.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db_container.get_state(Path(f.name))
+                f.seek(0)
+                content = f.read()
+
+            assert "Alice" in content
+            assert "alice@example.com" in content
+            assert "_id" not in content
+
+    def test_compare_state_identical(self, mongodb: str):
+        """Test that diff file should be identical when dbs are."""
+        db1 = self.start_mongodb(27017, mongodb)
+        db2 = self.start_mongodb(27018, mongodb)
+        with (
+            APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
+            APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
+        ):
+            # empty DBs should be the same
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result1 = f.read()
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result2 = f.read()
+
+            assert empty_result1 == empty_result2
+
+            # identical DBs should be the same
+            db1.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
+            db1.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
+            db2.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
+            db2.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                filled_result1 = f.read()
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                filled_result2 = f.read()
+
+            assert filled_result1 == filled_result2
+
+    def test_compare_state_diff(self, mongodb: str):
+        """Test that diff file should be different when dbs are."""
+        db1 = self.start_mongodb(27017, mongodb)
+        db2 = self.start_mongodb(27018, mongodb)
+        with (
+            APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
+            APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
+        ):
+            db1.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
+            db1.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
+
+            # should be different
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db1_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result1 = f.read()
+
+            with tempfile.NamedTemporaryFile("w+") as f:
+                db2_container.get_state(Path(f.name))
+                f.seek(0)
+                empty_result2 = f.read()
+
+            assert empty_result1 != empty_result2

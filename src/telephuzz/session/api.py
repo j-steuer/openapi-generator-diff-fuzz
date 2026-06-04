@@ -1,10 +1,13 @@
 """File for code relating to API containers."""
 
+import ast
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from docker.models.containers import Container
+
+# TODO implement postprocessing for nondeterministic columns
 
 
 class APIContainer:
@@ -110,7 +113,6 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
 
     def get_state(self, out: Path) -> None:
         """Write the state to a file that can be used for hashing and diff."""
-        # TODO postprocesss, remove SALT and HASH
         assert self.db_container
 
         tables_string = self._run_command("SHOW TABLES;")
@@ -174,4 +176,11 @@ class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
 
     def get_state(self, out: Path) -> None:
         """Write the state to a file that can be used for hashing and diff."""
-        pass  # TODO
+        collections = ast.literal_eval(
+            self._run_command("mongosh --quiet --eval db.getCollectionNames()")
+        )
+        for collection in collections:
+            with open(out, "w") as f:
+                find = f"db.{collection}.find({{}}, {{'_id': false}})"
+                content = self._run_command(f'mongosh --quiet --eval "{find}"')
+                f.write(content + "\n")
