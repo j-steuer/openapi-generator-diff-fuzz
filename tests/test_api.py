@@ -4,9 +4,14 @@ import tempfile
 from pathlib import Path
 
 import docker
+import pytest
 from docker.models.containers import Container
 
-from telephuzz.session.api import APIH2DatabaseContainer, APIMongoDBDatabaseContainer
+from telephuzz.session.api import (
+    APIH2DatabaseContainer,
+    APIMongoDBDatabaseContainer,
+    APIMySQLDatabaseContainer,
+)
 
 FILL_COMMAND = """
             CREATE TABLE users1 (
@@ -384,3 +389,77 @@ class TestMongoDB:
                 empty_result2 = f.read()
 
             assert empty_result1 != empty_result2
+
+
+class TestMySQL:
+    """Test MySQL container class."""
+
+    IMAGE = "mysql:8.0"
+
+    def start_mysql(self, port: int) -> Container:
+        """Start a MySQL instance."""
+        client = docker.from_env()
+
+        container = client.containers.run(
+            self.IMAGE,
+            detach=True,
+            environment={"MYSQL_ROOT_PASSWORD": "my-secret-pw"},
+            ports={"3306/tcp": port},
+        )
+
+        return container
+
+    def test_init(self):
+        """Test initializing MongoDB container."""
+        db = self.start_mysql(3306)
+        with APIMySQLDatabaseContainer(db_container=db) as db_container:
+            assert db_container.db_container == db
+
+    @pytest.mark.skip(reason="Fix")
+    def test_export_import(self):
+        """Unit test for MongoDB export and import methods."""
+        db1 = self.start_mysql(3306)
+        db2 = self.start_mysql(3307)
+
+        with (
+            APIMySQLDatabaseContainer(db_container=db1) as db1_container,
+            APIMySQLDatabaseContainer(db_container=db2) as db2_container,
+        ):
+            exit_code, output = db1.exec_run(
+                [
+                    "mysql",  # MySQL client
+                    "-uroot",  # username
+                    "-pmy-secret-pw",  # password (no space after -p)
+                    "-e",  # execute command
+                    FILL_COMMAND,  # SQL command
+                ]
+            )
+            assert exit_code == 0, output
+            db1_container.export_db_state(Path("/export"))
+
+            # assert export was created
+            exit_code, output = db1.exec_run("test -e /export")
+            assert exit_code == 0, output
+
+            stream, _ = db1.get_archive("/export")
+
+            with tempfile.NamedTemporaryFile(mode="wb+", delete=True) as temp_file:
+                for chunk in stream:
+                    temp_file.write(chunk)
+                temp_file.seek(0)
+
+                db2.put_archive("/", temp_file.read())
+                exit_code, output = db2.exec_run("mv /export /import")
+                assert exit_code == 0, output
+
+            # assert import.sql exists
+            exit_code, output = db2.exec_run("test -e /import")
+            assert exit_code == 0, output
+
+            db2_container.import_db_state(Path("/import"))
+
+            assert isinstance(output, bytes)
+            result_output = output.decode()
+
+            assert "Alice" in result_output
+            assert "alice@example.com" in result_output

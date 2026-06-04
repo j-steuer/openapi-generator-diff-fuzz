@@ -184,3 +184,42 @@ class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
                 find = f"db.{collection}.find({{}}, {{'_id': false}})"
                 content = self._run_command(f'mongosh --quiet --eval "{find}"')
                 f.write(content + "\n")
+
+
+class APIMySQLDatabaseContainer(APIWithDatabaseContainer):
+    """API container class using MySQL as database."""
+
+    def _run_command(self, cmnd: str) -> str:
+        assert self.db_container is not None
+        exit_code, output = self.db_container.exec_run(cmnd)
+        assert exit_code == 0, output
+
+        assert isinstance(output, bytes)
+        return output.decode()
+
+    def export_db_state(self, export_file: Path) -> None:
+        """Export the current state of the DB to export_file."""
+        str_command = f"mysql mysqldump -u root -p --all-databases > {export_file}"
+        self._run_command(str_command)
+
+    def import_db_state(self, import_file: Path) -> None:
+        """Import the new state of the DB from import_file."""
+        str_command = f"cat {import_file} | mysql mysql -u root -p"
+        self._run_command(str_command)
+
+    def get_state(self, out: Path) -> None:
+        """Write the state to a file that can be used for hashing and diff."""
+        assert self.db_container
+
+        tables_string = self._run_command("SHOW TABLES;")
+        # parse tables
+        tables = []
+        for table_row in tables_string.splitlines()[1:][:-1]:
+            table_name = table_row[: table_row.find("|")].strip()
+            tables.append(table_name)
+
+        # write data to file
+        with open(out, "w") as f:
+            for table in tables:
+                rows = self._run_command(f"SELECT * FROM {table};")
+                f.write("".join(rows.splitlines(keepends=True)[:-1]))
