@@ -22,6 +22,7 @@ class TelePhuzz:
         oas: Path,
         request_generator: RequestGenerator | None = None,
         timeout: int | None = None,
+        request_generator_api_url: str | None = None,
     ) -> None:
         """Initialize a TelePhuzz instance.
 
@@ -29,6 +30,8 @@ class TelePhuzz:
             oas: Path to the OpenAPI specification used for fuzzing.
             request_generator: The RequestGenerator to use (defaults to Schemathesis)
             timeout: The amount of time the fuzzer is to run in seconds.
+            request_generator_api_url: The URL of the API to generate requests from
+            when using a fuzzer-based generator.
             Runs until no more requests are generated if not set.
 
         """
@@ -36,6 +39,7 @@ class TelePhuzz:
         self.processed_oas = oas
 
         self.request_generator = request_generator
+        self.request_generator_api_url = request_generator_api_url
 
         self.timeout = timeout
 
@@ -79,7 +83,14 @@ class TelePhuzz:
         """Set up the request generator."""
         if self.request_generator is None:
             # Use SchemathesisGenerator as default
-            return SchemathesisGenerator(self.processed_oas)
+            if self.request_generator_api_url is None:
+                raise ValueError(
+                    "Must either provide Request Generator or "
+                    "API to generate requests from."
+                )
+            return SchemathesisGenerator(
+                self.processed_oas, self.request_generator_api_url
+            )
         return self.request_generator  # TODO way to pass processed OAS
 
     def start_fuzzing_session(self) -> None:
