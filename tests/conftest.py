@@ -11,9 +11,21 @@ import pytest
 import requests
 import yaml  # type: ignore
 from docker.errors import ImageNotFound
+from docker.models.containers import Container
 from requests.structures import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request, Response
+
+
+def start_mongodb(port: int, image_name: str) -> Container:
+    """Start a docker container with an MongoDB instance."""
+    client = docker.from_env()
+    db1 = client.containers.run(
+        image_name,
+        detach=True,
+        ports={"27017/tcp": port},
+    )
+    return db1
 
 
 @pytest.fixture
