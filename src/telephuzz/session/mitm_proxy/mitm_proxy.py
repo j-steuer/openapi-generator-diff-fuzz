@@ -9,7 +9,6 @@ import docker
 from docker.models.containers import Container
 
 from telephuzz.http_message import Request
-from telephuzz.session.client_library import LibraryId
 from telephuzz.session.mitm_proxy.proxy_hooks import RESPONSE_PATH
 
 DEFAULT_LISTEN_PORT = 8080
@@ -113,10 +112,8 @@ class MITMProxyContainer:
             self.container.remove(force=True)
             self.container = None
 
-    def through_proxy(
-        self, request: Request, library_id: LibraryId, library_port: int
-    ) -> Request:
+    def through_proxy(self, request: Request, library_port: int) -> Request:
         """Make the request target the proxy and encode the target."""
         new_request = deepcopy(request)
-        new_request.path = f"/{library_id}:{library_port}/{request.path}"
+        new_request.path = f"/localhost:{library_port}/{request.path}"
         return new_request
