@@ -14,5 +14,5 @@ class RequestResult:
     library: LibraryId
     request: Request
     response: Response
-    db_state_before: Path
-    db_state_after: Path
+    db_state_before: Path | None
+    db_state_after: Path | None
