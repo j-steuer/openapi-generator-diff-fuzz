@@ -232,7 +232,23 @@ class DiffEvaluator:
 
                     diff_reports[library].append(report)
 
-        # compare db state TODO
+        # compare db state TODO way to check details if different
+        if result.db_state_before and result.db_state_after:
+            with open(result.db_state_before, "r") as f:
+                before = f.read()
+            with open(result.db_state_after, "r") as f:
+                after = f.read()
+            if before != after:
+                report = DiffReport(
+                    library_id=library,
+                    error_id=self._get_error_id(result),
+                    persistent=True,
+                    request_chain=[result.request],
+                    request_only=False,
+                    unique=unique,
+                    detail="",
+                )
+                diff_reports[library].append(report)
 
         if log_errors:
             # log all reports
