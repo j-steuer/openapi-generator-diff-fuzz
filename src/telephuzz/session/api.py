@@ -15,7 +15,7 @@ class APIContainer:
 
     db_container: Container | None
 
-    def __init__(self, db_container: Container):
+    def __init__(self, db_container: Container | None = None):
         """Initialize the API container."""
         self.db_container = db_container
 
@@ -31,7 +31,7 @@ class APIContainer:
 
     def close(self) -> None:
         """Kill the container after context ends."""
-        if self.db_container is None:
+        if self.db_container is None or self.db_container.status != "running":
             return
 
         try:
