@@ -36,8 +36,6 @@ def test_config_singleton():
 
     m = mock_open(read_data=config)
 
-    Config.CONFIG_PATH = TEST_CONFIG_PATH
-
     with patch("builtins.open", m):
         cfg1 = cfg.get_config()
         cfg2 = cfg.get_config()
