@@ -1,9 +1,53 @@
 """Helper methods for docker."""
 
+import tarfile
 import tempfile
+from io import BytesIO
 from pathlib import Path
 
 from docker.models.containers import Container
+
+
+def write_to_host(
+    container: Container,
+    container_path: str,
+    output_path: str | Path,
+) -> None:
+    """Copy a file from a Docker container to the host.
+
+    Args:
+        container: Docker container instance.
+        container_path: Absolute path to the file inside the container.
+        output_path: Destination path on the host.
+
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    archive, _ = container.get_archive(container_path)
+
+    tar_bytes = BytesIO()
+    for chunk in archive:
+        tar_bytes.write(chunk)
+
+    tar_bytes.seek(0)
+
+    with tarfile.open(fileobj=tar_bytes) as tar:
+        members = [m for m in tar.getmembers() if m.isfile()]
+
+        if len(members) != 1:
+            raise ValueError(
+                f"Expected exactly one file in archive, found {len(members)}"
+            )
+
+        member = members[0]
+        extracted = tar.extractfile(member)
+
+        if extracted is None:
+            raise ValueError(f"Could not extract {container_path}")
+
+        with output_path.open("wb") as f:
+            f.write(extracted.read())
 
 
 def write_to_container(
