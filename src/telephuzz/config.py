@@ -1,0 +1,45 @@
+"""Helper methods related to reading and parsing config."""
+
+import yaml  # type: ignore
+
+from telephuzz.constants import BASE_PATH
+
+
+class Config:
+    """Class for reading the config."""
+
+    CONFIG_PATH = BASE_PATH / "config.yaml"
+
+    def __init__(self):
+        """Parse config attributes."""
+        config = self._get_config()
+
+        api_config = config["api"]
+        self.compose_path = api_config["compose-path"]
+        self.database_type = api_config["database-type"]
+        self.api_port_name = api_config["api-port-name"]
+        self.port_names = api_config["port-names"]
+
+        self.targets = config["targets"]
+
+        self.timeout = config["fuzzing"]["timeout"]
+
+    def _get_config(self) -> dict:
+        """Obtain the config as a dict."""
+        with open(self.CONFIG_PATH) as stream:
+            try:
+                return yaml.safe_load(stream)
+            except yaml.YAMLError as e:
+                raise ValueError("Invalid config.") from e
+
+
+# ---- lazy singleton state ----
+_config: Config | None = None
+
+
+def get_config() -> Config:
+    """Parse static config only once."""
+    global _config
+    if _config is None:
+        _config = Config()
+    return _config
