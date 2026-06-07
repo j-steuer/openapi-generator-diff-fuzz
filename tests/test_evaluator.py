@@ -28,9 +28,9 @@ def test_same_request_responses():
         text="Not found.",
     )
     # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, Path(""), Path(""))
-    result2 = RequestResult("Lib2", request, response, Path(""), Path(""))
-    result3 = RequestResult("Lib3", request, response, Path(""), Path(""))
+    result1 = RequestResult("Lib1", request, response, None, None)
+    result2 = RequestResult("Lib2", request, response, None, None)
+    result3 = RequestResult("Lib3", request, response, None, None)
     libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
 
     assert len(libs) == 0
@@ -56,9 +56,9 @@ def test_same_diff_request():
     wrong_request = deepcopy(request)
     request.body = "Wrong body."
     # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, Path(""), Path(""))
-    result2 = RequestResult("Lib2", wrong_request, response, Path(""), Path(""))
-    result3 = RequestResult("Lib3", request, response, Path(""), Path(""))
+    result1 = RequestResult("Lib1", request, response, None, None)
+    result2 = RequestResult("Lib2", wrong_request, response, None, None)
+    result3 = RequestResult("Lib3", request, response, None, None)
     libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
 
     assert len(libs) == 1
@@ -85,9 +85,9 @@ def test_same_diff_response():
     wrong_response = deepcopy(response)
     wrong_response.body = "Wrong body."
     # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, Path(""), Path(""))
-    result2 = RequestResult("Lib2", request, wrong_response, Path(""), Path(""))
-    result3 = RequestResult("Lib3", request, response, Path(""), Path(""))
+    result1 = RequestResult("Lib1", request, response, None, None)
+    result2 = RequestResult("Lib2", request, wrong_response, None, None)
+    result3 = RequestResult("Lib3", request, response, None, None)
     libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
 
     assert len(libs) == 1
