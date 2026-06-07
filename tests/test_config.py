@@ -24,6 +24,7 @@ def test_get_config():
         "swagger-codegen:python",
     }
 
+    assert config.log_path == "/logs/telephuzz"
     assert config.timeout == 3600
 
     cfg._config = None

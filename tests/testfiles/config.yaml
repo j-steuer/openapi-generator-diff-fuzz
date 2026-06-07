@@ -7,4 +7,5 @@ api:
 targets: ["openapi-generator:python", "swagger-codegen:python"]
 
 fuzzing:
+  log-path: "/logs/telephuzz"
   timeout: 3600

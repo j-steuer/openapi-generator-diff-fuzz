@@ -23,7 +23,9 @@ class Config:
 
         self.targets = set(config["targets"])
 
-        self.timeout = config["fuzzing"]["timeout"]
+        fuzzing_config = config["fuzzing"]
+        self.log_path = fuzzing_config["log-path"]
+        self.timeout = fuzzing_config["timeout"]
 
     def _get_config(self) -> dict:
         """Obtain the config as a dict."""
