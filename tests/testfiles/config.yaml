@@ -1,0 +1,10 @@
+api:
+  compose-path: "/compose/docker-compose.yaml"
+  database-type: "H2"
+  api-port-name: "HOST_PORT"
+  port-names: ["HOST_PORT", "DB_PORT"]
+
+targets: ["openapi-generator:python", "swagger-codegen:python"]
+
+fuzzing:
+  timeout: 3600
