@@ -79,6 +79,12 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     assert "Hello Alice, you are 30 years old!" in response
 
 
+def test_from_id():
+    """Test obtaining a class based on id."""
+    client_type = ClientLibraryContainer.from_id("openapi-generator:python")
+    assert client_type == OpenAPIGenPythonCLC
+
+
 @pytest.mark.parametrize("clc_class, library_path", CLIENT_CASES_NO_AUTH)
 def test_clients_noauth(clc_class, library_path, api) -> None:
     """Basic GET request test without authentication."""

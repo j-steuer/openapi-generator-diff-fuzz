@@ -42,6 +42,8 @@ class ClientLibraryContainer(ABC):
     container: Container | None
     method_case: Case = Case("snake")
 
+    registry: dict = {}
+
     def __init__(
         self,
         library_path: Path,
@@ -66,6 +68,17 @@ class ClientLibraryContainer(ABC):
 
         assert container is not None
         self.container = container
+
+    def __init_subclass__(cls, **kwargs):
+        """Obtain subclass id for registry lookup."""
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "id"):
+            ClientLibraryContainer.registry[cls.id] = cls
+
+    @classmethod
+    def from_id(cls, id_):
+        """Obtain concrete client library based on id."""
+        return cls.registry[id_]
 
     def __enter__(self):
         """Make a client library a context manager."""
@@ -557,6 +570,8 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
 class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
     """Client library class for openapi-python-generator."""
 
+    id = "openapi-python-generator:python"
+
     def _get_method_name(self, request: Request) -> str:
         # the hash is seperated
         method_name = super()._get_method_name(request)
@@ -587,6 +602,8 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
 
 class KiotaPythonCLC(PythonCLC):
     """Client library class for Kiota Python."""
+
+    id = "kiota:python"
 
     def _get_method_name(self, request: Request) -> str:
         client_method = f"{request.path.strip('/').replace('/', '.')}"
@@ -651,6 +668,8 @@ class KiotaPythonCLC(PythonCLC):
 class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
     """Client library class for OpenAPI Generator Go."""
 
+    id = "openapi-generator:go"
+
     def _get_code(self, request: Request, api_path: str) -> bytes:
         arg_string = ".".join(
             f"{k.capitalize()}({json.dumps(v)})"
@@ -700,6 +719,8 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
 class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
     """Client library class for Swagger Codegen Go."""
 
+    id = "swagger-codegen:go"
+
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
         dockerfile = f"""
@@ -718,6 +739,8 @@ class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
 
 class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
     """Client library class for oapi generator."""
+
+    id = "oapi-generator:go"
 
     def _translate(self, request: Request, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
@@ -798,6 +821,8 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
 class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator TypeScript (Axios)."""
 
+    id = "openapi-generator:typescript"
+
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
 
@@ -829,6 +854,8 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
 class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for Swagger Codegen TypeScript (Axios)."""
+
+    id = "swagger-codegen:typescript"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
@@ -863,6 +890,8 @@ class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
 class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for Nswag TypeScript (Axios)."""
+
+    id = "nswag:typescript"
 
     method_case = Case.SNAKE  # uses operation id as is, default is SNAKE
 
@@ -905,6 +934,8 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
 class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for swagger-typescript-api (Axios)."""
+
+    id = "swagger-typescript-api:typescript"
 
     def _get_method_name(self, request: Request) -> str:
         method_name = super()._get_method_name(request)
@@ -973,6 +1004,8 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
 class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for orval (Axios)."""
 
+    id = "orval:typescript"
+
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
         dockerfile = f"""
@@ -1025,6 +1058,8 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
 class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator Java."""
 
+    id = "openapi-generator:java"
+
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
 
@@ -1047,6 +1082,8 @@ class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
 
 class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
     """Concrete client library for Swagger Codegen Java."""
+
+    id = "swagger-codegen:java"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
@@ -1083,12 +1120,16 @@ class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
 class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
     """Concrete client library class for OpenAPI Generator Swift."""
 
+    id = "openapi-generator:swift"
+
     def _get_code(self, request: Request, api_path: str) -> bytes:
         return b""
 
 
 class SwiftOpenAPIGenerator(SwiftCLC, OperationIdBasedCLC):
     """Concrete client library class for Apple's Swift OpenAPI Generator."""
+
+    id = "swift-openapi-generator:swift"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         return b""
@@ -1099,6 +1140,8 @@ class SwiftOpenAPIGenerator(SwiftCLC, OperationIdBasedCLC):
 
 class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for OpenAPI Generator C#."""
+
+    id = "openapi-generator:csharp"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
@@ -1167,6 +1210,8 @@ class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
 class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for Swagger Codegen C#."""
 
+    id = "swagger-codegen:csharp"
+
     def _get_code(self, request: Request, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
         content = textwrap.dedent(f"""
@@ -1200,6 +1245,8 @@ class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
 
 class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for Nswag C#."""
+
+    id = "nswag:csharp"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Modify method to create project from scratch with single file cs."""
@@ -1255,6 +1302,8 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
 
 class KiotaCSharpCLC(CsharpCLC):
     """Concrete client library class for Kiota C#."""
+
+    id = "kiota:csharp"
 
     def _get_method_name(self, request: Request) -> str:
         client_method = ".".join(
@@ -1329,6 +1378,8 @@ class KiotaCSharpCLC(CsharpCLC):
 
 class KiotaJavaCLC(JavaCLC):
     """Concrete client library class for Kiota Java."""
+
+    id = "kiota:java"
 
     # TODO fix entire class
     def _get_method_name(self, request: Request) -> str:
