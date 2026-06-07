@@ -18,9 +18,10 @@ class Config:
         self.compose_path = api_config["compose-path"]
         self.database_type = api_config["database-type"]
         self.api_port_name = api_config["api-port-name"]
-        self.port_names = api_config["port-names"]
+        self.port_names = set(api_config["port-names"])
+        self.port_names.add(self.api_port_name)
 
-        self.targets = config["targets"]
+        self.targets = set(config["targets"])
 
         self.timeout = config["fuzzing"]["timeout"]
 
