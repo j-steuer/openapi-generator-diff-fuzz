@@ -15,6 +15,8 @@ from telephuzz.docker_helpers import (
 )
 from telephuzz.session.api import APIMongoDBDatabaseContainer
 
+COMPOSE_FILE = Path(__file__).parent / "testfiles" / "docker-compose.yml"
+
 
 def test_write_host(mongodb):
     """Test writing from API container to host."""
@@ -70,10 +72,9 @@ def test_port_env():
 
 def test_compose():
     """Test docker compose up and down methods."""
-    compose_file = Path(__file__).parent / "testfiles" / "docker-compose.yml"
     project = "test_compose"
 
-    compose_up(compose_path=compose_file, project=project)
+    compose_up(compose_path=COMPOSE_FILE, project=project)
 
     assert (
         project.encode()
@@ -83,7 +84,7 @@ def test_compose():
         ).stdout
     )
 
-    compose_down(compose_path=compose_file, project=project)
+    compose_down(compose_path=COMPOSE_FILE, project=project)
 
     assert (
         project.encode()
@@ -92,3 +93,21 @@ def test_compose():
             capture_output=True,
         ).stdout
     )
+
+
+def test_compose_with_env():
+    """Test using compose with a port number."""
+    env = set_port_env({"HOST_PORT": 8081})
+    project = "compose_with_env"
+
+    compose_up(compose_path=COMPOSE_FILE, env=env, project=project)
+
+    assert (
+        b"0.0.0.0:8081->8000/tcp"
+        in subprocess.run(
+            ["docker", "ps", "--filter", f"label=com.docker.compose.project={project}"],
+            capture_output=True,
+        ).stdout
+    )
+
+    compose_down(compose_path=COMPOSE_FILE, project=project)
