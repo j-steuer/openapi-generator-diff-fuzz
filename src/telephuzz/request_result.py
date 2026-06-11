@@ -16,3 +16,15 @@ class RequestResult:
     response: Response
     db_state_before: Path | None
     db_state_after: Path | None
+
+    def __hash__(self):
+        """Hash method."""
+        return hash(
+            (
+                self.library,
+                self.request,
+                self.response,
+                self.db_state_before,
+                self.db_state_after,
+            )
+        )
