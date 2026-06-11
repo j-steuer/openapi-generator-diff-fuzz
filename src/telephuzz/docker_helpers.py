@@ -37,7 +37,7 @@ def compose_down(compose_path: Path, project: str = "") -> None:
     cmd = ["docker", "compose", "-f", str(compose_path)]
     if project:
         cmd += ["-p", project]
-    cmd += ["down"]
+    cmd += ["down", "-v"]
     subprocess.run(
         cmd,
         check=True,
