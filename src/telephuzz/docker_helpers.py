@@ -33,12 +33,14 @@ def compose_up(
     )
 
 
-def compose_down(compose_path: Path, project: str = "") -> None:
+def compose_down(compose_path: Path, project: str = "", graceful: bool = False) -> None:
     """Run docker compose down."""
     cmd = ["docker", "compose", "-f", str(compose_path)]
     if project:
         cmd += ["-p", project]
     cmd += ["down", "-v"]
+    if not graceful:
+        cmd += ["-t", "0"]
     subprocess.run(
         cmd,
         check=True,
