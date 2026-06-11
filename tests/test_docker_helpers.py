@@ -57,6 +57,10 @@ def test_write_container(mongodb):
         exit_code, output = db2.exec_run(f"test -e {path}")
         assert exit_code == 0, output
 
+        exit_code, output = db2.exec_run(f"cat {path}")
+        assert exit_code == 0, output
+        assert output == b"test\n"
+
 
 def test_port_env():
     """Test setting ports to local environment."""
