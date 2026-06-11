@@ -9,6 +9,7 @@ from conftest import start_mongodb
 from telephuzz.docker_helpers import (
     compose_down,
     compose_up,
+    set_port_env,
     write_to_container,
     write_to_host,
 )
@@ -53,6 +54,18 @@ def test_write_container(mongodb):
 
         exit_code, output = db2.exec_run(f"test -e {path}")
         assert exit_code == 0, output
+
+
+def test_port_env():
+    """Test setting ports to local environment."""
+    env = set_port_env({"TEST_PORT": 8000, "TEST2_PORT": 8001})
+
+    # check current env is used
+    assert "PYTEST_CURRENT_TEST" in env
+
+    # check that ports were added
+    assert env["TEST_PORT"] == "8000"
+    assert env["TEST2_PORT"] == "8001"
 
 
 def test_compose():
