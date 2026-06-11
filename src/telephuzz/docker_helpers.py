@@ -94,6 +94,12 @@ def write_to_container(
 ) -> None:
     """Write file from one container to another."""
     path_str = str(path)
+
+    # check path exists in source container
+    exit_code, _ = source_container.exec_run(f"test -e {path_str}")
+    if exit_code != 0:
+        raise ValueError("Path does not exist in source container.")
+
     stream, _ = source_container.get_archive(path_str)
 
     with tempfile.NamedTemporaryFile(mode="wb+", delete=True) as temp_file:

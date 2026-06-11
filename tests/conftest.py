@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 from unittest.mock import Mock
 
 import docker
@@ -21,6 +22,34 @@ from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
 
 TEST_CONFIG_PATH = Path(__file__).parent / "testfiles" / "config.yaml"
+
+
+@runtime_checkable
+class PrefillMethod(Protocol):
+    """Definition of prefill callable fixture."""
+
+    def __call__(
+        self,
+        port1: int,
+        port2: int,
+        insert: str | None = None,
+    ) -> Container:
+        """Call method."""
+        ...
+
+
+def start_h2(port1: int, port2: int, image_name: str) -> Container:
+    """Start a docker container with an H2 instance."""
+    client = docker.from_env()
+    db1 = client.containers.run(
+        image_name,
+        detach=True,
+        ports={
+            "8082/tcp": ("127.0.0.1", port1),
+            "9092/tcp": ("127.0.0.1", port2),
+        },
+    )
+    return db1
 
 
 def start_mongodb(port: int, image_name: str) -> Container:
@@ -314,3 +343,43 @@ def mock_api_with_db():
     mock_api = Mock(spec=APIWithDatabaseContainer)
     mock_api.db_container = Mock(spec=Container)
     return mock_api
+
+
+@pytest.fixture()
+def prefilled_h2(h2) -> PrefillMethod:
+    """Create an H2 db instance with a default table and optional content.
+
+    Default table is users(id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))
+    """
+
+    def get_h2(port1: int, port2: int, insert: str | None = None) -> Container:
+        db = start_h2(port1, port2, h2)
+
+        create = """
+        CREATE TABLE users (
+        id INT PRIMARY KEY,
+        name VARCHAR(255),
+        email VARCHAR(255)
+        );
+        """
+
+        db.exec_run(f'sh -c "echo \\"{create}\\" > /tmp/command.sql"')
+        db.exec_run("""
+        java -cp /opt/h2/h2.jar org.h2.tools.RunScript \
+        -url jdbc:h2:/opt/h2/testdb \
+        -user sa \
+        -script /tmp/command.sql
+        """)
+
+        if insert is not None:
+            db.exec_run(f'sh -c "echo \\"{insert}\\" > /tmp/command.sql"')
+            db.exec_run("""
+            java -cp /opt/h2/h2.jar org.h2.tools.RunScript \
+            -url jdbc:h2:/opt/h2/testdb \
+            -user sa \
+            -script /tmp/command.sql
+            """)
+
+        return db
+
+    return get_h2

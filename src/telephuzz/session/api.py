@@ -141,6 +141,10 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
 
         return output.decode("utf-8")
 
+    def _clean_db(self) -> None:
+        """Clean the database state."""
+        self._run_command("DROP ALL OBJECTS;")
+
     def export_db_state(self, export_file: Path) -> None:
         """Export the current state of the DB to export_file."""
         assert self.db_container
@@ -150,6 +154,13 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
     def import_db_state(self, import_file: Path) -> None:
         """Import the new state of the DB from import_file."""
         assert self.db_container
+        exit_code, output = self.db_container.exec_run(f"test -e {import_file}")
+        if exit_code != 0:
+            raise ValueError("Import file not found.")
+        assert exit_code == 0, output
+
+        self._clean_db()
+
         cmnd = f"RUNSCRIPT FROM '{import_file}';"
         self._run_command(cmnd)
 

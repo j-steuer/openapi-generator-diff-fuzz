@@ -59,16 +59,20 @@ class Session:
     def change_api_proxy(self, container: APIWithDatabaseContainer) -> None:
         """Replace the API proxy with another container."""
         if not (
-            isinstance(container, APIWithDatabaseContainer)
-            and isinstance(self.api, APIWithDatabaseContainer)
+            isinstance(self.api, APIWithDatabaseContainer)
+            and type(container) is type(self.api)
         ):
-            raise ValueError("Both target and source APIs need a database.")
+            raise ValueError(
+                "Both target and source APIs need a database of the same type."
+            )
 
         path = Path("/export")
         container.export_db_state(path)
-        assert self.api.db_container is not None
+
         assert container.db_container is not None
-        write_to_container(self.api.db_container, container.db_container, path)
+        assert self.api.db_container is not None
+        write_to_container(container.db_container, self.api.db_container, path)
+
         self.api.import_db_state(path)
 
 

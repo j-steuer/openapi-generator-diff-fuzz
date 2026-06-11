@@ -5,6 +5,8 @@ from pathlib import Path
 
 import docker
 import pytest
+from conftest import PrefillMethod
+from conftest import start_h2 as h2
 from conftest import start_mongodb as sb
 from docker.models.containers import Container
 
@@ -49,17 +51,8 @@ class TestH2:
     """Tests for H2."""
 
     def start_h2(self, port1: int, port2: int, image_name: str) -> Container:
-        """Start a docker container with an H2 instance."""
-        client = docker.from_env()
-        db1 = client.containers.run(
-            image_name,
-            detach=True,
-            ports={
-                "8082/tcp": ("127.0.0.1", port1),
-                "9092/tcp": ("127.0.0.1", port2),
-            },
-        )
-        return db1
+        """Start an h2 container."""
+        return h2(port1, port2, image_name)
 
     def test_init(self, h2: str):
         """Test initializing H2 Container."""
@@ -68,20 +61,8 @@ class TestH2:
             assert db_container.db_container
             assert db_container.jar_path == Path("/opt/h2/h2.jar")
 
-    def test_export_import(self, h2: str):
+    def test_export_import(self, h2: str, prefilled_h2: PrefillMethod):
         """Unit test for H2 export and import methods."""
-        db1 = self.start_h2(8082, 9092, h2)
-        db2 = self.start_h2(8083, 9093, h2)
-
-        # seed db1 with users
-        create = """
-        CREATE TABLE users (
-        id INT PRIMARY KEY,
-        name VARCHAR(255),
-        email VARCHAR(255)
-        );
-        """
-
         insert = """
         INSERT INTO users (id, name, email)
         VALUES
@@ -90,21 +71,8 @@ class TestH2:
         (3, 'Charlie', 'charlie@example.com');
         """
 
-        db1.exec_run(f'sh -c "echo \\"{create}\\" > /tmp/command.sql"')
-        db1.exec_run("""
-        java -cp /opt/h2/h2.jar org.h2.tools.RunScript \
-        -url jdbc:h2:/opt/h2/testdb \
-        -user sa \
-        -script /tmp/command.sql
-        """)
-
-        db1.exec_run(f'sh -c "echo \\"{insert}\\" > /tmp/command.sql"')
-        db1.exec_run("""
-        java -cp /opt/h2/h2.jar org.h2.tools.RunScript \
-        -url jdbc:h2:/opt/h2/testdb \
-        -user sa \
-        -script /tmp/command.sql
-        """)
+        db1 = prefilled_h2(8082, 9092, insert=insert)
+        db2 = prefilled_h2(8083, 9093)
 
         with (
             APIH2DatabaseContainer(port=8082, db_container=db1) as db1_container,
