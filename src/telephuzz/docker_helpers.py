@@ -1,11 +1,47 @@
 """Helper methods for docker."""
 
+import os
+import subprocess
 import tarfile
 import tempfile
 from io import BytesIO
 from pathlib import Path
 
 from docker.models.containers import Container
+
+
+def set_port_env(port_map: dict[str, int]) -> dict[str, str]:
+    """Obtain local env with ports mapped."""
+    return {
+        **os.environ,
+        **{k: str(v) for k, v in port_map.items()},
+    }
+
+
+def compose_up(
+    compose_path: Path, env: dict[str, str] | None = None, project: str = ""
+):
+    """Run docker compose up."""
+    cmd = ["docker", "compose", "-f", str(compose_path), "up", "-d"]
+    if project:
+        cmd += ["-p", project]
+    subprocess.run(
+        cmd,
+        env=env,
+        check=True,
+    )
+
+
+def compose_down(compose_path: Path, project: str = "") -> None:
+    """Run docker compose down."""
+    cmd = ["docker", "compose", "-f", str(compose_path)]
+    if project:
+        cmd += ["-p", project]
+    cmd += ["down"]
+    subprocess.run(
+        cmd,
+        check=True,
+    )
 
 
 def write_to_host(

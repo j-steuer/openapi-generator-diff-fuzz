@@ -3,6 +3,9 @@ api:
   database-type: "H2"
   api-port-name: "HOST_PORT"
   port-names: ["HOST_PORT", "DB_PORT"]
+  non-deterministic-fields:
+    POST-test/example: ["date", "token"]
+    GET-test/random: ["random"]
 
 targets: ["openapi-generator:python", "swagger-codegen:python"]
 

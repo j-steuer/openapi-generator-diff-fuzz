@@ -1,10 +1,10 @@
 """Implementation for result evaluation."""
 
 import itertools
-from pathlib import Path
 from pprint import pformat
 from typing import Any
 
+from telephuzz.config import get_config
 from telephuzz.evaluation.abstractor import Abstractor
 from telephuzz.evaluation.report import DiffReport
 from telephuzz.http_message import Request, Response
@@ -17,10 +17,11 @@ from telephuzz.session.client_library import LibraryId
 class DiffEvaluator:
     """Class for comparing components of the result and generating logs."""
 
-    def __init__(self, log_path: Path):
+    def __init__(self):
         """Initialize the DiffEvaluator."""
         self.abstractor = Abstractor()  # TODO config file to provide args
-        self.log_path = log_path
+
+        self.log_path = get_config().log_path
 
     def _get_error_id(self, result: RequestResult) -> str:
         """Given an erroneous request result, obtain an error id."""
@@ -29,7 +30,7 @@ class DiffEvaluator:
 
     def eval(
         self,
-        results: list[RequestResult],
+        results: set[RequestResult],
         original_request: Request,
         log_errors: bool = True,
     ) -> set[LibraryId]:

@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from docker.models.containers import Container
+from requests.models import CaseInsensitiveDict
 
 # TODO implement postprocessing for nondeterministic columns
 
@@ -15,8 +16,9 @@ class APIContainer:
 
     db_container: Container | None
 
-    def __init__(self, db_container: Container | None = None):
+    def __init__(self, port: int, db_container: Container | None = None):
         """Initialize the API container."""
+        self.port = port
         self.db_container = db_container
 
     def __enter__(self):
@@ -31,7 +33,7 @@ class APIContainer:
 
     def close(self) -> None:
         """Kill the container after context ends."""
-        if self.db_container is None or self.db_container.status != "running":
+        if self.db_container is None:
             return
 
         try:
@@ -43,6 +45,20 @@ class APIContainer:
 
 class APIWithDatabaseContainer(ABC, APIContainer):
     """Abstract class for an API that uses a database system."""
+
+    id: str
+    registry: CaseInsensitiveDict = CaseInsensitiveDict()
+
+    def __init_subclass__(cls, **kwargs):
+        """Obtain subclass id for registry lookup."""
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "id"):
+            APIWithDatabaseContainer.registry[cls.id] = cls
+
+    @classmethod
+    def from_id(cls, id_: str):
+        """Obtain concrete client library based on id."""
+        return cls.registry[id_.lower()]
 
     @abstractmethod
     def export_db_state(self, export_file: Path) -> None:
@@ -63,9 +79,13 @@ class APIWithDatabaseContainer(ABC, APIContainer):
 class APIH2DatabaseContainer(APIWithDatabaseContainer):
     """API Container class using H2 as database."""
 
-    def __init__(self, db_container: Container, jar_path: Path | None = None):
+    id = "H2"
+
+    def __init__(
+        self, port: int, db_container: Container, jar_path: Path | None = None
+    ):
         """Determine path to H2 jar."""
-        super().__init__(db_container=db_container)
+        super().__init__(port=port, db_container=db_container)
         assert self.db_container
 
         if jar_path:
@@ -132,6 +152,8 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
 class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
     """API Container class using MongoDB as database."""
 
+    id = "MongoDB"
+
     def __enter__(self):
         """Verify MongoDB is running before returning."""
         super().__enter__()
@@ -188,6 +210,8 @@ class APIMongoDBDatabaseContainer(APIWithDatabaseContainer):
 
 class APIMySQLDatabaseContainer(APIWithDatabaseContainer):
     """API container class using MySQL as database."""
+
+    id = "MySQL"
 
     def _run_command(self, cmnd: str) -> str:
         assert self.db_container is not None

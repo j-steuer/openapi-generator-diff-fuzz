@@ -9,9 +9,13 @@ from typing import cast
 
 import yaml  # type: ignore
 
+from telephuzz.config import get_config
+from telephuzz.docker_helpers import compose_down, compose_up, set_port_env
+from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 from telephuzz.request_generator import RequestGenerator, SchemathesisGenerator
+from telephuzz.session.session import SessionManager
 
 
 class TelePhuzz:
@@ -21,8 +25,6 @@ class TelePhuzz:
         self,
         oas: Path,
         request_generator: RequestGenerator | None = None,
-        timeout: int | None = None,
-        request_generator_api_url: str | None = None,
     ) -> None:
         """Initialize a TelePhuzz instance.
 
@@ -39,9 +41,10 @@ class TelePhuzz:
         self.processed_oas = oas
 
         self.request_generator = request_generator
-        self.request_generator_api_url = request_generator_api_url
+        self.session_manager = SessionManager()
+        self.evaluator = DiffEvaluator()
 
-        self.timeout = timeout
+        self.timeout = get_config().timeout
 
     def _preprocess_oas(self, oas: Path, output_path: Path) -> None:
         """Pre-process an OpenAPI spec and map all paths to own operationId.
@@ -82,15 +85,18 @@ class TelePhuzz:
     def _setup_request_generator(self) -> RequestGenerator:
         """Set up the request generator."""
         if self.request_generator is None:
+            # start up example API
+            config = get_config()
+            env = set_port_env({config.api_port_name: 8000})
+            compose_up(config.compose_path, env=env)
+
             # Use SchemathesisGenerator as default
-            if self.request_generator_api_url is None:
-                raise ValueError(
-                    "Must either provide Request Generator or "
-                    "API to generate requests from."
-                )
-            return SchemathesisGenerator(
-                self.processed_oas, self.request_generator_api_url
+            generator = SchemathesisGenerator(
+                self.processed_oas, "http://localhost:8000"
             )
+
+            compose_down(config.compose_path)
+            return generator
         return self.request_generator  # TODO way to pass processed OAS
 
     def start_fuzzing_session(self) -> None:
@@ -121,4 +127,11 @@ class TelePhuzz:
 
             # fuzz until no more request( chain)s available or timeout has been reached
             while request is not None and (timeout is None or datetime.now() < timeout):
-                pass  # TODO define fuzzing loop
+                # TODO previous responses
+                request = self.request_generator.generate()
+                if request is None:
+                    continue
+
+                for current_request in request:
+                    results = self.session_manager.send(current_request)
+                    self.evaluator.eval(results, current_request)

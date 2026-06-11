@@ -5,12 +5,14 @@ from pathlib import Path
 
 import docker
 import pytest
+from conftest import start_mongodb as sb
 from docker.models.containers import Container
 
 from telephuzz.session.api import (
     APIH2DatabaseContainer,
     APIMongoDBDatabaseContainer,
     APIMySQLDatabaseContainer,
+    APIWithDatabaseContainer,
 )
 
 FILL_COMMAND = """
@@ -37,6 +39,12 @@ FILL_COMMAND = """
             """
 
 
+def test_from_id():
+    """Test obtaining the database class from id."""
+    h2 = APIWithDatabaseContainer.from_id("h2")
+    assert h2 == APIH2DatabaseContainer
+
+
 class TestH2:
     """Tests for H2."""
 
@@ -56,7 +64,7 @@ class TestH2:
     def test_init(self, h2: str):
         """Test initializing H2 Container."""
         db = self.start_h2(8082, 9092, h2)
-        with APIH2DatabaseContainer(db_container=db) as db_container:
+        with APIH2DatabaseContainer(port=8082, db_container=db) as db_container:
             assert db_container.db_container
             assert db_container.jar_path == Path("/opt/h2/h2.jar")
 
@@ -99,8 +107,8 @@ class TestH2:
         """)
 
         with (
-            APIH2DatabaseContainer(db_container=db1) as db1_container,
-            APIH2DatabaseContainer(db_container=db2) as db2_container,
+            APIH2DatabaseContainer(port=8082, db_container=db1) as db1_container,
+            APIH2DatabaseContainer(port=8083, db_container=db2) as db2_container,
         ):
             db1_container.export_db_state(Path("/export.sql"))
 
@@ -153,7 +161,7 @@ class TestH2:
     def test_get_state(self, h2: str):
         """Test obtaining the state of an H2 db."""
         db = self.start_h2(8082, 9092, h2)
-        with APIH2DatabaseContainer(db_container=db) as db_container:
+        with APIH2DatabaseContainer(port=8082, db_container=db) as db_container:
             db_container._run_command(FILL_COMMAND)
 
             with tempfile.NamedTemporaryFile("w+") as f:
@@ -173,8 +181,8 @@ class TestH2:
         db1 = self.start_h2(8082, 9092, h2)
         db2 = self.start_h2(8093, 9093, h2)
         with (
-            APIH2DatabaseContainer(db_container=db1) as db1_container,
-            APIH2DatabaseContainer(db_container=db2) as db2_container,
+            APIH2DatabaseContainer(port=8082, db_container=db1) as db1_container,
+            APIH2DatabaseContainer(port=8083, db_container=db2) as db2_container,
         ):
             # empty DBs should be the same
             with tempfile.NamedTemporaryFile("w+") as f:
@@ -210,8 +218,8 @@ class TestH2:
         db1 = self.start_h2(8082, 9092, h2)
         db2 = self.start_h2(8093, 9093, h2)
         with (
-            APIH2DatabaseContainer(db_container=db1) as db1_container,
-            APIH2DatabaseContainer(db_container=db2) as db2_container,
+            APIH2DatabaseContainer(port=8082, db_container=db1) as db1_container,
+            APIH2DatabaseContainer(port=8083, db_container=db2) as db2_container,
         ):
             db1_container._run_command(FILL_COMMAND)
 
@@ -245,18 +253,12 @@ class TestMongoDB:
 
     def start_mongodb(self, port: int, image_name: str) -> Container:
         """Start a docker container with an MongoDB instance."""
-        client = docker.from_env()
-        db1 = client.containers.run(
-            image_name,
-            detach=True,
-            ports={"27017/tcp": port},
-        )
-        return db1
+        return sb(port, image_name)
 
     def test_init(self, mongodb: str):
         """Test initializing MongoDB container."""
         db = self.start_mongodb(27017, mongodb)
-        with APIMongoDBDatabaseContainer(db_container=db) as db_container:
+        with APIMongoDBDatabaseContainer(port=27017, db_container=db) as db_container:
             assert db_container.db_container == db
 
     def test_export_import(self, mongodb: str):
@@ -265,8 +267,8 @@ class TestMongoDB:
         db2 = self.start_mongodb(27018, mongodb)
 
         with (
-            APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
-            APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
+            APIMongoDBDatabaseContainer(port=27017, db_container=db1) as db1_container,
+            APIMongoDBDatabaseContainer(port=27018, db_container=db2) as db2_container,
         ):
             exit_code, output = db1.exec_run(
                 ["mongosh", "--quiet", "--eval", self.CREATE_COMMAND]
@@ -315,7 +317,7 @@ class TestMongoDB:
         db = self.start_mongodb(27017, mongodb)
         # seed db with users
 
-        with APIMongoDBDatabaseContainer(db_container=db) as db_container:
+        with APIMongoDBDatabaseContainer(port=27017, db_container=db) as db_container:
             db.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
             db.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
 
@@ -333,8 +335,8 @@ class TestMongoDB:
         db1 = self.start_mongodb(27017, mongodb)
         db2 = self.start_mongodb(27018, mongodb)
         with (
-            APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
-            APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
+            APIMongoDBDatabaseContainer(port=27017, db_container=db1) as db1_container,
+            APIMongoDBDatabaseContainer(port=27018, db_container=db2) as db2_container,
         ):
             # empty DBs should be the same
             with tempfile.NamedTemporaryFile("w+") as f:
@@ -371,8 +373,8 @@ class TestMongoDB:
         db1 = self.start_mongodb(27017, mongodb)
         db2 = self.start_mongodb(27018, mongodb)
         with (
-            APIMongoDBDatabaseContainer(db_container=db1) as db1_container,
-            APIMongoDBDatabaseContainer(db_container=db2) as db2_container,
+            APIMongoDBDatabaseContainer(port=27017, db_container=db1) as db1_container,
+            APIMongoDBDatabaseContainer(port=27018, db_container=db2) as db2_container,
         ):
             db1.exec_run(["mongosh", "--quiet", "--eval", self.CREATE_COMMAND])
             db1.exec_run(["mongosh", "--quiet", "--eval", self.INSERT_COMMAND])
@@ -412,7 +414,7 @@ class TestMySQL:
     def test_init(self):
         """Test initializing MongoDB container."""
         db = self.start_mysql(3306)
-        with APIMySQLDatabaseContainer(db_container=db) as db_container:
+        with APIMySQLDatabaseContainer(port=3306, db_container=db) as db_container:
             assert db_container.db_container == db
 
     @pytest.mark.skip(reason="Fix")
@@ -422,8 +424,8 @@ class TestMySQL:
         db2 = self.start_mysql(3307)
 
         with (
-            APIMySQLDatabaseContainer(db_container=db1) as db1_container,
-            APIMySQLDatabaseContainer(db_container=db2) as db2_container,
+            APIMySQLDatabaseContainer(port=3306, db_container=db1) as db1_container,
+            APIMySQLDatabaseContainer(port=3307, db_container=db2) as db2_container,
         ):
             exit_code, output = db1.exec_run(
                 [

@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
+from unittest.mock import Mock
 
 import docker
 import pytest
@@ -15,6 +16,8 @@ from docker.models.containers import Container
 from requests.structures import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request, Response
+from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
+from telephuzz.session.client_library import ClientLibraryContainer
 
 
 def start_mongodb(port: int, image_name: str) -> Container:
@@ -267,3 +270,35 @@ def mongodb():
         client.images.build(path=path, dockerfile="mongodb.dockerfile", tag=mongodb)
 
     yield mongodb
+
+
+@pytest.fixture()
+def mock_client():
+    """Mock client library class."""
+    mock_client = Mock(spec=ClientLibraryContainer)
+    mock_client.mock_body = "MOCK_BODY"
+    mock_client.send.return_value = Response(
+        headers=CaseInsensitiveDict(),
+        body=mock_client.mock_body,
+        status=200,
+        text=None,
+    )
+    mock_client.id = "MOCK_ID"
+
+    return mock_client
+
+
+@pytest.fixture()
+def mock_api_no_db():
+    """Mock API without a DB."""
+    mock_api = Mock(spec=APIContainer)
+    mock_api.db_container = None
+    return mock_api
+
+
+@pytest.fixture()
+def mock_api_with_db():
+    """Mock API with DB."""
+    mock_api = Mock(spec=APIWithDatabaseContainer)
+    mock_api.db_container = Mock(spec=Container)
+    return mock_api
