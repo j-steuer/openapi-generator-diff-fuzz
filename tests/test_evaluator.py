@@ -1,7 +1,6 @@
 """Tests for DiffFuzzer."""
 
 from copy import deepcopy
-from pathlib import Path
 
 from requests.models import CaseInsensitiveDict
 
@@ -12,7 +11,7 @@ from telephuzz.request_result import RequestResult
 
 def test_same_request_responses():
     """Test that DiffFuzzer returns an empty set if no diffs."""
-    evaluator = DiffEvaluator(Path(""))
+    evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -31,14 +30,14 @@ def test_same_request_responses():
     result1 = RequestResult("Lib1", request, response, None, None)
     result2 = RequestResult("Lib2", request, response, None, None)
     result3 = RequestResult("Lib3", request, response, None, None)
-    libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
+    libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
 
     assert len(libs) == 0
 
 
 def test_same_diff_request():
     """Test that DiffFuzzer recognizes a diff in requests and returns the library."""
-    evaluator = DiffEvaluator(Path(""))
+    evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -59,7 +58,7 @@ def test_same_diff_request():
     result1 = RequestResult("Lib1", request, response, None, None)
     result2 = RequestResult("Lib2", wrong_request, response, None, None)
     result3 = RequestResult("Lib3", request, response, None, None)
-    libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
+    libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
 
     assert len(libs) == 1
     assert "Lib2" in libs
@@ -67,7 +66,7 @@ def test_same_diff_request():
 
 def test_same_diff_response():
     """Test that DiffFuzzer recognizes a diff in responses and returns the library."""
-    evaluator = DiffEvaluator(Path(""))
+    evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -88,7 +87,7 @@ def test_same_diff_response():
     result1 = RequestResult("Lib1", request, response, None, None)
     result2 = RequestResult("Lib2", request, wrong_response, None, None)
     result3 = RequestResult("Lib3", request, response, None, None)
-    libs = evaluator.eval([result1, result2, result3], request, log_errors=False)
+    libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
 
     assert len(libs) == 1
     assert "Lib2" in libs
