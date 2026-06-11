@@ -99,6 +99,28 @@ class APIH2DatabaseContainer(APIWithDatabaseContainer):
         if not self.jar_path:
             raise ValueError("Could not find the jar path.")
 
+    def __enter__(self):
+        """Verify H2 is running before returning."""
+        super().__enter__()
+        self.wait_until_ready()
+        return self
+
+    def wait_until_ready(self, timeout: int = 3) -> None:
+        """Check if the H2 server is accepting connections."""
+        assert self.db_container is not None
+
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            try:
+                self._run_command("SELECT 1;")
+            except Exception:
+                time.sleep(1)
+                continue
+            return
+
+        raise TimeoutError("H2 container failed to reach 'ready' state in time.")
+
     def _run_command(self, cmnd: str) -> str:
         """Run the provided command and return the output."""
         assert self.db_container
