@@ -22,9 +22,10 @@ def compose_up(
     compose_path: Path, env: dict[str, str] | None = None, project: str = ""
 ):
     """Run docker compose up."""
-    cmd = ["docker", "compose", "-f", str(compose_path), "up", "-d"]
+    cmd = ["docker", "compose", "-f", str(compose_path)]
     if project:
         cmd += ["-p", project]
+    cmd += ["up", "-d"]
     subprocess.run(
         cmd,
         env=env,
