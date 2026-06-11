@@ -15,9 +15,12 @@ from docker.errors import ImageNotFound
 from docker.models.containers import Container
 from requests.structures import CaseInsensitiveDict
 
+from telephuzz.config import Config
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
+
+TEST_CONFIG_PATH = Path(__file__).parent / "testfiles" / "config.yaml"
 
 
 def start_mongodb(port: int, image_name: str) -> Container:
@@ -176,6 +179,15 @@ def basic_oas_yaml():
         f.flush()
         f.seek(0)
         yield f
+
+
+@pytest.fixture(autouse=True)
+def use_test_config():
+    """Redirect config path to test config."""
+    original = Config.CONFIG_PATH
+    Config.CONFIG_PATH = TEST_CONFIG_PATH
+    yield
+    Config.CONFIG_PATH = original
 
 
 @pytest.fixture

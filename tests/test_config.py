@@ -1,17 +1,15 @@
 """Tests for config helper methods."""
 
-from pathlib import Path
 from unittest.mock import mock_open, patch
 
-import telephuzz.config as cfg
-from telephuzz.config import Config, get_config
+from conftest import TEST_CONFIG_PATH
 
-TEST_CONFIG_PATH = Path(__file__).parent / "testfiles" / "config.yaml"
+import telephuzz.config as cfg
+from telephuzz.config import get_config
 
 
 def test_get_config():
     """Test obtaining the config and reading."""
-    Config.CONFIG_PATH = TEST_CONFIG_PATH
     config = get_config()
 
     assert config.compose_path == "/compose/docker-compose.yaml"
