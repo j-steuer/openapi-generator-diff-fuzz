@@ -1,7 +1,6 @@
 """Tests for abstraction of non-deterministic values."""
 
 import json
-from pathlib import Path
 
 import pytest
 from requests.models import CaseInsensitiveDict
@@ -13,7 +12,7 @@ from telephuzz.request_result import RequestResult
 
 def dummy_result(request: Request, response: Response) -> RequestResult:
     """Return a RequestResult object with the only relevant parts."""
-    return RequestResult("", request, response, Path(""), Path(""))
+    return RequestResult("", request, response, None, None)
 
 
 class TestResponseComponent:
