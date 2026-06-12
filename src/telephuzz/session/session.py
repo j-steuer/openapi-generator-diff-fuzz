@@ -1,5 +1,6 @@
 """File for managing and creating sessions."""
 
+import logging
 import socket
 from contextlib import ExitStack
 from pathlib import Path
@@ -8,7 +9,7 @@ import docker
 from docker.errors import NotFound
 
 from telephuzz.config import get_config
-from telephuzz.constants import DOCKER_NETWORK_NAME
+from telephuzz.constants import CLIENT_PATH, DOCKER_NETWORK_NAME
 from telephuzz.docker_helpers import (
     compose_down,
     compose_up,
@@ -21,6 +22,8 @@ from telephuzz.request_result import RequestResult
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer, LibraryId
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
+
+logger = logging.getLogger(__name__)
 
 
 class Session:
@@ -87,13 +90,10 @@ class SessionManager:
         config = get_config()
         self.api_docker_compose_path = config.compose_path
 
-        client_libraries = [
-            ClientLibraryContainer.from_id(id_) for id_ in config.targets
-        ]
+        self.targets = config.targets
 
-        if len(client_libraries) <= 1:
+        if len(self.targets) <= 1:
             raise TypeError("Must have at least two client libraries under test.")
-        self.client_libraries = client_libraries
         self.api_port_name = config.api_port_name
         self.port_names = config.port_names
 
@@ -123,7 +123,7 @@ class SessionManager:
         env = set_port_env(port_map)
         return env
 
-    def __enter__(self):
+    def __enter__(self) -> "SessionManager":
         """Initialize session manager and docker network, clients, apis and proxy."""
         # create docker network
         client = docker.from_env()
@@ -138,12 +138,16 @@ class SessionManager:
         client.networks.create(name=DOCKER_NETWORK_NAME)
 
         # start up mitmproxy
+        logger.info("Setting up MITMProxy for request and response capturing.")
         self.mitmproxy = self.stack.enter_context(MITMProxyContainer())
 
-        # start up client libraries
-        for client_library in self.client_libraries:
+        # start up client
+        logger.info("Starting up client libraries")
+        for library_id, library_name in self.targets.items():
+            logger.info(f"Starting up {library_id}")
+            lib_class: type = ClientLibraryContainer.from_id(library_id)
             client_container: ClientLibraryContainer = self.stack.enter_context(
-                client_library()
+                lib_class(CLIENT_PATH / library_name)
             )
 
             project_name = self._get_project_name(client_container.id)
