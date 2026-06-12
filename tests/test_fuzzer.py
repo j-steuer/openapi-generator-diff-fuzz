@@ -33,7 +33,7 @@ class TestPreprocessing:
     def test_preprocessing_json(self, basic_oas_json: _TemporaryFileWrapper) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
         path = Path(basic_oas_json.name)
-        fuzzer = TelePhuzz(path)
+        fuzzer = TelePhuzz.__new__(TelePhuzz)
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
             fuzzer._preprocess_oas(path, Path(f.name))
@@ -62,7 +62,7 @@ class TestPreprocessing:
     def test_preprocessing_yaml(self, basic_oas_yaml: _TemporaryFileWrapper) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
         path = Path(basic_oas_yaml.name)
-        fuzzer = TelePhuzz(path)
+        fuzzer = TelePhuzz.__new__(TelePhuzz)
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
             fuzzer._preprocess_oas(path, Path(f.name))
