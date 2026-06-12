@@ -41,7 +41,6 @@ class TelePhuzz:
         self.processed_oas = oas
 
         self.request_generator = request_generator
-        self.session_manager = SessionManager()
         self.evaluator = DiffEvaluator()
 
         self.timeout = get_config().timeout
@@ -125,13 +124,16 @@ class TelePhuzz:
                     "Specified request generator must generate at least one request!"
                 )
 
-            # fuzz until no more request( chain)s available or timeout has been reached
-            while request is not None and (timeout is None or datetime.now() < timeout):
-                # TODO previous responses
-                request = self.request_generator.generate()
-                if request is None:
-                    continue
+            with SessionManager() as session_manager:
+                # fuzz until no more request( chain)s available or timeout
+                while request is not None and (
+                    timeout is None or datetime.now() < timeout
+                ):
+                    # TODO previous responses
+                    request = self.request_generator.generate()
+                    if request is None:
+                        continue
 
-                for current_request in request:
-                    results = self.session_manager.send(current_request)
-                    self.evaluator.eval(results, current_request)
+                    for current_request in request:
+                        results = session_manager.send(current_request)
+                        self.evaluator.eval(results, current_request)

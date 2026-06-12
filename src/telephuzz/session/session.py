@@ -123,7 +123,7 @@ class SessionManager:
         env = set_port_env(port_map)
         return env
 
-    def __enter__(self) -> None:
+    def __enter__(self):
         """Initialize session manager and docker network, clients, apis and proxy."""
         # create docker network
         client = docker.from_env()
@@ -184,7 +184,14 @@ class SessionManager:
 
             self.sessions[client_container.id] = session
 
-    def __exit__(self) -> None:
+        return self
+
+    def __exit__(
+        self,
+        exc_type,
+        exc_value,
+        traceback,
+    ) -> None:
         """Exit and close session-related containers."""
         for id in self.sessions.keys():
             compose_down(self.api_docker_compose_path, self._get_project_name(id))
