@@ -1,6 +1,7 @@
 """File for the main fuzzing loop."""
 
 import json
+import logging
 import os
 import tempfile
 from datetime import datetime, timedelta
@@ -13,9 +14,13 @@ from telephuzz.config import get_config
 from telephuzz.docker_helpers import compose_down, compose_up, set_port_env
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.http_message import HTTPMethod
+from telephuzz.logging_config import setup_logging
 from telephuzz.operation_ids import generate_operation_id
 from telephuzz.request_generator import RequestGenerator, SchemathesisGenerator
 from telephuzz.session.session import SessionManager
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 class TelePhuzz:
@@ -37,6 +42,7 @@ class TelePhuzz:
             Runs until no more requests are generated if not set.
 
         """
+        logging.info("Initializing fuzzing session.")
         self.base_oas = oas
         self.processed_oas = oas
 
@@ -83,7 +89,9 @@ class TelePhuzz:
 
     def _setup_request_generator(self) -> RequestGenerator:
         """Set up the request generator."""
+        logging.info("Setting up request generator.")
         if self.request_generator is None:
+            logging.info("No request generator provided, using default generator.")
             # start up example API
             config = get_config()
             env = set_port_env({config.api_port_name: 8000})
@@ -91,7 +99,9 @@ class TelePhuzz:
 
             # Use SchemathesisGenerator as default
             generator = SchemathesisGenerator(
-                self.processed_oas, "http://localhost:8000"
+                self.processed_oas,
+                "http://localhost:8000",
+                max_time_seconds=self.timeout if self.timeout else 3600,
             )
 
             compose_down(config.compose_path)
@@ -100,6 +110,7 @@ class TelePhuzz:
 
     def start_fuzzing_session(self) -> None:
         """Start the fuzzing session."""
+        logger.info("Starting fuzzing session.")
         with tempfile.TemporaryDirectory() as tmpdir:
             # pre-process OAS
             self.processed_oas = Path(
@@ -126,6 +137,7 @@ class TelePhuzz:
 
             with SessionManager() as session_manager:
                 # fuzz until no more request( chain)s available or timeout
+                logger.info("Beginning to fuzz clients.")
                 while request is not None and (
                     timeout is None or datetime.now() < timeout
                 ):
