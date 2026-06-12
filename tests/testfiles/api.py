@@ -1,5 +1,6 @@
 """Fastapi-based API used for testing."""
 
+import os
 import subprocess
 
 from fastapi import Body, FastAPI, Query
@@ -31,4 +32,5 @@ def create_user(name: str = Body(...), age: int = Body(..., ge=0)):
 
 
 if __name__ == "__main__":
-    subprocess.run(["fastapi", "run", __file__, "--port", "8000"])
+    port = os.getenv("HOST_PORT", "8000")
+    subprocess.run(["fastapi", "run", __file__, "--port", port])

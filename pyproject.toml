@@ -46,11 +46,11 @@ telephuzz = ["py.typed"]
 [tool.ruff]
 target-version = "py313"
 line-length = 88
-ignore = ["B008"] # complains about FastAPI Depends otherwise
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "D"]
+select = ["E", "F", "I", "B"]
 fixable = ["ALL"]
+ignore = ["B008"] # complains about FastAPI Depends otherwise
 
 [tool.ruff.lint.isort]
 known-first-party = ["telephuzz"]
