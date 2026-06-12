@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools==82.0.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telephuzz-basic-client"
+version = "0.1.0"
+description = "A basic client using the requests library for testing purposes."
+authors = [
+    { name="Justin Steuer", email="s8jnsteu@stud.uni-saarland.de" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests==2.33.1"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
