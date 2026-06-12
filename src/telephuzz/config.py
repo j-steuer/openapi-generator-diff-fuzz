@@ -15,8 +15,9 @@ class Config:
         config = self._get_config()
 
         api_config = config["api"]
+        assert isinstance(api_config, dict)
         self.compose_path = api_config["compose-path"]
-        self.database_type = api_config["database-type"]
+        self.database_type = api_config.get("database-type")
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])
         self.port_names.add(self.api_port_name)
@@ -24,6 +25,7 @@ class Config:
         self.targets = set(config["targets"])
 
         fuzzing_config = config["fuzzing"]
+        assert isinstance(fuzzing_config, dict)
         self.log_path = fuzzing_config["log-path"]
         self.timeout = fuzzing_config["timeout"]
 
