@@ -7,7 +7,12 @@ api:
     POST-test/example: ["date", "token"]
     GET-test/random: ["random"]
 
-targets: ["openapi-generator:python", "swagger-codegen:python"]
+targets:
+  - id: openapi-generator:python
+    lib_name: openapi-gen-python-client
+
+  - id: swagger-codegen:python
+    lib_name: swagger-codegen-python-client
 
 fuzzing:
   log-path: "/logs/telephuzz"

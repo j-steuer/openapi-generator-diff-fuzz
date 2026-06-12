@@ -22,7 +22,9 @@ class Config:
         self.port_names = set(api_config["port-names"])
         self.port_names.add(self.api_port_name)
 
-        self.targets = set(config["targets"])
+        self.targets = dict()
+        for target in config["targets"]:
+            self.targets[target["id"]] = target["lib_name"]
 
         fuzzing_config = config["fuzzing"]
         assert isinstance(fuzzing_config, dict)
