@@ -1,6 +1,7 @@
 """Implementation for result evaluation."""
 
 import itertools
+import logging
 import os
 from pprint import pformat
 from typing import Any
@@ -13,6 +14,8 @@ from telephuzz.request_result import RequestResult
 from telephuzz.session.client_library import LibraryId
 
 # TODO make detail own object
+
+logger = logging.getLogger(__name__)
 
 
 class DiffEvaluator:
@@ -66,6 +69,8 @@ class DiffEvaluator:
         diff_reports: dict[LibraryId, list[DiffReport]] = {
             l_id: [] for l_id in [r.library for r in results]
         }
+
+        logger.debug(f"Evaluating results for request: {repr(original_request)}")
 
         # input validation
         if len(results) <= 1:
