@@ -17,6 +17,12 @@ def test_simple_schemathesis_generator(api):
 
     # run basic Request structure assertions
     for request in generator.pregenerated_requests:
+        # method should be GET or POST
+        assert request.method.value in ["GET", "POST"], request.method.value
+
+        # path should be /greet or /user
+        assert "/greet" in request.path or "/user" in request.path
+
         # query parameters should match in path and query_parameters
         if "?" in request.path:
             assert request.query_parameters, (
