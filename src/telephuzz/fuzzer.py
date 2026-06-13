@@ -18,7 +18,11 @@ from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.http_message import HTTPMethod
 from telephuzz.logging_config import setup_logging
 from telephuzz.operation_ids import generate_operation_id
-from telephuzz.request_generator import RequestGenerator, SchemathesisGenerator
+from telephuzz.request_generator import (
+    FuzzerBasedGenerator,
+    RequestGenerator,
+    SchemathesisGenerator,
+)
 from telephuzz.session.session import SessionManager
 
 setup_logging()
@@ -159,9 +163,10 @@ class TelePhuzz:
             with SessionManager() as session_manager:
                 # fuzz until no more request( chain)s available or timeout
                 logger.info("Beginning to fuzz clients.")
-                while request is not None and (
-                    timeout is None or datetime.now() < timeout
-                ):
+                use_timeout = timeout is not None and not isinstance(
+                    self.request_generator, FuzzerBasedGenerator
+                )
+                while request is not None:
                     # TODO previous responses
                     request = self.request_generator.generate()
                     if request is None:
@@ -170,3 +175,8 @@ class TelePhuzz:
                     for current_request in request:
                         results = session_manager.send(current_request)
                         self.evaluator.eval(results, current_request)
+
+                    if use_timeout:
+                        assert timeout is not None
+                        if datetime.now() >= timeout:
+                            break
