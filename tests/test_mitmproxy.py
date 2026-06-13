@@ -7,6 +7,7 @@ from pathlib import Path
 
 import requests
 
+from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 
@@ -75,3 +76,10 @@ def test_single_target(api) -> None:
             entry_data = json.load(f)
 
         assert "Hello Alice, you are 30 years old!" in entry_data["response"]["body"]
+
+
+def test_through_proxy(basic_request: Request) -> None:
+    proxy = MITMProxyContainer.__new__(MITMProxyContainer)
+    basic_request.path = "/test?example=0"
+    proxy_request = proxy.through_proxy(basic_request, 1234)
+    assert proxy_request.path == "/localhost:1234/test?example=0"

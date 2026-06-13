@@ -115,5 +115,6 @@ class MITMProxyContainer:
     def through_proxy(self, request: Request, library_port: int) -> Request:
         """Make the request target the proxy and encode the target."""
         new_request = deepcopy(request)
-        new_request.path = f"/localhost:{library_port}/{request.path}"
+        extra_slash = "/" if not request.path.startswith("/") else ""
+        new_request.path = f"/localhost:{library_port}{extra_slash}{request.path}"
         return new_request
