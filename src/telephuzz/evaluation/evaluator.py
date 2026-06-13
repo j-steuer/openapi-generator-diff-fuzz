@@ -1,6 +1,7 @@
 """Implementation for result evaluation."""
 
 import itertools
+import os
 from pprint import pformat
 from typing import Any
 
@@ -252,6 +253,9 @@ class DiffEvaluator:
                 diff_reports[library].append(report)
 
         if log_errors:
+            # create log directory if not present
+            os.makedirs(self.log_path, exist_ok=True)
+
             # log all reports
             for report in itertools.chain.from_iterable(diff_reports.values()):
                 report.to_log(self.log_path)
