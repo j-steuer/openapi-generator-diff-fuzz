@@ -6,8 +6,10 @@ import os
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
+from time import sleep
 from typing import cast
 
+import requests
 import yaml  # type: ignore
 
 from telephuzz.config import get_config
@@ -96,6 +98,25 @@ class TelePhuzz:
             config = get_config()
             env = set_port_env({config.api_port_name: 8000})
             compose_up(config.compose_path, env=env)
+
+            # check that API server is ready
+            timeout = 5
+            for i in range(timeout + 1):
+                try:
+                    if (
+                        requests.get(
+                            "http://localhost:8000/openapi.json",
+                            timeout=1,
+                        ).status_code
+                        == 200
+                    ):
+                        break
+                except requests.RequestException:
+                    pass
+
+                if i == timeout:
+                    raise TimeoutError("API server did not start in time.")
+                sleep(1)
 
             # Use SchemathesisGenerator as default
             generator = SchemathesisGenerator(
