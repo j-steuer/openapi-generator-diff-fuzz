@@ -36,3 +36,10 @@ def test_transform_case_pascal() -> None:
     """Test transforming operation id to camel pascal."""
     operation_id = generate_operation_id("GET", "/test/{id}")
     assert "GetTestId" in transform_case(operation_id, Case("pascal"))
+
+
+def test_operation_ids_ignore_query() -> None:
+    """Query parameters should be ignored when generating the operation id."""
+    operation_id_no_query = generate_operation_id("GET", "/test")
+    operation_id_with_qury = generate_operation_id("GET", "/test?example=0")
+    assert operation_id_no_query == operation_id_with_qury

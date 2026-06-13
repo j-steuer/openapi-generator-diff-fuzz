@@ -25,10 +25,13 @@ class Case(Enum):
 
 def generate_operation_id(method: str, path: str) -> str:
     """Generate an operation id based on the method and path."""
-    path_part = path.strip("/").replace("/", "_").replace("{", "").replace("}", "")
+    path_segment = path[: path.find("?")] if "?" in path else path
+    path_part = (
+        path_segment.strip("/").replace("/", "_").replace("{", "").replace("}", "")
+    )
     operation_id = f"{method.lower()}_{path_part}"
     # add hash of full path to avoid collisions
-    hash_input = f"{method.upper()}:{path}"
+    hash_input = f"{method.upper()}:{path_segment}"
     operation_id += f"_{hashlib.sha1(hash_input.encode()).hexdigest()[:8]}"
 
     return operation_id
