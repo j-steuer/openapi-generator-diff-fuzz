@@ -1,5 +1,6 @@
 """Helper methods for docker."""
 
+import logging
 import os
 import subprocess
 import tarfile
@@ -8,6 +9,8 @@ from io import BytesIO
 from pathlib import Path
 
 from docker.models.containers import Container
+
+logger = logging.getLogger(__name__)
 
 
 def set_port_env(port_map: dict[str, int]) -> dict[str, str]:
@@ -22,6 +25,7 @@ def compose_up(
     compose_path: Path, env: dict[str, str] | None = None, project: str = ""
 ):
     """Run docker compose up."""
+    logger.info(f"Running docker compose using {compose_path}")
     cmd = ["docker", "compose", "-f", str(compose_path)]
     if project:
         cmd += ["-p", project]
@@ -31,6 +35,7 @@ def compose_up(
         env=env,
         check=True,
     )
+    logger.info("Finished running docker compose.")
 
 
 def compose_down(compose_path: Path, project: str = "", graceful: bool = False) -> None:
