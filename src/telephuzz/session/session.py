@@ -106,7 +106,9 @@ class SessionManager:
 
     def _get_project_name(self, id: LibraryId) -> str:
         """Get the docker compose project id for a library."""
-        return f"api_{id}"
+        base = f"api-{id}"
+        project_name = base.replace(":", "-")
+        return project_name
 
     def _get_compose_env(self) -> dict[str, str]:
         """Get env with free host ports for docker compose components.
@@ -120,6 +122,7 @@ class SessionManager:
                 s.bind(("127.0.0.1", 0))
                 ports.add(s.getsockname()[1])
         port_map = {port_name: ports.pop() for port_name in self.port_names}
+        logger.debug(f"Ports chosen: {port_map}")
         env = set_port_env(port_map)
         return env
 
