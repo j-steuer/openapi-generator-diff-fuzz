@@ -1,5 +1,6 @@
 """File for code relating to request generation."""
 
+import logging
 import os
 import subprocess
 import sys
@@ -9,6 +10,8 @@ from pathlib import Path
 
 from telephuzz.http_message import Request, Response
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
+
+logger = logging.getLogger(__name__)
 
 
 class RequestGenerator(ABC):
@@ -57,6 +60,7 @@ class FuzzerBasedGenerator(OASRequestGenerator):
             log_fuzzer: If true, display stdout and stderr messages produced by cmd
 
         """
+        logger.info("Setting up fuzzer-based generator.")
         self.oas = oas
         self.pregenerated_requests: list[Request] = []
 
@@ -69,6 +73,8 @@ class FuzzerBasedGenerator(OASRequestGenerator):
                     stdout=sys.stdout if log_fuzzer else subprocess.DEVNULL,
                     stderr=sys.stderr if log_fuzzer else subprocess.DEVNULL,
                 )
+
+            logger.info("Finished generating requests.")
 
             responses = os.listdir(tmpdir)
             if len(responses) < 1:
