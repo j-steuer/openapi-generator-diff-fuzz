@@ -1,0 +1,7 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: dockerfiles/api.dockerfile
+    ports:
+      - "${HOST_PORT:-8000}:8000"
