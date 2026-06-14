@@ -109,7 +109,7 @@ class Request(HTTPMessage):
                 self.method,
                 self.path,
                 json.dumps(self.query_parameters, sort_keys=True),
-                json.dumps(body, sort_keys=True) if body else body,
+                json.dumps(body, sort_keys=True) if body is not None else body,
                 json.dumps(dict(self.headers), sort_keys=True),
             )
         )
@@ -156,7 +156,7 @@ class Response(HTTPMessage):
             (
                 self.status,
                 self.text,
-                (json.dumps(body, sort_keys=True) if body else body),
+                (json.dumps(body, sort_keys=True) if body is not None else body),
                 json.dumps(dict(self.headers), sort_keys=True),
             )
         )

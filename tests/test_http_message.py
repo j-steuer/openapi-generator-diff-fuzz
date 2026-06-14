@@ -16,6 +16,10 @@ def test_request_hash():
     )
     hash(request)
 
+    # test hashing with empty body
+    request.body = {}
+    hash(request)
+
 
 def test_response_hash():
     """Test hashing a response object."""
@@ -25,4 +29,8 @@ def test_response_hash():
         status=404,
         text="Not found.",
     )
+    hash(response)
+
+    # test hashing with empty body
+    response.body = {}
     hash(response)
