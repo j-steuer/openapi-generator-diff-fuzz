@@ -43,6 +43,7 @@ def request(flow: http.HTTPFlow):
 def response(flow: http.HTTPFlow):
     """Convert the response to JSON."""
     assert flow.response is not None
+    # TODO fix body
     entry = {
         "request": {
             "method": flow.request.method,
@@ -54,6 +55,7 @@ def response(flow: http.HTTPFlow):
             "status_code": flow.response.status_code,
             "headers": dict(flow.response.headers),
             "body": flow.response.get_text(),
+            "text": flow.response.get_text(),
         },
     }
 

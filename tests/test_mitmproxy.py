@@ -31,6 +31,20 @@ def test_simple_routing(api) -> None:
         )
 
 
+def test_simple_routing_query_parameter(api) -> None:
+    """Test routing a request with a query parameter via mitmproxy container."""
+    params: dict = {"user_id": 1013}
+
+    with MITMProxyContainer() as mitm_proxy:
+        assert (
+            "This is a GET request returning user info"
+            in requests.get(
+                f"http://localhost:{mitm_proxy.listen_port}/localhost:8000/user?user_id=1013",
+                params=params,
+            ).text
+        )
+
+
 def test_json_response(api) -> None:
     """Test conversion of requests and responses into JSON."""
     params: dict = {"name": "Alice", "age": 30}

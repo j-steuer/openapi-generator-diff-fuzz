@@ -138,10 +138,13 @@ class Response(HTTPMessage):
         else:
             data = json.loads(json_data)
 
+        if "response" in data:
+            data = data["response"]
+
         return Response(
             headers=CaseInsensitiveDict(data["headers"]),
             body=data["body"],
-            status=data["status"],
+            status=data["status_code"],
             text=data["text"],
         )
 

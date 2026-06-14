@@ -117,4 +117,5 @@ class MITMProxyContainer:
         new_request = deepcopy(request)
         extra_slash = "/" if not request.path.startswith("/") else ""
         new_request.path = f"/localhost:{library_port}{extra_slash}{request.path}"
+        new_request.path = new_request.path.replace("localhost", "host.docker.internal")
         return new_request

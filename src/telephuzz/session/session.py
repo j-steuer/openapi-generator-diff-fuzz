@@ -1,7 +1,9 @@
 """File for managing and creating sessions."""
 
 import logging
+import os
 import socket
+import tempfile
 from contextlib import ExitStack
 from pathlib import Path
 
@@ -34,18 +36,28 @@ class Session:
         self.api = api
         self.client = client
 
-    def send(self, request: Request, api_path: str) -> RequestResult:
+    def send(
+        self, request: Request, api_path: str, response_output: Path
+    ) -> RequestResult:
         """Send a request to the API through the client library."""
+
+        def _get_response() -> Response:
+            # files are named after timestamp
+            latest_file = max(os.listdir(response_output))
+
+            response_path = response_output / latest_file
+            return Response.from_json(Path(response_path).absolute())
+
         if not isinstance(self.api, APIWithDatabaseContainer):
-            response = self.client.send(request, api_path)
-            assert isinstance(response, Response)
+            self.client.send(request, api_path)
+            response = _get_response()
             return RequestResult(self.client.id, request, response, None, None)
         else:
             out_before = Path("/tmp/before")
             out_after = Path("/out/after")
             self.api.get_state(out_before)
-            response = self.client.send(request, api_path)
-            assert isinstance(response, Response)
+            self.client.send(request, api_path)
+            response = _get_response()
             self.api.get_state(out_after)
 
             # TODO path within project?
@@ -142,7 +154,10 @@ class SessionManager:
 
         # start up mitmproxy
         logger.info("Setting up MITMProxy for request and response capturing.")
-        self.mitmproxy = self.stack.enter_context(MITMProxyContainer())
+        self.result_dir = self.stack.enter_context(tempfile.TemporaryDirectory())
+        self.mitmproxy = self.stack.enter_context(
+            MITMProxyContainer(response_output=self.result_dir)
+        )
 
         # start up client
         logger.info("Starting up client libraries")
@@ -213,7 +228,9 @@ class SessionManager:
             proxy_request = self.mitmproxy.through_proxy(request, api_port)
             results.add(
                 session.send(
-                    proxy_request, f"http://localhost:{self.mitmproxy.listen_port}"
+                    proxy_request,
+                    f"http://host.docker.internal:{self.mitmproxy.listen_port}",
+                    Path(self.result_dir),
                 )
             )
 

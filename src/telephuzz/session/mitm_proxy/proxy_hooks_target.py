@@ -17,13 +17,14 @@ def response(flow: http.HTTPFlow):
             "method": flow.request.method,
             "url": flow.request.pretty_url,
             "headers": dict(flow.response.headers),
-            "body": flow.request.get_text(),
+            "body": flow.response.get_text(),
             "query_parameters": dict(flow.request.query),
         },
         "response": {
             "status_code": flow.response.status_code,
             "headers": dict(flow.response.headers),
             "body": flow.response.get_text(),
+            "text": flow.response.get_text(),
         },
     }
 

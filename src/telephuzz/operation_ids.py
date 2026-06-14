@@ -29,7 +29,9 @@ def generate_operation_id(method: str, path: str) -> str:
     path_segment = path[: path.find("?")] if "?" in path else path
 
     # ignore mitmproxy target prefix
-    if path_segment.startswith("/localhost:"):
+    if path_segment.startswith("/localhost:") or path_segment.startswith(
+        "/host.docker.internal:"
+    ):
         path_segment = path_segment[path_segment.find("/", 1) :]
 
     path_part = (
