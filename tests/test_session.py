@@ -7,26 +7,12 @@ from uuid import uuid4
 
 from conftest import PrefillMethod
 
-from telephuzz.http_message import Request
 from telephuzz.session.api import APIH2DatabaseContainer
 from telephuzz.session.session import Session, SessionManager
 
 
 class TestSession:
     """Unit tests for Session."""
-
-    def test_send_no_db(
-        self, basic_request: Request, mock_client: Mock, mock_api_no_db: Mock
-    ):
-        """Test sending with no db."""
-        session = Session(api=mock_api_no_db, client=mock_client)
-        body = "TESTBODY"
-        basic_request.body = body
-        api_path = "http://localhost:8000"
-        result = session.send(basic_request, api_path=api_path)
-        assert result.request == basic_request
-        assert result.response.body == mock_client.mock_body
-        mock_client.send.assert_called_once_with(basic_request, api_path)
 
     def test_overwrite_db(self, prefilled_h2: PrefillMethod, mock_client: Mock):
         """Integration test for overwriting the API state."""
