@@ -57,7 +57,7 @@ class Request(HTTPMessage):
                 json_data.exists()
                 and json_data.is_file()
                 and json_data.suffix == ".json"
-            ), "Path must lead to a JSON file."
+            ), f"Path {json_data} must lead to a JSON file."
 
             with open(json_data, "r") as f:
                 try:

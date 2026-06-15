@@ -105,8 +105,8 @@ class SessionManager:
 
         self.targets = config.targets
 
-        if len(self.targets) <= 1:
-            raise TypeError("Must have at least two client libraries under test.")
+        if len(self.targets) <= 2:
+            raise TypeError("Must have at least three client libraries under test.")
         self.api_port_name = config.api_port_name
         self.port_names = config.port_names
 
@@ -224,7 +224,6 @@ class SessionManager:
 
     def send(self, request: Request) -> set[RequestResult]:
         """Send a request through all libraries."""
-        print("DEBUG:", repr(request))
         results: set[RequestResult] = set()
 
         for session in self.sessions.values():

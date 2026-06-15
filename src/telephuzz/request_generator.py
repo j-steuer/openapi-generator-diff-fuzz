@@ -8,8 +8,11 @@ import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from telephuzz.constants import BASE_PATH
 from telephuzz.http_message import Request, Response
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
+
+SCHEMATHESIS_CONFIG_PATH = BASE_PATH / "schemathesis.toml"
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +100,9 @@ class FuzzerBasedGenerator(OASRequestGenerator):
         if not self.pregenerated_requests:
             return None
 
+        if not hasattr(self, "total"):
+            self.total = len(self.pregenerated_requests)
+
         request = self.pregenerated_requests.pop(0)
         return [request]
 
@@ -119,6 +125,8 @@ class SchemathesisGenerator(FuzzerBasedGenerator):
         """Initialize the SchemathesisGenerator."""
         cmd = [
             "schemathesis",
+            "--config-file",
+            str(SCHEMATHESIS_CONFIG_PATH),
             "fuzz",
             str(oas),
             "--url",
@@ -126,6 +134,8 @@ class SchemathesisGenerator(FuzzerBasedGenerator):
             "--max-time",
             str(max_time_seconds),
             "--continue-on-failure",
+            "-m",
+            "positive",
         ]
         super().__init__(
             oas=oas,

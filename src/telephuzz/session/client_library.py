@@ -3,6 +3,7 @@
 import hashlib
 import io
 import json
+import logging
 import os
 import re
 import shutil
@@ -25,6 +26,8 @@ from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 LibraryId = str
 
 LIB_PATH = "/app"
+
+logger = logging.getLogger(__name__)
 
 
 def decode_output(output: bytes | Iterable[bytes]) -> str:
@@ -180,6 +183,7 @@ class ClientLibraryContainer(ABC):
 
     def send(self, request: Request, api_path: str) -> Response | str:
         """Send a request through the client library."""
+        logger.debug(f"{self.id} sending request: {repr(request)}")
         assert self.container is not None, "Container not set"
         exit_code, output = self.container.exec_run(
             cmd=self._translate(request, api_path)

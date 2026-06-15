@@ -10,6 +10,9 @@ targets:
   - id: test-client2:python
     lib_name: basic_client
 
+  - id: test-client3:python
+    lib_name: basic_client
+
 fuzzing:
   log-path: "/tmp/logs/telephuzz"
-  timeout: 3
+  timeout: 1

@@ -3,6 +3,7 @@
 import itertools
 import logging
 import os
+from pathlib import Path
 from pprint import pformat
 from typing import Any
 
@@ -25,7 +26,9 @@ class DiffEvaluator:
         """Initialize the DiffEvaluator."""
         self.abstractor = Abstractor()  # TODO config file to provide args
 
-        self.log_path = get_config().log_path
+        self.log_path = Path(get_config().log_path)
+        # create log path if necessary
+        os.makedirs(self.log_path, exist_ok=True)
 
     def _get_error_id(self, result: RequestResult) -> str:
         """Given an erroneous request result, obtain an error id."""
@@ -58,6 +61,14 @@ class DiffEvaluator:
                     raise ValueError(f"Results do not have attribute {attr}")
 
                 component = getattr(result, attr)
+
+                # normalize request paths
+                if isinstance(component, Request):
+                    if component.path.startswith(
+                        "/localhost:"
+                    ) or component.path.startswith("/host.docker.internal:"):
+                        component.path = component.path[component.path.find("/", 1) :]
+
                 if component not in groups:
                     groups[component] = [result.library]
                 else:
@@ -73,8 +84,8 @@ class DiffEvaluator:
         logger.debug(f"Evaluating results for request: {repr(original_request)}")
 
         # input validation
-        if len(results) <= 1:
-            raise ValueError("Must have at least two results to compare.")
+        if len(results) <= 2:
+            raise ValueError("Must have at least threee results to compare.")
 
         library_id_list = [r.library for r in results]
         if len(library_id_list) != len(set(library_id_list)):
@@ -88,6 +99,7 @@ class DiffEvaluator:
             self.abstractor.abstract(result)
 
         # compare requests
+
         request_groups: dict[Request, list[LibraryId]] = _get_groups("request")
 
         if original_request not in request_groups or len(request_groups) > 1:

@@ -33,9 +33,7 @@ class TelePhuzz:
     """The main fuzzer class."""
 
     def __init__(
-        self,
-        oas: Path,
-        request_generator: RequestGenerator | None = None,
+        self, oas: Path, request_generator: RequestGenerator | None = None
     ) -> None:
         """Initialize a TelePhuzz instance.
 
