@@ -15,5 +15,5 @@ targets:
     lib_name: swagger-codegen-python-client
 
 fuzzing:
-  log-path: "/logs/telephuzz"
+  log-path: "/tmp/logs/telephuzz"
   timeout: 3600
