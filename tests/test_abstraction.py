@@ -176,3 +176,36 @@ class TestAbstractor:
         assert headers["Date"] == ABSTRACTED
         assert headers["Custom-Remove"] == ABSTRACTED
         assert headers["Custom-Keep"] == 1
+
+    def test_config_components(self, basic_request: Request, basic_response: Response):
+        """Test abstracting values defined in the config."""
+        basic_request.method = HTTPMethod.GET
+        basic_request.path = "/test/random"
+
+        json_response = json.dumps(
+            {
+                "level1": {
+                    "level2": {"Custom": "1"},
+                    "other_key": 123,
+                    "random": "234",
+                },
+                "random": "1234",
+            }
+        )
+
+        basic_response.body = json_response
+
+        result = dummy_result(basic_request, basic_response)
+
+        abstractor = Abstractor()
+        assert any(
+            component.method == HTTPMethod.GET
+            and component.path == "/test/random"
+            and component.json_component == "random"
+            for component in abstractor.custom_response_components
+        )
+
+        abstractor.abstract(result)
+        abstracted_json_response = json.loads(result.response.body)
+        assert abstracted_json_response["random"] == ABSTRACTED
+        assert abstracted_json_response["level1"]["random"] == ABSTRACTED

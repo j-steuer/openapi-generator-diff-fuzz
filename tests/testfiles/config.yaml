@@ -3,9 +3,14 @@ api:
   database-type: "H2"
   api-port-name: "HOST_PORT"
   port-names: ["HOST_PORT", "DB_PORT"]
-  non-deterministic-fields:
-    POST-test/example: ["date", "token"]
-    GET-test/random: ["random"]
+  nondeterministic-fields:
+    POST:
+      /test/example:
+        - timestamp
+        - token
+    GET:
+      /test/random:
+        - random
 
 targets:
   - id: openapi-generator:python

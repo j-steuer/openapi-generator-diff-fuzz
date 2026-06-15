@@ -21,6 +21,10 @@ class Config:
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])
         self.port_names.add(self.api_port_name)
+        self.nondeterministic_fields = api_config.get("nondeterministic-fields", {})
+        for method, paths in self.nondeterministic_fields.items():
+            for path, fields in paths.items():
+                self.nondeterministic_fields[method][path] = set(fields)
 
         self.targets = dict()
         for target in config["targets"]:

@@ -6,6 +6,7 @@ from _collections_abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.request_result import RequestResult
 
@@ -100,6 +101,28 @@ class Abstractor:
         self.nondeterministic_headers_pattern = []
         if abstract_x_headers:
             self.nondeterministic_headers_pattern.append(r"^x-.*")
+
+        # parse config for additional abstraction targets
+        config_nondeterministic: (
+            dict[str | None, dict[str | None, set | None]] | None
+        ) = get_config().nondeterministic_fields
+
+        if config_nondeterministic is not None:
+            for method, path_values in config_nondeterministic.items():
+                for path, values in path_values.items():
+                    if values is None:
+                        component = ResponseComponent(
+                            method=HTTPMethod(method), path=path, json_component=values
+                        )
+                        self.custom_response_components.append(component)
+                    else:
+                        for value in values:
+                            component = ResponseComponent(
+                                method=HTTPMethod(method),
+                                path=path,
+                                json_component=value,
+                            )
+                        self.custom_response_components.append(component)
 
     def _transform_json(self, json_data: Any, target_key: str):
         if isinstance(json_data, Mapping):
