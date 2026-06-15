@@ -144,4 +144,33 @@ class DiffReport:
 
     def to_log(self, log_path: Path) -> None:
         """Write the information contained in the report to a log file."""
-        raise NotImplementedError  # TODO
+        error_str = f"Error report {self.error_id}\n"
+        error_str += "----------------------------\n"
+
+        error_str += "Requests:\n"
+        for request in self.request_chain:
+            error_str += repr(request) + "\n"
+        error_str += "----------------------------\n"
+
+        error_str += f"Error occured in library {self.library_id}:\n"
+
+        request_only = "Only the request showed deviations.\n"
+        if self.request_only:
+            error_str += request_only
+
+        unique = "Error was unique and only occured in this client.\n"
+        not_unique = "Error was not unique and occured in other clients.\n"
+        error_str += unique if self.unique else not_unique
+
+        persistent = (
+            "A change was detected in the database, implying a perrsistent error.\n"
+        )
+        not_persistent = "No deviation in the database state was detected.\n"
+        error_str += persistent if self.persistent else not_persistent
+
+        error_str += self.detail
+
+        # TODO format, JSON?
+        file_name = f"{self.error_id}_{self.library_id}.txt"
+        with open(log_path / file_name, "w") as f:
+            f.write(error_str)

@@ -1,5 +1,8 @@
 """Unit tests for DiffReport."""
 
+import tempfile
+from pathlib import Path
+
 import pytest
 
 from telephuzz.evaluation.report import DiffReport
@@ -135,3 +138,31 @@ def test_request_chain_mismatch(basic_request: Request, capsys) -> None:
     report2 = DiffReport("1", "1", True, [basic_request])  # TODO hash for Request
     with pytest.raises(ValueError, match="conflicting request chains"):
         DiffReport.unify({frozenset({report1, report2})})
+
+
+def test_to_log(basic_request: Request) -> None:
+    """Test writing a log file."""
+    report = DiffReport(
+        "lib1",
+        "err1",
+        persistent=False,
+        request_chain=[basic_request],
+        request_only=True,
+        unique=True,
+        detail="Test detail",
+    )
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        report.to_log(Path(temp_dir))
+
+        with open(Path(temp_dir) / "err1_lib1.txt") as f:
+            content = f.read()
+
+    assert "lib1" in content
+    assert "err1" in content
+    assert "Only the request" in content
+    assert "Error was unique" in content
+    assert "No deviation in the database" in content
+    assert basic_request.method.value in content
+    assert basic_request.path in content
+    assert "Test detail" in content
