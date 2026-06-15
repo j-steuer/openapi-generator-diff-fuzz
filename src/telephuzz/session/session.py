@@ -8,6 +8,7 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import docker
+import requests
 from docker.errors import NotFound
 
 from telephuzz.config import get_config
@@ -46,7 +47,7 @@ class Session:
             latest_file = max(os.listdir(response_output))
 
             response_path = response_output / latest_file
-            return Response.from_json(Path(response_path).absolute())
+            return Response.from_json(response_path)
 
         if not isinstance(self.api, APIWithDatabaseContainer):
             self.client.send(request, api_path)
@@ -115,6 +116,7 @@ class SessionManager:
         self.database_type = config.database_type
 
         self.stack = ExitStack()
+        self.warmup = False
 
     def _get_project_name(self, id: LibraryId) -> str:
         """Get the docker compose project id for a library."""
@@ -222,8 +224,17 @@ class SessionManager:
 
     def send(self, request: Request) -> set[RequestResult]:
         """Send a request through all libraries."""
+        print("DEBUG:", repr(request))
         results: set[RequestResult] = set()
+
         for session in self.sessions.values():
+            if not self.warmup:
+                # no idea why it is needed, capturing responses does not work
+                # without this for some reason. TODO investigate
+                api_url = f"http://localhost:{self.mitmproxy.listen_port}"
+                api_port = session.api.port
+                requests.get(f"{api_url}/localhost:{api_port}/openapi.json")
+                self.warmup = True
             api_port = session.api.port
             proxy_request = self.mitmproxy.through_proxy(request, api_port)
             results.add(
