@@ -52,6 +52,23 @@ def test_method_name_schemathesis_generator(api):
 def test_batches(api):
     """Test generating requests in batches."""
     with SchemathesisGenerator(
+        OAS_PATH, "http://localhost:8000", max_time_seconds=10, batch_time=1
+    ) as generator:
+        responses = []
+        for _ in range(10):
+            responses.append(generator.generate())
+
+        for response in responses:
+            assert isinstance(response, list)
+            assert len(response) > 10
+
+        if generator.generate() is not None:
+            assert generator.generate() is None
+
+
+def test_batches_uneven(api):
+    """Test generating requests in batche swith uneven run times."""
+    with SchemathesisGenerator(
         OAS_PATH, "http://localhost:8000", max_time_seconds=10, batch_time=7
     ) as generator:
         # should collect two times
