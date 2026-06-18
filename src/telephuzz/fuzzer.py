@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import tempfile
+from contextlib import ExitStack
 from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
@@ -27,6 +28,8 @@ from telephuzz.session.session import SessionManager
 
 setup_logging()
 logger = logging.getLogger(__name__)
+
+SCHEMATHESIS_PROJECT = "schemathesis_project"
 
 
 class TelePhuzz:
@@ -54,6 +57,8 @@ class TelePhuzz:
         self.evaluator = DiffEvaluator()
 
         self.timeout = get_config().timeout
+
+        self.exit_stack = ExitStack()
 
     def _preprocess_oas(self, oas: Path, output_path: Path) -> None:
         """Pre-process an OpenAPI spec and map all paths to own operationId.
@@ -99,7 +104,7 @@ class TelePhuzz:
             # start up example API
             config = get_config()
             env = set_port_env({config.api_port_name: 8000})
-            compose_up(config.compose_path, env=env)
+            compose_up(config.compose_path, env=env, project=SCHEMATHESIS_PROJECT)
 
             # check that API server is ready
             timeout = 5
@@ -121,13 +126,14 @@ class TelePhuzz:
                 sleep(1)
 
             # Use SchemathesisGenerator as default
-            generator = SchemathesisGenerator(
-                self.processed_oas,
-                "http://localhost:8000",
-                max_time_seconds=self.timeout if self.timeout else 3600,
+            generator = self.exit_stack.enter_context(
+                SchemathesisGenerator(
+                    self.processed_oas,
+                    "http://localhost:8000",
+                    max_time_seconds=self.timeout if self.timeout else 3600,
+                    proxy_port=8081,
+                )
             )
-
-            compose_down(config.compose_path)
             return generator
         return self.request_generator  # TODO way to pass processed OAS
 
@@ -178,3 +184,7 @@ class TelePhuzz:
                         assert timeout is not None
                         if datetime.now() >= timeout:
                             break
+
+        if isinstance(self.request_generator, FuzzerBasedGenerator):
+            self.exit_stack.close()
+            compose_down(get_config().compose_path, project=SCHEMATHESIS_PROJECT)
