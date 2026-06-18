@@ -1,5 +1,6 @@
 """Tests for DiffFuzzer."""
 
+import os
 from copy import deepcopy
 
 from requests.models import CaseInsensitiveDict
@@ -91,3 +92,32 @@ def test_same_diff_response():
 
     assert len(libs) == 1
     assert "Lib2" in libs
+
+
+def test_logging():
+    """Test that differences are logged."""
+
+    evaluator = DiffEvaluator()
+
+    request = Request(
+        headers=CaseInsensitiveDict({"test_header": 123}),
+        body="This is a test body.",
+        method=HTTPMethod.POST,
+        path="/example/path",
+        query_parameters={"test_parameter": 567},
+    )
+    response = Response(
+        headers=CaseInsensitiveDict({"response_header": "test"}),
+        body="This is a response body.",
+        status=404,
+        text="Not found.",
+    )
+    wrong_request = deepcopy(request)
+    request.body = "Wrong body."
+    result1 = RequestResult("Lib1", request, response, None, None)
+    result2 = RequestResult("Lib2", wrong_request, response, None, None)
+    result3 = RequestResult("Lib3", request, response, None, None)
+    libs = evaluator.eval({result1, result2, result3}, request, log_errors=True)
+
+    assert len(libs) == 1
+    assert len(os.listdir(evaluator.log_path)) == 1
