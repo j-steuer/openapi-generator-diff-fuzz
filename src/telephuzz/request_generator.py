@@ -6,7 +6,9 @@ import subprocess
 import sys
 import tempfile
 from abc import ABC, abstractmethod
+from contextlib import ExitStack
 from pathlib import Path
+from time import sleep
 
 from telephuzz.constants import BASE_PATH
 from telephuzz.http_message import Request, Response
@@ -67,38 +69,57 @@ class FuzzerBasedGenerator(OASRequestGenerator):
         self.oas = oas
         self.pregenerated_requests: list[Request] = []
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with MITMProxyContainer(
-                response_output=tmpdir, listen_port=proxy_port, target=base_api_url
-            ) as _:
-                subprocess.run(
-                    cmd,
-                    stdout=sys.stdout if log_fuzzer else subprocess.DEVNULL,
-                    stderr=sys.stderr if log_fuzzer else subprocess.DEVNULL,
-                )
+        self.exit_stack = ExitStack()
 
-            logger.info("Finished generating requests.")
+        self.tmpdir = self.exit_stack.enter_context(tempfile.TemporaryDirectory())
+        self.mitmproxy = self.exit_stack.enter_context(
+            MITMProxyContainer(
+                response_output=self.tmpdir, listen_port=proxy_port, target=base_api_url
+            )
+        )
 
-            responses = os.listdir(tmpdir)
-            if len(responses) < 1:
-                raise ValueError(
+        self.fuzzing_process = subprocess.Popen(
+            cmd,
+            stdout=sys.stdout if log_fuzzer else subprocess.DEVNULL,
+            stderr=sys.stderr if log_fuzzer else subprocess.DEVNULL,
+        )
+
+        attempts = 100
+        while len(os.listdir(self.tmpdir)) < 1:
+            sleep(0.1)
+            attempts -= 1
+            if not attempts:
+                raise TimeoutError(
                     "No responses were captured. "
                     "Your fuzzer needs to produce at least one request."
                 )
 
-            base_response_path = Path(tmpdir)
-            for response in responses:
-                response_path = base_response_path / response
-                request_obj = Request.from_json(response_path)
+    def __enter__(self):
+        return self
 
-                self.pregenerated_requests.append(request_obj)
+    def __exit__(self, exc_type, exc, tb):
+        self.exit_stack.close()
+
+    def _collect_responses(self):
+        """Collect latest responses."""
+        responses = os.listdir(self.tmpdir)
+        base_response_path = Path(self.tmpdir)
+        for response in responses[:1000]:
+            response_path = base_response_path / response
+            request_obj = Request.from_json(response_path)
+
+            self.pregenerated_requests.append(request_obj)
+
+            os.remove(response_path)
 
     def generate(
         self, previous_responses: list[Response] | None = None
     ) -> list[Request] | None:
         """Return pregenerated requests in captured order until empty."""
         if not self.pregenerated_requests:
-            return None
+            self._collect_responses()
+            if not self.pregenerated_requests:
+                return None
 
         if not hasattr(self, "total"):
             self.total = len(self.pregenerated_requests)
@@ -130,7 +151,7 @@ class SchemathesisGenerator(FuzzerBasedGenerator):
             "fuzz",
             str(oas),
             "--url",
-            "http://localhost:8080",
+            f"http://localhost:{proxy_port}",
             "--max-time",
             str(max_time_seconds),
             "--continue-on-failure",
