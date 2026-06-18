@@ -1,6 +1,7 @@
 """Tests for request generation."""
 
 from pathlib import Path
+from time import sleep
 
 from telephuzz.operation_ids import generate_operation_id
 from telephuzz.request_generator import SchemathesisGenerator
@@ -52,3 +53,24 @@ def test_method_name_schemathesis_generator(api):
         for request in generator.pregenerated_requests:
             operation_id = generate_operation_id(request.method.value, request.path)
             assert operation_id in method_names
+
+
+def test_unique_requests(api):
+    """Assert requests are not loaded twice."""
+    with SchemathesisGenerator(
+        OAS_PATH, "http://localhost:8000", max_time_seconds=5
+    ) as generator:
+        sleep(1)
+        generator.generate()
+        requests = set()
+        requests.update(generator.pregenerated_requests)
+        assert 0 < len(requests)
+        assert len(requests) == len(generator.pregenerated_requests)
+
+        generator.pregenerated_requests = []
+        sleep(1)
+        generator.generate()
+        assert 0 < len(generator.pregenerated_requests)
+        assert not any(
+            request in requests for request in generator.pregenerated_requests
+        )
