@@ -1,6 +1,7 @@
 """File for pytest fixtures."""
 
 import json
+import shutil
 import subprocess
 import tempfile
 import time
@@ -211,12 +212,14 @@ def basic_oas_yaml():
 
 
 @pytest.fixture(autouse=True)
-def use_test_config():
+def setup():
     """Redirect config path to test config."""
     original = Config.CONFIG_PATH
     Config.CONFIG_PATH = TEST_CONFIG_PATH
     yield
     Config.CONFIG_PATH = original
+
+    shutil.rmtree("/tmp/logs/telephuzz")
 
 
 @pytest.fixture
