@@ -219,7 +219,7 @@ def setup():
     yield
     Config.CONFIG_PATH = original
 
-    shutil.rmtree("/tmp/logs/telephuzz")
+    shutil.rmtree("/tmp/logs/telephuzz", ignore_errors=True)
 
 
 @pytest.fixture
