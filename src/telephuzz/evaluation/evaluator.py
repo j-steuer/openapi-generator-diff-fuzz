@@ -85,7 +85,7 @@ class DiffEvaluator:
 
         # input validation
         if len(results) <= 2:
-            raise ValueError("Must have at least threee results to compare.")
+            raise ValueError("Must have at least three results to compare.")
 
         library_id_list = [r.library for r in results]
         if len(library_id_list) != len(set(library_id_list)):
@@ -99,7 +99,6 @@ class DiffEvaluator:
             self.abstractor.abstract(result)
 
         # compare requests
-
         request_groups: dict[Request, list[LibraryId]] = _get_groups("request")
 
         if original_request not in request_groups or len(request_groups) > 1:
@@ -268,6 +267,8 @@ class DiffEvaluator:
                     detail="",
                 )
                 diff_reports[library].append(report)
+
+        logging.debug(f"Evaluation results: {diff_reports}")
 
         if log_errors:
             # create log directory if not present
