@@ -1,6 +1,7 @@
 """File for pytest fixtures."""
 
 import json
+import logging
 import shutil
 import subprocess
 import tempfile
@@ -23,6 +24,14 @@ from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
 
 TEST_CONFIG_PATH = Path(__file__).parent / "testfiles" / "config.yaml"
+
+disable_loggers = ["urllib3.connectionpool", "docker.utils.config"]
+
+
+def pytest_configure():
+    for logger_name in disable_loggers:
+        logger = logging.getLogger(logger_name)
+        logger.disabled = True
 
 
 @runtime_checkable
