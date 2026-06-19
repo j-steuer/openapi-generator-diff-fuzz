@@ -1,0 +1,18 @@
+api:
+  compose-path: "./tests/testfiles/docker-compose-loop.yaml"
+  api-port-name: "HOST_PORT"
+  port-names: ["HOST_PORT"]
+
+targets:
+  - id: test-client1:python
+    lib_name: basic_client
+
+  - id: test-faulty-client:python
+    lib_name: basic_faulty_client
+
+  - id: test-client2:python
+    lib_name: basic_client
+
+fuzzing:
+  log-path: "/tmp/logs/telephuzz"
+  timeout: 1
