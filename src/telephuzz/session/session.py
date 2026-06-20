@@ -8,10 +8,9 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import docker
-from docker.errors import NotFound
 
 from telephuzz.config import get_config
-from telephuzz.constants import CLIENT_PATH, DOCKER_NETWORK_NAME
+from telephuzz.constants import CLIENT_PATH
 from telephuzz.docker_helpers import (
     compose_down,
     compose_up,
@@ -141,17 +140,7 @@ class SessionManager:
 
     def __enter__(self) -> "SessionManager":
         """Initialize session manager and docker network, clients, apis and proxy."""
-        # create docker network
         client = docker.from_env()
-
-        try:
-            # reset network if it already exists
-            network = client.networks.get(DOCKER_NETWORK_NAME)
-            network.remove()
-        except NotFound:
-            pass
-
-        client.networks.create(name=DOCKER_NETWORK_NAME)
 
         # start up mitmproxy
         logger.info("Setting up MITMProxy for request and response capturing.")
