@@ -1,9 +1,11 @@
 """Tests for client libraries."""
 
 from pathlib import Path
+from time import sleep
 
 import docker
 import pytest
+from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request
@@ -86,10 +88,13 @@ def test_from_id():
 
 
 @pytest.mark.parametrize("clc_class, library_path", CLIENT_CASES_NO_AUTH)
-def test_clients_noauth(clc_class, library_path, api) -> None:
+def test_clients_noauth(clc_class, library_path, api: tuple[Network, str]) -> None:
     """Basic GET request test without authentication."""
+    network, api_path = api
     with clc_class(library_path=library_path) as clc:
-        _init_and_send(clc, api, auth=False)
+        network.connect(clc.container)
+        sleep(1)
+        _init_and_send(clc, api_path, auth=False)
 
 
 def test_client_openapigen_python_auth(api_oauth) -> None:
