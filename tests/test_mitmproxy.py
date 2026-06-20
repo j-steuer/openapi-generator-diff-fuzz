@@ -4,55 +4,72 @@ import json
 import os
 import tempfile
 from pathlib import Path
+from time import sleep
 
 import requests
+from docker.models.networks import Network
 
 from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 
-def test__init() -> None:
+def test_init() -> None:
     """Test initializing a mitmproxy container."""
     with MITMProxyContainer() as _:
         pass
 
 
-def test_simple_routing(api) -> None:
+def test_simple_routing(api: tuple[Network, str]) -> None:
     """Test routing a request via mitmproxy container."""
     params: dict = {"name": "Alice", "age": 30}
 
+    network, _ = api
+
     with MITMProxyContainer() as mitm_proxy:
+        assert mitm_proxy.container is not None
+        network.connect(mitm_proxy.container)
+        sleep(1)
         assert (
             "Hello Alice, you are 30 years old!"
             in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/localhost:8000/greet",
+                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
                 params=params,
             ).text
         )
 
 
-def test_simple_routing_query_parameter(api) -> None:
+def test_simple_routing_query_parameter(api: tuple[Network, str]) -> None:
     """Test routing a request with a query parameter via mitmproxy container."""
     params: dict = {"user_id": 1013}
 
+    network, _ = api
+
     with MITMProxyContainer() as mitm_proxy:
+        assert mitm_proxy.container is not None
+        network.connect(mitm_proxy.container)
+        sleep(1)
         assert (
             "This is a GET request returning user info"
             in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/localhost:8000/user?user_id=1013",
+                f"http://localhost:{mitm_proxy.listen_port}/api:8000/user?user_id=1013",
                 params=params,
             ).text
         )
 
 
-def test_json_response(api) -> None:
+def test_json_response(api: tuple[Network, str]) -> None:
     """Test conversion of requests and responses into JSON."""
     params: dict = {"name": "Alice", "age": 30}
 
+    network, _ = api
+
     with tempfile.TemporaryDirectory() as tmpdir:
         with MITMProxyContainer(response_output=tmpdir) as mitm_proxy:
+            assert mitm_proxy.container is not None
+            network.connect(mitm_proxy.container)
+            sleep(1)
             requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/localhost:8000/greet",
+                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
                 params=params,
             )
 
@@ -67,14 +84,19 @@ def test_json_response(api) -> None:
             )
 
 
-def test_single_target(api) -> None:
+def test_single_target(api: tuple[Network, str]) -> None:
     """Test single target mode."""
     params: dict = {"name": "Alice", "age": 30}
 
+    network, _ = api
+
     with tempfile.TemporaryDirectory() as tmpdir:
         with MITMProxyContainer(
-            response_output=tmpdir, target="http://localhost:8000"
+            response_output=tmpdir, target="http://api:8000"
         ) as mitm_proxy:
+            assert mitm_proxy.container is not None
+            network.connect(mitm_proxy.container)
+            sleep(1)
             assert (
                 "Hello Alice, you are 30 years old!"
                 in requests.get(

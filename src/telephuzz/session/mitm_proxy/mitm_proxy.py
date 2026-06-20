@@ -46,7 +46,7 @@ class MITMProxyContainer:
                     "--script",
                     hooks_path,
                 ],
-                network_mode="host",  # TODO replace?
+                ports={f"{self.listen_port}/tcp": self.listen_port},
                 detach=True,
                 volumes={
                     str(SCRIPTS_DYNAMIC): {"bind": hooks_path, "mode": "ro"},
@@ -67,7 +67,7 @@ class MITMProxyContainer:
                     "--script",
                     hooks_path,
                 ],
-                network_mode="host",  # TODO replace?
+                ports={"8080/tcp": self.listen_port},
                 detach=True,
                 volumes={
                     str(SCRIPTS_TARGET): {"bind": hooks_path, "mode": "ro"},
@@ -112,10 +112,14 @@ class MITMProxyContainer:
             self.container.remove(force=True)
             self.container = None
 
-    def through_proxy(self, request: Request, library_port: int) -> Request:
+    def through_proxy(
+        self,
+        request: Request,
+        library_port: int,
+        client_alias: str = "host.docker.internal",
+    ) -> Request:
         """Make the request target the proxy and encode the target."""
         new_request = deepcopy(request)
         extra_slash = "/" if not request.path.startswith("/") else ""
-        new_request.path = f"/localhost:{library_port}{extra_slash}{request.path}"
-        new_request.path = new_request.path.replace("localhost", "host.docker.internal")
+        new_request.path = f"/{client_alias}:{library_port}{extra_slash}{request.path}"
         return new_request

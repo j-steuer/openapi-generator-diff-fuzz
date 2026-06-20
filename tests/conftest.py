@@ -254,9 +254,27 @@ def basic_response():
 @pytest.fixture(scope="session")
 def api():
     """Run a test API for this test."""
-    api_file = Path(__file__).resolve().parent / "testfiles" / "api.py"
+    dockerfiles = Path(__file__).resolve().parent / "testfiles" / "dockerfiles"
 
-    proc = subprocess.Popen(["fastapi", "run", api_file, "--port", "8000"])
+    client = docker.from_env()
+
+    client.images.build(
+        path=str(dockerfiles), dockerfile="api.dockerfile", tag="api_fixture"
+    )
+
+    network_name = "api_fixture"
+    network = client.networks.create(network_name)
+
+    container = client.containers.run(
+        image="api_fixture",
+        detach=True,
+        ports={
+            "8000/tcp": 8000,
+        },
+        name="api",
+        remove=True,
+        network=network.name,
+    )
 
     # wait for startup
     for _ in range(30):
@@ -268,9 +286,10 @@ def api():
             pass
         time.sleep(0.5)
 
-    yield "http://host.docker.internal:8000"
+    yield network, "http://api:8000"
 
-    proc.terminate()
+    container.kill()
+    network.remove()
 
 
 @pytest.fixture(scope="session")
