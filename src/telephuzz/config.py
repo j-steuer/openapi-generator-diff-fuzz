@@ -16,6 +16,7 @@ class Config:
 
         api_config = config["api"]
         assert isinstance(api_config, dict)
+        self.api_container_name = api_config["container-name"]
         self.compose_path = api_config["compose-path"]
         self.database_type = api_config.get("database-type")
         self.api_port_name = api_config["api-port-name"]

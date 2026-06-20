@@ -1,4 +1,5 @@
 api:
+  container-name: "api"
   compose-path: "./tests/testfiles/docker-compose-loop.yaml"
   api-port-name: "HOST_PORT"
   port-names: ["HOST_PORT"]

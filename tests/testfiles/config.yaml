@@ -1,4 +1,5 @@
 api:
+  container-name: "api"
   compose-path: "/compose/docker-compose.yaml"
   database-type: "H2"
   api-port-name: "HOST_PORT"
