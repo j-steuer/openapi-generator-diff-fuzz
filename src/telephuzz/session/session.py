@@ -8,7 +8,6 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import docker
-import requests
 from docker.errors import NotFound
 
 from telephuzz.config import get_config
@@ -227,13 +226,6 @@ class SessionManager:
         results: set[RequestResult] = set()
 
         for session in self.sessions.values():
-            if not self.warmup:
-                # no idea why it is needed, capturing responses does not work
-                # without this for some reason. TODO investigate
-                api_url = f"http://localhost:{self.mitmproxy.listen_port}"
-                api_port = session.api.port
-                requests.get(f"{api_url}/localhost:{api_port}/openapi.json")
-                self.warmup = True
             api_port = session.api.port
             proxy_request = self.mitmproxy.through_proxy(request, api_port)
             results.add(
