@@ -189,7 +189,7 @@ class ClientLibraryContainer(ABC):
         out = decode_output(output)
         assert exit_code == 0, f"Error occured while sending request: {out}"
 
-        return out  # TODO parse to Response object
+        return out
 
 
 # --- Language-based Abstractions ---

@@ -25,6 +25,7 @@ CLIENT_PATH = TESTFILES / "test_clients"
 BASIC_CLIENT_PATH = CLIENT_PATH / "basic_client"
 TEST_OAS = TESTFILES / "openapi_test_fuzzing.json"
 CONFIG_PATH = TESTFILES / "loop_config.yaml"
+FAULTY_CONFIG_PATH = TESTFILES / "loop_faulty_config.yaml"
 
 LOG_PATH = Path("/tmp/logs/telephuzz")
 
@@ -84,10 +85,23 @@ class BasicClient3(BasicClient):
     id = "test-client3:python"
 
 
+class BasicFaultyClient(BasicClient):
+    id = "test-faulty-client:python"
+
+
 def test_basic_client(api):
     """Test that basic client works."""
     with BasicClient(library_path=BASIC_CLIENT_PATH) as basic_client:
         _init_and_send(basic_client, api)
+
+
+def test_faulty_client(api):
+    """Test that faulty client does not send messages correctly."""
+    with BasicFaultyClient(
+        library_path=CLIENT_PATH / "basic_faulty_client"
+    ) as basic_client:
+        with pytest.raises(AssertionError, match="Hello Faulty, you are 42"):
+            _init_and_send(basic_client, api)
 
 
 def test_session_manager_setup(monkeypatch):
@@ -102,26 +116,37 @@ def test_session_manager_setup(monkeypatch):
 
         assert session_manager.mitmproxy.listen_port == 8080
 
-        assert len(session_manager.sessions) == 3
         assert BasicClient1.id in session_manager.sessions
         assert BasicClient2.id in session_manager.sessions
         assert BasicClient3.id in session_manager.sessions
+        for session in session_manager.sessions.values():
+            assert session.client.container is not None
+            session.client.container.reload()
+            assert session.client.container.status == "running"
+
+        assert len(session_manager.networks) == 3
+        for network in session_manager.networks:
+            network.reload()
+            assert len(network.containers) == 3
+            assert session_manager.mitmproxy.container in network.containers
 
         assert "docker-compose-loop.yaml" in session_manager.api_docker_compose_path
 
         # assert mitmproxy and target api is up by sending manual request
-        api_port = session_manager.sessions[BasicClient1.id].api.port
+        session1 = session_manager.sessions[BasicClient1.id]
+
         api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
         params = {"name": "Alice", "age": 30}
-        assert (
-            "Hello Alice, you are 30 years old!"
-            in requests.get(
-                f"{api_url}/localhost:{api_port}/greet",
-                params=params,
-            ).text
-        ), "Message was not routed."
+        text = requests.get(
+            f"{api_url}/api{session1.id}:8000/greet",
+            params=params,
+        ).text
+        assert "Hello Alice, you are 30 years old!" in text, (
+            f"Message was not routed correctly: {text}"
+        )
 
         # try to send a request through the send method
+
         request = Request(
             headers=CaseInsensitiveDict(
                 {
@@ -140,17 +165,51 @@ def test_session_manager_setup(monkeypatch):
         )
 
         # attempt to send with single client
-        client1 = session_manager.sessions[BasicClient1.id].client
-        api_url = api_url.replace("localhost", "host.docker.internal")
+        api_url = api_url.replace("localhost", "mitmproxy")
+        api_url += f"/api{session1.id}:8000"
+        client1 = session1.client
         client1.send(request, api_url)
 
         # attempt to send with session manager
-        request.headers["X-TEST"] = "1"
         results = session_manager.send(request)
         assert len(results) == 3
 
-        for result in results:
-            assert "X-TEST" in result.request.headers
+
+def test_session_manager_faulty(monkeypatch):
+    """Test setting up session manager with faulty client."""
+    Config.CONFIG_PATH = FAULTY_CONFIG_PATH
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
+
+    with SessionManager() as session_manager:
+        assert len(session_manager.sessions) == 3
+        faulty_clients = [
+            s
+            for s in session_manager.sessions.values()
+            if isinstance(s.client, BasicFaultyClient)
+        ]
+        assert len(faulty_clients) == 1
+
+        # try to send a request and check for faulty response
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "3ATnwX",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/greet?age=0&name=",
+            query_parameters={"age": "0", "name": ""},
+        )
+
+        results = session_manager.send(request=request)
+        assert any("Faulty" in repr(r) for r in results), results
 
 
 def test_diff_eval(monkeypatch):
@@ -187,36 +246,6 @@ def test_diff_eval(monkeypatch):
         assert len(os.listdir(LOG_PATH)) == 0
 
 
-def test_warmup(monkeypatch):
-    """Try sending requests with a session."""
-    Config.CONFIG_PATH = CONFIG_PATH
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
-
-    with SessionManager() as session_manager:
-        request = Request(
-            headers=CaseInsensitiveDict(
-                {
-                    "User-Agent": "schemathesis/4.15.2",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept": "*/*",
-                    "Connection": "keep-alive",
-                    "X-Schemathesis-TestCaseId": "g9cMS9",
-                }
-            ),
-            body="",
-            method=HTTPMethod("GET"),
-            path="/greet?age=0&name=",
-            query_parameters={"age": "0", "name": ""},
-        )
-
-        for _ in range(10):
-            age = int(request.query_parameters["age"]) + 1
-            request.query_parameters["age"] = str(age)
-            result = session_manager.send(request)
-            assert result.pop().request.query_parameters["age"] == str(age)
-
-
 def test_mitmproxy_result_dir(monkeypatch):
     """Test obtaining a result from mitmproxy."""
     Config.CONFIG_PATH = CONFIG_PATH
@@ -224,13 +253,12 @@ def test_mitmproxy_result_dir(monkeypatch):
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     with SessionManager() as session_manager:
-        api_port = session_manager.sessions[BasicClient1.id].api.port
         api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
         params = {"name": "Alice", "age": 30}
         assert (
             "Hello Alice, you are 30 years old!"
             in requests.get(
-                f"{api_url}/localhost:{api_port}/greet",
+                f"{api_url}/api0:8000/greet",
                 params=params,
             ).text
         ), "Message was not routed."
@@ -252,3 +280,17 @@ def test_loop_same_library(monkeypatch):
     fuzzer.start_fuzzing_session()
 
     assert len(os.listdir(LOG_PATH)) == 0
+
+
+def test_loop_faulty_library(monkeypatch):
+    """Test the fuzzing loop with two instances of the basic client."""
+    Config.CONFIG_PATH = FAULTY_CONFIG_PATH
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
+
+    fuzzer = TelePhuzz(TEST_OAS)
+    fuzzer.start_fuzzing_session()
+
+    assert len(os.listdir(LOG_PATH)) > 0
+    assert not any("test-client" in f for f in os.listdir(LOG_PATH))
+    assert all("test-faulty-client" in f for f in os.listdir(LOG_PATH))

@@ -9,7 +9,6 @@ from time import sleep
 import requests
 from docker.models.networks import Network
 
-from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 
@@ -36,6 +35,45 @@ def test_simple_routing(api: tuple[Network, str]) -> None:
                 params=params,
             ).text
         )
+
+
+def test_simple_routing_custom_port(api: tuple[Network, str]) -> None:
+    """Test routing a request via mitmproxy container with non-default port."""
+    params: dict = {"name": "Alice", "age": 30}
+
+    network, _ = api
+
+    with MITMProxyContainer(listen_port=8081) as mitm_proxy:
+        assert mitm_proxy.container is not None
+        network.connect(mitm_proxy.container)
+        sleep(1)
+        assert (
+            "Hello Alice, you are 30 years old!"
+            in requests.get(
+                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
+                params=params,
+            ).text
+        )
+
+
+def test_simple_routing_multiple(api: tuple[Network, str]) -> None:
+    """Test routing a request via mitmproxy container while multiple are running."""
+    params: dict = {"name": "Alice", "age": 30}
+
+    network, _ = api
+
+    with MITMProxyContainer(listen_port=8080) as _:
+        with MITMProxyContainer(listen_port=8081) as mitm_proxy:
+            assert mitm_proxy.container is not None
+            network.connect(mitm_proxy.container)
+            sleep(1)
+            assert (
+                "Hello Alice, you are 30 years old!"
+                in requests.get(
+                    f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
+                    params=params,
+                ).text
+            )
 
 
 def test_simple_routing_query_parameter(api: tuple[Network, str]) -> None:
@@ -112,10 +150,3 @@ def test_single_target(api: tuple[Network, str]) -> None:
             entry_data = json.load(f)
 
         assert "Hello Alice, you are 30 years old!" in entry_data["response"]["body"]
-
-
-def test_through_proxy(basic_request: Request) -> None:
-    proxy = MITMProxyContainer.__new__(MITMProxyContainer)
-    basic_request.path = "/test?example=0"
-    proxy_request = proxy.through_proxy(basic_request, 1234)
-    assert proxy_request.path == "/host.docker.internal:1234/test?example=0"

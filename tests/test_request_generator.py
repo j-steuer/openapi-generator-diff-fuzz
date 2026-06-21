@@ -14,6 +14,7 @@ def test_simple_schemathesis_generator(api):
     with SchemathesisGenerator(
         OAS_PATH, "http://localhost:8000", max_time_seconds=3
     ) as generator:
+        sleep(0.5)
         generator.generate()
 
         assert len(generator.pregenerated_requests) >= 1, "No requests were generated."
@@ -41,6 +42,7 @@ def test_method_name_schemathesis_generator(api):
     with SchemathesisGenerator(
         OAS_PATH, "http://localhost:8000", max_time_seconds=3
     ) as generator:
+        sleep(0.5)
         generator.generate()
 
         assert len(generator.pregenerated_requests) >= 1, "No requests were generated."
@@ -60,7 +62,7 @@ def test_unique_requests(api):
     with SchemathesisGenerator(
         OAS_PATH, "http://localhost:8000", max_time_seconds=5
     ) as generator:
-        sleep(1)
+        sleep(0.5)
         generator.generate()
         requests = set()
         requests.update(generator.pregenerated_requests)

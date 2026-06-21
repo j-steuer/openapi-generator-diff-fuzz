@@ -149,6 +149,7 @@ class TelePhuzz:
 
             # set up request generator
             self.request_generator = self._setup_request_generator()
+            sleep(0.5)
 
             # compute timeout if set
             timeout = (
