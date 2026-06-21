@@ -5,9 +5,11 @@ import os
 import shutil
 import textwrap
 from pathlib import Path
+from time import sleep
 
 import pytest
 import requests
+from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 from test_client import _init_and_send
 
@@ -89,19 +91,27 @@ class BasicFaultyClient(BasicClient):
     id = "test-faulty-client:python"
 
 
-def test_basic_client(api):
+def test_basic_client(api: tuple[Network, str]):
     """Test that basic client works."""
+    network, api_path = api
     with BasicClient(library_path=BASIC_CLIENT_PATH) as basic_client:
-        _init_and_send(basic_client, api)
+        assert basic_client.container is not None
+        network.connect(basic_client.container)
+        sleep(1)
+        _init_and_send(basic_client, api_path)
 
 
-def test_faulty_client(api):
+def test_faulty_client(api: tuple[Network, str]):
     """Test that faulty client does not send messages correctly."""
+    network, api_path = api
     with BasicFaultyClient(
         library_path=CLIENT_PATH / "basic_faulty_client"
     ) as basic_client:
+        assert basic_client.container is not None
+        network.connect(basic_client.container)
+        sleep(1)
         with pytest.raises(AssertionError, match="Hello Faulty, you are 42"):
-            _init_and_send(basic_client, api)
+            _init_and_send(basic_client, api_path)
 
 
 def test_session_manager_setup(monkeypatch):
