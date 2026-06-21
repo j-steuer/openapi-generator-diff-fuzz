@@ -36,7 +36,7 @@ class TestSession:
             ) as db_container_alice,
             APIH2DatabaseContainer(port=8083, db_container=db_bob) as db_container_bob,
         ):
-            session = Session(api=db_container_bob, client=mock_client)
+            session = Session(id=0, api=db_container_bob, client=mock_client)
 
             session.change_api_proxy(db_container_alice)
 

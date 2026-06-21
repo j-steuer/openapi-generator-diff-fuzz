@@ -2,12 +2,14 @@
 
 import logging
 import os
+import re
 import socket
 import tempfile
 from contextlib import ExitStack
 from pathlib import Path
 
 import docker
+from docker.models.networks import Network
 
 from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH
@@ -26,12 +28,17 @@ from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 logger = logging.getLogger(__name__)
 
+API_ALIAS_BASE = "api"
+CLIENT_ALIAS = "client"
+MITMPROXY_ALIAS = "mitmproxy"
+
 
 class Session:
     """A single client-api session."""
 
-    def __init__(self, api: APIContainer, client: ClientLibraryContainer):
+    def __init__(self, id: int, api: APIContainer, client: ClientLibraryContainer):
         """Set up session with client and api."""
+        self.id = id
         self.api = api
         self.client = client
 
@@ -45,12 +52,15 @@ class Session:
             latest_file = max(os.listdir(response_output))
 
             response_path = response_output / latest_file
-            return Response.from_json(response_path)
+            response = Response.from_json(response_path)
+
+            os.remove(response_path)
+            return response
 
         if not isinstance(self.api, APIWithDatabaseContainer):
             self.client.send(request, api_path)
             response = _get_response()
-            return RequestResult(self.client.id, request, response, None, None)
+            result = RequestResult(self.client.id, request, response, None, None)
         else:
             out_before = Path("/tmp/before")
             out_after = Path("/out/after")
@@ -66,9 +76,16 @@ class Session:
             write_to_host(self.api.db_container, str(out_before), out_before_host)
             write_to_host(self.api.db_container, str(out_after), out_after_host)
 
-            return RequestResult(
+            result = RequestResult(
                 self.client.id, request, response, out_before_host, out_after_host
             )
+
+        if result.response.status in [502, 503]:
+            raise RuntimeError(
+                "API server could not be reached, please check the configuration."
+            )
+
+        return result
 
     def change_api_proxy(self, container: APIWithDatabaseContainer) -> None:
         """Replace the API proxy with another container."""
@@ -100,6 +117,7 @@ class SessionManager:
         """Initialize the session manager."""
         config = get_config()
         self.api_docker_compose_path = config.compose_path
+        self.api_name = config.api_container_name
 
         self.targets = config.targets
 
@@ -114,11 +132,11 @@ class SessionManager:
         self.database_type = config.database_type
 
         self.stack = ExitStack()
-        self.warmup = False
+        self.networks: list[Network] = []
 
     def _get_project_name(self, id: LibraryId) -> str:
         """Get the docker compose project id for a library."""
-        base = f"api-{id}"
+        base = f"apicompose-{id}"
         project_name = base.replace(":", "-")
         return project_name
 
@@ -159,6 +177,7 @@ class SessionManager:
             )
 
             project_name = self._get_project_name(client_container.id)
+            network_name = f"network-{library_id}"
 
             env = self._get_compose_env()
             api_port = int(env[self.api_port_name])
@@ -192,7 +211,27 @@ class SessionManager:
                     )
                 )
 
-            session = Session(api=api_container, client=client_container)
+            session = Session(
+                id=len(self.networks), api=api_container, client=client_container
+            )
+
+            # add api containers, client container and mitmproxy to same network
+            network = client.networks.create(network_name)
+            api_container = [
+                c
+                for c in api_containers
+                if c.name is not None
+                and re.search(rf"-{re.escape(self.api_name)}-\d+$", c.name)
+            ]
+            if len(api_container) != 1:
+                raise ValueError(f"API container name {self.api_name} not found.")
+            api_alias = f"{API_ALIAS_BASE}{len(self.networks)}"
+            network.connect(api_container[0], aliases=[api_alias])
+            assert client_container.container is not None
+            network.connect(client_container.container, aliases=[CLIENT_ALIAS])
+            assert self.mitmproxy.container is not None
+            network.connect(self.mitmproxy.container, aliases=[MITMPROXY_ALIAS])
+            self.networks.append(network)
 
             self.sessions[client_container.id] = session
 
@@ -210,17 +249,20 @@ class SessionManager:
 
         self.stack.close()
 
+        for network in self.networks:
+            network.remove()
+
     def send(self, request: Request) -> set[RequestResult]:
         """Send a request through all libraries."""
         results: set[RequestResult] = set()
 
         for session in self.sessions.values():
-            api_port = session.api.port
-            proxy_request = self.mitmproxy.through_proxy(request, api_port)
+            api_url = f"http://{MITMPROXY_ALIAS}:{self.mitmproxy.listen_port}"
+            api_url += f"/{API_ALIAS_BASE}{session.id}:8000"
             results.add(
                 session.send(
-                    proxy_request,
-                    f"http://host.docker.internal:{self.mitmproxy.listen_port}",
+                    request,
+                    api_url,
                     Path(self.result_dir),
                 )
             )

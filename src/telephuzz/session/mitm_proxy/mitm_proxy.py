@@ -2,13 +2,11 @@
 
 import socket
 import time
-from copy import deepcopy
 from pathlib import Path
 
 import docker
 from docker.models.containers import Container
 
-from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.proxy_hooks import RESPONSE_PATH
 
 DEFAULT_LISTEN_PORT = 8080
@@ -46,7 +44,7 @@ class MITMProxyContainer:
                     "--script",
                     hooks_path,
                 ],
-                network_mode="host",  # TODO replace?
+                ports={f"{self.listen_port}/tcp": self.listen_port},
                 detach=True,
                 volumes={
                     str(SCRIPTS_DYNAMIC): {"bind": hooks_path, "mode": "ro"},
@@ -67,7 +65,7 @@ class MITMProxyContainer:
                     "--script",
                     hooks_path,
                 ],
-                network_mode="host",  # TODO replace?
+                network_mode="host",
                 detach=True,
                 volumes={
                     str(SCRIPTS_TARGET): {"bind": hooks_path, "mode": "ro"},
@@ -111,11 +109,3 @@ class MITMProxyContainer:
         finally:
             self.container.remove(force=True)
             self.container = None
-
-    def through_proxy(self, request: Request, library_port: int) -> Request:
-        """Make the request target the proxy and encode the target."""
-        new_request = deepcopy(request)
-        extra_slash = "/" if not request.path.startswith("/") else ""
-        new_request.path = f"/localhost:{library_port}{extra_slash}{request.path}"
-        new_request.path = new_request.path.replace("localhost", "host.docker.internal")
-        return new_request

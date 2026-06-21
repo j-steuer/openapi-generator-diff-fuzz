@@ -64,9 +64,6 @@ class ClientLibraryContainer(ABC):
             image=image,
             command="sleep infinity",  # keep container alive
             detach=True,
-            extra_hosts={
-                "host.docker.internal": "host-gateway"
-            },  # TODO remove once fixture fixed
         )
 
         assert container is not None
@@ -192,7 +189,7 @@ class ClientLibraryContainer(ABC):
         out = decode_output(output)
         assert exit_code == 0, f"Error occured while sending request: {out}"
 
-        return out  # TODO parse to Response object
+        return out
 
 
 # --- Language-based Abstractions ---

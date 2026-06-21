@@ -48,5 +48,5 @@ def test_operation_ids_ignore_query() -> None:
 def test_operation_ids_ignore_mitmproxy_target_prefix() -> None:
     """Mitmproxy target prefix should be ignored when generating the operation id."""
     operation_id_no_prefix = generate_operation_id("GET", "/test")
-    operation_id_with_prefix = generate_operation_id("GET", "/localhost:1234/test")
+    operation_id_with_prefix = generate_operation_id("GET", "/api1:8000/test")
     assert operation_id_no_prefix == operation_id_with_prefix
