@@ -50,3 +50,13 @@ def test_operation_ids_ignore_mitmproxy_target_prefix() -> None:
     operation_id_no_prefix = generate_operation_id("GET", "/test")
     operation_id_with_prefix = generate_operation_id("GET", "/api1:8000/test")
     assert operation_id_no_prefix == operation_id_with_prefix
+
+
+def test_default_path() -> None:
+    """Default path should return a valid id."""
+    operation_id = generate_operation_id("GET", "/")
+
+    # assert case can be transformed
+    transform_case(operation_id, Case.SNAKE)
+    transform_case(operation_id, Case.PASCAL)
+    transform_case(operation_id, Case.CAMEL)

@@ -25,6 +25,10 @@ class Case(Enum):
 
 def generate_operation_id(method: str, path: str) -> str:
     """Generate an operation id based on the method and path."""
+    # handle default path
+    if path == "/":
+        return f"{method.lower()}_default"
+
     # ignore query parameters
     path_segment = path[: path.find("?")] if "?" in path else path
 
