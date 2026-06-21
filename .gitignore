@@ -1,6 +1,7 @@
 # telephuzz
 clients/
 config.yaml
+spec/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
