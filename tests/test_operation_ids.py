@@ -60,3 +60,16 @@ def test_default_path() -> None:
     transform_case(operation_id, Case.SNAKE)
     transform_case(operation_id, Case.PASCAL)
     transform_case(operation_id, Case.CAMEL)
+
+
+def test_mixed_case_path() -> None:
+    """Paths with mixed case should return a valid id."""
+    operation_id = generate_operation_id("GET", "/slowApi")
+
+    # assert case can be transformed
+    transform_case(operation_id, Case.SNAKE)
+    transform_case(operation_id, Case.PASCAL)
+    transform_case(operation_id, Case.CAMEL)
+
+    # paths where only case differs should still produce different ids
+    assert operation_id != generate_operation_id("GET", "/slowapi")

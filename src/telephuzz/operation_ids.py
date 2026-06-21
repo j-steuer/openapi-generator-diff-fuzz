@@ -39,7 +39,7 @@ def generate_operation_id(method: str, path: str) -> str:
     path_part = (
         path_segment.strip("/").replace("/", "_").replace("{", "").replace("}", "")
     )
-    operation_id = f"{method.lower()}_{path_part}"
+    operation_id = f"{method.lower()}_{path_part.lower()}"
     # add hash of full path to avoid collisions
     hash_input = f"{method.upper()}:{path_segment}"
     operation_id += f"_{hashlib.sha1(hash_input.encode()).hexdigest()[:8]}"
