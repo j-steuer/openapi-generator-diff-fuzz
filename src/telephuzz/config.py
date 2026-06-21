@@ -8,13 +8,13 @@ from telephuzz.constants import BASE_PATH
 class Config:
     """Class for reading the config."""
 
-    CONFIG_PATH = BASE_PATH / "config.yaml"
+    API_CONFIG_PATH = BASE_PATH / "api_config.yaml"
+    CLIENT_CONFIG_PATH = BASE_PATH / "client_config.yaml"
 
     def __init__(self):
         """Parse config attributes."""
-        config = self._get_config()
+        api_config, client_config = self._get_config()
 
-        api_config = config["api"]
         assert isinstance(api_config, dict)
         self.api_container_name = api_config["container-name"]
         self.compose_path = api_config["compose-path"]
@@ -28,21 +28,22 @@ class Config:
                 self.nondeterministic_fields[method][path] = set(fields)
 
         self.targets = dict()
-        for target in config["targets"]:
+        for target in client_config["targets"]:
             self.targets[target["id"]] = target["lib_name"]
 
-        fuzzing_config = config["fuzzing"]
+        fuzzing_config = client_config["fuzzing"]
         assert isinstance(fuzzing_config, dict)
         self.log_path = fuzzing_config["log-path"]
         self.timeout = fuzzing_config["timeout"]
 
-    def _get_config(self) -> dict:
+    def _get_config(self) -> tuple[dict, dict]:
         """Obtain the config as a dict."""
-        with open(self.CONFIG_PATH) as stream:
-            try:
-                return yaml.safe_load(stream)
-            except yaml.YAMLError as e:
-                raise ValueError("Invalid config.") from e
+        with open(self.API_CONFIG_PATH) as api_stream:
+            with open(self.CLIENT_CONFIG_PATH) as client_stream:
+                try:
+                    return yaml.safe_load(api_stream), yaml.safe_load(client_stream)
+                except yaml.YAMLError as e:
+                    raise ValueError("Invalid config.") from e
 
 
 # ---- lazy singleton state ----

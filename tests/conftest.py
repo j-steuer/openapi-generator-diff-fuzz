@@ -23,7 +23,9 @@ from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
 
-TEST_CONFIG_PATH = Path(__file__).parent / "testfiles" / "config.yaml"
+TEST_CONFIG_BASE_PATH = Path(__file__).parent / "testfiles" / "configs"
+TEST_API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
+TEST_CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_config.yaml"
 
 disable_loggers = ["urllib3.connectionpool", "docker.utils.config"]
 
@@ -223,10 +225,11 @@ def basic_oas_yaml():
 @pytest.fixture(autouse=True)
 def setup():
     """Redirect config path to test config."""
-    original = Config.CONFIG_PATH
-    Config.CONFIG_PATH = TEST_CONFIG_PATH
+    original = Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH
+    Config.API_CONFIG_PATH = TEST_API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = TEST_CLIENT_CONFIG_PATH
     yield
-    Config.CONFIG_PATH = original
+    Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH = original
 
     shutil.rmtree("/tmp/logs/telephuzz", ignore_errors=True)
 

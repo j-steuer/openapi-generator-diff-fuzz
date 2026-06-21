@@ -9,6 +9,7 @@ from time import sleep
 
 import pytest
 import requests
+from conftest import TEST_CONFIG_BASE_PATH
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 from test_client import _init_and_send
@@ -26,8 +27,11 @@ TESTFILES = Path(__file__).parent / "testfiles"
 CLIENT_PATH = TESTFILES / "test_clients"
 BASIC_CLIENT_PATH = CLIENT_PATH / "basic_client"
 TEST_OAS = TESTFILES / "openapi_test_fuzzing.json"
-CONFIG_PATH = TESTFILES / "loop_config.yaml"
-FAULTY_CONFIG_PATH = TESTFILES / "loop_faulty_config.yaml"
+
+API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_loop_config.yaml"
+CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_config.yaml"
+
+CLIENT_FAULTY_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_faulty_config.yaml"
 
 LOG_PATH = Path("/tmp/logs/telephuzz")
 
@@ -117,7 +121,8 @@ def test_faulty_client(api: tuple[Network, str]):
 def test_session_manager_setup(monkeypatch):
     """Test setting up the session manager without db."""
 
-    Config.CONFIG_PATH = CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
@@ -187,7 +192,8 @@ def test_session_manager_setup(monkeypatch):
 
 def test_session_manager_faulty(monkeypatch):
     """Test setting up session manager with faulty client."""
-    Config.CONFIG_PATH = FAULTY_CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
@@ -224,7 +230,8 @@ def test_session_manager_faulty(monkeypatch):
 
 def test_diff_eval(monkeypatch):
     """Test capturing and evaluating a result."""
-    Config.CONFIG_PATH = CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
@@ -258,7 +265,8 @@ def test_diff_eval(monkeypatch):
 
 def test_mitmproxy_result_dir(monkeypatch):
     """Test obtaining a result from mitmproxy."""
-    Config.CONFIG_PATH = CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
@@ -282,7 +290,8 @@ def test_mitmproxy_result_dir(monkeypatch):
 
 def test_loop_same_library(monkeypatch):
     """Test the fuzzing loop with two instances of the basic client."""
-    Config.CONFIG_PATH = CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
@@ -294,7 +303,8 @@ def test_loop_same_library(monkeypatch):
 
 def test_loop_faulty_library(monkeypatch):
     """Test the fuzzing loop with two instances of the basic client."""
-    Config.CONFIG_PATH = FAULTY_CONFIG_PATH
+    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
