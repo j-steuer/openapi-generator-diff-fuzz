@@ -331,7 +331,7 @@ def api_oauth():
             pass
         time.sleep(0.5)
 
-    yield network, "http://api:8001"
+    yield network, "http://api_oauth:8001"
 
     container.kill()
     network.remove()
