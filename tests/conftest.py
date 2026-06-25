@@ -3,7 +3,6 @@
 import json
 import logging
 import shutil
-import subprocess
 import tempfile
 import time
 from pathlib import Path
@@ -298,9 +297,29 @@ def api():
 @pytest.fixture(scope="session")
 def api_oauth():
     """Run a test API for this test."""
-    api_file = Path(__file__).resolve().parent / "testfiles" / "api_oauth.py"
+    dockerfiles = Path(__file__).resolve().parent / "testfiles" / "dockerfiles"
 
-    proc = subprocess.Popen(["fastapi", "run", api_file, "--port", "8001"])
+    client = docker.from_env()
+
+    client.images.build(
+        path=str(dockerfiles),
+        dockerfile="api_oauth.dockerfile",
+        tag="api_oauth_fixture",
+    )
+
+    network_name = "api_oauth_fixture"
+    network = client.networks.create(network_name)
+
+    container = client.containers.run(
+        image="api_oauth_fixture",
+        detach=True,
+        ports={
+            "8001/tcp": 8001,
+        },
+        name="api_oauth",
+        remove=True,
+        network=network.name,
+    )
 
     # wait for startup
     for _ in range(30):
@@ -312,9 +331,10 @@ def api_oauth():
             pass
         time.sleep(0.5)
 
-    yield "http://host.docker.internal:8001"
+    yield network, "http://api:8001"
 
-    proc.terminate()
+    container.kill()
+    network.remove()
 
 
 @pytest.fixture()

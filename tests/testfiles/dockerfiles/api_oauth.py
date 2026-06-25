@@ -1,5 +1,6 @@
 """Fastapi-based API used for testing with mock OAuth protection."""
 
+import os
 import subprocess
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Query, status
@@ -61,4 +62,5 @@ def create_user(
 
 
 if __name__ == "__main__":
-    subprocess.run(["fastapi", "run", __file__, "--port", "8001"])
+    port = os.getenv("HOST_PORT", "8001")
+    subprocess.run(["fastapi", "run", __file__, "--port", port])

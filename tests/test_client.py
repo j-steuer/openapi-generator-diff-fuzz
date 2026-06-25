@@ -2,9 +2,11 @@
 
 from pathlib import Path
 from time import sleep
+from typing import cast
 
 import docker
 import pytest
+from docker.models.containers import Container
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
@@ -92,18 +94,21 @@ def test_clients_noauth(clc_class, library_path, api: tuple[Network, str]) -> No
     """Basic GET request test without authentication."""
     network, api_path = api
     with clc_class(library_path=library_path) as clc:
-        network.connect(clc.container)
+        clc = cast(ClientLibraryContainer, clc)
+        network.connect(cast(Container, clc.container))
         sleep(1)
         _init_and_send(clc, api_path, auth=False)
 
 
-@pytest.mark.skip("Fix")
-def test_client_openapigen_python_auth(api_oauth) -> None:
+def test_client_openapigen_python_auth(api_oauth: tuple[Network, str]) -> None:
     """Test that default clients initialize correctly."""
-    library_path = CLIENT_PATH / "openapi-gen-python-auth-client"
+    library_path = CLIENT_PATH / "openapi-gen-python-client-auth"
 
+    network, api_path = api_oauth
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        _init_and_send(clc, api_oauth, auth=True)
+        network.connect(cast(Container, clc.container))
+        sleep(1)
+        _init_and_send(clc, api_path, auth=True)
 
 
 @pytest.mark.skip("Fix")
