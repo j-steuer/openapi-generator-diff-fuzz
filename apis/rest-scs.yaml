@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/rest-scs.yaml
+container-name: rest-scs
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

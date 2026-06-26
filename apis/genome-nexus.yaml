@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/genome-nexus.yaml
+container-name: genome-nexus
+database-type: MongoDB
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

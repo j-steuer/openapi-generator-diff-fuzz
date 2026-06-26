@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/market.yaml
+container-name: market
+database-type: H2
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

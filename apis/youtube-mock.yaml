@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/youtube-mock.yaml
+container-name: youtube-mock
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

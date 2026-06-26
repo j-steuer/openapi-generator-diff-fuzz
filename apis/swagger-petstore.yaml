@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/swagger-petstore.yaml
+container-name: swagger-petstore
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

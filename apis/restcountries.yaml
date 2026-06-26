@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/restcountries.yaml
+container-name: restcountries
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

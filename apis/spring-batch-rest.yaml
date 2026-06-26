@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/spring-batch-rest.yaml
+container-name: spring-batch-rest
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

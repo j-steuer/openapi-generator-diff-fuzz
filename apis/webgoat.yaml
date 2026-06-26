@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/webgoat.yaml
+container-name: webgoat
+database-type: H2
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/erc20-rest-service.yaml
+container-name: erc20-rest-service
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

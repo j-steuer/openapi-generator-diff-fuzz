@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/ocvn.yaml
+container-name: ocvn
+database-type: MongoDB
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

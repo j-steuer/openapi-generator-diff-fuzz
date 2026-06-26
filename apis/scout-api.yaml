@@ -1,0 +1,7 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/scout-api.yaml
+container-name: scout-api
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

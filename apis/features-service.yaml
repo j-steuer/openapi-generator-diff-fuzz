@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/features-service.yaml
+container-name: features-service
+database-type: H2
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

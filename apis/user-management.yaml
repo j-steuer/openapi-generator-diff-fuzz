@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/user-management.yaml
+container-name: user-management
+database-type: MySQL
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT
