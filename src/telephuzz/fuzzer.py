@@ -190,7 +190,7 @@ class TelePhuzz:
                         if datetime.now() >= timeout:
                             break
 
-        logger.info(f"Fuzzing loop finished, processed {num_requests}.")
+        logger.info(f"Fuzzing loop finished, processed {num_requests} requests.")
 
         if isinstance(self.request_generator, FuzzerBasedGenerator):
             self.exit_stack.close()
