@@ -165,6 +165,8 @@ class TelePhuzz:
                     "Specified request generator must generate at least one request!"
                 )
 
+            num_requests = 1
+
             with SessionManager() as session_manager:
                 # fuzz until no more request( chain)s available or timeout
                 logger.info("Beginning to fuzz clients.")
@@ -177,6 +179,8 @@ class TelePhuzz:
                     if request is None:
                         continue
 
+                    num_requests += len(request)
+
                     for current_request in request:
                         results = session_manager.send(current_request)
                         self.evaluator.eval(results, current_request)
@@ -185,6 +189,8 @@ class TelePhuzz:
                         assert timeout is not None
                         if datetime.now() >= timeout:
                             break
+
+        logger.info(f"Fuzzing loop finished, processed {num_requests}.")
 
         if isinstance(self.request_generator, FuzzerBasedGenerator):
             self.exit_stack.close()
