@@ -1,6 +1,5 @@
 """File for the main fuzzing loop."""
 
-import json
 import logging
 import os
 import tempfile
@@ -8,17 +7,14 @@ from contextlib import ExitStack
 from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
-from typing import cast
 
 import requests
-import yaml  # type: ignore
 
 from telephuzz.config import get_config
 from telephuzz.docker_helpers import compose_down, compose_up, set_port_env
 from telephuzz.evaluation.evaluator import DiffEvaluator
-from telephuzz.http_message import HTTPMethod
 from telephuzz.logging_config import setup_logging
-from telephuzz.operation_ids import generate_operation_id
+from telephuzz.openapi_helpers import preprocess_oas
 from telephuzz.request_generator import (
     FuzzerBasedGenerator,
     RequestGenerator,
@@ -59,42 +55,6 @@ class TelePhuzz:
         self.timeout = get_config().timeout
 
         self.exit_stack = ExitStack()
-
-    def _preprocess_oas(self, oas: Path, output_path: Path) -> None:
-        """Pre-process an OpenAPI spec and map all paths to own operationId.
-
-        Writes the resulting OpenAPI spec to output_path.
-        """
-        match oas.suffix:
-            case ".json":
-                with open(oas) as f:
-                    spec = json.load(f)
-            case ".yaml" | ".yml":
-                with open(oas) as f:
-                    spec = yaml.safe_load(f)
-            case _:
-                raise ValueError(
-                    "Only .json and .yaml OpenAPI spec files are supported."
-                )
-
-        assert isinstance(spec, dict), "OpenAPI spec was not loaded as a dict"
-        spec = cast(dict[str, dict], spec)
-        for path, methods in spec.get("paths", {}).items():
-            assert isinstance(methods, dict), "Methods were not loaded as a dict"
-            methods = cast(dict[str, dict], methods)
-            for method, operation in methods.items():
-                try:
-                    HTTPMethod(method)
-                except ValueError:
-                    # ignore non-method keys like parameters
-                    continue
-                operation["operationId"] = generate_operation_id(method, path)
-
-        with open(output_path, "w") as f:
-            if output_path.suffix == ".json":
-                json.dump(spec, f)
-            elif output_path.suffix == ".yaml":
-                yaml.safe_dump(spec, f)
 
     def _setup_request_generator(self) -> RequestGenerator:
         """Set up the request generator."""
@@ -145,7 +105,7 @@ class TelePhuzz:
             self.processed_oas = Path(
                 os.path.join(tmpdir, f"oas{self.base_oas.suffix}")
             )
-            self._preprocess_oas(self.base_oas, self.processed_oas)
+            preprocess_oas(self.base_oas, self.processed_oas)
 
             # set up request generator
             self.request_generator = self._setup_request_generator()

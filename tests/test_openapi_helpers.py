@@ -1,4 +1,4 @@
-"""Tests relating to fuzzer.py."""
+"""Tests OpenAPI helper methods"""
 
 import json
 from pathlib import Path
@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml  # type: ignore
 
-from telephuzz.fuzzer import TelePhuzz
+from telephuzz.openapi_helpers import preprocess_oas
 from telephuzz.operation_ids import generate_operation_id
 
 OPERATION_ID = "operationId"
@@ -33,10 +33,9 @@ class TestPreprocessing:
     def test_preprocessing_json(self, basic_oas_json: _TemporaryFileWrapper) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
         path = Path(basic_oas_json.name)
-        fuzzer = TelePhuzz.__new__(TelePhuzz)
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
-            fuzzer._preprocess_oas(path, Path(f.name))
+            preprocess_oas(path, Path(f.name))
             preprocessed_content = json.load(f)
 
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
@@ -62,10 +61,9 @@ class TestPreprocessing:
     def test_preprocessing_yaml(self, basic_oas_yaml: _TemporaryFileWrapper) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
         path = Path(basic_oas_yaml.name)
-        fuzzer = TelePhuzz.__new__(TelePhuzz)
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
-            fuzzer._preprocess_oas(path, Path(f.name))
+            preprocess_oas(path, Path(f.name))
             preprocessed_content = yaml.safe_load(f)
 
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
