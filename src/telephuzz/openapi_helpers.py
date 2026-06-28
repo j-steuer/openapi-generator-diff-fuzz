@@ -79,10 +79,11 @@ def find_operation(spec: dict, operation_id: str) -> dict | None:
 
 
 @cache
-def get_args(operation_id: str) -> str | None:
+def get_args(method: HTTPMethod, path: str) -> str | None:
     """Obtain a list of arguments for the given operation id."""
     # search operation id
     spec = get_config().spec
+    operation_id = generate_operation_id(method.value, path)
     operation = find_operation(spec, operation_id)
     assert isinstance(operation, dict)
 

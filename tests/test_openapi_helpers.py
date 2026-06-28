@@ -8,6 +8,7 @@ from unittest.mock import patch
 import yaml  # type: ignore
 
 from telephuzz.config import get_config
+from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     _find_all,
     find_operation,
@@ -128,5 +129,5 @@ def test_find_args():
     }
 
     with patch.object(get_config(), "spec", spec):
-        arg = get_args("post_pet_cec649da")
+        arg = get_args(HTTPMethod.POST, "/pet")
         assert arg == "Pet"
