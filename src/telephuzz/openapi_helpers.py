@@ -59,5 +59,36 @@ def _find_all(spec: dict, element: str) -> list[Any]:
     return results
 
 
-def get_args(oas: Path, operation_id: str) -> str | None:
+def find_operation(spec: dict, operation_id: str) -> dict | None:
+    """Find operation with operation id."""
+
+    if isinstance(spec, dict):
+        for v in spec.values():
+            if not isinstance(v, dict):
+                continue
+            if "operationId" in v and v["operationId"] == operation_id:
+                return v
+            else:
+                rec_search = find_operation(v, operation_id)
+                if rec_search is not None:
+                    return rec_search
+
+    return None
+
+
+def get_args(spec: dict, operation_id: str) -> str | None:
     """Obtain a list of arguments for the given operation id."""
+    # search operation id
+    operation = find_operation(spec, operation_id)
+    assert isinstance(operation, dict)
+
+    # get request body
+    if "requestBody" in operation:
+        content = operation["requestBody"]["content"]
+        _ref = set(_find_all(content, "$ref"))
+        assert len(_ref) == 1
+        ref = _ref.pop()
+        assert isinstance(ref, str)
+        return ref[ref.rfind("/") + 1 :].capitalize()
+
+    return None

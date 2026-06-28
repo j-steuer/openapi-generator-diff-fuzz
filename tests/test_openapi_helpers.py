@@ -6,7 +6,12 @@ from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
 import yaml  # type: ignore
 
-from telephuzz.openapi_helpers import _find_all, preprocess_oas
+from telephuzz.openapi_helpers import (
+    _find_all,
+    find_operation,
+    get_args,
+    preprocess_oas,
+)
 from telephuzz.operation_ids import generate_operation_id
 
 OPERATION_ID = "operationId"
@@ -66,3 +71,59 @@ class TestPreprocessing:
                     count += 1
 
         assert count == len(operation_ids)
+
+
+def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
+    """Test for finding operation based on operationId."""
+    spec = json.load(basic_oas_json)
+
+    operation = find_operation(spec, "listItems")
+
+    assert operation is not None
+    assert operation["operationId"] == "listItems"
+    assert "200" in operation["responses"]
+
+
+def test_find_args():
+    """Test finding the name of a ref arg."""
+    spec = {
+        "post": {
+            "tags": ["pet"],
+            "summary": "Add a new pet to the store.",
+            "description": "Add a new pet to the store.",
+            "operationId": "post_pet_cec649da",
+            "requestBody": {
+                "description": "Create a new pet in the store",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": "#/components/schemas/Pet"}
+                    },
+                    "application/xml": {"schema": {"$ref": "#/components/schemas/Pet"}},
+                    "application/x-www-form-urlencoded": {
+                        "schema": {"$ref": "#/components/schemas/Pet"}
+                    },
+                },
+                "required": True,
+            },
+            "responses": {
+                "200": {
+                    "description": "Successful operation",
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/Pet"}
+                        },
+                        "application/xml": {
+                            "schema": {"$ref": "#/components/schemas/Pet"}
+                        },
+                    },
+                },
+                "400": {"description": "Invalid input"},
+                "422": {"description": "Validation exception"},
+                "default": {"description": "Unexpected error"},
+            },
+            "security": [{"petstore_auth": ["write:pets", "read:pets"]}],
+        }
+    }
+
+    arg = get_args(spec, "post_pet_cec649da")
+    assert arg == "Pet"
