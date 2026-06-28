@@ -3,28 +3,13 @@
 import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
-from typing import Any
 
 import yaml  # type: ignore
 
-from telephuzz.openapi_helpers import preprocess_oas
+from telephuzz.openapi_helpers import _find_all, preprocess_oas
 from telephuzz.operation_ids import generate_operation_id
 
 OPERATION_ID = "operationId"
-
-
-def _find_all(spec: dict, element: str) -> list[Any]:
-    """Find all instances of element in the spec."""
-    results = []
-
-    if isinstance(spec, dict):
-        for k, v in spec.items():
-            if k == element:
-                results.append(v)
-            else:
-                results.extend(_find_all(v, element))
-
-    return results
 
 
 class TestPreprocessing:

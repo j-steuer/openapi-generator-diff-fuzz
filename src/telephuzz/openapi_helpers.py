@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import yaml  # type: ignore
 
@@ -43,3 +43,21 @@ def preprocess_oas(oas: Path, output_path: Path) -> None:
             json.dump(spec, f)
         elif output_path.suffix == ".yaml":
             yaml.safe_dump(spec, f)
+
+
+def _find_all(spec: dict, element: str) -> list[Any]:
+    """Find all instances of element in the spec."""
+    results = []
+
+    if isinstance(spec, dict):
+        for k, v in spec.items():
+            if k == element:
+                results.append(v)
+            else:
+                results.extend(_find_all(v, element))
+
+    return results
+
+
+def get_args(oas: Path, operation_id: str) -> str | None:
+    """Obtain a list of arguments for the given operation id."""
