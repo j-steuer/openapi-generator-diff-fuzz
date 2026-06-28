@@ -1,6 +1,6 @@
 container-name: "api"
 compose-path: "/compose/docker-compose.yaml"
-spec-path: "/spec/openapi.json"
+spec-path: tests/testfiles/openapi_test_fuzzing.json
 database-type: "H2"
 api-port-name: "HOST_PORT"
 port-names: ["HOST_PORT", "DB_PORT"]

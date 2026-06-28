@@ -1,5 +1,7 @@
 """Helper methods related to reading and parsing config."""
 
+import json
+
 import yaml  # type: ignore
 
 from telephuzz.constants import BASE_PATH
@@ -18,11 +20,13 @@ class Config:
         assert isinstance(api_config, dict)
         self.api_container_name = api_config["container-name"]
         self.compose_path = api_config["compose-path"]
-        self.spec_path = (
+        spec_path = (
             api_config["spec-path"]
             if "spec-path" in api_config
             else str(BASE_PATH / "spec" / "openapi.json")
         )
+        with open(spec_path, "r") as f:
+            self.spec = json.load(f)
         self.database_type = api_config.get("database-type")
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])
