@@ -3,9 +3,11 @@
 import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
+from unittest.mock import patch
 
 import yaml  # type: ignore
 
+from telephuzz.config import get_config
 from telephuzz.openapi_helpers import (
     _find_all,
     find_operation,
@@ -125,5 +127,6 @@ def test_find_args():
         }
     }
 
-    arg = get_args(spec, "post_pet_cec649da")
-    assert arg == "Pet"
+    with patch.object(get_config(), "spec", spec):
+        arg = get_args("post_pet_cec649da")
+        assert arg == "Pet"

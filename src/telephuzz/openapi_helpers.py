@@ -1,11 +1,13 @@
 """Helper methods for reading and processing an OpenAPI spec."""
 
 import json
+from functools import cache
 from pathlib import Path
 from typing import Any, cast
 
 import yaml  # type: ignore
 
+from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
@@ -76,9 +78,11 @@ def find_operation(spec: dict, operation_id: str) -> dict | None:
     return None
 
 
-def get_args(spec: dict, operation_id: str) -> str | None:
+@cache
+def get_args(operation_id: str) -> str | None:
     """Obtain a list of arguments for the given operation id."""
     # search operation id
+    spec = get_config().spec
     operation = find_operation(spec, operation_id)
     assert isinstance(operation, dict)
 
