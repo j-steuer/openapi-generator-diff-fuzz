@@ -145,6 +145,8 @@ class TelePhuzz:
                         results = session_manager.send(current_request)
                         self.evaluator.eval(results, current_request)
 
+                    del results
+
                     if use_timeout:
                         assert timeout is not None
                         if datetime.now() >= timeout:
