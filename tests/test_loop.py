@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import textwrap
+from json import JSONDecodeError
 from pathlib import Path
 from time import sleep
 
@@ -58,7 +59,7 @@ class BasicClient(PythonCLC, OperationIdBasedCLC):
         if request.body:
             try:
                 body: dict | None = dict(json.loads(request.body))
-            except Exception:
+            except (JSONDecodeError, ValueError, TypeError):
                 body = None
 
             if body:
