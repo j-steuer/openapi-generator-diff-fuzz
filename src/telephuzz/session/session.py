@@ -1,7 +1,6 @@
 """File for managing and creating sessions."""
 
 import logging
-import os
 import re
 import socket
 import tempfile
@@ -49,13 +48,14 @@ class Session:
         """Send a request to the API through the client library."""
 
         def _get_response() -> Response:
-            # files are named after timestamp
-            latest_file = max(os.listdir(response_output))
+            try:
+                response_path = next(response_output.iterdir())
+            except StopIteration as e:
+                raise RuntimeError("No response file found") from e
 
-            response_path = response_output / latest_file
             response = Response.from_json(response_path)
 
-            os.remove(response_path)
+            response_path.unlink()
             return response
 
         if not isinstance(self.api, APIWithDatabaseContainer):
