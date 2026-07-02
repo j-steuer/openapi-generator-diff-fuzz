@@ -205,7 +205,6 @@ def basic_oas_yaml():
             patch:
                 responses:
                     "200":
-        response = c
                         description: Patched
 
             head:
