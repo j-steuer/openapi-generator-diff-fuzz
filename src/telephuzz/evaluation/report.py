@@ -163,7 +163,7 @@ class DiffReport:
         error_str += unique if self.unique else not_unique
 
         persistent = (
-            "A change was detected in the database, implying a perrsistent error.\n"
+            "A change was detected in the database, implying a persistent error.\n"
         )
         not_persistent = "No deviation in the database state was detected.\n"
         error_str += persistent if self.persistent else not_persistent
