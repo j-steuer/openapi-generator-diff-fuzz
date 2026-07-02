@@ -182,7 +182,7 @@ class ClientLibraryContainer(ABC):
 
     def send(self, request: Request, api_path: str) -> Response | str:
         """Send a request through the client library."""
-        logger.debug(f"{self.id} sending request: {repr(request)}")
+        logger.debug(f"{self.id} sending request to API at {api_path}: {repr(request)}")
         assert self.container is not None, "Container not set"
         exit_code, output = self.container.exec_run(
             cmd=self._translate(request, api_path)
