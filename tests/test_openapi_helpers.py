@@ -136,13 +136,13 @@ def test_find_args():
 
 def test_get_api_url_path_no_servers():
     """If servers are not defined, should return base path."""
-    assert get_api_url_path({}) == "/"
+    assert get_api_url_path({}) == ""
 
 
 def test_get_api_url_path_no_path(spec_factory):
     """Test obtaining the api path from an OpenAPI spec if none provided."""
     spec = spec_factory(servers=[{"url": "http://localhost:8000"}])
-    assert get_api_url_path(spec) == "/"
+    assert get_api_url_path(spec) == ""
 
 
 def test_get_api_url_path_with_path(spec_factory):

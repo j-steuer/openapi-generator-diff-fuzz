@@ -112,7 +112,7 @@ def get_api_url_path(spec: dict | None = None) -> str:
 
     assert isinstance(spec, dict)
     if "servers" not in spec:
-        return "/"
+        return ""
 
     url = spec["servers"][0]["url"]
     parsed_url = urlparse(url)
@@ -121,4 +121,4 @@ def get_api_url_path(spec: dict | None = None) -> str:
     path = parsed_url.path
 
     assert isinstance(path, str)
-    return path if path else "/"
+    return path
