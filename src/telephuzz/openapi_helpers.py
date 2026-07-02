@@ -4,6 +4,7 @@ import json
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
+from urllib.parse import ParseResult, urlparse
 
 import yaml  # type: ignore
 
@@ -100,3 +101,30 @@ def get_args(method: HTTPMethod, path: str) -> str | None:
         return ref[ref.rfind("/") + 1 :].capitalize()
 
     return None
+
+
+def get_url_path(spec: dict | None) -> str:
+    """Obtain the base path of the API.
+
+    Spec can either be provided directly or read from config if not provided."""
+    if spec is None:
+        spec = get_config().spec
+
+    if not isinstance(spec, dict):
+        raise ValueError("Error when loading spec.")
+
+    if "servers" not in spec:
+        return "/"
+
+    url = spec["servers"][0]["url"]
+    parsed_url = urlparse(url)
+
+    if not isinstance(parsed_url, ParseResult):
+        raise ValueError("Parsing the url did not yield expected result")
+
+    path = parsed_url.path
+
+    if not isinstance(path, str):
+        raise ValueError("Parsing the path did not yield a string.")
+
+    return path if path else "/"

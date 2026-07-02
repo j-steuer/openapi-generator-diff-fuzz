@@ -5,6 +5,7 @@ import logging
 import shutil
 import tempfile
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 from unittest.mock import Mock
@@ -24,7 +25,8 @@ from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
 
-TEST_CONFIG_BASE_PATH = Path(__file__).parent / "testfiles" / "configs"
+TESTFILES_PATH = BASE_PATH / "tests" / "testfiles"
+TEST_CONFIG_BASE_PATH = TESTFILES_PATH / "configs"
 TEST_API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
 TEST_CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_config.yaml"
 
@@ -254,6 +256,28 @@ def basic_response():
     return Response(
         headers=CaseInsensitiveDict({"Test": ["test"]}), body=None, status=404, text=""
     )
+
+
+@pytest.fixture
+def spec_factory():
+    """Create a minimal OpenAPI spec."""
+
+    base_spec = {
+        "openapi": "3.0.3",
+        "info": {
+            "title": "Test API",
+            "version": "1.0.0",
+        },
+        "servers": [{"url": "https://api.example.com"}],
+        "paths": {},
+    }
+
+    def _factory(**overrides):
+        spec = deepcopy(base_spec)
+        spec.update(overrides)
+        return spec
+
+    return _factory
 
 
 @pytest.fixture(scope="session")
