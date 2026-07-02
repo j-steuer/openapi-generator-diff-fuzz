@@ -103,7 +103,7 @@ def get_args(method: HTTPMethod, path: str) -> str | None:
     return None
 
 
-def get_url_path(spec: dict | None) -> str:
+def get_api_url_path(spec: dict | None = None) -> str:
     """Obtain the base path of the API.
 
     Spec can either be provided directly or read from config if not provided."""

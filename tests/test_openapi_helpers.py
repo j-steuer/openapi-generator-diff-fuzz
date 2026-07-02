@@ -12,8 +12,8 @@ from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     _find_all,
     find_operation,
+    get_api_url_path,
     get_args,
-    get_url_path,
     preprocess_oas,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -134,18 +134,18 @@ def test_find_args():
         assert arg == "Pet"
 
 
-def test_get_url_path_no_servers():
+def test_get_api_url_path_no_servers():
     """If servers are not defined, should return base path."""
-    assert get_url_path({}) == "/"
+    assert get_api_url_path({}) == "/"
 
 
-def test_get_url_path_no_path(spec_factory):
+def test_get_api_url_path_no_path(spec_factory):
     """Test obtaining the api path from an OpenAPI spec if none provided."""
     spec = spec_factory(servers=[{"url": "http://localhost:8000"}])
-    assert get_url_path(spec) == "/"
+    assert get_api_url_path(spec) == "/"
 
 
-def test_get_url_path_with_path(spec_factory):
+def test_get_api_url_path_with_path(spec_factory):
     """Test obtaining the api path from an OpenAPI spec if none provided."""
     spec = spec_factory(servers=[{"url": "http://localhost:8000/api/v3"}])
-    assert get_url_path(spec) == "/api/v3"
+    assert get_api_url_path(spec) == "/api/v3"

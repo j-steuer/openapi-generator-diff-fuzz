@@ -21,6 +21,7 @@ from telephuzz.docker_helpers import (
     write_to_host,
 )
 from telephuzz.http_message import Request, Response
+from telephuzz.openapi_helpers import get_api_url_path
 from telephuzz.request_result import RequestResult
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer, LibraryId
@@ -123,6 +124,7 @@ class SessionManager:
 
         if len(self.targets) <= 2:
             raise TypeError("Must have at least three client libraries under test.")
+        self.api_path = get_api_url_path()
         self.api_port_name = config.api_port_name
         self.port_names = config.port_names
 
@@ -258,7 +260,7 @@ class SessionManager:
 
         for session in self.sessions.values():
             api_url = f"http://{MITMPROXY_ALIAS}:{self.mitmproxy.listen_port}"
-            api_url += f"/{API_ALIAS_BASE}{session.id}:8000"
+            api_url += f"/{API_ALIAS_BASE}{session.id}:8000{self.api_path}"
             results.add(
                 session.send(
                     request,
