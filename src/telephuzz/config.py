@@ -47,12 +47,17 @@ class Config:
 
     def _get_config(self) -> tuple[dict, dict]:
         """Obtain the config as a dict."""
+        if not self.CLIENT_CONFIG_PATH.exists():
+            raise ValueError("No client config provided.")
+        if not self.API_CONFIG_PATH.exists():
+            raise ValueError("No API config provided.")
+
         with open(self.API_CONFIG_PATH) as api_stream:
             with open(self.CLIENT_CONFIG_PATH) as client_stream:
                 try:
                     return yaml.safe_load(api_stream), yaml.safe_load(client_stream)
                 except yaml.YAMLError as e:
-                    raise ValueError("Invalid config.") from e
+                    raise ValueError(f"Invalid YAML in config: {e}") from e
 
 
 # ---- lazy singleton state ----
