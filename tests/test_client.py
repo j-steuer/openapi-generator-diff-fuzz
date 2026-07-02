@@ -1,5 +1,6 @@
 """Tests for client libraries."""
 
+import json
 from pathlib import Path
 from time import sleep
 from typing import cast
@@ -10,6 +11,7 @@ from docker.models.containers import Container
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
+from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
@@ -109,6 +111,50 @@ def test_client_openapigen_python_auth(api_oauth: tuple[Network, str]) -> None:
         network.connect(cast(Container, clc.container))
         sleep(1)
         _init_and_send(clc, api_path, auth=True)
+
+
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_client_openapi_gen_python_petshop(
+    api_wfd: tuple[Network, str], monkeypatch
+) -> None:
+    """Test that client library works with one of the default test targets."""
+    library_path = CLIENT_PATH / "openapi-gen-python-client-pet-api"
+
+    config = get_config()
+
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.load(f)
+
+    monkeypatch.setattr(config, "spec", spec)
+
+    network, api_path = api_wfd
+    with OpenAPIGenPythonCLC(library_path=library_path) as clc:
+        network.connect(cast(Container, clc.container))
+
+        payload = {
+            "id": 123,
+            "name": "doggie",
+            "category": {"id": 1, "name": "dogs"},
+            "photoUrls": ["https://example.com/dog.jpg"],
+            "tags": [{"id": 1, "name": "friendly"}],
+            "status": "available",
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+        }
+
+        request = Request(
+            headers=CaseInsensitiveDict(headers),
+            body=str(payload),
+            method=HTTPMethod.POST,
+            path="/pet",
+            query_parameters=dict(),
+        )
+
+        response = clc.send(request, api_path=api_path)
+        assert isinstance(response, str)
+        assert "doggie" in response
 
 
 @pytest.mark.skip("Fix")

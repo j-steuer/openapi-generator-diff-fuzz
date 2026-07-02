@@ -1,5 +1,6 @@
 """File for code relating to client library containers."""
 
+import ast
 import hashlib
 import io
 import json
@@ -21,6 +22,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 from telephuzz.http_message import Request, Response
+from telephuzz.openapi_helpers import get_args
 from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 
 LibraryId = str
@@ -513,26 +515,47 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     id = "openapi-generator:python"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(
-            f"{k}={repr(v)}" for k, v in request.query_parameters.items()
-        )
+        if request.query_parameters:
+            kwargs = ", ".join(
+                f"{k}={repr(v)}" for k, v in request.query_parameters.items()
+            )
+            model_name_str = ""
+        elif request.body and "json" in request.headers["Content-Type"]:
+            model_name = get_args(request.method, request.path)
+            assert model_name is not None
+            model_name_str = f"from openapi_client.models.{model_name.lower()} "
+            model_name_str += f"import {model_name.capitalize()}"
+
+            # TODO parse in Request object
+            body = json.dumps(ast.literal_eval(request.body))
+            kwargs = f"{model_name.capitalize()}.from_json({body!r})"
 
         try:
             auth = f', access_token="{request.headers["Authorization"]}"'
         except Exception:
             auth = ""
 
+        if request.path == "/":
+            api = "default"
+        else:
+            cutoff = request.path.find("/", 1)
+            if cutoff != -1:
+                api = request.path[:cutoff][1:]
+            else:
+                api = request.path[1:]
+
         content = textwrap.dedent(f"""
         from pprint import pprint
 
         from openapi_client import Configuration, ApiClient
-        from openapi_client.api.default_api import DefaultApi
+        from openapi_client.api.{api}_api import {api.capitalize()}Api
+        {model_name_str}
 
         config = Configuration(host="{api_path}"{auth})
 
         client = ApiClient(configuration=config)
 
-        api = DefaultApi(api_client=client)
+        api = {api.capitalize()}Api(api_client=client)
 
         pprint(api.{self._get_method_name(request)}({kwargs}))
         """).encode()

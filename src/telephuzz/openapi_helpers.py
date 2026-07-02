@@ -85,8 +85,11 @@ def get_args(method: HTTPMethod, path: str) -> str | None:
     spec = get_config().spec
     operation_id = generate_operation_id(method.value, path)
     operation = find_operation(spec, operation_id)
-    assert isinstance(operation, dict)
 
+    if operation is None:
+        return None
+
+    assert isinstance(operation, dict)
     # get request body
     if "requestBody" in operation:
         content = operation["requestBody"]["content"]
