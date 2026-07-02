@@ -110,21 +110,15 @@ def get_api_url_path(spec: dict | None = None) -> str:
     if spec is None:
         spec = get_config().spec
 
-    if not isinstance(spec, dict):
-        raise ValueError("Error when loading spec.")
-
+    assert isinstance(spec, dict)
     if "servers" not in spec:
         return "/"
 
     url = spec["servers"][0]["url"]
     parsed_url = urlparse(url)
 
-    if not isinstance(parsed_url, ParseResult):
-        raise ValueError("Parsing the url did not yield expected result")
-
+    assert isinstance(parsed_url, ParseResult)
     path = parsed_url.path
 
-    if not isinstance(path, str):
-        raise ValueError("Parsing the path did not yield a string.")
-
+    assert isinstance(path, str)
     return path if path else "/"
