@@ -1,5 +1,6 @@
 """Tests for request generation."""
 
+import os
 from pathlib import Path
 from time import sleep
 
@@ -70,9 +71,51 @@ def test_unique_requests(api):
         assert len(requests) == len(generator.pregenerated_requests)
 
         generator.pregenerated_requests = []
-        sleep(1)
+        sleep(0.5)
         generator.generate()
         assert 0 < len(generator.pregenerated_requests)
         assert not any(
             request in requests for request in generator.pregenerated_requests
         )
+
+
+def test_stop_and_resume(api):
+    """Test stopping and resuming the generator."""
+    with SchemathesisGenerator(
+        OAS_PATH, "http://localhost:8000", max_time_seconds=5
+    ) as generator:
+        generator.pause()
+        assert not generator.running
+
+        # no new requests should be generated
+        sleep(0.1)
+        num_requests = len(os.listdir(generator.tmpdir))
+        sleep(1)
+        assert num_requests == len(os.listdir(generator.tmpdir))
+
+        # resuming should generate new requests
+        generator.resume()
+        sleep(1)
+        assert num_requests < len(os.listdir(generator.tmpdir))
+
+        assert generator.running
+
+
+def test_run(api):
+    """Test that fuzzer is running for defined time interval."""
+    with SchemathesisGenerator(
+        OAS_PATH, "http://localhost:8000", max_time_seconds=5, batch_interval=1
+    ) as generator:
+        assert generator.running
+        sleep(1)
+        assert not generator.running
+
+        # clear requests
+        for file in Path(generator.tmpdir).iterdir():
+            os.remove(file)
+
+        # loop should start again when requesting files
+        assert generator.generate()
+        assert generator.running
+        sleep(1)
+        assert 0 < len(os.listdir(generator.tmpdir))
