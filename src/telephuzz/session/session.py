@@ -48,8 +48,9 @@ class Session:
         """Send a request to the API through the client library."""
 
         def _get_response() -> Response:
+            response_dir = response_output / f"api{self.id}"
             try:
-                response_path = next(response_output.iterdir())
+                response_path = next(response_dir.iterdir())
             except StopIteration as e:
                 raise RuntimeError("No response file found") from e
 

@@ -3,6 +3,8 @@
 import json
 import os
 import time
+from pathlib import Path
+from urllib.parse import urlparse
 
 from mitmproxy import http
 
@@ -64,5 +66,12 @@ def response(flow: http.HTTPFlow):
 
     response_id = time.time_ns()
     os.makedirs(RESPONSE_PATH, exist_ok=True)
-    with open(RESPONSE_PATH + f"/response_{response_id}.json", "w") as f:
+
+    # get result_dir
+    url = urlparse(flow.request.pretty_url)
+    api_name = url.netloc[: url.netloc.find(":")]
+    response_path = Path(RESPONSE_PATH) / api_name
+    os.makedirs(response_path, exist_ok=True)
+
+    with open(response_path / f"response_{response_id}.json", "w") as f:
         json.dump(entry, f)

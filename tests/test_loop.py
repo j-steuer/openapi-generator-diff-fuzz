@@ -282,9 +282,10 @@ def test_mitmproxy_result_dir(monkeypatch):
             ).text
         ), "Message was not routed."
 
-        result_files = os.listdir(session_manager.result_dir)
+        result_dir = Path(session_manager.result_dir) / "api0"
+        result_files = os.listdir(result_dir)
         assert len(result_files) == 1
-        result_file = Path(session_manager.result_dir) / result_files[0]
+        result_file = result_dir / result_files[0]
         Request.from_json(result_file)
         Response.from_json(result_file)
 
