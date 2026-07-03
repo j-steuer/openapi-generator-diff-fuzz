@@ -120,7 +120,6 @@ class Response(HTTPMessage):
     """Class for HTTP response fields relevant for the evaluation."""
 
     status: int
-    text: str | None
 
     @classmethod
     def from_json(cls, json_data: Path | str):
@@ -145,7 +144,6 @@ class Response(HTTPMessage):
             headers=CaseInsensitiveDict(data["headers"]),
             body=data["body"],
             status=data["status_code"],
-            text=data["text"],
         )
 
     def __hash__(self) -> int:
@@ -158,7 +156,6 @@ class Response(HTTPMessage):
         return hash(
             (
                 self.status,
-                self.text,
                 (json.dumps(body, sort_keys=True) if body is not None else body),
                 json.dumps(dict(self.headers), sort_keys=True),
             )

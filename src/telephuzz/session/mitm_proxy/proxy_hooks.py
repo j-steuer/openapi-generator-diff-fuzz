@@ -60,7 +60,6 @@ def response(flow: http.HTTPFlow):
             "status_code": flow.response.status_code,
             "headers": dict(flow.response.headers),
             "body": flow.response.get_text(),
-            "text": flow.response.get_text(),
         },
     }
 

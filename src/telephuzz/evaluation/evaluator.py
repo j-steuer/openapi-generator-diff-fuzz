@@ -197,7 +197,6 @@ class DiffEvaluator:
 
             for diff_response, libraries in response_groups.items():
                 diff_status = true_response.status != diff_response.status
-                diff_text = true_response.text != diff_response.text
                 diff_body = true_response.body != diff_response.body
                 diff_headers = true_response.headers != diff_response.headers
 
@@ -207,7 +206,7 @@ class DiffEvaluator:
                 "agree on the source of truth.\n"
 
                 for library in libraries:
-                    if not any([diff_status, diff_text, diff_body, diff_headers]):
+                    if not any([diff_status, diff_body, diff_headers]):
                         raise RuntimeError(
                             "Diff in response detected, but exact diff not found."
                         )
@@ -215,9 +214,6 @@ class DiffEvaluator:
                     if diff_status:
                         detail += f"- Status code {true_response.status} expected, "
                         f"but got {diff_response.status}.\n"
-                    if diff_text:
-                        detail += f"- Text '{true_response.text}' expected, "
-                        f"but got '{diff_response.text}.'\n"
                     if diff_body:
                         detail += f"- Body '{pformat(true_response.body)}' "
                         f"expected, but got '{pformat(diff_response.body)}.'\n"

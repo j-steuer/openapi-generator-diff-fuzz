@@ -25,7 +25,6 @@ def test_same_request_responses():
         headers=CaseInsensitiveDict({"response_header": "test"}),
         body="This is a response body.",
         status=404,
-        text="Not found.",
     )
     # TODO adjust when db comp implemented
     result1 = RequestResult("Lib1", request, response, None, None)
@@ -51,7 +50,6 @@ def test_same_diff_request():
         headers=CaseInsensitiveDict({"response_header": "test"}),
         body="This is a response body.",
         status=404,
-        text="Not found.",
     )
     wrong_request = deepcopy(request)
     request.body = "Wrong body."
@@ -80,7 +78,6 @@ def test_same_diff_response():
         headers=CaseInsensitiveDict({"response_header": "test"}),
         body="This is a response body.",
         status=404,
-        text="Not found.",
     )
     wrong_response = deepcopy(response)
     wrong_response.body = "Wrong body."
@@ -110,7 +107,6 @@ def test_logging():
         headers=CaseInsensitiveDict({"response_header": "test"}),
         body="This is a response body.",
         status=404,
-        text="Not found.",
     )
     wrong_request = deepcopy(request)
     request.body = "Wrong body."

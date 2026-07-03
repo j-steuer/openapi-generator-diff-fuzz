@@ -27,7 +27,6 @@ def test_response_hash():
         headers=CaseInsensitiveDict({"response_header": "test"}),
         body=r"{'test': 123}",
         status=404,
-        text="Not found.",
     )
     hash(response)
 
