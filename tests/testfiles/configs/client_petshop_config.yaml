@@ -1,0 +1,24 @@
+targets:
+  - id: test-client1:python
+    lib_name: openapi-gen-python-petshop-client
+
+  - id: test-client2:python
+    lib_name: openapi-gen-python-petshop-client
+
+  - id: test-client3:python
+    lib_name: openapi-gen-python-petshop-client
+
+  - id: test-client4:python
+    lib_name: openapi-gen-python-petshop-client
+
+  - id: test-client5:python
+    lib_name: openapi-gen-python-petshop-client
+
+  - id: test-client6:python
+    lib_name: openapi-gen-python-petshop-client
+
+    
+
+fuzzing:
+  log-path: "/tmp/logs/telephuzz"
+  timeout: 60
