@@ -61,7 +61,7 @@ def response(flow: http.HTTPFlow):
     os.makedirs(RESPONSE_PATH, exist_ok=True)
 
     # get result_dir
-    url = urlparse(flow.request.pretty_url)
+    url = urlparse(flow.request.url)
     api_name = url.netloc[: url.netloc.find(":")]
     response_path = Path(RESPONSE_PATH) / api_name
     os.makedirs(response_path, exist_ok=True)
