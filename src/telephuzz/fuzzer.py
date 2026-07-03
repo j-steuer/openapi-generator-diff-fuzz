@@ -130,9 +130,7 @@ class TelePhuzz:
             with SessionManager() as session_manager:
                 # fuzz until no more request( chain)s available or timeout
                 logger.info("Beginning to fuzz clients.")
-                use_timeout = timeout is not None and not isinstance(
-                    self.request_generator, FuzzerBasedGenerator
-                )
+                use_timeout = timeout is not None
                 while request is not None:
                     # TODO previous responses
                     request = self.request_generator.generate()
@@ -147,6 +145,7 @@ class TelePhuzz:
 
                     del results
 
+                    logger.debug(f"Current time: {datetime.now()} | Timeout: {timeout}")
                     if use_timeout:
                         assert timeout is not None
                         if datetime.now() >= timeout:
