@@ -13,12 +13,6 @@ RESPONSE_PATH = "/responses"
 
 def request(flow: http.HTTPFlow):
     """Handle custom encoding to route requests to API targets."""
-    log = "/tmp/logs"
-    os.makedirs(log, exist_ok=True)
-    if len(os.listdir(log)) < 3:
-        with open(f"{log}/log{time.time_ns()}.txt", "w") as f:
-            f.write(repr(flow))
-
     path = flow.request.path  # e.g. /server:8000/api/foo
 
     parts = path.lstrip("/").split("/", 1)
