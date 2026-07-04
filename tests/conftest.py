@@ -253,7 +253,7 @@ def basic_request():
 def basic_response():
     """Fixture for dummy response."""
     return Response(
-        headers=CaseInsensitiveDict({"Test": ["test"]}), body=None, status=404, text=""
+        headers=CaseInsensitiveDict({"Test": ["test"]}), body=None, status=404
     )
 
 
@@ -432,7 +432,6 @@ def mock_client():
         headers=CaseInsensitiveDict(),
         body=mock_client.mock_body,
         status=200,
-        text=None,
     )
     mock_client.id = "MOCK_ID"
 
