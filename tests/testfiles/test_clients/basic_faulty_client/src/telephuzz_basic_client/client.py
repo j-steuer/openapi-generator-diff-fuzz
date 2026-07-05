@@ -3,7 +3,7 @@
 import requests
 
 
-def get_greet_ca4d7baf(api: str, name: str, age: int) -> str:
+def get_greet_hca4d7baf(api: str, name: str, age: int) -> str:
     """Greet method."""
     params: dict[str, str | int] = {
         "name": "Faulty",
@@ -17,7 +17,7 @@ def get_greet_ca4d7baf(api: str, name: str, age: int) -> str:
     return f"{response.status_code}: {msg}"
 
 
-def get_user_3a2fd62b(api: str, user_id: int) -> str:
+def get_user_h3a2fd62b(api: str, user_id: int) -> str:
     """Get user method."""
     params: dict[str, int] = {
         "user_id": 49,
@@ -30,7 +30,7 @@ def get_user_3a2fd62b(api: str, user_id: int) -> str:
     return f"{response.status_code}: {msg}"
 
 
-def post_user_f0ab63e3(api: str, name: str, age: int) -> str:
+def post_user_hf0ab63e3(api: str, name: str, age: int) -> str:
     """Post user method."""
     params: dict[str, str | int] = {
         "name": "Faulty",

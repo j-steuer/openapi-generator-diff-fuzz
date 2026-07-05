@@ -14,3 +14,4 @@ repos:
           - types-docker
         args:
           - --ignore-missing-imports
+        exclude: ^tests/testfiles/test_clients/
