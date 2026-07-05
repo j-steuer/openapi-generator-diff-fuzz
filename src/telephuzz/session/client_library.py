@@ -553,7 +553,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
         elif request.body and "json" in request.headers["Content-Type"]:
-            model_name = get_args(request.method, request.path)
+            model_name = get_args(get_config().spec_str, request.method, request.path)
             assert model_name is not None, (
                 f"Obtaining args failed for {request.method} "
                 f"{request.path} with body {request.body}"

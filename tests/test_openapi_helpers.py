@@ -7,7 +7,6 @@ from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 import pytest
 import yaml  # type: ignore
 
-from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     _find_all,
@@ -92,30 +91,26 @@ def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
     assert "200" in operation["responses"]
 
 
-def test_find_args(monkeypatch):
+def test_find_args():
     """Test finding the name of a ref arg."""
-    config = get_config()
-
     with open("tests/testfiles/processed_petshop.json", "r") as f:
-        spec = json.load(f)
-
-    monkeypatch.setattr(config, "spec", spec)
+        spec = json.dumps(json.load(f))
 
     # concrete path should resolve
-    arg = get_args(HTTPMethod.POST, "/pet")
+    arg = get_args(spec, HTTPMethod.POST, "/pet")
     assert arg == "Pet"
 
     # non-concrete path should resolve
-    arg = get_args(HTTPMethod.PUT, "/user/123")
+    arg = get_args(spec, HTTPMethod.PUT, "/user/123")
     assert arg == "User"
 
     # concrete path should not resolve to non-concrete path
-    arg = get_args(HTTPMethod.GET, "/user/login")
+    arg = get_args(spec, HTTPMethod.GET, "/user/login")
     assert arg is None
 
     # nonexistent path should raise error
     with pytest.raises(ValueError):
-        get_args(HTTPMethod.GET, "/nonexistent")
+        get_args(spec, HTTPMethod.GET, "/nonexistent")
 
 
 def test_get_api_url_path_no_servers():

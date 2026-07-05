@@ -8,12 +8,11 @@ from urllib.parse import ParseResult, unquote, urlparse
 
 import yaml  # type: ignore
 
-from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
 
-def preprocess_oas(oas: Path, output_path: Path) -> None:
+def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
     """Pre-process an OpenAPI spec and map all paths to own operationId.
 
     Writes the resulting OpenAPI spec to output_path.
@@ -41,11 +40,14 @@ def preprocess_oas(oas: Path, output_path: Path) -> None:
                 continue
             operation["operationId"] = generate_operation_id(method, path)
 
-    with open(output_path, "w") as f:
-        if output_path.suffix == ".json":
-            json.dump(spec, f)
-        elif output_path.suffix == ".yaml":
-            yaml.safe_dump(spec, f)
+    if output_path:
+        with open(output_path, "w") as f:
+            if output_path.suffix == ".json":
+                json.dump(spec, f)
+            elif output_path.suffix == ".yaml":
+                yaml.safe_dump(spec, f)
+
+    return spec
 
 
 def _find_all(spec: dict, element: str) -> list[Any]:
@@ -80,12 +82,14 @@ def find_operation(spec: dict, operation_id: str) -> dict | None:
 
 
 @cache
-def get_args(method: HTTPMethod, path: str) -> str | None:
-    """Obtain a list of arguments for the given operation id."""
+def get_args(spec: str, method: HTTPMethod, path: str) -> str | None:
+    """Obtain a list of arguments for the given operation id.
+
+    Spec must be passed as string using json.dumps to enable caching.
+    """
     # search operation id
-    spec = get_config().spec
-    operation_id = resolve_request_id(method, path, json.dumps(spec))
-    operation = find_operation(spec, operation_id)
+    operation_id = resolve_request_id(method, path, spec)
+    operation = find_operation(json.loads(spec), operation_id)
 
     if operation is None:
         return None
@@ -103,13 +107,8 @@ def get_args(method: HTTPMethod, path: str) -> str | None:
     return None
 
 
-def get_api_url_path(spec: dict | None = None) -> str:
-    """Obtain the base path of the API.
-
-    Spec can either be provided directly or read from config if not provided."""
-    if spec is None:
-        spec = get_config().spec
-
+def get_api_url_path(spec: dict) -> str:
+    """Obtain the base path of the API."""
     assert isinstance(spec, dict)
     if "servers" not in spec:
         return ""

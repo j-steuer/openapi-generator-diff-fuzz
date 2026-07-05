@@ -1,10 +1,12 @@
 """Helper methods related to reading and parsing config."""
 
 import json
+from pathlib import Path
 
 import yaml  # type: ignore
 
 from telephuzz.constants import BASE_PATH
+from telephuzz.openapi_helpers import preprocess_oas
 
 
 class Config:
@@ -25,8 +27,10 @@ class Config:
             if "spec-path" in api_config
             else str(BASE_PATH / "spec" / "openapi.json")
         )
-        with open(spec_path, "r") as f:
-            self.spec = json.load(f)
+        _spec = preprocess_oas(Path(spec_path))
+        assert _spec is not None
+        self.spec = _spec
+        self.spec_str = json.dumps(self.spec)
         self.database_type = api_config.get("database-type")
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])

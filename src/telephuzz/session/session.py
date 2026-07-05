@@ -125,7 +125,7 @@ class SessionManager:
 
         if len(self.targets) <= 2:
             raise TypeError("Must have at least three client libraries under test.")
-        self.api_path = get_api_url_path()
+        self.api_path = get_api_url_path(config.spec)
         self.api_port_name = config.api_port_name
         self.port_names = config.port_names
 
