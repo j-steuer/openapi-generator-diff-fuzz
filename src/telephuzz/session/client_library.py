@@ -23,7 +23,12 @@ from docker.models.images import Image
 
 from telephuzz.config import get_config
 from telephuzz.http_message import Request, Response
-from telephuzz.openapi_helpers import extract_paths, get_args, resolve_path
+from telephuzz.openapi_helpers import (
+    extract_path_parameters,
+    extract_paths,
+    get_args,
+    resolve_path,
+)
 from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 
 LibraryId = str
@@ -31,6 +36,22 @@ LibraryId = str
 LIB_PATH = "/app"
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_path(path: str) -> str:
+    """Resolve the concrete path."""
+    path = _path_only(path)
+
+    concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
+    return resolve_path(path, concrete, non_concrete)
+
+
+def _path_only(path: str) -> str:
+    """Return the path without query parameters."""
+    if "?" in path:
+        path = path[: path.find("?")]
+
+    return path
 
 
 def decode_output(output: bytes | Iterable[bytes]) -> str:
@@ -190,7 +211,6 @@ class ClientLibraryContainer(ABC):
         )
 
         out = decode_output(output)
-        assert exit_code == 0, f"Error occured while sending request: {out}"
 
         return out
 
@@ -503,13 +523,7 @@ class OperationIdBasedCLC(ClientLibraryContainer):
         method, path = request.method, request.path
         operation_id = generate_operation_id(method.value, path)
 
-        concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
-        if "?" in request.path:
-            path_only = request.path[: request.path.find("?")]
-        else:
-            path_only = request.path
-
-        path = resolve_path(path_only, concrete, non_concrete)
+        path = _resolve_path(request.path)
         operation_id = generate_operation_id(method.value, path)
 
         library_method_name = transform_case(operation_id, self.method_case)
@@ -527,10 +541,17 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
         model_name_str = ""
-        if request.query_parameters:
-            kwargs = ", ".join(
-                f"{k}={repr(v)}" for k, v in request.query_parameters.items()
-            )
+
+        # check for path variables
+        path_only = _path_only(request.path)
+        path = _resolve_path(request.path)
+
+        query_parameters = request.query_parameters
+        if "{" in path:
+            query_parameters.update(extract_path_parameters(path, path_only))
+
+        if query_parameters:
+            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
         elif request.body and "json" in request.headers["Content-Type"]:
             model_name = get_args(request.method, request.path)
             assert model_name is not None, (

@@ -11,6 +11,7 @@ from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     _find_all,
+    extract_path_parameters,
     extract_paths,
     find_operation,
     get_api_url_path,
@@ -191,3 +192,18 @@ def test_resolve_request_id_non_concrete(basic_oas_json: _TemporaryFileWrapper):
     assert resolve_request_id(
         method, path, basic_oas_json.read()
     ) == generate_operation_id(method.value, "/items/{id}")
+
+
+def test_extract_path_parameters():
+    """Test extracting path parameters from concrete paths."""
+    # should extract parameters
+    assert extract_path_parameters(
+        "/items/{id}/test/{name}", "/items/123/test/Test"
+    ) == {"id": "123", "name": "Test"}
+
+    # should return empty with no parameters
+    assert extract_path_parameters("/items", "/items") == {}
+
+    # should raise on mismatch
+    with pytest.raises(ValueError):
+        extract_path_parameters("/items", "/items/123")

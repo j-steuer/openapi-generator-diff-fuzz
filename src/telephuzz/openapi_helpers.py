@@ -4,7 +4,7 @@ import json
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
-from urllib.parse import ParseResult, urlparse
+from urllib.parse import ParseResult, unquote, urlparse
 
 import yaml  # type: ignore
 
@@ -213,3 +213,26 @@ def resolve_request_id(method: HTTPMethod, path: str, spec_str: str) -> str:
 
     operation_id = generate_operation_id(method.value, path)
     return operation_id
+
+
+def extract_path_parameters(template: str, path: str) -> dict[str, str]:
+    """Extract path parameters from a concrete path."""
+    template_parts = template.strip("/").split("/")
+    path_parts = path.strip("/").split("/")
+
+    if len(template_parts) != len(path_parts):
+        raise ValueError("Template and path have different numbers of segments.")
+
+    params = {}
+
+    for template_part, path_part in zip(template_parts, path_parts, strict=False):
+        if template_part.startswith("{") and template_part.endswith("}"):
+            name = template_part[1:-1]
+            params[name] = unquote(path_part)
+        elif template_part != path_part:
+            raise ValueError(
+                f"Static path segment mismatch: "
+                f"expected '{template_part}', got '{path_part}'."
+            )
+
+    return params

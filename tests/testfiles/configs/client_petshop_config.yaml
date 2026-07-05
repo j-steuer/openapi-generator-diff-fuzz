@@ -1,21 +1,21 @@
 targets:
-  - id: test-client1:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client1:python
+    lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-client2:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client2:python
+    lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-client3:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client3:python
+    lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-client4:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client4:python
+    lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-client5:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client5:python
+    lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-client6:python
-    lib_name: openapi-gen-python-petshop-client
+  - id: test-pet-client6:python
+    lib_name: openapi-gen-python-client-pet-api
 
     
 

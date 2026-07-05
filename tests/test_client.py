@@ -13,6 +13,7 @@ from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod, Request
+from telephuzz.operation_ids import generate_operation_id
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
     KiotaCSharpCLC,
@@ -28,6 +29,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
     OpenapiPythonGeneratorCLC,
+    OperationIdBasedCLC,
     OrvalCLC,
     SwaggerCodegenCsharpCLC,
     SwaggerCodegenPythonCLC,
@@ -91,6 +93,34 @@ def test_from_id():
     assert client_type == OpenAPIGenPythonCLC
 
 
+def test_get_method_name_opid_mixin(monkeypatch):
+    """Test mixin for obtaining method names based on operation id."""
+    config = get_config()
+
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.load(f)
+
+    monkeypatch.setattr(config, "spec", spec)
+
+    class Dummy(OperationIdBasedCLC):
+        def _translate(self, request: Request, api_path: str) -> str | list[str]:
+            return "DUMMY"
+
+    mixin = Dummy.__new__(Dummy)
+
+    request = Request(
+        CaseInsensitiveDict(),
+        body="",
+        method=HTTPMethod.DELETE,
+        path="/user/123",
+        query_parameters={},
+    )
+
+    assert mixin._get_method_name(request) == generate_operation_id(
+        HTTPMethod.DELETE.value, "/user/{username}"
+    )
+
+
 @pytest.mark.parametrize("clc_class, library_path", CLIENT_CASES_NO_AUTH)
 def test_clients_noauth(clc_class, library_path, api: tuple[Network, str]) -> None:
     """Basic GET request test without authentication."""
@@ -131,30 +161,26 @@ def test_client_openapi_gen_python_petshop(
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
         network.connect(cast(Container, clc.container))
 
-        payload = {
-            "id": 123,
-            "name": "doggie",
-            "category": {"id": 1, "name": "dogs"},
-            "photoUrls": ["https://example.com/dog.jpg"],
-            "tags": [{"id": 1, "name": "friendly"}],
-            "status": "available",
-        }
-
-        headers = {
-            "Content-Type": "application/json",
-        }
-
         request = Request(
-            headers=CaseInsensitiveDict(headers),
-            body=str(payload),
-            method=HTTPMethod.POST,
-            path="/pet",
-            query_parameters=dict(),
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "dPIEin",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/user/%C2%B4i%C2%84%C3%B2X2%C2%BA%3A%3D%C3%B5%F1%BA%86%8D",
+            query_parameters={},
         )
 
         response = clc.send(request, api_path=api_path)
         assert isinstance(response, str)
-        assert "doggie" in response
+        assert "User not found" in response
 
 
 @pytest.mark.skip("Fix")
