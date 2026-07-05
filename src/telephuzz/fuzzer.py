@@ -70,15 +70,12 @@ class TelePhuzz:
             timeout = 5
             for i in range(timeout + 1):
                 try:
-                    if (
-                        requests.get(
-                            "http://localhost:8000/openapi.json",
-                            timeout=1,
-                        ).status_code
-                        == 200
-                    ):
-                        break
-                except requests.RequestException:
+                    requests.get("http://localhost:8000/", timeout=1)
+                    break  # Any HTTP response means the server is up
+                except (
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.ReadTimeout,
+                ):
                     pass
 
                 if i == timeout:
