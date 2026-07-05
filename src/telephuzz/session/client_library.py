@@ -21,8 +21,9 @@ from docker.errors import ImageNotFound
 from docker.models.containers import Container
 from docker.models.images import Image
 
+from telephuzz.config import get_config
 from telephuzz.http_message import Request, Response
-from telephuzz.openapi_helpers import get_args
+from telephuzz.openapi_helpers import extract_paths, get_args, resolve_path
 from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 
 LibraryId = str
@@ -501,6 +502,16 @@ class OperationIdBasedCLC(ClientLibraryContainer):
     def _get_method_name(self, request: Request) -> str:
         method, path = request.method, request.path
         operation_id = generate_operation_id(method.value, path)
+
+        concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
+        if "?" in request.path:
+            path_only = request.path[: request.path.find("?")]
+        else:
+            path_only = request.path
+
+        path = resolve_path(path_only, concrete, non_concrete)
+        operation_id = generate_operation_id(method.value, path)
+
         library_method_name = transform_case(operation_id, self.method_case)
 
         return library_method_name
@@ -515,14 +526,17 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     id = "openapi-generator:python"
 
     def _get_code(self, request: Request, api_path: str) -> bytes:
+        model_name_str = ""
         if request.query_parameters:
             kwargs = ", ".join(
                 f"{k}={repr(v)}" for k, v in request.query_parameters.items()
             )
-            model_name_str = ""
         elif request.body and "json" in request.headers["Content-Type"]:
             model_name = get_args(request.method, request.path)
-            assert model_name is not None
+            assert model_name is not None, (
+                f"Obtaining args failed for {request.method} "
+                f"{request.path} with body {request.body}"
+            )
             model_name_str = f"from openapi_client.models.{model_name.lower()} "
             model_name_str += f"import {model_name.capitalize()}"
 
