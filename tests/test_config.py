@@ -11,6 +11,7 @@ def test_get_config():
     assert config.api_container_name == "api"
     assert config.compose_path == "/compose/docker-compose.yaml"
     assert config.spec
+    assert config.spec_str
     assert config.database_type == "H2"
     assert config.api_port_name == "HOST_PORT"
     assert config.port_names == {"HOST_PORT", "DB_PORT"}
