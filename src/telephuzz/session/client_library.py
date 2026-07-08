@@ -552,6 +552,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         if "{" in path:
             query_parameters.update(extract_path_parameters(path, path_only))
 
+        kwargs = ""
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
         elif request.body and "json" in request.headers["Content-Type"]:
