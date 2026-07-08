@@ -6,10 +6,40 @@ import tempfile
 from pathlib import Path
 from time import sleep
 
+import pytest
 import requests
 from docker.models.networks import Network
+from mitmproxy import http
 
+from telephuzz.session.mitm_proxy import proxy_hooks_target
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
+
+
+@pytest.fixture
+def basic_flow():
+    request = http.Request.make(
+        "POST",
+        "https://example.com/api/test?foo=bar",
+        '{"hello": "world"}',
+        {
+            "Content-Type": "application/json",
+            "X-Test": "true",
+        },
+    )
+
+    response = http.Response.make(
+        200,
+        '{"success": true}',
+        {
+            "Content-Type": "application/json",
+        },
+    )
+
+    flow = http.HTTPFlow.__new__(http.HTTPFlow)
+    flow.request = request
+    flow.response = response
+
+    return flow
 
 
 def test_init() -> None:
@@ -150,3 +180,27 @@ def test_single_target(api: tuple[Network, str]) -> None:
             entry_data = json.load(f)
 
         assert "Hello Alice, you are 30 years old!" in entry_data["response"]["body"]
+
+
+def test_explode(basic_flow: http.HTTPFlow, monkeypatch) -> None:
+    """Test that multiple items for a single query are resolved to an array."""
+    basic_flow.request = http.Request.make(
+        "GET",
+        "https://example.com/search?tags=python&tags=mitmproxy&tags=testing&page=1",
+    )
+
+    with tempfile.TemporaryDirectory() as dir:
+        monkeypatch.setattr(proxy_hooks_target, "RESPONSE_PATH", dir)
+
+        proxy_hooks_target.response(basic_flow)
+        file = os.listdir(dir)[0]
+        with open(Path(dir) / file, "r") as f:
+            data = json.load(f)
+
+    query_parameters = data["request"]["query_parameters"]
+    assert set(query_parameters["tags"]) == {
+        "python",
+        "mitmproxy",
+        "testing",
+    }
+    assert query_parameters["page"] == "1"
