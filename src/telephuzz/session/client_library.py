@@ -14,7 +14,7 @@ import textwrap
 from _hashlib import HASH
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, cast
 
 import docker
 from docker.errors import ImageNotFound
@@ -550,11 +550,18 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         query_parameters = request.query_parameters
         if "{" in path:
-            query_parameters.update(extract_path_parameters(path, path_only))
+            _path_params = extract_path_parameters(path, path_only)
+            path_params = {
+                transform_case(key, self.method_case): (
+                    int(value) if cast(str, value).isnumeric() else value
+                )
+                for key, value in _path_params.items()
+            }
+            query_parameters.update(path_params)
 
         kwargs = ""
         if query_parameters:
-            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
+            kwargs = ", ".join(f"{k}={v}" for k, v in query_parameters.items())
         elif request.body and "json" in request.headers["Content-Type"]:
             model_name = get_args(get_config().spec_str, request.method, request.path)
             assert model_name is not None, (
