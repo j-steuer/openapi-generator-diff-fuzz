@@ -38,6 +38,30 @@ def test_transform_case_pascal() -> None:
     assert "GetTestId" in transform_case(operation_id, Case("pascal"))
 
 
+def test_transform_pascal_to_camel() -> None:
+    """Test transforming pascal to camel."""
+    string = "TestStringPascal"
+    assert "testStringPascal" == transform_case(string, Case.CAMEL)
+
+
+def test_transform_camel_to_pascal() -> None:
+    """Test transforming pascal to camel."""
+    string = "testStringCamel"
+    assert "TestStringCamel" == transform_case(string, Case.PASCAL)
+
+
+def test_transform_camel_to_snake() -> None:
+    """Test transforming camel to snake."""
+    string = "testStringCamel"
+    assert "test_string_camel" == transform_case(string, Case.SNAKE)
+
+
+def test_transform_pascal_to_snake() -> None:
+    """Test transforming pascal to snake."""
+    string = "TestStringPascal"
+    assert "test_string_pascal" == transform_case(string, Case.SNAKE)
+
+
 def test_operation_ids_ignore_query() -> None:
     """Query parameters should be ignored when generating the operation id."""
     operation_id_no_query = generate_operation_id("GET", "/test")
