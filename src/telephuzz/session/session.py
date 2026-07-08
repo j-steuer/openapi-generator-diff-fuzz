@@ -202,8 +202,23 @@ class SessionManager:
             else:
                 db_container = None
 
+            api_container = [
+                c
+                for c in api_containers
+                if c.name is not None
+                and re.search(rf"-{re.escape(self.api_name)}-\d+$", c.name)
+            ]
+            if len(api_container) != 1:
+                raise ValueError(f"API container name {self.api_name} not found.")
+
+            internal_port_numbers = [
+                int(port.split("/")[0])
+                for port in api_container[0].attrs["NetworkSettings"]["Ports"]
+            ]
+            api_port = internal_port_numbers[0]
+
             if db_container is None:
-                api_container = self.stack.enter_context(APIContainer(api_port))
+                api_container_obj = self.stack.enter_context(APIContainer(api_port))
             else:
                 assert self.database_type is not None, (
                     "Database type must be provided when using APIs with a database."
@@ -215,19 +230,11 @@ class SessionManager:
                 )
 
             session = Session(
-                id=len(self.networks), api=api_container, client=client_container
+                id=len(self.networks), api=api_container_obj, client=client_container
             )
 
             # add api containers, client container and mitmproxy to same network
             network = client.networks.create(network_name)
-            api_container = [
-                c
-                for c in api_containers
-                if c.name is not None
-                and re.search(rf"-{re.escape(self.api_name)}-\d+$", c.name)
-            ]
-            if len(api_container) != 1:
-                raise ValueError(f"API container name {self.api_name} not found.")
             api_alias = f"{API_ALIAS_BASE}{len(self.networks)}"
             network.connect(api_container[0], aliases=[api_alias])
             assert client_container.container is not None
@@ -261,7 +268,9 @@ class SessionManager:
 
         for session in self.sessions.values():
             api_url = f"http://{MITMPROXY_ALIAS}:{self.mitmproxy.listen_port}"
-            api_url += f"/{API_ALIAS_BASE}{session.id}:8000{self.api_path}"
+            api_url += (
+                f"/{API_ALIAS_BASE}{session.id}:{session.api.port}{self.api_path}"
+            )
             results.add(
                 session.send(
                     request,

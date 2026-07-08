@@ -211,6 +211,8 @@ class ClientLibraryContainer(ABC):
         )
 
         out = decode_output(output)
+        if exit_code != 0:
+            logger.debug(f"Client process exited with exit code {exit_code}: {out}")
 
         return out
 

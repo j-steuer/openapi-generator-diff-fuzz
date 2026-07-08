@@ -1,7 +1,7 @@
 api-port-name: HOST_PORT
 compose-path: wfd/dockerfiles/swagger-petstore.yaml
 spec-path: wfd/openapi-swagger/swagger-petstore.json
-container-name: swagger-petstore
+container-name: mitmproxy
 port-names:
 - HOST_PORT
 - AUTH_PORT
