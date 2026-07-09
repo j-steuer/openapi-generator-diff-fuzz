@@ -19,7 +19,11 @@ from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.fuzzer import TelePhuzz
 from telephuzz.http_message import HTTPMethod, Request, Response
-from telephuzz.session.client_library import OperationIdBasedCLC, PythonCLC
+from telephuzz.session.client_library import (
+    OpenAPIGenPythonCLC,
+    OperationIdBasedCLC,
+    PythonCLC,
+)
 from telephuzz.session.session import SessionManager
 
 # TODO move somewhere else
@@ -316,3 +320,123 @@ def test_loop_faulty_library(monkeypatch):
     assert len(os.listdir(LOG_PATH)) > 0
     assert not any("test-client" in f for f in os.listdir(LOG_PATH))
     assert all("test-faulty-client" in f for f in os.listdir(LOG_PATH))
+
+
+def test_send_petshop(monkeypatch):
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "api_key": "^",
+                "X-Schemathesis-TestCaseId": "q2GdK4",
+            }
+        ),
+        body="",
+        method=HTTPMethod.GET,
+        path="/store/inventory",
+        query_parameters={},
+    )
+
+    with SessionManager() as session_manager:
+        session_manager.send(request)
+        assert len(os.listdir(session_manager.result_dir)) == 3
+
+
+def test_resolve_path_params(monkeypatch):
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    request_int = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "api_key": "l",
+                "X-Schemathesis-TestCaseId": "GGvhsb",
+            }
+        ),
+        body="",
+        method=HTTPMethod.GET,
+        path="/pet/105",
+        query_parameters={},
+    )
+
+    request_str = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "api_key": "l",
+                "X-Schemathesis-TestCaseId": "GGvhsb",
+            }
+        ),
+        body="",
+        method=HTTPMethod.GET,
+        path="/user/105",
+        query_parameters={},
+    )
+
+    with SessionManager() as session_manager:
+        session_manager.send(request_int)
+        assert len(os.listdir(session_manager.result_dir)) == 3
+
+        session_manager.send(request_str)
+        assert len(os.listdir(session_manager.result_dir)) == 3
+
+
+def test_loop_petshop(monkeypatch):
+    """Tets the fuzzing loop with the petshop API and six identical clients."""
+
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    fuzzer = TelePhuzz(TESTFILES / "processed_petshop.json")
+    fuzzer.start_fuzzing_session()
+
+    assert len(os.listdir(LOG_PATH)) == 0
