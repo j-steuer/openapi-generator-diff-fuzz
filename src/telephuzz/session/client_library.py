@@ -587,7 +587,10 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                 model_name_str += f"import {model_name.capitalize()}"
 
                 # TODO parse in Request object
-                eval_body = ast.literal_eval(request.body)
+                try:
+                    eval_body = ast.literal_eval(request.body)
+                except ValueError:
+                    eval_body = json.loads(request.body)
                 if isinstance(eval_body, list):
                     # create list of objects
                     model_list = [
@@ -596,7 +599,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                     ]
                     body_kwargs = "[" + ", ".join(model_list) + "]"
                 elif isinstance(eval_body, dict):
-                    body = json.dumps(ast.literal_eval(request.body))
+                    body = json.dumps(eval_body)
                     model_name_case = transform_case(model_name, self.method_case)
                     from_json = f"{model_name.capitalize()}.from_json({body!r}"
                     body_kwargs = f"{model_name_case}={from_json})"
