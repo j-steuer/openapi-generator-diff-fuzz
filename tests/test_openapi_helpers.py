@@ -11,6 +11,7 @@ from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     _find_all,
     extract_path_parameters,
+    extract_path_variable_types,
     extract_paths,
     find_operation,
     get_api_url_path,
@@ -202,3 +203,18 @@ def test_extract_path_parameters():
     # should raise on mismatch
     with pytest.raises(ValueError):
         extract_path_parameters("/items", "/items/123")
+
+
+def test_extract_path_variable_types():
+    """Test extracting path variable types."""
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.dumps(json.load(f))
+
+    assert extract_path_variable_types(spec, "/pet/{petId}") == {"petId": "integer"}
+    assert extract_path_variable_types(spec, "/user/{username}") == {
+        "username": "string"
+    }
+    assert extract_path_variable_types(spec, "/user/login") == {}
+
+    with pytest.raises(KeyError):
+        extract_path_variable_types(spec, "none")

@@ -139,6 +139,36 @@ def extract_paths(spec_json: str) -> tuple[set[str], set[str]]:
     return concrete, non_concrete
 
 
+@cache
+def extract_path_variable_types(spec_json: str, path: str) -> dict[str, str]:
+    """Given an OpenAPI spec and an operation id, get the type of all path variables."""
+    spec: dict = json.loads(spec_json)
+    paths: dict = spec.get("paths", {})
+    path_item: dict = paths[path]
+
+    path_level_params = path_item.get("parameters", [])
+
+    for method, operation in path_item.items():
+        if method == "parameters" or not isinstance(operation, dict):
+            continue
+
+        result: dict[str, str] = {}
+
+        # Operation-level parameters override path-level ones.
+        params = path_level_params + operation.get("parameters", [])
+
+        for param in params:
+            if param.get("in") != "path":
+                continue
+
+            schema = param.get("schema", {})
+            result[param["name"]] = schema.get("type", "string")
+
+        return result
+
+    raise KeyError(f"Path {path!r} not found")
+
+
 def resolve_path(
     path: str, concrete_paths: set[str], non_concrete_paths: set[str]
 ) -> str:
@@ -146,7 +176,7 @@ def resolve_path(
     Resolve an incoming API path to:
     1. Exact match in concrete paths, or
     2. Best match among non-concrete paths, or
-    3. Raise error if no match found
+    3. Raise error if no match
     """
 
     # 1. Exact match
@@ -214,7 +244,7 @@ def resolve_request_id(method: HTTPMethod, path: str, spec_str: str) -> str:
     return operation_id
 
 
-def extract_path_parameters(template: str, path: str) -> dict[str, str]:
+def extract_path_parameters(template: str, path: str) -> dict[str, Any]:
     """Extract path parameters from a concrete path."""
     template_parts = template.strip("/").split("/")
     path_parts = path.strip("/").split("/")

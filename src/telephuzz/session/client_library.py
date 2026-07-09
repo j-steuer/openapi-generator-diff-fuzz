@@ -14,7 +14,7 @@ import textwrap
 from _hashlib import HASH
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Iterable, cast
+from typing import Iterable
 
 import docker
 from docker.errors import ImageNotFound
@@ -25,6 +25,7 @@ from telephuzz.config import get_config
 from telephuzz.http_message import Request, Response
 from telephuzz.openapi_helpers import (
     extract_path_parameters,
+    extract_path_variable_types,
     extract_paths,
     get_args,
     resolve_path,
@@ -551,17 +552,27 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         query_parameters = request.query_parameters
         if "{" in path:
             _path_params = extract_path_parameters(path, path_only)
+
+            # cast integers
+            path_parameter_types = extract_path_variable_types(
+                get_config().spec_str, path
+            )
+            for parameter, value in path_parameter_types.items():
+                if value == "integer":
+                    _path_params[parameter] = int(_path_params[parameter])
+                else:
+                    _path_params[parameter] = str(_path_params[parameter])
+
+            # transform case of path variable
             path_params = {
-                transform_case(key, self.method_case): (
-                    int(value) if cast(str, value).isnumeric() else value
-                )
+                transform_case(key, self.method_case): value
                 for key, value in _path_params.items()
             }
             query_parameters.update(path_params)
 
         kwargs = ""
         if query_parameters:
-            kwargs = ", ".join(f"{k}={v}" for k, v in query_parameters.items())
+            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
         elif request.body and "json" in request.headers["Content-Type"]:
             model_name = get_args(get_config().spec_str, request.method, request.path)
             assert model_name is not None, (
