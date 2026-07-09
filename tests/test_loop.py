@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import textwrap
+from copy import deepcopy
 from json import JSONDecodeError
 from pathlib import Path
 from time import sleep
@@ -356,8 +357,8 @@ def test_send_petshop(monkeypatch):
     )
 
     with SessionManager() as session_manager:
-        session_manager.send(request)
-        assert len(os.listdir(session_manager.result_dir)) == 3
+        results = session_manager.send(request)
+        assert len(results) == 3
 
 
 def test_resolve_path_params(monkeypatch):
@@ -412,11 +413,11 @@ def test_resolve_path_params(monkeypatch):
     )
 
     with SessionManager() as session_manager:
-        session_manager.send(request_int)
-        assert len(os.listdir(session_manager.result_dir)) == 3
+        result = session_manager.send(request_int)
+        assert len(result) == 3
 
-        session_manager.send(request_str)
-        assert len(os.listdir(session_manager.result_dir)) == 3
+        result = session_manager.send(request_str)
+        assert len(result) == 3
 
 
 def test_non_json_body(monkeypatch):
@@ -456,8 +457,80 @@ def test_non_json_body(monkeypatch):
     )
 
     with SessionManager() as session_manager:
-        session_manager.send(request)
-        assert len(os.listdir(session_manager.result_dir)) == 3
+        result = session_manager.send(request)
+        assert len(result) == 3
+
+
+def test_json_body_array(monkeypatch):
+    """Test sending an array as json body."""
+
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    request_empty = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "rD5pQN",
+                "Content-Type": "application/json",
+                "Content-Length": "2",
+            }
+        ),
+        body="[]",
+        method=HTTPMethod.POST,
+        path="/user/createWithList",
+        query_parameters={},
+    )
+
+    request_two = deepcopy(request_empty)
+    request_two.body = json.dumps(
+        [
+            {
+                "id": 10,
+                "username": "theUser",
+                "firstName": "John",
+                "lastName": "James",
+                "email": "john@email.com",
+                "password": "12345",
+                "phone": "12345",
+                "userStatus": 1,
+            },
+            {
+                "id": 11,
+                "username": "theUser2",
+                "firstName": "John",
+                "lastName": "James",
+                "email": "john2@email.com",
+                "password": "12345",
+                "phone": "12345",
+                "userStatus": 1,
+            },
+        ]
+    )
+
+    with SessionManager() as session_manager:
+        result = session_manager.send(request_empty)
+        assert len(result) == 3
+
+        result = session_manager.send(request_two)
+        assert len(result) == 3
+        for r in result:
+            assert r.response.status == 200
 
 
 def test_loop_petshop(monkeypatch):

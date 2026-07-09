@@ -587,8 +587,21 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                 model_name_str += f"import {model_name.capitalize()}"
 
                 # TODO parse in Request object
-                body = json.dumps(ast.literal_eval(request.body))
-                body_kwargs = f"{model_name.capitalize()}.from_json({body!r})"
+                eval_body = ast.literal_eval(request.body)
+                if isinstance(eval_body, list):
+                    # create list of objects
+                    model_list = [
+                        f"{model_name.capitalize()}.from_json({json.dumps(json.dumps(body))})"
+                        for body in eval_body
+                    ]
+                    body_kwargs = "[" + ", ".join(model_list) + "]"
+                elif isinstance(eval_body, dict):
+                    body = json.dumps(ast.literal_eval(request.body))
+                    body_kwargs = f"{model_name.capitalize()}.from_json({body!r})"
+                else:
+                    raise NotImplementedError(
+                        f"Unhandled body type {type(eval_body)}: {request.body}"
+                    )
             else:
                 raw_body: str = request.body
                 body_kwargs = f"body={raw_body.encode()!r}"
