@@ -573,18 +573,27 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         kwargs = ""
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
-        elif request.body and "json" in request.headers["Content-Type"]:
-            model_name = get_args(get_config().spec_str, request.method, request.path)
-            assert model_name is not None, (
-                f"Obtaining args failed for {request.method} "
-                f"{request.path} with body {request.body}"
-            )
-            model_name_str = f"from openapi_client.models.{model_name.lower()} "
-            model_name_str += f"import {model_name.capitalize()}"
 
-            # TODO parse in Request object
-            body = json.dumps(ast.literal_eval(request.body))
-            kwargs = f"{model_name.capitalize()}.from_json({body!r})"
+        if request.body:
+            if request.headers["Content-Type"] == "application/json":
+                model_name = get_args(
+                    get_config().spec_str, request.method, request.path
+                )
+                assert model_name is not None, (
+                    f"Obtaining args failed for {request.method} "
+                    f"{request.path} with body {request.body}"
+                )
+                model_name_str = f"from openapi_client.models.{model_name.lower()} "
+                model_name_str += f"import {model_name.capitalize()}"
+
+                # TODO parse in Request object
+                body = json.dumps(ast.literal_eval(request.body))
+                body_kwargs = f"{model_name.capitalize()}.from_json({body!r})"
+            else:
+                raw_body: str = request.body
+                body_kwargs = f"body={raw_body.encode()!r}"
+
+            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
         try:
             auth = f', access_token="{request.headers["Authorization"]}"'

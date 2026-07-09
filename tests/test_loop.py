@@ -419,6 +419,47 @@ def test_resolve_path_params(monkeypatch):
         assert len(os.listdir(session_manager.result_dir)) == 3
 
 
+def test_non_json_body(monkeypatch):
+    """Test sending a non-json body."""
+
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "fHclfr",
+                "Content-Type": "application/octet-stream",
+                "Content-Length": "2",
+            }
+        ),
+        body="j\x13",
+        method=HTTPMethod.POST,
+        path="/pet/140737488355328/uploadImage",
+        query_parameters={},
+    )
+
+    with SessionManager() as session_manager:
+        session_manager.send(request)
+        assert len(os.listdir(session_manager.result_dir)) == 3
+
+
 def test_loop_petshop(monkeypatch):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 
