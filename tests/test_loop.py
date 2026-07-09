@@ -533,6 +533,47 @@ def test_json_body_array(monkeypatch):
             assert r.response.status == 200
 
 
+def test_query_and_body(monkeypatch):
+    """Test request with path variables and body."""
+
+    class PetClient1(OpenAPIGenPythonCLC):
+        id = "test-pet-client1:python"
+
+    class PetClient2(OpenAPIGenPythonCLC):
+        id = "test-pet-client2:python"
+
+    class PetClient3(OpenAPIGenPythonCLC):
+        id = "test-pet-client3:python"
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+
+    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+
+    request_empty = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "nwZmwH",
+                "Content-Type": "application/json",
+                "Content-Length": "2",
+            }
+        ),
+        body="{}",
+        method=HTTPMethod.PUT,
+        path="/user/%C2%A6g%F4%84%82%90%C2%BB%C2%8F%C2%80%0Cr",
+        query_parameters={},
+    )
+
+    with SessionManager() as session_manager:
+        result = session_manager.send(request_empty)
+        assert len(result) == 3
+
+
 def test_loop_petshop(monkeypatch):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 

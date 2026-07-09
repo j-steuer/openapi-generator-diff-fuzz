@@ -597,7 +597,9 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                     body_kwargs = "[" + ", ".join(model_list) + "]"
                 elif isinstance(eval_body, dict):
                     body = json.dumps(ast.literal_eval(request.body))
-                    body_kwargs = f"{model_name.capitalize()}.from_json({body!r})"
+                    model_name_case = transform_case(model_name, self.method_case)
+                    from_json = f"{model_name.capitalize()}.from_json({body!r}"
+                    body_kwargs = f"{model_name_case}={from_json})"
                 else:
                     raise NotImplementedError(
                         f"Unhandled body type {type(eval_body)}: {request.body}"
