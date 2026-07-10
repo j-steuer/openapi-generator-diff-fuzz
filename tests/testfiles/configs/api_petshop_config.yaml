@@ -6,3 +6,5 @@ port-names:
 - HOST_PORT
 - AUTH_PORT
 - JACOCO_PORT
+nondeterministic_components:
+  - regex_component: "ID: [a-f0-9]+"
