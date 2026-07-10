@@ -5,7 +5,11 @@ import json
 import pytest
 from requests.models import CaseInsensitiveDict
 
-from telephuzz.evaluation.abstractor import ABSTRACTED, Abstractor, ResponseComponent
+from telephuzz.evaluation.abstractor import (
+    ABSTRACTED,
+    Abstractor,
+    NondeterministicComponent,
+)
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.request_result import RequestResult
 
@@ -15,30 +19,30 @@ def dummy_result(request: Request, response: Response) -> RequestResult:
     return RequestResult("", request, response, None, None)
 
 
-class TestResponseComponent:
-    """Unit tests for ResponseComponent."""
+class TestNondeterministicComponent:
+    """Unit tests for NondeterministicComponent."""
 
     def test_init_full(self):
         """Test initializing a response component with all possible fields."""
-        ResponseComponent(HTTPMethod.GET, "/example", json_component="token")
-        ResponseComponent(HTTPMethod.GET, "/example", regex_component=r"token*")
+        NondeterministicComponent(HTTPMethod.GET, "/example", json_component="token")
+        NondeterministicComponent(HTTPMethod.GET, "/example", regex_component=r"token*")
 
     def test_init_partial(self):
         """Test initializing a response component with some empty fields."""
-        ResponseComponent(method=HTTPMethod.GET)
-        ResponseComponent(path="/example")
-        ResponseComponent(json_component="token")
-        ResponseComponent(regex_component=r"token*")
+        NondeterministicComponent(method=HTTPMethod.GET)
+        NondeterministicComponent(path="/example")
+        NondeterministicComponent(json_component="token")
+        NondeterministicComponent(regex_component=r"token*")
 
     def test_init_empty(self):
         """Test initializing a response component with all empty fields."""
         with pytest.raises(ValueError, match="At least one of"):
-            ResponseComponent()
+            NondeterministicComponent()
 
     def test_init_component_conflict(self):
         """Test initializing a response component with conflicting component fields."""
         with pytest.raises(ValueError, match="At most one of"):
-            ResponseComponent(json_component="token", regex_component=r"token*")
+            NondeterministicComponent(json_component="token", regex_component=r"token*")
 
 
 class TestAbstractor:
@@ -93,11 +97,11 @@ class TestAbstractor:
         basic_request.method = HTTPMethod.GET
         basic_request.path = "/example"
         basic_response.body = "This is a response."
-        component = ResponseComponent(
+        component = NondeterministicComponent(
             method=method, path=path, regex_component=regex_component
         )
         result = dummy_result(basic_request, basic_response)
-        abstractor = Abstractor(custom_response_components=[component])
+        abstractor = Abstractor(custom_ndt_components=[component])
         abstractor.abstract(result)
         assert result.response.body == ABSTRACTED
 
@@ -121,11 +125,11 @@ class TestAbstractor:
         basic_request.method = HTTPMethod.GET
         basic_request.path = "/example"
         basic_response.body = "This is a response."
-        component = ResponseComponent(
+        component = NondeterministicComponent(
             method=method, path=path, regex_component=regex_component
         )
         result = dummy_result(basic_request, basic_response)
-        abstractor = Abstractor(custom_response_components=[component])
+        abstractor = Abstractor(custom_ndt_components=[component])
         abstractor.abstract(result)
         assert result.response.body != ABSTRACTED
 
@@ -134,9 +138,9 @@ class TestAbstractor:
     ):
         """Test partially abstracting a response with a regex."""
         basic_response.body = "Non-deterministic-code: 1234-5678"
-        component = ResponseComponent(regex_component=r"\d+-\d+")
+        component = NondeterministicComponent(regex_component=r"\d+-\d+")
         result = dummy_result(basic_request, basic_response)
-        Abstractor(custom_response_components=[component]).abstract(result)
+        Abstractor(custom_ndt_components=[component]).abstract(result)
         assert result.response.body == f"Non-deterministic-code: {ABSTRACTED}"
 
     def test_response_component_abstraction_json(
@@ -153,9 +157,9 @@ class TestAbstractor:
             }
         )
         basic_response.body = json_response
-        component = ResponseComponent(json_component="Custom-Remove")
+        component = NondeterministicComponent(json_component="Custom-Remove")
         result = dummy_result(basic_request, basic_response)
-        Abstractor(custom_response_components=[component]).abstract(result)
+        Abstractor(custom_ndt_components=[component]).abstract(result)
 
         abstracted_json_response = json.loads(result.response.body)
         assert (

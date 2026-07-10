@@ -14,7 +14,7 @@ ABSTRACTED = "TELEPHUZZ_ABSTRACTED"
 
 
 @dataclass
-class ResponseComponent:
+class NondeterministicComponent:
     r"""Describes which parts of matching responses should be abstracted.
 
     A response is matched by `method` and `path`:
@@ -82,7 +82,7 @@ class Abstractor:
     def __init__(
         self,
         custom_headers: list[str] | None = None,
-        custom_response_components: list[ResponseComponent] | None = None,
+        custom_ndt_components: list[NondeterministicComponent] | None = None,
         abstract_x_headers: bool = True,
     ):
         """Initialize the Abstractor class.
@@ -95,7 +95,7 @@ class Abstractor:
         """
         self.custom_headers = custom_headers if custom_headers else []
         self.custom_response_components = (
-            custom_response_components if custom_response_components else []
+            custom_ndt_components if custom_ndt_components else []
         )
 
         self.nondeterministic_headers_pattern = []
@@ -111,13 +111,13 @@ class Abstractor:
             for method, path_values in config_nondeterministic.items():
                 for path, values in path_values.items():
                     if values is None:
-                        component = ResponseComponent(
+                        component = NondeterministicComponent(
                             method=HTTPMethod(method), path=path, json_component=values
                         )
                         self.custom_response_components.append(component)
                     else:
                         for value in values:
-                            component = ResponseComponent(
+                            component = NondeterministicComponent(
                                 method=HTTPMethod(method),
                                 path=path,
                                 json_component=value,
