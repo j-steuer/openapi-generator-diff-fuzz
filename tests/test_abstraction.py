@@ -23,24 +23,24 @@ class TestNondeterministicComponent:
     """Unit tests for NondeterministicComponent."""
 
     def test_init_full(self):
-        """Test initializing a response component with all possible fields."""
+        """Test initializing a component with all possible fields."""
         NondeterministicComponent(HTTPMethod.GET, "/example", json_component="token")
         NondeterministicComponent(HTTPMethod.GET, "/example", regex_component=r"token*")
 
     def test_init_partial(self):
-        """Test initializing a response component with some empty fields."""
+        """Test initializing a component with some empty fields."""
         NondeterministicComponent(method=HTTPMethod.GET)
         NondeterministicComponent(path="/example")
         NondeterministicComponent(json_component="token")
         NondeterministicComponent(regex_component=r"token*")
 
     def test_init_empty(self):
-        """Test initializing a response component with all empty fields."""
+        """Test initializing a component with all empty fields."""
         with pytest.raises(ValueError, match="At least one of"):
             NondeterministicComponent()
 
     def test_init_component_conflict(self):
-        """Test initializing a response component with conflicting component fields."""
+        """Test initializing a component with conflicting fields."""
         with pytest.raises(ValueError, match="At most one of"):
             NondeterministicComponent(json_component="token", regex_component=r"token*")
 
@@ -202,12 +202,12 @@ class TestAbstractor:
         result = dummy_result(basic_request, basic_response)
 
         abstractor = Abstractor()
-        assert any(
-            component.method == HTTPMethod.GET
-            and component.path == "/test/random"
-            and component.json_component == "random"
-            for component in abstractor.custom_response_components
-        )
+        assert (
+            NondeterministicComponent(
+                method=HTTPMethod.GET, path="/test/random", json_component="random"
+            )
+            in abstractor.custom_ndt_components
+        ), abstractor.custom_ndt_components
 
         abstractor.abstract(result)
         abstracted_json_response = json.loads(result.response.body)

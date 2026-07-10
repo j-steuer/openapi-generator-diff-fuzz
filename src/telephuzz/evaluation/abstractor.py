@@ -7,7 +7,6 @@ from typing import Any
 
 from telephuzz.config import get_config
 from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
-from telephuzz.http_message import HTTPMethod
 from telephuzz.request_result import RequestResult
 
 ABSTRACTED = "TELEPHUZZ_ABSTRACTED"
@@ -31,7 +30,7 @@ class Abstractor:
 
         """
         self.custom_headers = custom_headers if custom_headers else []
-        self.custom_response_components = (
+        self.custom_ndt_components = (
             custom_ndt_components if custom_ndt_components else []
         )
 
@@ -39,27 +38,8 @@ class Abstractor:
         if abstract_x_headers:
             self.nondeterministic_headers_pattern.append(r"^x-.*")
 
-        # parse config for additional abstraction targets
-        config_nondeterministic: (
-            dict[str | None, dict[str | None, set | None]] | None
-        ) = get_config().nondeterministic_fields
-
-        if config_nondeterministic is not None:
-            for method, path_values in config_nondeterministic.items():
-                for path, values in path_values.items():
-                    if values is None:
-                        component = NondeterministicComponent(
-                            method=HTTPMethod(method), path=path, json_component=values
-                        )
-                        self.custom_response_components.append(component)
-                    else:
-                        for value in values:
-                            component = NondeterministicComponent(
-                                method=HTTPMethod(method),
-                                path=path,
-                                json_component=value,
-                            )
-                        self.custom_response_components.append(component)
+        # add nondeterministic components from config
+        self.custom_ndt_components.extend(get_config().nondeterministic_components)
 
     def _transform_json(self, json_data: Any, target_key: str):
         if isinstance(json_data, Mapping):
@@ -96,7 +76,7 @@ class Abstractor:
                 response.headers[nondeterministic_header] = ABSTRACTED
 
         # handle custom response components
-        for response_component in self.custom_response_components:
+        for response_component in self.custom_ndt_components:
             # check request
             if (
                 response_component.method

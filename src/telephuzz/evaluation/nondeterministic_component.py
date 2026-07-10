@@ -35,13 +35,19 @@ class NondeterministicComponent:
 
     """
 
-    method: HTTPMethod | None = None
+    method: HTTPMethod | str | None = None
     path: str | None = None  # TODO startswith?
     json_component: str | None = None
     regex_component: str | None = None
 
     def __post_init__(self) -> None:
         """Run compatibility checks."""
+        if isinstance(self.method, str):
+            try:
+                self.method = HTTPMethod(self.method)
+            except ValueError as e:
+                raise ValueError(f"Invalid HTTP method {self.method}") from e
+
         if all(
             v is None
             for v in (

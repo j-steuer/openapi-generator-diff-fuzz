@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml  # type: ignore
 
 from telephuzz.constants import BASE_PATH
+from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
 from telephuzz.openapi_helpers import preprocess_oas
 
 
@@ -35,10 +36,11 @@ class Config:
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])
         self.port_names.add(self.api_port_name)
-        self.nondeterministic_fields = api_config.get("nondeterministic-fields", {})
-        for method, paths in self.nondeterministic_fields.items():
-            for path, fields in paths.items():
-                self.nondeterministic_fields[method][path] = set(fields)
+
+        self.nondeterministic_components = [
+            NondeterministicComponent(**item)
+            for item in api_config.get("nondeterministic_components", [])
+        ]
 
         self.targets = dict()
         for target in client_config["targets"]:
