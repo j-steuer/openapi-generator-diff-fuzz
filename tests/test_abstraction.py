@@ -8,8 +8,8 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.evaluation.abstractor import (
     ABSTRACTED,
     Abstractor,
-    NondeterministicComponent,
 )
+from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.request_result import RequestResult
 
