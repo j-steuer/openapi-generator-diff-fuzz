@@ -188,6 +188,8 @@ class DiffEvaluator:
                 len(largest_response_group[1]),
             )
 
+            logger.debug(f"Diffs found, chose {true_response} as source of truth")
+
             # compare against remaining responses
             del response_groups[true_response]
 
@@ -214,25 +216,33 @@ class DiffEvaluator:
                     if diff_status:
                         detail += f"- Status code {true_response.status} expected, "
                         f"but got {diff_response.status}.\n"
+                        logger.debug(f"Different status {diff_response.status}")
                     if diff_body:
                         detail += f"- Body '{pformat(true_response.body)}' "
                         f"expected, but got '{pformat(diff_response.body)}.'\n"
+                        logger.debug(f"Different body {diff_response.body}")
                     if diff_headers:
                         for header in true_response.headers.keys():
                             if header not in diff_response.headers:
                                 detail += f"- Header '{header}' expected, "
                                 "but is not present in response.\n"
+                                logger.debug(f"Header {header} not present")
                             elif (
                                 true_response.headers[header]
                                 != diff_response.headers[header]
                             ):
+                                diff_header = diff_response.headers[header]
                                 detail += f"- Header '{header}' has content "
-                                f"{diff_response.headers[header]}, expected "
+                                f"{diff_header}, expected "
                                 f"{true_response.headers[header]}.\n"
+                                logger.debug(
+                                    f"Header {header} has content {diff_header}"
+                                )
 
                             for header in diff_response.headers.keys():
                                 if header not in true_response.headers:
                                     detail += f"- Unexpected header: '{header}'"
+                                logger.debug(f"Extra header {header}")
 
                     report = DiffReport(
                         library_id=library,
