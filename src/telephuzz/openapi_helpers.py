@@ -11,6 +11,8 @@ import yaml  # type: ignore
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
+UNSUPPORTED_MEDIA_TYPES = {"application/xml"}
+
 
 def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
     """Pre-process an OpenAPI spec and map all paths to own operationId.
@@ -33,6 +35,22 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
         assert isinstance(methods, dict), "Methods were not loaded as a dict"
         methods = cast(dict[str, dict], methods)
         for method, operation in methods.items():
+            # filter out unsupported content-types if possible
+            request_body = operation.get("requestBody")
+            if not isinstance(request_body, dict):
+                continue
+
+            content = request_body.get("content")
+            if not isinstance(content, dict):
+                continue
+
+            for media_type in UNSUPPORTED_MEDIA_TYPES:
+                content.pop(media_type, None)
+
+            if not content:
+                raise ValueError(f"Content of {path} has no supported media types.")
+
+            # change operation id
             try:
                 HTTPMethod(method)
             except ValueError:

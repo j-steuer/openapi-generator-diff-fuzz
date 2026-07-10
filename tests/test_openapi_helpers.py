@@ -3,12 +3,14 @@
 import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
+from typing import cast
 
 import pytest
 import yaml  # type: ignore
 
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
+    UNSUPPORTED_MEDIA_TYPES,
     _find_all,
     extract_path_parameters,
     extract_path_variable_types,
@@ -79,6 +81,24 @@ class TestPreprocessing:
                     count += 1
 
         assert count == len(operation_ids)
+
+    def test_unsupported_media_type(self):
+        """Test filtering out unsupported media types."""
+        processed_spec = preprocess_oas(Path("tests/testfiles/processed_petshop.json"))
+        for methods in cast(dict, processed_spec).get("paths", {}).values():
+            assert isinstance(methods, dict), "Methods were not loaded as a dict"
+            for operation in methods.values():
+                # filter out unsupported content-types if possible
+                request_body = operation.get("requestBody")
+                if not isinstance(request_body, dict):
+                    continue
+
+                content = request_body.get("content")
+                if not isinstance(content, dict):
+                    continue
+
+                for media_type in UNSUPPORTED_MEDIA_TYPES:
+                    assert media_type not in content
 
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
