@@ -8,3 +8,6 @@ port-names:
 - JACOCO_PORT
 nondeterministic_components:
   - regex_component: "ID: [a-f0-9]+"
+  - json_component: shipDate
+  - path: /user/login
+    regex_component: 'Logged in user session [0-9]+'
