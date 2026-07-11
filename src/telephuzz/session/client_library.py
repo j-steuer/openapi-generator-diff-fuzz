@@ -563,12 +563,12 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                 else:
                     _path_params[parameter] = str(_path_params[parameter])
 
-            # transform case of path variable
-            path_params = {
-                transform_case(key, self.method_case): value
-                for key, value in _path_params.items()
-            }
-            query_parameters.update(path_params)
+            query_parameters.update(_path_params)
+
+        # transform case
+        query_parameters = {
+            transform_case(k, self.method_case): v for k, v in query_parameters.items()
+        }
 
         kwargs = ""
         if query_parameters:
