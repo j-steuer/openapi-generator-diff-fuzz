@@ -1,6 +1,7 @@
 """File for the abstractor class used to handle non-determinism in responses."""
 
 import json
+import logging
 import re
 from _collections_abc import Mapping
 from typing import Any
@@ -10,6 +11,8 @@ from telephuzz.evaluation.nondeterministic_component import NondeterministicComp
 from telephuzz.request_result import RequestResult
 
 ABSTRACTED = "TELEPHUZZ_ABSTRACTED"
+
+logger = logging.getLogger(__name__)
 
 
 class Abstractor:
@@ -75,39 +78,55 @@ class Abstractor:
             if nondeterministic_header in response.headers:
                 response.headers[nondeterministic_header] = ABSTRACTED
 
-        # handle custom response components
-        for response_component in self.custom_ndt_components:
+        # handle custom nondeterministic components
+        for nondeterministic_component in self.custom_ndt_components:
             # check request
             if (
-                response_component.method
-                and request.method != response_component.method
+                nondeterministic_component.method
+                and request.method != nondeterministic_component.method
             ):
                 continue
 
-            if response_component.path and request.path != response_component.path:
+            if (
+                nondeterministic_component.path
+                and request.path != nondeterministic_component.path
+            ):
                 continue
 
             # apply abstraction
-            if response_component.component_count == 0:
+            if nondeterministic_component.component_count == 0:
                 response.body = ABSTRACTED
             else:
-                if response_component.json_component:
+                if nondeterministic_component.json_component:
                     try:
                         response_data = json.loads(response.body)
-                    except json.decoder.JSONDecodeError as e:
-                        raise ValueError(
+                    except json.decoder.JSONDecodeError:
+                        method_str = (
+                            "all"
+                            if nondeterministic_component.method is None
+                            else nondeterministic_component.method
+                        )
+                        path_str = (
+                            "all"
+                            if nondeterministic_component.path is None
+                            else nondeterministic_component.path
+                        )
+                        logger.warning(
                             f"json_component abstraction intended for "
-                            f"{response_component.method} {response_component.path}, "
+                            f"{method_str} {path_str}, "
                             f"but request returned non-JSON body."
-                        ) from e
+                        )
+                        continue
 
                     response_data = self._transform_json(
-                        response_data, response_component.json_component
+                        response_data, nondeterministic_component.json_component
                     )
 
                     response.body = json.dumps(response_data)
 
-                elif response_component.regex_component:
+                elif nondeterministic_component.regex_component:
                     response.body = re.sub(
-                        response_component.regex_component, ABSTRACTED, response.body
+                        nondeterministic_component.regex_component,
+                        ABSTRACTED,
+                        response.body,
                     )
