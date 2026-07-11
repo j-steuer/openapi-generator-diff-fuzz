@@ -11,7 +11,11 @@ import yaml  # type: ignore
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
-UNSUPPORTED_MEDIA_TYPES = {"application/xml", "application/x-www-form-urlencoded"}
+UNSUPPORTED_MEDIA_TYPES = {
+    "application/xml",
+    "application/x-www-form-urlencoded",
+    "application/octet-stream",
+}
 
 
 def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
