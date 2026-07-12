@@ -14,7 +14,7 @@ import textwrap
 from _hashlib import HASH
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import docker
 from docker.errors import ImageNotFound
@@ -216,6 +216,37 @@ class ClientLibraryContainer(ABC):
             logger.debug(f"Client process exited with exit code {exit_code}: {out}")
 
         return out
+
+    # general helper methods
+
+    def _get_query_parameters(self, request: Request) -> dict[str, Any]:
+        """Resolve query parameters (including path variables)."""
+        # check for path variables
+        path_only = _path_only(request.path)
+        path = _resolve_path(request.path)
+
+        query_parameters = request.query_parameters
+        if "{" in path:
+            _path_params = extract_path_parameters(path, path_only)
+
+            # cast integers
+            path_parameter_types = extract_path_variable_types(
+                get_config().spec_str, path
+            )
+            for parameter, value in path_parameter_types.items():
+                if value == "integer":
+                    _path_params[parameter] = int(_path_params[parameter])
+                else:
+                    _path_params[parameter] = str(_path_params[parameter])
+
+            query_parameters.update(_path_params)
+
+        # transform case
+        query_parameters = {
+            transform_case(k, self.method_case): v for k, v in query_parameters.items()
+        }
+
+        return query_parameters
 
 
 # --- Language-based Abstractions ---
@@ -546,29 +577,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         model_name_str = ""
 
         # check for path variables
-        path_only = _path_only(request.path)
-        path = _resolve_path(request.path)
-
-        query_parameters = request.query_parameters
-        if "{" in path:
-            _path_params = extract_path_parameters(path, path_only)
-
-            # cast integers
-            path_parameter_types = extract_path_variable_types(
-                get_config().spec_str, path
-            )
-            for parameter, value in path_parameter_types.items():
-                if value == "integer":
-                    _path_params[parameter] = int(_path_params[parameter])
-                else:
-                    _path_params[parameter] = str(_path_params[parameter])
-
-            query_parameters.update(_path_params)
-
-        # transform case
-        query_parameters = {
-            transform_case(k, self.method_case): v for k, v in query_parameters.items()
-        }
+        query_parameters = self._get_query_parameters(request)
 
         kwargs = ""
         if query_parameters:
