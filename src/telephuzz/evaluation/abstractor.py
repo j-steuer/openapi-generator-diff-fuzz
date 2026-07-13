@@ -87,9 +87,14 @@ class Abstractor:
             ):
                 continue
 
+            normalized_path = (
+                request.path[: request.path.find("?")]
+                if "?" in request.path
+                else request.path
+            )
             if (
                 nondeterministic_component.path
-                and request.path != nondeterministic_component.path
+                and normalized_path != nondeterministic_component.path
             ):
                 continue
 

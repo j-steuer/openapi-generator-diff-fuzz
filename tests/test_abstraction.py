@@ -213,3 +213,38 @@ class TestAbstractor:
         abstracted_json_response = json.loads(result.response.body)
         assert abstracted_json_response["random"] == ABSTRACTED
         assert abstracted_json_response["level1"]["random"] == ABSTRACTED
+
+    def test_ignore_query_parameters(
+        self, basic_request: Request, basic_response: Response
+    ):
+        """Abstractors should ignore query parameters in the path."""
+        basic_request.method = HTTPMethod.GET
+        basic_request.path = "/test/random?somevalue=100"
+
+        json_response = json.dumps(
+            {
+                "level1": {
+                    "level2": {"Custom": "1"},
+                    "other_key": 123,
+                    "random": "234",
+                },
+                "random": "1234",
+            }
+        )
+
+        basic_response.body = json_response
+
+        result = dummy_result(basic_request, basic_response)
+
+        abstractor = Abstractor()
+        assert (
+            NondeterministicComponent(
+                method=HTTPMethod.GET, path="/test/random", json_component="random"
+            )
+            in abstractor.custom_ndt_components
+        ), abstractor.custom_ndt_components
+
+        abstractor.abstract(result)
+        abstracted_json_response = json.loads(result.response.body)
+        assert abstracted_json_response["random"] == ABSTRACTED
+        assert abstracted_json_response["level1"]["random"] == ABSTRACTED
