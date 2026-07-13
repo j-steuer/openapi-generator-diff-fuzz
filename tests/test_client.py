@@ -13,6 +13,7 @@ from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import get_config
 from telephuzz.http_message import HTTPMethod, Request
+from telephuzz.invocation_data import InvocationData
 from telephuzz.operation_ids import generate_operation_id
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
@@ -82,7 +83,7 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     if auth:
         request.headers["Authorization"] = "mock-token"
 
-    response = clc.send(request, api)
+    response = clc.send(InvocationData(request), api)
     assert isinstance(response, str)
     assert "Hello Alice, you are 30 years old!" in response
 
@@ -101,9 +102,12 @@ def test_get_method_name_opid_mixin(monkeypatch):
         spec = json.load(f)
 
     monkeypatch.setattr(config, "spec", spec)
+    monkeypatch.setattr(config, "spec_str", json.dumps(spec))
 
     class Dummy(OperationIdBasedCLC):
-        def _translate(self, request: Request, api_path: str) -> str | list[str]:
+        def _translate(
+            self, invocation: InvocationData, api_path: str
+        ) -> str | list[str]:
             return "DUMMY"
 
     mixin = Dummy.__new__(Dummy)
@@ -116,7 +120,7 @@ def test_get_method_name_opid_mixin(monkeypatch):
         query_parameters={},
     )
 
-    assert mixin._get_method_name(request) == generate_operation_id(
+    assert mixin._get_method_name(InvocationData(request)) == generate_operation_id(
         HTTPMethod.DELETE.value, "/user/{username}"
     )
 
@@ -156,6 +160,7 @@ def test_client_openapi_gen_python_petshop(
         spec = json.load(f)
 
     monkeypatch.setattr(config, "spec", spec)
+    monkeypatch.setattr(config, "spec_str", json.dumps(spec))
 
     network, api_path = api_wfd
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
@@ -178,7 +183,7 @@ def test_client_openapi_gen_python_petshop(
             query_parameters={},
         )
 
-        response = clc.send(request, api_path=api_path)
+        response = clc.send(InvocationData(request), api_path=api_path)
         assert isinstance(response, str)
         assert "User not found" in response
 
@@ -226,6 +231,6 @@ def test_client_auth(api: str, basic_request: Request) -> None:
     basic_request.query_parameters = {"name": "Alice", "age": 30}
 
     with OpenAPIGenPythonCLC(library_path=library_path) as clc:
-        response = clc.send(basic_request, api)
+        response = clc.send(InvocationData(basic_request), api)
         assert isinstance(response, str)
         assert "Hello Alice, you are 30 years old!" in response

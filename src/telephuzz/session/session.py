@@ -20,6 +20,7 @@ from telephuzz.docker_helpers import (
     write_to_host,
 )
 from telephuzz.http_message import Request, Response
+from telephuzz.invocation_data import InvocationData
 from telephuzz.openapi_helpers import get_api_url_path
 from telephuzz.request_result import RequestResult
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
@@ -43,7 +44,11 @@ class Session:
         self.client = client
 
     def send(
-        self, request: Request, api_path: str, response_output: Path
+        self,
+        request: Request,
+        api_path: str,
+        response_output: Path,
+        invocation: InvocationData | None = None,
     ) -> RequestResult:
         """Send a request to the API through the client library."""
 
@@ -59,15 +64,20 @@ class Session:
             response_path.unlink()
             return response
 
+        # process request to invocation data if not done already
+        if invocation is None:
+            invocation = InvocationData(request)
+
+        # send message
         if not isinstance(self.api, APIWithDatabaseContainer):
-            self.client.send(request, api_path)
+            self.client.send(invocation, api_path)
             response = _get_response()
             result = RequestResult(self.client.id, request, response, None, None)
         else:
             out_before = Path("/tmp/before")
             out_after = Path("/out/after")
             self.api.get_state(out_before)
-            self.client.send(request, api_path)
+            self.client.send(invocation, api_path)
             response = _get_response()
             self.api.get_state(out_after)
 
@@ -271,11 +281,13 @@ class SessionManager:
             api_url += (
                 f"/{API_ALIAS_BASE}{session.id}:{session.api.port}{self.api_path}"
             )
+
+            # process into invocation data to do it once per request
+            invocation = InvocationData(request)
+
             results.add(
                 session.send(
-                    request,
-                    api_url,
-                    Path(self.result_dir),
+                    request, api_url, Path(self.result_dir), invocation=invocation
                 )
             )
 

@@ -13,8 +13,9 @@ import tempfile
 import textwrap
 from _hashlib import HASH
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Iterable
 
 import docker
 from docker.errors import ImageNotFound
@@ -22,37 +23,16 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 from telephuzz.config import get_config
-from telephuzz.http_message import Request, Response
-from telephuzz.openapi_helpers import (
-    extract_path_parameters,
-    extract_path_variable_types,
-    extract_paths,
-    get_args,
-    resolve_path,
-)
-from telephuzz.operation_ids import Case, generate_operation_id, transform_case
+from telephuzz.http_message import Response
+from telephuzz.invocation_data import InvocationData
+from telephuzz.openapi_helpers import get_args
+from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
 
 LIB_PATH = "/app"
 
 logger = logging.getLogger(__name__)
-
-
-def _resolve_path(path: str) -> str:
-    """Resolve the concrete path."""
-    path = _path_only(path)
-
-    concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
-    return resolve_path(path, concrete, non_concrete)
-
-
-def _path_only(path: str) -> str:
-    """Return the path without query parameters."""
-    if "?" in path:
-        path = path[: path.find("?")]
-
-    return path
 
 
 def decode_output(output: bytes | Iterable[bytes]) -> str:
@@ -183,7 +163,7 @@ class ClientLibraryContainer(ABC):
         return None
 
     @abstractmethod
-    def _get_method_name(self, request: Request) -> str:
+    def _get_method_name(self, invocation: InvocationData) -> str:
         """Describe how to obtain the method name.
 
         To be used in _translate method.
@@ -191,8 +171,8 @@ class ClientLibraryContainer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
-        """Translate the request.
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
+        """Translate the invocation.
 
         Translate the request into a command to call the target library.
 
@@ -203,12 +183,17 @@ class ClientLibraryContainer(ABC):
         """
         raise NotImplementedError
 
-    def send(self, request: Request, api_path: str) -> Response | str:
+    def send(self, invocation: InvocationData, api_path: str) -> Response | str:
         """Send a request through the client library."""
-        logger.debug(f"{self.id} sending request to API at {api_path}: {repr(request)}")
+        logger.debug(
+            f"{self.id} sending request to API at {api_path}: {repr(invocation)}"
+        )
+
+        cased_invocation = self._apply_case_to_invocation(invocation)
+
         assert self.container is not None, "Container not set"
         exit_code, output = self.container.exec_run(
-            cmd=self._translate(request, api_path)
+            cmd=self._translate(cased_invocation, api_path)
         )
 
         out = decode_output(output)
@@ -217,36 +202,22 @@ class ClientLibraryContainer(ABC):
 
         return out
 
-    # general helper methods
+    def _apply_case_to_invocation(self, invocation: InvocationData) -> InvocationData:
+        """Apply method case to relevant invocation data."""
+        cased_invocation = deepcopy(invocation)
 
-    def _get_query_parameters(self, request: Request) -> dict[str, Any]:
-        """Resolve query parameters (including path variables)."""
-        # check for path variables
-        path_only = _path_only(request.path)
-        path = _resolve_path(request.path)
+        # operation id
+        cased_invocation.operation_id = transform_case(
+            invocation.operation_id, self.method_case
+        )
 
-        query_parameters = request.query_parameters
-        if "{" in path:
-            _path_params = extract_path_parameters(path, path_only)
-
-            # cast integers
-            path_parameter_types = extract_path_variable_types(
-                get_config().spec_str, path
-            )
-            for parameter, value in path_parameter_types.items():
-                if value == "integer":
-                    _path_params[parameter] = int(_path_params[parameter])
-                else:
-                    _path_params[parameter] = str(_path_params[parameter])
-
-            query_parameters.update(_path_params)
-
-        # transform case
-        query_parameters = {
-            transform_case(k, self.method_case): v for k, v in query_parameters.items()
+        # query parameters
+        cased_invocation.query_parameters = {
+            transform_case(k, self.method_case): v
+            for k, v in invocation.query_parameters.items()
         }
 
-        return query_parameters
+        return cased_invocation
 
 
 # --- Language-based Abstractions ---
@@ -266,24 +237,24 @@ class PythonCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.py")
+            info = tarfile.TarInfo(name="invocation.py")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive("/tmp", tar_stream)
 
-        return "python3 /tmp/request.py"
+        return "python3 /tmp/invocation.py"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Python-based libraries."""
@@ -314,24 +285,24 @@ class GoCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.go")
+            info = tarfile.TarInfo(name="invocation.go")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive("/app", tar_stream)
 
-        return "go run /app/request.go"
+        return "go run /app/invocation.go"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -358,17 +329,17 @@ class JavaCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.jsh")
+            info = tarfile.TarInfo(name="invocation.jsh")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
@@ -376,7 +347,7 @@ class JavaCLC(ClientLibraryContainer):
         self.container.put_archive("/app", tar_stream)
 
         lib_path = '"lib/target/openapi-java-client-0.1.0.jar:lib/target/lib/*"'
-        return f"jshell --class-path {lib_path} request.jsh"
+        return f"jshell --class-path {lib_path} invocation.jsh"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
@@ -419,24 +390,24 @@ class SwiftCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.swift")
+            info = tarfile.TarInfo(name="invocation.swift")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive("/app", tar_stream)
 
-        return "swift request.swift"
+        return "swift invocation.swift"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
@@ -462,24 +433,24 @@ class CsharpCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.csx")
+            info = tarfile.TarInfo(name="invocation.csx")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive("/app", tar_stream)
 
-        return "dotnet script request.csx"
+        return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
@@ -516,24 +487,24 @@ class TypeScriptCLC(ClientLibraryContainer):
         assert self.container is not None
 
     @abstractmethod
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        """Return the encoded code string that executes the request."""
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.ts")
+            info = tarfile.TarInfo(name="invocation.ts")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive(LIB_PATH, tar_stream)
 
-        return f"npx tsx {LIB_PATH}/request.ts"
+        return f"npx tsx {LIB_PATH}/invocation.ts"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -553,14 +524,8 @@ class TypeScriptCLC(ClientLibraryContainer):
 class OperationIdBasedCLC(ClientLibraryContainer):
     """Mixin for containers where methods are named after operation ids."""
 
-    def _get_method_name(self, request: Request) -> str:
-        method, path = request.method, request.path
-        operation_id = generate_operation_id(method.value, path)
-
-        path = _resolve_path(request.path)
-        operation_id = generate_operation_id(method.value, path)
-
-        library_method_name = transform_case(operation_id, self.method_case)
+    def _get_method_name(self, invocation: InvocationData):
+        library_method_name = transform_case(invocation.operation_id, self.method_case)
 
         return library_method_name
 
@@ -573,33 +538,31 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:python"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         model_name_str = ""
-
-        # check for path variables
-        query_parameters = self._get_query_parameters(request)
+        query_parameters = invocation.query_parameters
 
         kwargs = ""
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
-        if request.body:
-            if request.headers["Content-Type"] == "application/json":
+        if invocation.body:
+            if invocation.content_type == "application/json":
                 model_name = get_args(
-                    get_config().spec_str, request.method, request.path
+                    get_config().spec_str, invocation.method, invocation.path
                 )
                 assert model_name is not None, (
-                    f"Obtaining args failed for {request.method} "
-                    f"{request.path} with body {request.body}"
+                    f"Obtaining args failed for {invocation.method} "
+                    f"{invocation.path} with body {invocation.body}"
                 )
                 model_name_str = f"from openapi_client.models.{model_name.lower()} "
                 model_name_str += f"import {model_name.capitalize()}"
 
                 # TODO parse in Request object
                 try:
-                    eval_body = ast.literal_eval(request.body)
+                    eval_body = ast.literal_eval(invocation.body)
                 except ValueError:
-                    eval_body = json.loads(request.body)
+                    eval_body = json.loads(invocation.body)
                 if isinstance(eval_body, list):
                     # create list of objects
                     model_list = [
@@ -614,27 +577,27 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                     body_kwargs = f"{model_name_case}={from_json})"
                 else:
                     raise NotImplementedError(
-                        f"Unhandled body type {type(eval_body)}: {request.body}"
+                        f"Unhandled body type {type(eval_body)}: {invocation.body}"
                     )
             else:
-                raw_body: str = request.body
+                raw_body: str = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
-        try:
-            auth = f', access_token="{request.headers["Authorization"]}"'
-        except Exception:
+        if invocation.authorization is not None:
+            auth = f', access_token="{invocation.authorization}"'
+        else:
             auth = ""
 
-        if request.path == "/":
+        if invocation.path == "/":
             api = "default"
         else:
-            cutoff = request.path.find("/", 1)
+            cutoff = invocation.path.find("/", 1)
             if cutoff != -1:
-                api = request.path[:cutoff][1:]
+                api = invocation.path[:cutoff][1:]
             else:
-                api = request.path[1:]
+                api = invocation.path[1:]
 
         content = textwrap.dedent(f"""
         from pprint import pprint
@@ -649,7 +612,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         api = {api.capitalize()}Api(api_client=client)
 
-        pprint(api.{self._get_method_name(request)}({kwargs}))
+        pprint(api.{self._get_method_name(invocation)}({kwargs}))
         """).encode()
 
         return content
@@ -660,9 +623,9 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
     id = "swagger-codegen:python"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         kwargs = ", ".join(
-            f"{k}={repr(v)}" for k, v in request.query_parameters.items()
+            f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
         )
 
         content = textwrap.dedent(f"""
@@ -676,7 +639,7 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
         config.host = "{api_path}"
         api_instance = swagger_client.DefaultApi(swagger_client.ApiClient(config))
 
-        api_response = api_instance.{self._get_method_name(request)}({kwargs})
+        api_response = api_instance.{self._get_method_name(invocation)}({kwargs})
         pprint(api_response)
         """).encode()
 
@@ -688,15 +651,15 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
 
     id = "openapi-python-generator:python"
 
-    def _get_method_name(self, request: Request) -> str:
+    def _get_method_name(self, invocation: InvocationData):
         # the hash is seperated
-        method_name = super()._get_method_name(request)
+        method_name = super()._get_method_name(invocation)
         return method_name[:-8] + method_name[-8:]
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        method_name = self._get_method_name(request)
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        method_name = self._get_method_name(invocation)
         kwargs = ", ".join(
-            f"{k}={repr(v)}" for k, v in request.query_parameters.items()
+            f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
         )
 
         content = textwrap.dedent(f"""
@@ -721,14 +684,14 @@ class KiotaPythonCLC(PythonCLC):
 
     id = "kiota:python"
 
-    def _get_method_name(self, request: Request) -> str:
-        client_method = f"{request.path.strip('/').replace('/', '.')}"
-        client_method += f".{request.method.value.lower()}"
+    def _get_method_name(self, invocation: InvocationData):
+        client_method = f"{invocation.path.strip('/').replace('/', '.')}"
+        client_method += f".{invocation.method.value.lower()}"
         return client_method
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         request_builder = "".join(
-            part.capitalize() for part in request.path.split("/") if part
+            part.capitalize() for part in invocation.path.split("/") if part
         )
         request_builder += "RequestBuilder"
 
@@ -767,7 +730,7 @@ class KiotaPythonCLC(PythonCLC):
                 query_parameters=query_params
             )
 
-            response = await client.{self._get_method_name(request)}(request_config)
+            response = await client.{self._get_method_name(invocation)}(request_config)
 
             print(response.decode())
 
@@ -786,10 +749,10 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:go"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         arg_string = ".".join(
             f"{k.capitalize()}({json.dumps(v)})"
-            for k, v in request.query_parameters.items()
+            for k, v in invocation.query_parameters.items()
         )
         arg_string += "."
 
@@ -817,7 +780,7 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
 
             // Call the generated API method
             resp, httpRes, err := client.DefaultAPI.
-                {self._get_method_name(request)}(context.Background()).
+                {self._get_method_name(invocation)}(context.Background()).
                 {arg_string}
                 Execute()
 
@@ -849,7 +812,7 @@ class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         return b""
 
 
@@ -858,20 +821,20 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
 
     id = "oapi-generator:go"
 
-    def _translate(self, request: Request, api_path: str) -> str | list[str]:
+    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
-        content = self._get_code(request, api_path)
+        content = self._get_code(invocation, api_path)
 
         tar_stream = io.BytesIO()
         with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="request.go")
+            info = tarfile.TarInfo(name="invocation.go")
             info.size = len(content)
             tar.addfile(info, io.BytesIO(content))
         tar_stream.seek(0)
 
         self.container.put_archive(f"{LIB_PATH}/lib", tar_stream)
 
-        return f"go run {LIB_PATH}/lib/request.go"
+        return f"go run {LIB_PATH}/lib/invocation.go"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -887,12 +850,12 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         arg_string = ",".join(
-            f"{json.dumps(v)}" for v in request.query_parameters.values()
+            f"{json.dumps(v)}" for v in invocation.query_parameters.values()
         )
         arg_string += "."
-        method_name = self._get_method_name(request)
+        method_name = self._get_method_name(invocation)
         content = f"""
         package main
 
@@ -939,8 +902,8 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:typescript"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
 
         content = textwrap.dedent(f"""
         import {{ Configuration, DefaultApi }} from "./lib";
@@ -953,7 +916,7 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
         async function main() {{
         try {{
-            const greetRes = await api.{self._get_method_name(request)}({kwargs});
+            const greetRes = await api.{self._get_method_name(invocation)}({kwargs});
 
             console.log(greetRes.data);
         }} catch (err) {{
@@ -973,12 +936,12 @@ class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
 
     id = "swagger-codegen:typescript"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
-        method_name = self._get_method_name(request)
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
+        method_name = self._get_method_name(invocation)
 
         content = f"""
-        // request.ts
+        // invocation.ts
 
         import {{ Configuration, DefaultApi }} from "./lib";
 
@@ -1022,11 +985,11 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
 
-        client_type = request.method.value.capitalize()
-        method_name = self._get_method_name(request)
+        client_type = invocation.method.value.capitalize()
+        method_name = self._get_method_name(invocation)
         method_name = method_name[method_name.find("_") + 1 :]  # cut method
 
         # TODO fix client type stuff
@@ -1053,8 +1016,8 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
 
     id = "swagger-typescript-api:typescript"
 
-    def _get_method_name(self, request: Request) -> str:
-        method_name = super()._get_method_name(request)
+    def _get_method_name(self, invocation: InvocationData):
+        method_name = super()._get_method_name(invocation)
 
         name, hash = method_name[:-8], method_name[-8:]
         processed_hash: list[str] = [hash[0].upper()]
@@ -1082,13 +1045,14 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         arg_string = ",".join(
-            f"{k.lower()}: {json.dumps(v)}" for k, v in request.query_parameters.items()
+            f"{k.lower()}: {json.dumps(v)}"
+            for k, v in invocation.query_parameters.items()
         )
         arg_string += ","
 
-        method_name = self._get_method_name(request)
+        method_name = self._get_method_name(invocation)
 
         content = f"""
         import {{ Api }} from "./lib/swagger-typescript-api";
@@ -1133,9 +1097,10 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         arg_string = ",".join(
-            f"{k.lower()}: {json.dumps(v)}" for k, v in request.query_parameters.items()
+            f"{k.lower()}: {json.dumps(v)}"
+            for k, v in invocation.query_parameters.items()
         )
         arg_string += ","
 
@@ -1150,7 +1115,7 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
         const api = getFastAPI();
 
         try {{
-            const response = await api.{self._get_method_name(request)}(
+            const response = await api.{self._get_method_name(invocation)}(
             {{
                 {arg_string}
             }}
@@ -1176,8 +1141,8 @@ class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:java"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
 
         content = textwrap.dedent(f"""
         import org.openapitools.client.ApiClient;
@@ -1188,7 +1153,7 @@ class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
 
         var api = new DefaultApi(client);
 
-        var response = api.{self._get_method_name(request)}({kwargs});
+        var response = api.{self._get_method_name(invocation)}({kwargs});
 
         System.out.println(response);
         """).encode()
@@ -1210,8 +1175,8 @@ class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
 
         content = textwrap.dedent(f"""
         import org.openapitools.client.ApiClient;
@@ -1222,7 +1187,7 @@ class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
 
         var api = new DefaultApi(client);
 
-        var response = api.{self._get_method_name(request)}({kwargs});
+        var response = api.{self._get_method_name(invocation)}({kwargs});
 
         System.out.println(response);
         """).encode()
@@ -1238,7 +1203,7 @@ class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:swift"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         return b""
 
 
@@ -1247,7 +1212,7 @@ class SwiftOpenAPIGenerator(SwiftCLC, OperationIdBasedCLC):
 
     id = "swift-openapi-generator:swift"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         return b""
 
 
@@ -1259,9 +1224,9 @@ class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
 
     id = "openapi-generator:csharp"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
-        method_name = self._get_method_name(request)
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
+        method_name = self._get_method_name(invocation)
 
         content = textwrap.dedent(f"""
         #r "./lib/bin/Debug/net10.0/Org.OpenAPITools.dll"
@@ -1328,8 +1293,8 @@ class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
 
     id = "swagger-codegen:csharp"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
         content = textwrap.dedent(f"""
         #r "./lib/bin/Debug/net471/IO.Swagger.dll"
         #r "./lib/bin/Debug/net471/RestSharp.dll"
@@ -1344,7 +1309,7 @@ class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
 
         try
         {{
-            var response = api.{self._get_method_name(request)}({kwargs});
+            var response = api.{self._get_method_name(invocation)}({kwargs});
 
             Console.WriteLine("Response:");
             Console.WriteLine(response);
@@ -1386,14 +1351,14 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_method_name(self, request: Request) -> str:
-        name = super()._get_method_name(request)
+    def _get_method_name(self, invocation: InvocationData):
+        name = super()._get_method_name(invocation)
         parts = re.findall(r"[A-Z][a-z0-9]*", name)
         name = "_".join(part for part in parts[1:])
         return name[:-8] + name[-8].lower() + name[-7:]
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in request.query_parameters.values())
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
         content = textwrap.dedent(f"""
         #r "nuget: Newtonsoft.Json, 13.0.3"
         #r "ApiClient/bin/Debug/net10.0/ApiClient.dll"
@@ -1404,11 +1369,11 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
 
         var httpClient = new HttpClient();
 
-        var client = new {request.method.value.capitalize()}Client(
+        var client = new {invocation.method.value.capitalize()}Client(
             "{api_path}",
             httpClient);
 
-        var response = await client.{self._get_method_name(request)}Async({kwargs});
+        var response = await client.{self._get_method_name(invocation)}Async({kwargs});
 
         Console.WriteLine(response);        
         """).encode()
@@ -1421,20 +1386,20 @@ class KiotaCSharpCLC(CsharpCLC):
 
     id = "kiota:csharp"
 
-    def _get_method_name(self, request: Request) -> str:
+    def _get_method_name(self, invocation: InvocationData):
         client_method = ".".join(
-            part.capitalize() for part in request.path.strip("/").split("/") if part
+            part.capitalize() for part in invocation.path.strip("/").split("/") if part
         )
-        client_method += f".{request.method.value.capitalize()}Async"
+        client_method += f".{invocation.method.value.capitalize()}Async"
 
         return client_method
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
-        module_name = self._get_method_name(request)
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        module_name = self._get_method_name(invocation)
         module_name = module_name[: module_name.rfind(".")]
 
         lines = []
-        for key, value in request.query_parameters.items():
+        for key, value in invocation.query_parameters.items():
             lines.append(
                 f"config.QueryParameters.{key.capitalize()} = {json.dumps(value)};"
             )
@@ -1467,7 +1432,7 @@ class KiotaCSharpCLC(CsharpCLC):
 
         var client = new PostsClient(adapter);
 
-        var response = await client.{self._get_method_name(request)}(config =>
+        var response = await client.{self._get_method_name(invocation)}(config =>
         {{
             {kwargs}
         }});
@@ -1498,15 +1463,15 @@ class KiotaJavaCLC(JavaCLC):
     id = "kiota:java"
 
     # TODO fix entire class
-    def _get_method_name(self, request: Request) -> str:
+    def _get_method_name(self, invocation: InvocationData):
         # split and remove empty segments (handles leading "/")
-        parts = [p for p in request.path.split("/") if p]
+        parts = [p for p in invocation.path.split("/") if p]
 
         # build chained calls
         chain = ".".join(f"{p}()" for p in parts)
 
         # append final method call
-        return f"{chain}.{request.method.value}"
+        return f"{chain}.{invocation.method.value}"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Java-based libraries."""
@@ -1517,9 +1482,9 @@ class KiotaJavaCLC(JavaCLC):
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         lines = []
-        for key, value in request.query_parameters.items():
+        for key, value in invocation.query_parameters.items():
             lines.append(f"q.{key.lower()} = {json.dumps(value)};")
         kwargs = "\n".join(lines)
 
@@ -1548,7 +1513,7 @@ class KiotaJavaCLC(JavaCLC):
         // ----------------------
         // Call API
         // ----------------------
-        var response = client.{self._get_method_name(request)}(cfg -> {{
+        var response = client.{self._get_method_name(invocation)}(cfg -> {{
             var q = cfg.queryParameters;
             {kwargs}
         }});

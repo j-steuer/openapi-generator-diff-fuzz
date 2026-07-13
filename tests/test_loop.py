@@ -20,6 +20,7 @@ from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.fuzzer import TelePhuzz
 from telephuzz.http_message import HTTPMethod, Request, Response
+from telephuzz.invocation_data import InvocationData
 from telephuzz.session.client_library import (
     OpenAPIGenPythonCLC,
     OperationIdBasedCLC,
@@ -43,7 +44,7 @@ LOG_PATH = Path("/tmp/logs/telephuzz")
 
 
 @pytest.fixture(autouse=True, scope="module")
-def setup():
+def setup_loop():
     """Clear log directory."""
     if LOG_PATH.exists():
         shutil.rmtree(LOG_PATH)
@@ -52,18 +53,18 @@ def setup():
 class BasicClient(PythonCLC, OperationIdBasedCLC):
     id = "test-client:python"
 
-    def _get_code(self, request: Request, api_path: str) -> bytes:
+    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         allowed_args = ["name", "age", "user_id"]
         kwargs = f"api='{api_path}',"
-        if request.query_parameters:
+        if invocation.query_parameters:
             kwargs += ", ".join(
                 f"{k}={repr(v)}"
-                for k, v in request.query_parameters.items()
+                for k, v in invocation.query_parameters.items()
                 if k in allowed_args
             )
-        if request.body:
+        if invocation.body:
             try:
-                body: dict | None = dict(json.loads(request.body))
+                body: dict | None = dict(json.loads(invocation.body))
             except (JSONDecodeError, ValueError, TypeError):
                 body = None
 
@@ -72,14 +73,14 @@ class BasicClient(PythonCLC, OperationIdBasedCLC):
                     f"{k}={repr(v)}" for k, v in body.items() if k in allowed_args
                 )
 
-        method_name = self._get_method_name(request)
+        method_name = self._get_method_name(invocation)
 
         content = textwrap.dedent(f"""
         from pprint import pprint
                                   
         from telephuzz_basic_client.client import {method_name}
 
-        pprint({self._get_method_name(request)}({kwargs}))
+        pprint({self._get_method_name(invocation)}({kwargs}))
         """).encode()
 
         return content
@@ -189,7 +190,8 @@ def test_session_manager_setup(monkeypatch):
         api_url = api_url.replace("localhost", "mitmproxy")
         api_url += f"/api{session1.id}:8000"
         client1 = session1.client
-        client1.send(request, api_url)
+        invocation = InvocationData(request)
+        client1.send(invocation, api_url)
 
         # attempt to send with session manager
         results = session_manager.send(request)

@@ -1,0 +1,70 @@
+"""Store information relevant for client library request source code generation."""
+
+import json
+from typing import Any
+
+from telephuzz.config import get_config
+from telephuzz.http_message import Request
+from telephuzz.openapi_helpers import (
+    extract_path_parameters,
+    extract_path_variable_types,
+    extract_paths,
+    resolve_path,
+)
+from telephuzz.operation_ids import generate_operation_id
+
+
+class InvocationData:
+    """Process general request information for client request code generation."""
+
+    def __init__(self, request: Request):
+        self.method = request.method
+        self.operation_id = self._get_operation_id(request)
+        self.query_parameters = self._get_query_parameters(request)
+        self.body = request.body
+        self.path = request.path
+        self.content_type = request.headers.get("Content-Type", None)
+        self.authorization = request.headers.get("Authorization", None)
+
+    def _get_operation_id(self, request: Request) -> str:
+        """Resolve the operation id."""
+        path = self._resolve_path(request.path)
+        return generate_operation_id(request.method.value, path)
+
+    def _get_query_parameters(self, request: Request) -> dict[str, Any]:
+        """Resolve query parameters (including path variables)."""
+        # check for path variables
+        path_only = self._path_only(request.path)
+        path = self._resolve_path(request.path)
+
+        query_parameters = request.query_parameters
+        if "{" in path:
+            _path_params = extract_path_parameters(path, path_only)
+
+            # cast integers
+            path_parameter_types = extract_path_variable_types(
+                get_config().spec_str, path
+            )
+            for parameter, value in path_parameter_types.items():
+                if value == "integer":
+                    _path_params[parameter] = int(_path_params[parameter])
+                else:
+                    _path_params[parameter] = str(_path_params[parameter])
+
+            query_parameters.update(_path_params)
+
+        return query_parameters
+
+    def _resolve_path(self, path: str) -> str:
+        """Resolve the concrete path."""
+        path = self._path_only(path)
+
+        concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
+        return resolve_path(path, concrete, non_concrete)
+
+    def _path_only(self, path: str) -> str:
+        """Return the path without query parameters."""
+        if "?" in path:
+            path = path[: path.find("?")]
+
+        return path
