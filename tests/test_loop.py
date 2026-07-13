@@ -3,6 +3,7 @@
 import json
 import os
 import shutil
+import tempfile
 import textwrap
 from copy import deepcopy
 from json import JSONDecodeError
@@ -137,7 +138,6 @@ def test_session_manager_setup(monkeypatch):
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     classes = make_client_classes(BasicClient)
-    print(classes)
 
     with SessionManager() as session_manager:
         assert session_manager.database_type is None
@@ -614,17 +614,38 @@ def test_parse_invalid_python_json(monkeypatch):
             assert r.response.status == 200
 
 
-def test_loop_petshop(monkeypatch):
+@pytest.mark.parametrize(
+    "client_class, client_lib",
+    [(OpenAPIGenPythonCLC, "openapi-gen-python-client-pet-api")],
+)
+def test_loop_petshop(monkeypatch, client_class: type, client_lib: str):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
+    classes = make_client_classes(client_class)
 
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
+    with tempfile.NamedTemporaryFile("w+") as client_config:
+        template_config = TEST_CONFIG_BASE_PATH / "client_template_config.yaml"
+        with open(template_config, "r") as template:
+            template_data = template.read()
 
-    make_client_classes(OpenAPIGenPythonCLC)
+        client_config.write(
+            template_data.format(
+                classes[0].id,  # type: ignore
+                classes[1].id,  # type: ignore
+                classes[2].id,  # type: ignore
+                client_lib,
+            )
+        )
+        client_config.seek(0)
 
-    fuzzer = TelePhuzz(TESTFILES / "processed_petshop.json")
-    fuzzer.start_fuzzing_session()
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.CLIENT_CONFIG_PATH = Path(client_config.name)
 
-    assert len(os.listdir(LOG_PATH)) == 0
+        monkeypatch.setattr(
+            "telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients"
+        )
+
+        fuzzer = TelePhuzz(TESTFILES / "processed_petshop.json")
+        fuzzer.start_fuzzing_session()
+
+        assert len(os.listdir(LOG_PATH)) == 0

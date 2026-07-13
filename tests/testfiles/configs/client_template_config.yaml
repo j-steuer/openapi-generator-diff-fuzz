@@ -1,0 +1,15 @@
+targets:
+  - id: {0}
+    lib_name: {3}
+
+  - id: {1}
+    lib_name: {3}
+
+  - id: {2}
+    lib_name: {3}
+
+    
+
+fuzzing:
+  log-path: "/tmp/logs/telephuzz"
+  timeout: 60
