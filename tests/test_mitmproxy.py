@@ -141,10 +141,11 @@ def test_json_response(api: tuple[Network, str]) -> None:
                 params=params,
             )
 
-            responses = os.listdir(tmpdir)
+            respose_path = Path(tmpdir) / "api"
+            responses = os.listdir(respose_path)
             assert len(responses) == 1, "Should contain a single response file."
             response_file = responses[0]
-            with open(Path(tmpdir) / response_file) as f:
+            with open(respose_path / response_file) as f:
                 entry_data = json.load(f)
 
             assert (
@@ -160,11 +161,9 @@ def test_single_target(api: tuple[Network, str]) -> None:
 
     with tempfile.TemporaryDirectory() as tmpdir:
         with MITMProxyContainer(
-            response_output=tmpdir, target="http://api:8000"
+            response_output=tmpdir, target="http://localhost:8000"
         ) as mitm_proxy:
             assert mitm_proxy.container is not None
-            network.connect(mitm_proxy.container)
-            sleep(1)
             assert (
                 "Hello Alice, you are 30 years old!"
                 in requests.get(
