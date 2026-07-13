@@ -1,11 +1,11 @@
 targets:
-  - id: test-client1:python
+  - id: basicclient1
     lib_name: basic_client
 
-  - id: test-client2:python
+  - id: basicclient2
     lib_name: basic_client
 
-  - id: test-client3:python
+  - id: basicclient3
     lib_name: basic_client
 
 fuzzing:

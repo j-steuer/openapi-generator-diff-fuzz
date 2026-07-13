@@ -1,15 +1,15 @@
 targets:
-  - id: test-pet-client1:python
+  - id: openapigenpythonclc1
     lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-pet-client2:python
+  - id: openapigenpythonclc2
     lib_name: openapi-gen-python-client-pet-api
 
-  - id: test-pet-client3:python
+  - id: openapigenpythonclc3
     lib_name: openapi-gen-python-client-pet-api
 
     
 
 fuzzing:
   log-path: "/tmp/logs/telephuzz"
-  timeout: 60
+  timeout: 180
