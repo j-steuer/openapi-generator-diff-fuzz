@@ -629,9 +629,34 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
     id = "swagger-codegen:python"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(
-            f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
-        )
+        query_parameters = invocation.query_parameters
+
+        kwargs = ""
+        if query_parameters:
+            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
+
+        if invocation.body:
+            if invocation.content_type == "application/json":
+                # TODO parse in Request object
+                eval_body = invocation.json_body
+                if isinstance(eval_body, list):
+                    # create list of objects
+                    pass
+                elif isinstance(eval_body, dict):
+                    body_kwargs = ", ".join(
+                        f"{k}={repr(v)}" for k, v in eval_body.items()
+                    )
+                else:
+                    raise NotImplementedError(
+                        f"Unhandled body type {type(eval_body)}: {invocation.body}"
+                    )
+            else:
+                raw_body: str = invocation.body
+                body_kwargs = f"body={raw_body.encode()!r}"
+
+            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
+
+        api = _get_main_path(invocation.path).capitalize()
 
         content = textwrap.dedent(f"""
         from pprint import pprint
@@ -642,7 +667,7 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         config = Configuration()
         config.host = "{api_path}"
-        api_instance = swagger_client.DefaultApi(swagger_client.ApiClient(config))
+        api_instance = swagger_client.{api}Api(swagger_client.ApiClient(config))
 
         api_response = api_instance.{self._get_method_name(invocation)}({kwargs})
         pprint(api_response)
