@@ -1,5 +1,6 @@
 """Store information relevant for client library request source code generation."""
 
+import ast
 import json
 from typing import Any
 
@@ -13,6 +14,8 @@ from telephuzz.openapi_helpers import (
 )
 from telephuzz.operation_ids import generate_operation_id
 
+JSON_CONTENT = "application/json"
+
 
 class InvocationData:
     """Process general request information for client request code generation."""
@@ -22,9 +25,17 @@ class InvocationData:
         self.operation_id = self._get_operation_id(request)
         self.query_parameters = self._get_query_parameters(request)
         self.body = request.body
+        self.json_body = None
         self.path = request.path
         self.content_type = request.headers.get("Content-Type", None)
         self.authorization = request.headers.get("Authorization", None)
+
+        if self.content_type == JSON_CONTENT:
+            # process body to usable JSON
+            try:
+                self.json_body = ast.literal_eval(request.body)
+            except ValueError:
+                self.json_body = json.loads(request.body)
 
     def _get_operation_id(self, request: Request) -> str:
         """Resolve the operation id."""

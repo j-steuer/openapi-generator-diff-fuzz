@@ -1,6 +1,5 @@
 """File for code relating to client library containers."""
 
-import ast
 import hashlib
 import io
 import json
@@ -533,6 +532,22 @@ class OperationIdBasedCLC(ClientLibraryContainer):
 # --- Concrete Python Client Classes ---
 
 
+def _get_main_path(path: str) -> str:
+    """Return main component of the API path.
+
+    Used to determine the name of the client class for some
+    generators.
+    """
+    if path == "/":
+        return "default"
+    else:
+        cutoff = path.find("/", 1)
+        if cutoff != -1:
+            return path[:cutoff][1:]
+        else:
+            return path[1:]
+
+
 class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator Python."""
 
@@ -559,10 +574,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
                 model_name_str += f"import {model_name.capitalize()}"
 
                 # TODO parse in Request object
-                try:
-                    eval_body = ast.literal_eval(invocation.body)
-                except ValueError:
-                    eval_body = json.loads(invocation.body)
+                eval_body = invocation.json_body
                 if isinstance(eval_body, list):
                     # create list of objects
                     model_list = [
@@ -590,14 +602,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         else:
             auth = ""
 
-        if invocation.path == "/":
-            api = "default"
-        else:
-            cutoff = invocation.path.find("/", 1)
-            if cutoff != -1:
-                api = invocation.path[:cutoff][1:]
-            else:
-                api = invocation.path[1:]
+        api = _get_main_path(invocation.path)
 
         content = textwrap.dedent(f"""
         from pprint import pprint
