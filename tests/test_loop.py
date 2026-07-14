@@ -26,6 +26,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenPythonCLC,
     OperationIdBasedCLC,
     PythonCLC,
+    SwaggerCodegenPythonCLC,
 )
 from telephuzz.session.session import SessionManager
 
@@ -615,13 +616,15 @@ def test_parse_invalid_python_json(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "client_class, client_lib",
-    [(OpenAPIGenPythonCLC, "openapi-gen-python-client-pet-api")],
+    "client_class",
+    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC],
 )
-def test_loop_petshop(monkeypatch, client_class: type, client_lib: str):
+def test_loop_petshop(monkeypatch, client_class: type):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 
     classes = make_client_classes(client_class)
+
+    client_lib = f"pet-{client_class.__name__.lower()}"
 
     with tempfile.NamedTemporaryFile("w+") as client_config:
         template_config = TEST_CONFIG_BASE_PATH / "client_template_config.yaml"
