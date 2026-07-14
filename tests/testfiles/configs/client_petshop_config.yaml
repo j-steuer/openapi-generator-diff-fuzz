@@ -1,12 +1,12 @@
 targets:
   - id: openapigenpythonclc1
-    lib_name: openapi-gen-python-client-pet-api
+    lib_name: pet-openapigenpythonclc
 
   - id: openapigenpythonclc2
-    lib_name: openapi-gen-python-client-pet-api
+    lib_name: pet-openapigenpythonclc
 
   - id: openapigenpythonclc3
-    lib_name: openapi-gen-python-client-pet-api
+    lib_name: pet-openapigenpythonclc
 
     
 
