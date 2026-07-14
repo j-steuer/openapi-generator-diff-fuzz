@@ -338,8 +338,8 @@ def test_loop_faulty_library(monkeypatch):
     fuzzer.start_fuzzing_session()
 
     assert len(os.listdir(LOG_PATH)) > 0
-    assert not any("test-client" in f for f in os.listdir(LOG_PATH))
-    assert all("test-faulty-client" in f for f in os.listdir(LOG_PATH))
+    assert not any("basicclient" in f for f in os.listdir(LOG_PATH))
+    assert all("basicfaultyclient" in f for f in os.listdir(LOG_PATH))
 
 
 def test_send_petshop(monkeypatch):
