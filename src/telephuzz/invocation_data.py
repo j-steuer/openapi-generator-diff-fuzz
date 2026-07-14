@@ -37,6 +37,10 @@ class InvocationData:
             except ValueError:
                 self.json_body = json.loads(request.body)
 
+    def __repr__(self) -> str:
+        """Repr method."""
+        return str(self.__dict__)
+
     def _get_operation_id(self, request: Request) -> str:
         """Resolve the operation id."""
         path = self._resolve_path(request.path)
