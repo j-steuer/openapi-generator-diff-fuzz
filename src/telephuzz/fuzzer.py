@@ -1,5 +1,6 @@
 """File for the main fuzzing loop."""
 
+import json
 import logging
 import os
 import tempfile
@@ -14,7 +15,6 @@ from telephuzz.config import get_config
 from telephuzz.docker_helpers import compose_down, compose_up, set_port_env
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.logging_config import setup_logging
-from telephuzz.openapi_helpers import preprocess_oas
 from telephuzz.request_generator import (
     FuzzerBasedGenerator,
     RequestGenerator,
@@ -31,9 +31,7 @@ SCHEMATHESIS_PROJECT = "schemathesis_project"
 class TelePhuzz:
     """The main fuzzer class."""
 
-    def __init__(
-        self, oas: Path, request_generator: RequestGenerator | None = None
-    ) -> None:
+    def __init__(self, request_generator: RequestGenerator | None = None) -> None:
         """Initialize a TelePhuzz instance.
 
         Args:
@@ -46,8 +44,7 @@ class TelePhuzz:
 
         """
         logging.info("Initializing fuzzing session.")
-        self.base_oas = oas
-        self.processed_oas = oas
+        self.processed_oas: Path | None = None
 
         self.request_generator = request_generator
         self.evaluator = DiffEvaluator()
@@ -83,6 +80,7 @@ class TelePhuzz:
                 sleep(1)
 
             # Use SchemathesisGenerator as default
+            assert self.processed_oas is not None
             generator = self.exit_stack.enter_context(
                 SchemathesisGenerator(
                     self.processed_oas,
@@ -99,10 +97,9 @@ class TelePhuzz:
         logger.info("Starting fuzzing session.")
         with tempfile.TemporaryDirectory() as tmpdir:
             # pre-process OAS
-            self.processed_oas = Path(
-                os.path.join(tmpdir, f"oas{self.base_oas.suffix}")
-            )
-            preprocess_oas(self.base_oas, self.processed_oas)
+            self.processed_oas = Path(os.path.join(tmpdir, "processed_spec.json"))
+            with open(self.processed_oas, "w") as spec_file:
+                json.dump(get_config().spec, spec_file)
 
             # set up request generator
             self.request_generator = self._setup_request_generator()

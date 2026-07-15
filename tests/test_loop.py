@@ -319,7 +319,7 @@ def test_loop_same_library(monkeypatch):
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
-    fuzzer = TelePhuzz(TEST_OAS)
+    fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
 
     assert len(os.listdir(LOG_PATH)) == 0
@@ -334,7 +334,7 @@ def test_loop_faulty_library(monkeypatch):
 
     monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
-    fuzzer = TelePhuzz(TEST_OAS)
+    fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
 
     assert len(os.listdir(LOG_PATH)) > 0
@@ -648,7 +648,7 @@ def test_loop_petshop(monkeypatch, client_class: type):
             "telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients"
         )
 
-        fuzzer = TelePhuzz(TESTFILES / "processed_petshop.json")
+        fuzzer = TelePhuzz()
         fuzzer.start_fuzzing_session()
 
         assert len(os.listdir(LOG_PATH)) == 0
