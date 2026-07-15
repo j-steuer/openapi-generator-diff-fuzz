@@ -12,18 +12,18 @@ PROJECT_ROOT="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 docker build \
-  -t telephuzz:swagger-typescript-api \
-  -f "$SCRIPT_DIR/dockerfiles/swagger-typescript-api.dockerfile" \
+  -t telephuzz:nswag \
+  -f "$SCRIPT_DIR/dockerfiles/nswag.dockerfile" \
   "$SCRIPT_DIR/dockerfiles"
 
-echo "Swagger TypeScript API: Generating TypeScript"
+echo "Nswag: Generating C#"
 
 docker run --rm \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
-  telephuzz:swagger-typescript-api \
-  generate \
-  -o /local/output \
-  -n swagger-typescript-api.ts \
-  -p /local/spec/openapi.json \
-  --axios
+  telephuzz:nswag \
+  openapi2csclient \
+  /input:/local/spec/openapi.json \
+  /output:/local/output/nswag-csharp-client.cs \
+  /namespace:MyCompany.ApiClient \
+  /className:{controller}Client

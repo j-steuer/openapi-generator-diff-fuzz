@@ -1,64 +1,44 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-LANGS=("python" "go" "java" "swift5" "csharp" "typescript-axios")
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <language> <output-path>"
+    exit 1
+fi
 
-for LANG in "${LANGS[@]}"; do
-  echo "OpenAPI Generator: Generating $LANG"
+LANG="$1"
+OUT_DIR="$(realpath -m "$2")"
 
-  OUT_DIR="/local/clients/openapi-gen-$LANG-client"
-  OUT_DIR_AUTH="/local/clients/openapi-gen-$LANG-client-auth"
+PARENT_DIR="$(dirname "$OUT_DIR")"
+OUT_NAME="$(basename "$OUT_DIR")"
 
-  docker run --rm \
+mkdir -p "$PARENT_DIR"
+
+echo "OpenAPI Generator: Generating $LANG"
+echo "Output: $OUT_DIR"
+
+docker run --rm \
     -v "$(pwd)":/local \
+    -v "$PARENT_DIR":/output \
     openapitools/openapi-generator-cli:v7.22.0 \
     generate \
     -i /local/spec/openapi.json \
     -g "$LANG" \
-    -o "$OUT_DIR"
+    -o "/output/$OUT_NAME"
 
-  docker run --rm \
-    -v "$(pwd)":/local \
-    openapitools/openapi-generator-cli:v7.22.0 \
-    generate \
-    -i /local/spec/openapi_auth.json \
-    -g "$LANG" \
-    -o "$OUT_DIR_AUTH"
-
-  # --- C# post-processing: flatten src/Org.OpenAPITools ---
-  if [ "$LANG" = "csharp" ]; then
+# C# post-processing: flatten src/Org.OpenAPITools
+if [ "$LANG" = "csharp" ]; then
     echo "Post-processing C# output structure..."
 
-    OUT_DIR="clients/openapi-gen-csharp-client"
-    TMP_DIR="clients/openapi-gen-csharp-client_temp"
-    SRC_DIR="clients/openapi-gen-csharp-client/src/Org.OpenAPITools"
+    SRC_DIR="$OUT_DIR/src/Org.OpenAPITools"
+    TMP_DIR="${OUT_DIR}_temp"
 
-    OUT_DIR_AUTH="clients/openapi-gen-csharp-client-auth"
-    TMP_DIR_AUTH="clients/openapi-gen-csharp-client_temp-auth"
-    SRC_DIR_AUTH="clients/openapi-gen-csharp-client-auth/src/Org.OpenAPITools"
-    
-  if [ -e "$SRC_DIR" ]; then
-      echo "Moving contents of $SRC_DIR to $OUT_DIR"
-
-      mv "$SRC_DIR" "$TMP_DIR"
-      rm -r "$OUT_DIR"
-      mv "$TMP_DIR" "$OUT_DIR"
-
-  else
-      echo "File $SRC_DIR does not exist"
-  fi
-
-  if [ -e "$SRC_DIR_AUTH" ]; then
-      echo "Moving contents of $SRC_DIR_AUTH to $OUT_DIR_AUTH"
-
-      mv "$SRC_DIR_AUTH" "$TMP_DIR_AUTH"
-      rm -r "$OUT_DIR_AUTH"
-      mv "$TMP_DIR_AUTH" "$OUT_DIR_AUTH"
-
-  else
-      echo "File $SRC_DIR_AUTH does not exist"
-  fi
+    if [ -d "$SRC_DIR" ]; then
+        mv "$SRC_DIR" "$TMP_DIR"
+        rm -rf "$OUT_DIR"
+        mv "$TMP_DIR" "$OUT_DIR"
+    else
+        echo "Directory $SRC_DIR does not exist"
+    fi
 fi
-
-done

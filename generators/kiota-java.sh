@@ -12,18 +12,23 @@ PROJECT_ROOT="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 docker build \
-  -t telephuzz:swagger-typescript-api \
-  -f "$SCRIPT_DIR/dockerfiles/swagger-typescript-api.dockerfile" \
+  -t telephuzz:kiota \
+  -f "$SCRIPT_DIR/dockerfiles/kiota.dockerfile" \
   "$SCRIPT_DIR/dockerfiles"
 
-echo "Swagger TypeScript API: Generating TypeScript"
+echo "Kiota: Generating java"
 
 docker run --rm \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
-  telephuzz:swagger-typescript-api \
+  telephuzz:kiota \
   generate \
-  -o /local/output \
-  -n swagger-typescript-api.ts \
-  -p /local/spec/openapi.json \
-  --axios
+  --language java \
+  --openapi /local/spec/openapi.json \
+  --output /local/output/client \
+  -c PostsClient \
+  -n client \
+  --clean-output
+
+cp "$SCRIPT_DIR/kiota_project_files/pom.xml" \
+  "$OUTPUT_PATH/pom.xml"
