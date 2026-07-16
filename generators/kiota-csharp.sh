@@ -19,6 +19,7 @@ docker build \
 echo "Kiota: Generating csharp"
 
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
   telephuzz:kiota \

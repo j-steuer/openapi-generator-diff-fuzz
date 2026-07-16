@@ -19,6 +19,7 @@ docker build \
 echo "Swagger TypeScript API: Generating TypeScript"
 
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
   telephuzz:swagger-typescript-api \

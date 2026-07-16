@@ -17,6 +17,7 @@ docker build \
   "$SCRIPT_DIR/dockerfiles"
 
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
   telephuzz:oapi-codegen \

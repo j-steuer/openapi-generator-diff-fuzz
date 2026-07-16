@@ -19,6 +19,7 @@ docker build \
 echo "Nswag: Generating TypeScript Axios"
 
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_ROOT:/local" \
   -v "$OUTPUT_PATH:/local/output" \
   telephuzz:nswag \

@@ -19,6 +19,7 @@ echo "Swagger Codegen: Generating $LANG"
 echo "Output: $OUT_DIR"
 
 docker run --rm \
+    --user "$(id -u):$(id -g)" \
     -v "$(pwd)":/local \
     -v "$PARENT_DIR":/output \
     swaggerapi/swagger-codegen-cli-v3:3.0.80 \

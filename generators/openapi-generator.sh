@@ -19,6 +19,7 @@ echo "OpenAPI Generator: Generating $LANG"
 echo "Output: $OUT_DIR"
 
 docker run --rm \
+    --user "$(id -u):$(id -g)" \
     -v "$(pwd)":/local \
     -v "$PARENT_DIR":/output \
     openapitools/openapi-generator-cli:v7.22.0 \
