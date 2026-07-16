@@ -35,29 +35,25 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
         assert isinstance(methods, dict), "Methods were not loaded as a dict"
         methods = cast(dict[str, dict], methods)
         for method, operation in methods.items():
-            # filter out unsupported content-types if possible
-            request_body = operation.get("requestBody")
-            if not isinstance(request_body, dict):
-                continue
-
-            content = request_body.get("content")
-            if not isinstance(content, dict):
-                continue
-
-            for media_type in UNSUPPORTED_MEDIA_TYPES:
-                content.pop(media_type, None)
-
-            if not content:
-                raise ValueError(f"Content of {path} has no supported media types.")
-
-            # change operation id
             try:
                 HTTPMethod(method)
             except ValueError:
                 # ignore non-method keys like parameters
                 continue
-            operation["operationId"] = generate_operation_id(method, path)
 
+            request_body = operation.get("requestBody")
+            if isinstance(request_body, dict):
+                content = request_body.get("content")
+                if isinstance(content, dict):
+                    for media_type in UNSUPPORTED_MEDIA_TYPES:
+                        content.pop(media_type, None)
+
+                    if not content:
+                        raise ValueError(
+                            f"Content of {path} has no supported media types."
+                        )
+
+            operation["operationId"] = generate_operation_id(method, path)
     if output_path:
         with open(output_path, "w") as f:
             if output_path.suffix == ".json":

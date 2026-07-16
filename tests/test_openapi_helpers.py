@@ -30,16 +30,16 @@ OPERATION_ID = "operationId"
 class TestPreprocessing:
     """Tests relating to preprocessing of OpenAPI spec files."""
 
-    def test_preprocessing_json(self, basic_oas_json: _TemporaryFileWrapper) -> None:
+    def test_preprocessing_json(self) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
-        path = Path(basic_oas_json.name)
+        path = Path("wfd/openapi-swagger/swagger-petstore.json")
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
             preprocess_oas(path, Path(f.name))
             preprocessed_content = json.load(f)
 
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
-        assert len(operation_ids) == 8
+        assert len(operation_ids) == 19
 
         from pprint import pprint
 
@@ -58,16 +58,16 @@ class TestPreprocessing:
 
         assert count == len(operation_ids)
 
-    def test_preprocessing_yaml(self, basic_oas_yaml: _TemporaryFileWrapper) -> None:
+    def test_preprocessing_yaml(self) -> None:
         """Test insertion of custom operation ids in OpenAPI spec."""
-        path = Path(basic_oas_yaml.name)
+        path = Path("wfd/openapi-swagger/swagger-petstore.json")
 
         with NamedTemporaryFile(mode="w+", suffix=".json") as f:
             preprocess_oas(path, Path(f.name))
             preprocessed_content = yaml.safe_load(f)
 
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
-        assert len(operation_ids) == 8
+        assert len(operation_ids) == 19
 
         assert isinstance(preprocessed_content, dict)
         count = 0
