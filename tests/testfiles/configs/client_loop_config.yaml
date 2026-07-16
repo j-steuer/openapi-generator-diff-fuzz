@@ -1,12 +1,7 @@
 targets:
   - id: basicclient1
-    lib_name: basic_client
-
   - id: basicclient2
-    lib_name: basic_client
-
   - id: basicclient3
-    lib_name: basic_client
 
 fuzzing:
   log-path: "/tmp/logs/telephuzz"

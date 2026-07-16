@@ -10,12 +10,12 @@ from json import JSONDecodeError
 from pathlib import Path
 from time import sleep
 
+import docker
 import pytest
 import requests
 from conftest import TEST_CONFIG_BASE_PATH
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
-from test_client import _init_and_send
 
 from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
@@ -23,6 +23,7 @@ from telephuzz.fuzzer import TelePhuzz
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.invocation_data import InvocationData
 from telephuzz.session.client_library import (
+    ClientLibraryContainer,
     OpenAPIGenPythonCLC,
     OperationIdBasedCLC,
     PythonCLC,
@@ -43,6 +44,34 @@ CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_config.yaml"
 CLIENT_FAULTY_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_faulty_config.yaml"
 
 LOG_PATH = Path("/tmp/logs/telephuzz")
+
+
+def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
+    """Initialize and send basic message to test API."""
+    client = docker.from_env()
+    assert clc.container is not None
+    id = clc.container.id
+    assert id is not None
+    container = client.containers.get(id)
+    assert container.status == "running"
+
+    request = Request(
+        headers=CaseInsensitiveDict({"Test": ["test"]}),
+        body=None,
+        method=HTTPMethod.GET,
+        path="dummytarget.org/test",
+        query_parameters={},
+    )
+    request.path = "/greet"
+    request.method = HTTPMethod("GET")
+    request.query_parameters = {"name": "Alice", "age": 30}
+
+    if auth:
+        request.headers["Authorization"] = "mock-token"
+
+    response = clc.send(InvocationData(request), api)
+    assert isinstance(response, str)
+    assert "Hello Alice, you are 30 years old!" in response
 
 
 def make_client_classes(base: type, amount: int = 3) -> list[type]:
@@ -68,7 +97,8 @@ def setup_loop():
 
 
 class BasicClient(PythonCLC, OperationIdBasedCLC):
-    id = "test-client:python"
+    id = "basicclient"
+    generator_script = "basic-client.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         allowed_args = ["name", "age", "user_id"]
@@ -105,12 +135,13 @@ class BasicClient(PythonCLC, OperationIdBasedCLC):
 
 class BasicFaultyClient(BasicClient):
     id = "basicfaultyclient"
+    generator_script = "basic-faulty-client.sh"
 
 
 def test_basic_client(api: tuple[Network, str]):
     """Test that basic client works."""
     network, api_path = api
-    with BasicClient(library_path=BASIC_CLIENT_PATH) as basic_client:
+    with BasicClient() as basic_client:
         assert basic_client.container is not None
         network.connect(basic_client.container)
         sleep(1)
@@ -120,9 +151,7 @@ def test_basic_client(api: tuple[Network, str]):
 def test_faulty_client(api: tuple[Network, str]):
     """Test that faulty client does not send messages correctly."""
     network, api_path = api
-    with BasicFaultyClient(
-        library_path=CLIENT_PATH / "basic_faulty_client"
-    ) as basic_client:
+    with BasicFaultyClient() as basic_client:
         assert basic_client.container is not None
         network.connect(basic_client.container)
         sleep(1)
@@ -624,8 +653,6 @@ def test_loop_petshop(monkeypatch, client_class: type):
 
     classes = make_client_classes(client_class)
 
-    client_lib = f"pet-{client_class.__name__.lower()}"
-
     with tempfile.NamedTemporaryFile("w+") as client_config:
         template_config = TEST_CONFIG_BASE_PATH / "client_template_config.yaml"
         with open(template_config, "r") as template:
@@ -636,7 +663,6 @@ def test_loop_petshop(monkeypatch, client_class: type):
                 classes[0].id,  # type: ignore
                 classes[1].id,  # type: ignore
                 classes[2].id,  # type: ignore
-                client_lib,
             )
         )
         client_config.seek(0)

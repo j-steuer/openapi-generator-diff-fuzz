@@ -11,7 +11,6 @@ import docker
 from docker.models.networks import Network
 
 from telephuzz.config import get_config
-from telephuzz.constants import CLIENT_PATH
 from telephuzz.docker_helpers import (
     compose_down,
     compose_up,
@@ -182,11 +181,12 @@ class SessionManager:
 
         # start up client
         logger.info("Starting up client libraries")
-        for library_id, library_name in self.targets.items():
+        for target in self.targets:
+            library_id = target["id"]
             logger.info(f"Starting up {library_id}")
             lib_class: type = ClientLibraryContainer.from_id(library_id)
             client_container: ClientLibraryContainer = self.stack.enter_context(
-                lib_class(CLIENT_PATH / library_name)
+                lib_class()
             )
 
             project_name = self._get_project_name(client_container.id)

@@ -42,9 +42,7 @@ class Config:
             for item in api_config.get("nondeterministic_components", [])
         ]
 
-        self.targets = dict()
-        for target in client_config["targets"]:
-            self.targets[target["id"]] = target["lib_name"]
+        self.targets = client_config["targets"]
 
         fuzzing_config = client_config["fuzzing"]
         assert isinstance(fuzzing_config, dict)

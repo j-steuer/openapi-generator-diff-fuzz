@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import shutil
 import tempfile
 import time
@@ -19,7 +20,7 @@ from docker.models.containers import Container
 from requests.structures import CaseInsensitiveDict
 
 from telephuzz.config import Config
-from telephuzz.constants import BASE_PATH
+from telephuzz.constants import BASE_PATH, CLIENT_PATH, SPEC_PATH
 from telephuzz.docker_helpers import compose_down, compose_up
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
@@ -227,7 +228,14 @@ def basic_oas_yaml():
 
 @pytest.fixture(autouse=True)
 def setup():
-    """Redirect config path to test config."""
+    """Basic setup for all tests."""
+    # clear clients and spec
+    if os.listdir(CLIENT_PATH):
+        shutil.rmtree(CLIENT_PATH)
+        os.mkdir(CLIENT_PATH)
+    if SPEC_PATH.exists():
+        os.remove(SPEC_PATH)
+
     original = Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH
     Config.API_CONFIG_PATH = TEST_API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = TEST_CLIENT_CONFIG_PATH

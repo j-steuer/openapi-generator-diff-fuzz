@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 import tarfile
 import tempfile
 import textwrap
@@ -22,6 +23,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 from telephuzz.config import get_config
+from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
 from telephuzz.openapi_helpers import get_args
@@ -48,18 +50,27 @@ class ClientLibraryContainer(ABC):
     id: LibraryId
     container: Container | None
     method_case: Case = Case("snake")
+    generator_script: str
 
     registry: dict = {}
 
-    def __init__(
-        self,
-        library_path: Path,
-    ):
+    def __init__(self):
         """Initialize an existing image or create a new one if possible."""
+        # build library
+        if not SPEC_PATH.exists():
+            with open(SPEC_PATH, "w") as spec:
+                json.dump(get_config().spec, spec)
+
+        generator_path = GENERATORS_PATH / self.generator_script
+        library_path = CLIENT_PATH / self.id.replace(":", "_")
+        try:
+            subprocess.run([generator_path, library_path], check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError("Error while generating client") from e
+
         image = self.get_image_by_hash(library_path)
         if image is None:
-            # start up container without image TODO remove?
-            raise ValueError("Hash should be obtainable")
+            raise ValueError("Hash should be obtainable" + " " + str(library_path))
 
         # set up container
         client = docker.from_env()
@@ -228,11 +239,9 @@ class PythonCLC(ClientLibraryContainer):
     method_case = Case.SNAKE
     base_image = "python:3.11-slim"
 
-    def __init__(self, library_path: Path):
+    def __init__(self):
         """Initialize a Python-based client library."""
-        super().__init__(
-            library_path=library_path,
-        )
+        super().__init__()
         assert self.container is not None
 
     @abstractmethod
@@ -276,146 +285,15 @@ class GoCLC(ClientLibraryContainer):
     base_image = "golang:1.26"
     library_name: str
 
-    def __init__(self, library_path: Path):
+    def __init__(self):
         """Initialize a Go-based client library."""
-        super().__init__(
-            library_path=library_path,
-        )
+        super().__init__()
         assert self.container is not None
 
     @abstractmethod
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         """Return the encoded code string that executes the invocation."""
         raise NotImplementedError
-
-    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
-        assert self.container is not None, "Container not set"
-        content = self._get_code(invocation, api_path)
-
-        tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="invocation.go")
-            info.size = len(content)
-            tar.addfile(info, io.BytesIO(content))
-        tar_stream.seek(0)
-
-        self.container.put_archive("/app", tar_stream)
-
-        return "go run /app/invocation.go"
-
-    def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for Go-based libraries."""
-        dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-                    RUN go work init {LIB_PATH}/lib
-                    """
-        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
-
-
-class JavaCLC(ClientLibraryContainer):
-    """Abstract class for Java-based client library containers."""
-
-    method_case = Case.CAMEL
-    base_image = "eclipse-temurin:21"
-
-    def __init__(self, library_path: Path):
-        """Initialize a Java-based client library."""
-        super().__init__(
-            library_path=library_path,
-        )
-        assert self.container is not None
-
-    @abstractmethod
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        """Return the encoded code string that executes the invocation."""
-        raise NotImplementedError
-
-    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
-        assert self.container is not None, "Container not set"
-        content = self._get_code(invocation, api_path)
-
-        tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="invocation.jsh")
-            info.size = len(content)
-            tar.addfile(info, io.BytesIO(content))
-        tar_stream.seek(0)
-
-        self.container.put_archive("/app", tar_stream)
-
-        lib_path = '"lib/target/openapi-java-client-0.1.0.jar:lib/target/lib/*"'
-        return f"jshell --class-path {lib_path} invocation.jsh"
-
-    def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for Java-based libraries."""
-        dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-
-                    RUN apt-get update && \
-                    apt-get install -y zip unzip
-                    
-                    SHELL ["/bin/bash", "-c"]
-
-                    RUN curl -s "https://get.sdkman.io" | bash && \
-                        source "$HOME/.sdkman/bin/sdkman-init.sh" && \
-                        sdk install maven 3.9.15
-
-                    WORKDIR /app/lib
-
-                    RUN source "$HOME/.sdkman/bin/sdkman-init.sh" && \
-                        mvn package && \
-                        mvn dependency:build-classpath -Dmdep.outputFile=classpath.txt
-
-                    WORKDIR /app
-                    """
-        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
-
-
-class SwiftCLC(ClientLibraryContainer):
-    """Abstract class for Swift-based client library containers."""
-
-    method_case = Case.CAMEL
-    base_image = "swift:6.3.1"
-
-    def __init__(self, library_path: Path):
-        """Initialize a Swift-based client library."""
-        super().__init__(
-            library_path=library_path,
-        )
-        assert self.container is not None
-
-    @abstractmethod
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        """Return the encoded code string that executes the invocation."""
-        raise NotImplementedError
-
-    def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
-        assert self.container is not None, "Container not set"
-        content = self._get_code(invocation, api_path)
-
-        tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-            info = tarfile.TarInfo(name="invocation.swift")
-            info.size = len(content)
-            tar.addfile(info, io.BytesIO(content))
-        tar_stream.seek(0)
-
-        self.container.put_archive("/app", tar_stream)
-
-        return "swift invocation.swift"
-
-    def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for C#-based libraries."""
-        dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-                    """
-        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
 
 
 class CsharpCLC(ClientLibraryContainer):
@@ -424,11 +302,9 @@ class CsharpCLC(ClientLibraryContainer):
     method_case = Case.PASCAL
     base_image = "mcr.microsoft.com/dotnet/sdk:10.0"
 
-    def __init__(self, library_path: Path):
+    def __init__(self):
         """Initialize a C#-based client library."""
-        super().__init__(
-            library_path=library_path,
-        )
+        super().__init__()
         assert self.container is not None
 
     @abstractmethod
@@ -480,9 +356,9 @@ class TypeScriptCLC(ClientLibraryContainer):
     method_case = Case.CAMEL
     base_image = "node:20-alpine"
 
-    def __init__(self, library_path: Path):
+    def __init__(self):
         """Initialize a TypeScript-based client library."""
-        super().__init__(library_path=library_path)
+        super().__init__()
         assert self.container is not None
 
     @abstractmethod
@@ -552,6 +428,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator Python."""
 
     id = "openapi-generator:python"
+    generator_script = "openapi-generator-python.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         model_name_str = ""
@@ -627,6 +504,7 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
     """Client library class for Swagger Codegen Python."""
 
     id = "swagger-codegen:python"
+    generator_script = "swagger-codegen-python.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         query_parameters = invocation.query_parameters
@@ -680,6 +558,7 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
     """Client library class for openapi-python-generator."""
 
     id = "openapi-python-generator:python"
+    generator_script = "openapi-python-generator.sh"
 
     def _get_method_name(self, invocation: InvocationData):
         # the hash is seperated
@@ -713,6 +592,7 @@ class KiotaPythonCLC(PythonCLC):
     """Client library class for Kiota Python."""
 
     id = "kiota:python"
+    generator_script = "kiota-python.sh"
 
     def _get_method_name(self, invocation: InvocationData):
         client_method = f"{invocation.path.strip('/').replace('/', '.')}"
@@ -778,6 +658,7 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
     """Client library class for OpenAPI Generator Go."""
 
     id = "openapi-generator:go"
+    generator_script = "openapi-generator-go.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         arg_string = ".".join(
@@ -829,6 +710,7 @@ class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
     """Client library class for Swagger Codegen Go."""
 
     id = "swagger-codegen:go"
+    generator_script = "swagger-codegen-go.sh"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -850,6 +732,7 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
     """Client library class for oapi generator."""
 
     id = "oapi-generator:go"
+    generator_script = "oapi-codegen.sh"
 
     def _translate(self, invocation: InvocationData, api_path: str) -> str | list[str]:
         assert self.container is not None, "Container not set"
@@ -931,6 +814,7 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator TypeScript (Axios)."""
 
     id = "openapi-generator:typescript"
+    generator_script = "openapi-generator-typescript.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
@@ -965,6 +849,7 @@ class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for Swagger Codegen TypeScript (Axios)."""
 
     id = "swagger-codegen:typescript"
+    generator_script = "swagger-codegen-typescript.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
@@ -1001,6 +886,7 @@ class NswagTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for Nswag TypeScript (Axios)."""
 
     id = "nswag:typescript"
+    generator_script = "nswag-typescript.sh"
 
     method_case = Case.SNAKE  # uses operation id as is, default is SNAKE
 
@@ -1045,6 +931,7 @@ class SwaggerTsAPICLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for swagger-typescript-api (Axios)."""
 
     id = "swagger-typescript-api:typescript"
+    generator_script = "swagger-typescript-api.sh"
 
     def _get_method_name(self, invocation: InvocationData):
         method_name = super()._get_method_name(invocation)
@@ -1115,6 +1002,7 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
     """Concrete client library for orval (Axios)."""
 
     id = "orval:typescript"
+    generator_script = "orval.sh"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Go-based libraries."""
@@ -1163,89 +1051,6 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
         return content
 
 
-# --- Concrete Java Client classes ---
-
-
-class OpenAPIGenJavaCLC(JavaCLC, OperationIdBasedCLC):
-    """Concrete client library for OpenAPI Generator Java."""
-
-    id = "openapi-generator:java"
-
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
-
-        content = textwrap.dedent(f"""
-        import org.openapitools.client.ApiClient;
-        import org.openapitools.client.api.DefaultApi;
-
-        var client = new ApiClient();
-        client.setBasePath("{api_path}");
-
-        var api = new DefaultApi(client);
-
-        var response = api.{self._get_method_name(invocation)}({kwargs});
-
-        System.out.println(response);
-        """).encode()
-
-        return content
-
-
-class SwaggerCodegenJavaCLC(JavaCLC, OperationIdBasedCLC):
-    """Concrete client library for Swagger Codegen Java."""
-
-    id = "swagger-codegen:java"
-
-    def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for Java-based libraries."""
-        dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-                    """
-        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
-
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
-
-        content = textwrap.dedent(f"""
-        import org.openapitools.client.ApiClient;
-        import org.openapitools.client.api.DefaultApi;
-
-        var client = new ApiClient();
-        client.setBasePath("{api_path}");
-
-        var api = new DefaultApi(client);
-
-        var response = api.{self._get_method_name(invocation)}({kwargs});
-
-        System.out.println(response);
-        """).encode()
-
-        return content
-
-
-# --- Concrete Swift Client classes ---
-
-
-class OpenAPIGeneratorSwiftCLC(SwiftCLC, OperationIdBasedCLC):
-    """Concrete client library class for OpenAPI Generator Swift."""
-
-    id = "openapi-generator:swift"
-
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        return b""
-
-
-class SwiftOpenAPIGenerator(SwiftCLC, OperationIdBasedCLC):
-    """Concrete client library class for Apple's Swift OpenAPI Generator."""
-
-    id = "swift-openapi-generator:swift"
-
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        return b""
-
-
 # --- Concrete C# Client classes ---
 
 
@@ -1253,6 +1058,7 @@ class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for OpenAPI Generator C#."""
 
     id = "openapi-generator:csharp"
+    generator_script = "openapi-generator-csharp.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
@@ -1322,6 +1128,7 @@ class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for Swagger Codegen C#."""
 
     id = "swagger-codegen:csharp"
+    generator_script = "swagger-codegen-csharp.sh"
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
@@ -1358,6 +1165,7 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
     """Concrete client library class for Nswag C#."""
 
     id = "nswag:csharp"
+    generator_script = "nswag-csharp.sh"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Modify method to create project from scratch with single file cs."""
@@ -1415,6 +1223,7 @@ class KiotaCSharpCLC(CsharpCLC):
     """Concrete client library class for Kiota C#."""
 
     id = "kiota:csharp"
+    generator_script = "kiota-csharp.sh"
 
     def _get_method_name(self, invocation: InvocationData):
         client_method = ".".join(
@@ -1482,76 +1291,6 @@ class KiotaCSharpCLC(CsharpCLC):
             }}
         }}
                                   
-        """).encode()
-
-        return content
-
-
-class KiotaJavaCLC(JavaCLC):
-    """Concrete client library class for Kiota Java."""
-
-    id = "kiota:java"
-
-    # TODO fix entire class
-    def _get_method_name(self, invocation: InvocationData):
-        # split and remove empty segments (handles leading "/")
-        parts = [p for p in invocation.path.split("/") if p]
-
-        # build chained calls
-        chain = ".".join(f"{p}()" for p in parts)
-
-        # append final method call
-        return f"{chain}.{invocation.method.value}"
-
-    def get_image_by_hash(self, library_path: Path) -> Image | None:
-        """Image creation for Java-based libraries."""
-        dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-                    """
-        return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
-
-    def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        lines = []
-        for key, value in invocation.query_parameters.items():
-            lines.append(f"q.{key.lower()} = {json.dumps(value)};")
-        kwargs = "\n".join(lines)
-
-        content = textwrap.dedent(f"""
-        import java.net.http.HttpClient;
-        import com.microsoft.kiota.http.HttpClientRequestAdapter;
-        import com.microsoft.kiota.authentication.AnonymousAuthenticationProvider;
-
-        import client.PostsClient;
-
-        // ----------------------
-        // Setup Kiota adapter
-        // ----------------------
-        var adapter = new HttpClientRequestAdapter(
-            new AnonymousAuthenticationProvider(),
-            HttpClient.newHttpClient()
-        );
-
-        adapter.setBaseUrl("{api_path}");
-
-        // ----------------------
-        // Create client
-        // ----------------------
-        var client = new PostsClient(adapter);
-
-        // ----------------------
-        // Call API
-        // ----------------------
-        var response = client.{self._get_method_name(invocation)}(cfg -> {{
-            var q = cfg.queryParameters;
-            {kwargs}
-        }});
-
-        // ----------------------
-        // Print result
-        // ----------------------
-        System.out.println(response);
         """).encode()
 
         return content
