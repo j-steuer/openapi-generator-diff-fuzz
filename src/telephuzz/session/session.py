@@ -50,6 +50,7 @@ class Session:
         invocation: InvocationData | None = None,
     ) -> RequestResult:
         """Send a request to the API through the client library."""
+        logger.debug(f"Sending request through clients: {request}")
 
         def _get_response() -> Response:
             response_dir = response_output / f"api{self.id}"

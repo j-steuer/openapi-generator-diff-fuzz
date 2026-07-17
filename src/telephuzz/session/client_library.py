@@ -514,20 +514,8 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
         if invocation.body:
-            if invocation.content_type == "application/json":
-                # TODO parse in Request object
-                eval_body = invocation.json_body
-                if isinstance(eval_body, list):
-                    # create list of objects
-                    pass
-                elif isinstance(eval_body, dict):
-                    body_kwargs = ", ".join(
-                        f"{k}={repr(v)}" for k, v in eval_body.items()
-                    )
-                else:
-                    raise NotImplementedError(
-                        f"Unhandled body type {type(eval_body)}: {invocation.body}"
-                    )
+            if invocation.json_body is not None:
+                body_kwargs = f"body={invocation.json_body}"
             else:
                 raw_body: str = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"

@@ -5,11 +5,12 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+from conftest import TEST_CONFIG_BASE_PATH
 from docker.models.containers import Container
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
-from telephuzz.config import get_config
+from telephuzz.config import Config, get_config
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
 from telephuzz.operation_ids import generate_operation_id
@@ -53,6 +54,26 @@ CLIENT_CASES_NO_AUTH = [
 ]
 
 
+def _test_send_request(
+    clc: ClientLibraryContainer,
+    request: Request,
+    network: Network,
+    api_path: str,
+    expected_response: str | None = None,
+):
+    """Test sending the request."""
+    assert clc.container is not None
+
+    network.connect(clc.container)
+
+    response = clc.send(InvocationData(request), api_path=api_path)
+    assert isinstance(response, str)
+    if expected_response is not None:
+        assert expected_response in response
+
+    network.disconnect(clc.container)
+
+
 def test_from_id():
     """Test obtaining a class based on id."""
     client_type = ClientLibraryContainer.from_id("openapi-generator:python")
@@ -90,9 +111,10 @@ def test_get_method_name_opid_mixin(monkeypatch):
     )
 
 
+@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-def test_client_openapi_gen_python_petshop(
-    api_wfd: tuple[Network, str], monkeypatch
+def test_client_basic_petshop(
+    clc_class, api_wfd: tuple[Network, str], monkeypatch
 ) -> None:
     """Test that client library works with one of the default test targets."""
     config = get_config()
@@ -104,7 +126,8 @@ def test_client_openapi_gen_python_petshop(
     monkeypatch.setattr(config, "spec_str", json.dumps(spec))
 
     network, api_path = api_wfd
-    with OpenAPIGenPythonCLC() as clc:
+    with clc_class() as clc:
+        clc = cast(ClientLibraryContainer, clc)
         network.connect(cast(Container, clc.container))
 
         request = Request(
@@ -127,3 +150,132 @@ def test_client_openapi_gen_python_petshop(
         response = clc.send(InvocationData(request), api_path=api_path)
         assert isinstance(response, str)
         assert "User not found" in response
+
+
+@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_resolve_path_params(clc_class, api_wfd: tuple[Network, str]):
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request_int = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "api_key": "l",
+                    "X-Schemathesis-TestCaseId": "GGvhsb",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/pet/105",
+            query_parameters={},
+        )
+
+        request_str = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "api_key": "l",
+                    "X-Schemathesis-TestCaseId": "GGvhsb",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/user/105",
+            query_parameters={},
+        )
+
+        _test_send_request(clc, request_int, network, api_path, "Pet not found")
+        _test_send_request(clc, request_str, network, api_path, "User not found")
+
+
+@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
+    """Test request with path variables and body."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "nwZmwH",
+                    "Content-Type": "application/json",
+                    "Content-Length": "2",
+                }
+            ),
+            body="{}",
+            method=HTTPMethod.PUT,
+            path="/user/%C2%A6g%F4%84%82%90%C2%BB%C2%8F%C2%80%0Cr",
+            query_parameters={},
+        )
+
+        _test_send_request(clc, request, network, api_path, "User not found")
+
+
+@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
+    """Test parsing a JSON body not parseable through literal_eval."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "JXLuUJ",
+                    "Content-Type": "application/json",
+                    "Content-Length": "931",
+                }
+            ),
+            body=(
+                '{"name": "\\u00ea\\u0096h\\u00a5\\u00b9\\u00ae?1", "photoUrls": '
+                '["\\udb62\\uddc9=b\\ud96f\\udd08", "P\\u00a6\\u00fc"], "id": -5008, '
+                '"": 5.960464477539063e-08, "tags": [{"id": -1247184487}, {"name": '
+                '"\\u00ee\\u00d7\\uda61\\udf05\\u009e~\\u00dfYA\\udb99\\udf03'
+                '\\udbee\\ude6e\\udb84\\ude429\\udb12\\uddf2", '
+                '"\\u00c1A\\"\\u0015\\u0016\\u0098\\u00d3\\u0000\\u0098\\u00f0'
+                '\\udbfe\\ude7d\\t\\u00d5": {}, "id": 2843, "\\u008d\\u00bd": '
+                '[{}, false, [false]]}, {"id": -562949953421312, "": '
+                '[[5.8196220103433455e-307, "Vt\\u0002v\\u00b1", null]], "\\u001a": '
+                '{"\\u0082\\ud82b\\udf11\\u00ef\\u1d20`f\\u00e2\\u00d7": {}, '
+                '"\\u0087\\u009e\\u00a9\\u00d6\\u0081T": {'
+                '"\\u0087\\u00cb\\ud98c\\udde2\\u00d4\\u0099\\u000e\\u008b'
+                "\\u00f8\\u0017\\u0012\\u00da0:\\u00d3\\u00b2\\uda5b\\udc33"
+                "\\ud915\\udd65\\u0088Z\\udbf5\\udf1c?\\ud9b7\\udfd2n"
+                '\\ud870\\udf92\\u00a3\\u009d\\u0091": "=o\\u00e99", '
+                '"\\u00c3O\\u0015\\udac6\\udcba\\ud8e7\\udd34": null}, '
+                '"\\u0083\\u00c7\\u00c3\\u000b\\u009b\\u00fcT\\u0088\\u00fe": '
+                '{"&\\u0097O\\u00ff": null}}}], "c\\u00df\\u00c8": ""}'
+            ),
+            method=HTTPMethod.POST,
+            path="/pet",
+            query_parameters={},
+        )
+
+        _test_send_request(clc, request, network, api_path, "-5008")
