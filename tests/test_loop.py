@@ -74,21 +74,6 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     assert "Hello Alice, you are 30 years old!" in response
 
 
-def make_client_classes(base: type, amount: int = 3) -> list[type]:
-    """Generate clients libraries for testing purposes.
-
-    For instance, make_client_class(BasicClient)
-    will generate BasicClient1, BasicClient2 and BasicClient3 classes
-    with ids basicclient1, basicclient2, basicclient3.
-    """
-    types = []
-    for i in range(amount):
-        base_name = f"{base.__name__}{i + 1}"
-        types.append(type(base_name, (base,), {"id": base_name.lower()}))
-
-    return types
-
-
 @pytest.fixture(autouse=True, scope="module")
 def setup_loop():
     """Clear log directory."""
@@ -159,13 +144,13 @@ def test_faulty_client(api: tuple[Network, str]):
             _init_and_send(basic_client, api_path)
 
 
-def test_session_manager_setup():
+def test_session_manager_setup(client_generator):
     """Test setting up the session manager without db."""
 
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    classes = make_client_classes(BasicClient)
+    classes = client_generator(BasicClient)
 
     with SessionManager() as session_manager:
         assert session_manager.database_type is None
@@ -232,12 +217,12 @@ def test_session_manager_setup():
         assert len(results) == 3
 
 
-def test_session_manager_faulty():
+def test_session_manager_faulty(client_generator):
     """Test setting up session manager with faulty client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
-    make_client_classes(BasicClient, amount=2)
+    client_generator(BasicClient, amount=2)
 
     with SessionManager() as session_manager:
         assert len(session_manager.sessions) == 3
@@ -270,12 +255,12 @@ def test_session_manager_faulty():
         assert any("Faulty" in repr(r) for r in results), results
 
 
-def test_diff_eval():
+def test_diff_eval(client_generator):
     """Test capturing and evaluating a result."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    make_client_classes(BasicClient)
+    client_generator(BasicClient)
 
     with SessionManager() as session_manager:
         request = Request(
@@ -305,12 +290,12 @@ def test_diff_eval():
         assert len(os.listdir(LOG_PATH)) == 0
 
 
-def test_mitmproxy_result_dir():
+def test_mitmproxy_result_dir(client_generator):
     """Test obtaining a result from mitmproxy."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    make_client_classes(BasicClient)
+    client_generator(BasicClient)
 
     with SessionManager() as session_manager:
         api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
@@ -331,12 +316,12 @@ def test_mitmproxy_result_dir():
         Response.from_json(result_file)
 
 
-def test_loop_same_library():
+def test_loop_same_library(client_generator):
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    make_client_classes(BasicClient)
+    client_generator(BasicClient)
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
@@ -344,12 +329,12 @@ def test_loop_same_library():
     assert len(os.listdir(LOG_PATH)) == 0
 
 
-def test_loop_faulty_library():
+def test_loop_faulty_library(client_generator):
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
-    make_client_classes(BasicClient, amount=2)
+    client_generator(BasicClient, amount=2)
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
@@ -359,12 +344,12 @@ def test_loop_faulty_library():
     assert all("basicfaultyclient" in f for f in os.listdir(LOG_PATH))
 
 
-def test_send_petshop():
+def test_send_petshop(client_generator):
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -389,12 +374,12 @@ def test_send_petshop():
         assert len(results) == 3
 
 
-def test_resolve_path_params():
+def test_resolve_path_params(client_generator):
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request_int = Request(
         headers=CaseInsensitiveDict(
@@ -440,13 +425,13 @@ def test_resolve_path_params():
         assert len(result) == 3
 
 
-def test_non_json_body():
+def test_non_json_body(client_generator):
     """Test sending a non-json body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -472,13 +457,13 @@ def test_non_json_body():
         assert len(result) == 3
 
 
-def test_json_body_array():
+def test_json_body_array(client_generator):
     """Test sending an array as json body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request_empty = Request(
         headers=CaseInsensitiveDict(
@@ -535,13 +520,13 @@ def test_json_body_array():
             assert r.response.status == 200
 
 
-def test_query_and_body():
+def test_query_and_body(client_generator):
     """Test request with path variables and body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request_empty = Request(
         headers=CaseInsensitiveDict(
@@ -567,13 +552,13 @@ def test_query_and_body():
         assert len(result) == 3
 
 
-def test_parse_invalid_python_json():
+def test_parse_invalid_python_json(client_generator):
     """Test parsing a JSON body not parseable through literal_eval."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
 
-    make_client_classes(OpenAPIGenPythonCLC)
+    client_generator(OpenAPIGenPythonCLC)
 
     request_empty = Request(
         headers=CaseInsensitiveDict(
@@ -624,10 +609,10 @@ def test_parse_invalid_python_json():
     "client_class",
     [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC],
 )
-def test_loop_petshop(client_class: type):
+def test_loop_petshop(client_class: type, client_generator):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 
-    classes = make_client_classes(client_class)
+    classes = client_generator(client_class)
 
     with tempfile.NamedTemporaryFile("w+") as client_config:
         template_config = TEST_CONFIG_BASE_PATH / "client_template_config.yaml"

@@ -159,6 +159,26 @@ def basic_oas_json():
 
 
 @pytest.fixture
+def client_generator():
+    """Generate clients libraries for testing purposes.
+
+    For instance, make_client_class(BasicClient)
+    will generate BasicClient1, BasicClient2 and BasicClient3 classes
+    with ids basicclient1, basicclient2, basicclient3.
+    """
+
+    def make_client_classes(base: type, amount: int = 3) -> list[type]:
+        types = []
+        for i in range(amount):
+            base_name = f"{base.__name__}{i + 1}"
+            types.append(type(base_name, (base,), {"id": base_name.lower()}))
+
+        return types
+
+    return make_client_classes
+
+
+@pytest.fixture
 def basic_oas_yaml():
     """Fixture for a simple OAS file in YAML."""
     content = yaml.safe_load("""
