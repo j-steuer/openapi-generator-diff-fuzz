@@ -159,13 +159,11 @@ def test_faulty_client(api: tuple[Network, str]):
             _init_and_send(basic_client, api_path)
 
 
-def test_session_manager_setup(monkeypatch):
+def test_session_manager_setup():
     """Test setting up the session manager without db."""
 
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     classes = make_client_classes(BasicClient)
 
@@ -234,12 +232,10 @@ def test_session_manager_setup(monkeypatch):
         assert len(results) == 3
 
 
-def test_session_manager_faulty(monkeypatch):
+def test_session_manager_faulty():
     """Test setting up session manager with faulty client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     make_client_classes(BasicClient, amount=2)
 
@@ -274,12 +270,10 @@ def test_session_manager_faulty(monkeypatch):
         assert any("Faulty" in repr(r) for r in results), results
 
 
-def test_diff_eval(monkeypatch):
+def test_diff_eval():
     """Test capturing and evaluating a result."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     make_client_classes(BasicClient)
 
@@ -311,12 +305,10 @@ def test_diff_eval(monkeypatch):
         assert len(os.listdir(LOG_PATH)) == 0
 
 
-def test_mitmproxy_result_dir(monkeypatch):
+def test_mitmproxy_result_dir():
     """Test obtaining a result from mitmproxy."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     make_client_classes(BasicClient)
 
@@ -339,14 +331,12 @@ def test_mitmproxy_result_dir(monkeypatch):
         Response.from_json(result_file)
 
 
-def test_loop_same_library(monkeypatch):
+def test_loop_same_library():
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
     make_client_classes(BasicClient)
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
@@ -354,14 +344,12 @@ def test_loop_same_library(monkeypatch):
     assert len(os.listdir(LOG_PATH)) == 0
 
 
-def test_loop_faulty_library(monkeypatch):
+def test_loop_faulty_library():
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
     make_client_classes(BasicClient, amount=2)
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", CLIENT_PATH)
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
@@ -371,12 +359,10 @@ def test_loop_faulty_library(monkeypatch):
     assert all("basicfaultyclient" in f for f in os.listdir(LOG_PATH))
 
 
-def test_send_petshop(monkeypatch):
+def test_send_petshop():
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -403,12 +389,10 @@ def test_send_petshop(monkeypatch):
         assert len(results) == 3
 
 
-def test_resolve_path_params(monkeypatch):
+def test_resolve_path_params():
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -456,13 +440,11 @@ def test_resolve_path_params(monkeypatch):
         assert len(result) == 3
 
 
-def test_non_json_body(monkeypatch):
+def test_non_json_body():
     """Test sending a non-json body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -490,13 +472,11 @@ def test_non_json_body(monkeypatch):
         assert len(result) == 3
 
 
-def test_json_body_array(monkeypatch):
+def test_json_body_array():
     """Test sending an array as json body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -555,13 +535,11 @@ def test_json_body_array(monkeypatch):
             assert r.response.status == 200
 
 
-def test_query_and_body(monkeypatch):
+def test_query_and_body():
     """Test request with path variables and body."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -589,13 +567,11 @@ def test_query_and_body(monkeypatch):
         assert len(result) == 3
 
 
-def test_parse_invalid_python_json(monkeypatch):
+def test_parse_invalid_python_json():
     """Test parsing a JSON body not parseable through literal_eval."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
     Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    monkeypatch.setattr("telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients")
 
     make_client_classes(OpenAPIGenPythonCLC)
 
@@ -648,7 +624,7 @@ def test_parse_invalid_python_json(monkeypatch):
     "client_class",
     [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC],
 )
-def test_loop_petshop(monkeypatch, client_class: type):
+def test_loop_petshop(client_class: type):
     """Tets the fuzzing loop with the petshop API and six identical clients."""
 
     classes = make_client_classes(client_class)
@@ -669,10 +645,6 @@ def test_loop_petshop(monkeypatch, client_class: type):
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
         Config.CLIENT_CONFIG_PATH = Path(client_config.name)
-
-        monkeypatch.setattr(
-            "telephuzz.session.session.CLIENT_PATH", TESTFILES / "clients"
-        )
 
         fuzzer = TelePhuzz()
         fuzzer.start_fuzzing_session()
