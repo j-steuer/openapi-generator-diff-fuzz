@@ -1,7 +1,9 @@
 """Tests for client libraries."""
 
 import json
+import re
 import tomllib
+from copy import deepcopy
 from pathlib import Path
 from typing import cast
 
@@ -63,6 +65,7 @@ def _test_send_request(
     api_path: str,
     expected_response: str | None = None,
     exclude_str: list[str] | None = None,
+    expected_status: int | None = None,
 ):
     """Test sending the request."""
     assert clc.container is not None
@@ -70,12 +73,24 @@ def _test_send_request(
     network.connect(clc.container)
 
     response = clc.send(InvocationData(request), api_path=api_path)
+    network.reload()
     assert isinstance(response, str)
     if expected_response is not None:
         assert expected_response in response
     if exclude_str:
         for string in exclude_str:
             assert string not in response
+    if expected_status:
+        # obtain status from mitmproxy logs
+        network.reload()
+        mitmproxy = [
+            c
+            for c in network.containers
+            if c.image is not None and "mitmproxy" in c.image.tags[0]
+        ][0]
+        logs = mitmproxy.logs().decode()
+        latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
+        assert f"<< {expected_status}" == latest_status
 
     network.disconnect(clc.container)
 
@@ -300,3 +315,60 @@ def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
         )
 
         _test_send_request(clc, request, network, api_path, "-5008", ["Traceback"])
+
+
+@pytest.mark.parametrize(
+    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_json_body_array(clc_class, api_wfd: tuple[Network, str]):
+    """Test request with path variables and body."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request_empty = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "rD5pQN",
+                    "Content-Type": "application/json",
+                    "Content-Length": "2",
+                }
+            ),
+            body="[]",
+            method=HTTPMethod.POST,
+            path="/user/createWithList",
+            query_parameters={},
+        )
+
+        request_two = deepcopy(request_empty)
+        request_two.body = json.dumps(
+            [
+                {
+                    "id": 10,
+                    "username": "theUser",
+                    "firstName": "John",
+                    "lastName": "James",
+                    "email": "john@email.com",
+                    "password": "12345",
+                    "phone": "12345",
+                    "userStatus": 1,
+                }
+            ]
+        )
+
+        _test_send_request(
+            clc,
+            request_empty,
+            network,
+            api_path,
+            "No User provided",
+            expected_status=400,
+        )
+        _test_send_request(clc, request_two, network, api_path, expected_status=200)

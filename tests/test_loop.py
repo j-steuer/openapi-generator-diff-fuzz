@@ -5,7 +5,6 @@ import os
 import shutil
 import tempfile
 import textwrap
-from copy import deepcopy
 from json import JSONDecodeError
 from pathlib import Path
 from time import sleep
@@ -372,70 +371,6 @@ def test_send_petshop(client_generator):
     with SessionManager() as session_manager:
         results = session_manager.send(request)
         assert len(results) == 3
-
-
-def test_json_body_array(client_generator):
-    """Test sending an array as json body."""
-
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    client_generator(OpenAPIGenPythonCLC)
-
-    request_empty = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "rD5pQN",
-                "Content-Type": "application/json",
-                "Content-Length": "2",
-            }
-        ),
-        body="[]",
-        method=HTTPMethod.POST,
-        path="/user/createWithList",
-        query_parameters={},
-    )
-
-    request_two = deepcopy(request_empty)
-    request_two.body = json.dumps(
-        [
-            {
-                "id": 10,
-                "username": "theUser",
-                "firstName": "John",
-                "lastName": "James",
-                "email": "john@email.com",
-                "password": "12345",
-                "phone": "12345",
-                "userStatus": 1,
-            },
-            {
-                "id": 11,
-                "username": "theUser2",
-                "firstName": "John",
-                "lastName": "James",
-                "email": "john2@email.com",
-                "password": "12345",
-                "phone": "12345",
-                "userStatus": 1,
-            },
-        ]
-    )
-
-    with SessionManager() as session_manager:
-        result = session_manager.send(request_empty)
-        assert len(result) == 3
-
-        result = session_manager.send(request_two)
-        assert len(result) == 3
-        for r in result:
-            print("DEBUG: ", result)
-            assert r.response.status == 200
 
 
 @pytest.mark.parametrize(

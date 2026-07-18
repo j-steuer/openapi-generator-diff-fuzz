@@ -591,12 +591,11 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
 
                 json_body = invocation.json_body
                 if isinstance(json_body, list):
-                    # create list of objects
                     model_list = [
-                        f"{model_name.capitalize()}.from_dict({json_body})"
+                        f"{model_name.capitalize()}.from_dict({body})"
                         for body in json_body
                     ]
-                    body_kwargs = "[" + ", ".join(model_list) + "]"
+                    body_kwargs = "body=[" + ", ".join(model_list) + "]"
                 elif isinstance(json_body, dict):
                     from_json = f"{model_name.capitalize()}.from_dict({json_body})"
                     body_kwargs = f"body={from_json}"
