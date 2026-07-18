@@ -62,6 +62,7 @@ def _test_send_request(
     network: Network,
     api_path: str,
     expected_response: str | None = None,
+    exclude_str: list[str] | None = None,
 ):
     """Test sending the request."""
     assert clc.container is not None
@@ -72,6 +73,9 @@ def _test_send_request(
     assert isinstance(response, str)
     if expected_response is not None:
         assert expected_response in response
+    if exclude_str:
+        for string in exclude_str:
+            assert string not in response
 
     network.disconnect(clc.container)
 
@@ -246,7 +250,9 @@ def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
         _test_send_request(clc, request, network, api_path, "User not found")
 
 
-@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize(
+    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+)
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
     """Test parsing a JSON body not parseable through literal_eval."""
@@ -293,4 +299,4 @@ def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
             query_parameters={},
         )
 
-        _test_send_request(clc, request, network, api_path, "-5008")
+        _test_send_request(clc, request, network, api_path, "-5008", ["Traceback"])
