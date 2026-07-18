@@ -554,16 +554,29 @@ class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
         return method_name[:-8] + method_name[-8:]
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        # obtain main module name (should be only directory)
+        if not hasattr(self, "module_name"):
+            dir_name = self.id.replace(":", "_")
+            first_dir = next(d for d in CLIENT_PATH.iterdir() if dir_name in d.name)
+            second_dir = next(
+                d
+                for d in first_dir.iterdir()
+                if d.is_dir() and not d.name.startswith(".")
+            )
+            self.module_name = second_dir.name
+
         method_name = self._get_method_name(invocation)
         kwargs = ", ".join(
             f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
         )
 
+        api = _get_main_path(invocation.path).lower()
+
         content = textwrap.dedent(f"""
         from pprint import pprint
 
-        from fast_api_client import Client
-        from fast_api_client.api.default import {method_name}
+        from {self.module_name} import Client
+        from {self.module_name}.api.{api} import {method_name}
 
         client = Client("{api_path}")
 

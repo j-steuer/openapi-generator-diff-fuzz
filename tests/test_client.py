@@ -125,19 +125,15 @@ def test_version_overwrite() -> None:
         assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
 
 
-@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize(
+    "clc_class",
+    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenapiPythonGeneratorCLC],
+)
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-def test_client_basic_petshop(
-    clc_class, api_wfd: tuple[Network, str], monkeypatch
-) -> None:
+def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
     """Test that client library works with one of the default test targets."""
-    config = get_config()
 
-    with open("tests/testfiles/processed_petshop.json", "r") as f:
-        spec = json.load(f)
-
-    monkeypatch.setattr(config, "spec", spec)
-    monkeypatch.setattr(config, "spec_str", json.dumps(spec))
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
     network, api_path = api_wfd
     with clc_class() as clc:
