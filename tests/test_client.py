@@ -27,7 +27,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenGoCLC,
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
-    OpenapiPythonGeneratorCLC,
+    OpenAPIPythonClientCLC,
     OperationIdBasedCLC,
     OrvalCLC,
     SwaggerCodegenCsharpCLC,
@@ -50,7 +50,7 @@ CLIENT_CASES_NO_AUTH = [
     NswagTypeScriptCLC,
     OrvalCLC,
     SwaggerTsAPICLC,
-    OpenapiPythonGeneratorCLC,
+    OpenAPIPythonClientCLC,
     KiotaCSharpCLC,
     KiotaPythonCLC,
 ]
@@ -116,7 +116,7 @@ def test_get_method_name_opid_mixin(monkeypatch):
 def test_version_overwrite() -> None:
     """Spec version should be overwritten for clients that use it for generation."""
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    with OpenapiPythonGeneratorCLC() as _:
+    with OpenAPIPythonClientCLC() as _:
         clients_dir = BASE_PATH / "clients"
         client_dir = next(d for d in clients_dir.iterdir() if d.is_dir())
         with open(client_dir / "pyproject.toml", "rb") as f:
@@ -127,7 +127,7 @@ def test_version_overwrite() -> None:
 
 @pytest.mark.parametrize(
     "clc_class",
-    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenapiPythonGeneratorCLC],
+    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
@@ -162,7 +162,10 @@ def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
         assert "User not found" in response
 
 
-@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize(
+    "clc_class",
+    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC],
+)
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_resolve_path_params(clc_class, api_wfd: tuple[Network, str]):
 

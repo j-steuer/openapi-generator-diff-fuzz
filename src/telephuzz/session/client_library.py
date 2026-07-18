@@ -542,11 +542,11 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
         return content
 
 
-class OpenapiPythonGeneratorCLC(PythonCLC, OperationIdBasedCLC):
-    """Client library class for openapi-python-generator."""
+class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
+    """Client library class for openapi-python-client."""
 
-    id = "openapi-python-generator:python"
-    generator_script = "openapi-python-generator.sh"
+    id = "openapi-python-client:python"
+    generator_script = "openapi-python-client.sh"
 
     def _get_method_name(self, invocation: InvocationData):
         # the hash is seperated
