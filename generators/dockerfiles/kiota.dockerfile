@@ -1,15 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 
-# Install Kiota CLI as a global .NET tool
-RUN dotnet tool install --global Microsoft.OpenApi.Kiota
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH="${PATH}:/opt/dotnet-tools"
 
-# Add .NET global tools to PATH
-ENV PATH="${PATH}:/root/.dotnet/tools"
+RUN dotnet tool install \
+    --tool-path /opt/dotnet-tools \
+    Microsoft.OpenApi.Kiota
 
-# Verify installation
 RUN kiota --version
 
-# Default shell
 WORKDIR /workspace
 
 ENTRYPOINT ["kiota"]

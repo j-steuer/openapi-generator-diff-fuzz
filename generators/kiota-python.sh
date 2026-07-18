@@ -6,7 +6,7 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-OUTPUT_PATH="$(realpath "$1")"
+OUTPUT_PATH="$1"
 PROJECT_ROOT="$(pwd)"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,15 +18,18 @@ docker build \
 
 echo "Kiota: Generating python"
 
+mkdir -p "$OUTPUT_PATH"
+
 docker run --rm \
   --user "$(id -u):$(id -g)" \
-  -v "$PROJECT_ROOT:/local" \
-  -v "$OUTPUT_PATH:/local/output" \
+  -v "$PROJECT_ROOT:$PROJECT_ROOT" \
+  -v "$OUTPUT_PATH:$OUTPUT_PATH" \
+  -w "$PROJECT_ROOT" \
   telephuzz:kiota \
   generate \
   --language python \
-  --openapi /local/spec/openapi.json \
-  --output /local/output/my_kiota_client \
+  --openapi "$PROJECT_ROOT/spec/openapi.json" \
+  --output "$OUTPUT_PATH/my_kiota_client" \
   -c PostsClient \
   -n client \
   --clean-output
