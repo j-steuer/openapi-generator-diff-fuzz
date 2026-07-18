@@ -1,6 +1,7 @@
 """Tests for client libraries."""
 
 import json
+import tomllib
 from pathlib import Path
 from typing import cast
 
@@ -11,6 +12,7 @@ from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import Config, get_config
+from telephuzz.constants import BASE_PATH
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
 from telephuzz.operation_ids import generate_operation_id
@@ -109,6 +111,18 @@ def test_get_method_name_opid_mixin(monkeypatch):
     assert mixin._get_method_name(InvocationData(request)) == generate_operation_id(
         HTTPMethod.DELETE.value, "/user/{username}"
     )
+
+
+def test_version_overwrite() -> None:
+    """Spec version should be overwritten for clients that use it for generation."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    with OpenapiPythonGeneratorCLC() as _:
+        clients_dir = BASE_PATH / "clients"
+        client_dir = next(d for d in clients_dir.iterdir() if d.is_dir())
+        with open(client_dir / "pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+
+        assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
 
 
 @pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])

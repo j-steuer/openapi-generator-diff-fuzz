@@ -10,6 +10,7 @@ import yaml  # type: ignore
 
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
+    DEFAULT_VERSION,
     UNSUPPORTED_MEDIA_TYPES,
     _find_all,
     extract_path_parameters,
@@ -40,10 +41,6 @@ class TestPreprocessing:
 
         operation_ids = _find_all(preprocessed_content, OPERATION_ID)
         assert len(operation_ids) == 19
-
-        from pprint import pprint
-
-        pprint(preprocessed_content)
 
         assert isinstance(preprocessed_content, dict)
         count = 0
@@ -99,6 +96,12 @@ class TestPreprocessing:
 
                 for media_type in UNSUPPORTED_MEDIA_TYPES:
                     assert media_type not in content
+
+    def test_default_version(self):
+        """Version should be fixed regardless of spec."""
+        processed_spec = preprocess_oas(Path("tests/testfiles/processed_petshop.json"))
+        assert processed_spec is not None
+        assert processed_spec["info"]["version"] == DEFAULT_VERSION
 
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):

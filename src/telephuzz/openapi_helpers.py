@@ -11,6 +11,7 @@ import yaml  # type: ignore
 from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
+DEFAULT_VERSION = "0.0.0"
 UNSUPPORTED_MEDIA_TYPES = {"application/xml", "application/x-www-form-urlencoded"}
 
 
@@ -31,6 +32,13 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
 
     assert isinstance(spec, dict), "OpenAPI spec was not loaded as a dict"
     spec = cast(dict[str, dict], spec)
+
+    # set version to simple constant to avoid format issues if used by a generator
+    info = spec.get("info")
+    if info is not None:
+        if "version" in info:
+            info["version"] = DEFAULT_VERSION
+
     for path, methods in spec.get("paths", {}).items():
         assert isinstance(methods, dict), "Methods were not loaded as a dict"
         methods = cast(dict[str, dict], methods)
