@@ -213,7 +213,9 @@ def test_resolve_path_params(clc_class, api_wfd: tuple[Network, str]):
         _test_send_request(clc, request_str, network, api_path, "User not found")
 
 
-@pytest.mark.parametrize("clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC])
+@pytest.mark.parametrize(
+    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+)
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
     """Test request with path variables and body."""

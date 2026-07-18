@@ -424,6 +424,24 @@ def _get_main_path(path: str) -> str:
             return path[1:]
 
 
+def _get_model_name(invocation: InvocationData) -> str:
+    """Obtain the name of a model.
+
+    For instance, in the petshop API for OpenAPI Generator Python,
+    refs usually result in objects: User, Pet, etc.
+    This method resolves the names of these objects based on the
+    queried endpoint and the OpenAPI spec.
+    """
+    model_name: str | None = ""
+    if invocation.body and invocation.content_type == "application/json":
+        model_name = get_args(get_config().spec_str, invocation.method, invocation.path)
+    assert model_name is not None, (
+        f"Obtaining args failed for {invocation.method} "
+        f"{invocation.path} with body {invocation.body}"
+    )
+    return model_name
+
+
 class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     """Concrete client library for OpenAPI Generator Python."""
 
@@ -440,13 +458,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         if invocation.body:
             if invocation.content_type == "application/json":
-                model_name = get_args(
-                    get_config().spec_str, invocation.method, invocation.path
-                )
-                assert model_name is not None, (
-                    f"Obtaining args failed for {invocation.method} "
-                    f"{invocation.path} with body {invocation.body}"
-                )
+                model_name = _get_model_name(invocation)
                 model_name_str = f"from openapi_client.models.{model_name.lower()} "
                 model_name_str += f"import {model_name.capitalize()}"
 
@@ -570,6 +582,35 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
             f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
         )
 
+        model_name_str = ""
+        if invocation.body:
+            if invocation.content_type == "application/json":
+                model_name = _get_model_name(invocation)
+                model_name_str = f"from {self.module_name}.models.{model_name.lower()} "
+                model_name_str += f"import {model_name.capitalize()}"
+
+                json_body = invocation.json_body
+                if isinstance(json_body, list):
+                    # create list of objects
+                    model_list = [
+                        f"{model_name.capitalize()}.from_dict({body})"
+                        for body in json_body
+                    ]
+                    body_kwargs = "[" + ", ".join(model_list) + "]"
+                elif isinstance(json_body, dict):
+                    body = json.dumps(json_body)
+                    from_json = f"{model_name.capitalize()}.from_dict({body})"
+                    body_kwargs = f"body={from_json}"
+                else:
+                    raise NotImplementedError(
+                        f"Unhandled body type {type(json_body)}: {invocation.body}"
+                    )
+            else:
+                raw_body: str = invocation.body
+                body_kwargs = f"body={raw_body.encode()!r}"
+
+            kwargs += f"{', ' if invocation.query_parameters else ''}{body_kwargs}"
+
         api = _get_main_path(invocation.path).lower()
 
         content = textwrap.dedent(f"""
@@ -577,6 +618,8 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
 
         from {self.module_name} import Client
         from {self.module_name}.api.{api} import {method_name}
+        {model_name_str}
+
 
         client = Client("{api_path}")
 
