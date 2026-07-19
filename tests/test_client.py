@@ -236,7 +236,13 @@ def test_resolve_path_params(clc_class, api_wfd: tuple[Network, str]):
 
 
 @pytest.mark.parametrize(
-    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
@@ -265,7 +271,7 @@ def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
             query_parameters={},
         )
 
-        _test_send_request(clc, request, network, api_path, "User not found")
+        _test_send_request(clc, request, network, api_path, expected_status=404)
 
 
 @pytest.mark.parametrize(

@@ -661,6 +661,32 @@ class KiotaPythonCLC(PythonCLC):
             invocation.path, *extract_paths(get_config().spec_str)
         ).split("/")
 
+        if invocation.body:
+            if invocation.content_type == "application/json":
+                model_name = _get_model_name(invocation)
+                model_name_str = f"from my_kiota_client.models.{model_name.lower()} "
+                model_name_str += f"import {model_name.capitalize()}"
+
+                json_body = invocation.json_body
+                if isinstance(json_body, list):
+                    model_list = [
+                        f"{model_name.capitalize()}({body})" for body in json_body
+                    ]
+                    body_kwargs = "body=[" + ", ".join(model_list) + "]"
+                elif isinstance(json_body, dict):
+                    from_json = f"{model_name.capitalize()}({json_body})"
+                    body_kwargs = f"body={from_json}"
+                else:
+                    raise NotImplementedError(
+                        f"Unhandled body type {type(json_body)}: {invocation.body}"
+                    )
+            else:
+                raw_body: str = invocation.body
+                body_kwargs = f"body={raw_body.encode()!r}"
+        else:
+            model_name_str = ""
+            body_kwargs = ""
+
         query_parameters = invocation.query_parameters_without_path_vars
         if query_parameters:
             path_components = list(
@@ -688,6 +714,8 @@ class KiotaPythonCLC(PythonCLC):
         aauth = "kiota_abstractions.authentication.anonymous_authentication_provider"
         method_name = self._get_method_name(invocation)
 
+        kwargs = ",".join(list(filter(None, [body_kwargs, request_config])))
+
         content = textwrap.dedent(f"""
         import asyncio
 
@@ -699,6 +727,7 @@ class KiotaPythonCLC(PythonCLC):
         from kiota_abstractions.base_request_configuration import RequestConfiguration
 
         from my_kiota_client.posts_client import PostsClient
+        {model_name_str}
         {import_query}
 
         async def main():
@@ -709,7 +738,7 @@ class KiotaPythonCLC(PythonCLC):
 
             client = PostsClient(adapter)
 
-            response = await client.{method_name}({request_config})
+            response = await client.{method_name}({kwargs})
 
             print(response.decode())
 
