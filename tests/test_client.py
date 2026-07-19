@@ -5,11 +5,9 @@ import re
 import tomllib
 from copy import deepcopy
 from pathlib import Path
-from typing import cast
 
 import pytest
 from conftest import TEST_CONFIG_BASE_PATH
-from docker.models.containers import Container
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
@@ -146,7 +144,12 @@ def test_version_overwrite() -> None:
 
 @pytest.mark.parametrize(
     "clc_class",
-    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC],
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
@@ -156,9 +159,6 @@ def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
 
     network, api_path = api_wfd
     with clc_class() as clc:
-        clc = cast(ClientLibraryContainer, clc)
-        network.connect(cast(Container, clc.container))
-
         request = Request(
             headers=CaseInsensitiveDict(
                 {
@@ -176,9 +176,7 @@ def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
             query_parameters={},
         )
 
-        response = clc.send(InvocationData(request), api_path=api_path)
-        assert isinstance(response, str)
-        assert "User not found" in response
+        _test_send_request(clc, request, network, api_path, expected_status=404)
 
 
 @pytest.mark.parametrize(

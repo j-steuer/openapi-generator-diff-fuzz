@@ -26,7 +26,7 @@ from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import get_args
+from telephuzz.openapi_helpers import extract_paths, get_args, resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -637,17 +637,54 @@ class KiotaPythonCLC(PythonCLC):
     generator_script = "kiota-python.sh"
 
     def _get_method_name(self, invocation: InvocationData):
-        client_method = f"{invocation.path.strip('/').replace('/', '.')}"
-        client_method += f".{invocation.method.value.lower()}"
-        return client_method
+        path_components = resolve_path(
+            invocation.path, *extract_paths(get_config().spec_str)
+        ).split("/")
+        path_components = list(filter(None, path_components))
+        for idx, path_component in enumerate(path_components):
+            if path_component.startswith("{"):
+                component_name = path_component[1:][:-1]
+                value = invocation.query_parameters[component_name]
+                if isinstance(value, str):
+                    value = f'"""{value}"""'
+                path_components[idx] = f"by_{component_name}({value})"
+
+        path_components.append(f"{invocation.method.value.lower()}")
+
+        return ".".join(path_components)
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        request_builder = "".join(
-            part.capitalize() for part in invocation.path.split("/") if part
-        )
-        request_builder += "RequestBuilder"
+
+        path_components = resolve_path(
+            invocation.path, *extract_paths(get_config().spec_str)
+        ).split("/")
+
+        query_parameters = invocation.query_parameters_without_path_vars
+        if query_parameters:
+            path_components = list(
+                filter(lambda x: x and "{" not in x, path_components)
+            )
+            request_builder_module = (
+                f"{'.'.join(path_components)}.{path_components[-1]}_request_builder"
+            )
+            request_builder = f"{path_components[0].capitalize()}RequestBuilder"
+            import_query = (
+                f"from my_kiota_client.{request_builder_module} "
+                f"import {request_builder}"
+            )
+            query_params = f"""{request_builder}.{request_builder}GetQueryParameters(
+                name="Alice",
+                age=30,
+            )"""
+            request_config = f"""request_config = RequestConfiguration(
+                query_parameters={query_params}
+            )"""
+        else:
+            import_query = ""
+            request_config = ""
 
         aauth = "kiota_abstractions.authentication.anonymous_authentication_provider"
+        method_name = self._get_method_name(invocation)
 
         content = textwrap.dedent(f"""
         import asyncio
@@ -660,10 +697,7 @@ class KiotaPythonCLC(PythonCLC):
         from kiota_abstractions.base_request_configuration import RequestConfiguration
 
         from my_kiota_client.posts_client import PostsClient
-        from my_kiota_client.greet.greet_request_builder import (
-            {request_builder},
-        )
-
+        {import_query}
 
         async def main():
             auth_provider = AnonymousAuthenticationProvider()
@@ -673,16 +707,7 @@ class KiotaPythonCLC(PythonCLC):
 
             client = PostsClient(adapter)
 
-            query_params = {request_builder}.{request_builder}GetQueryParameters(
-                name="Alice",
-                age=30,
-            )
-
-            request_config = RequestConfiguration(
-                query_parameters=query_params
-            )
-
-            response = await client.{self._get_method_name(invocation)}(request_config)
+            response = await client.{method_name}({request_config})
 
             print(response.decode())
 

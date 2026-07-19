@@ -23,6 +23,7 @@ class InvocationData:
     def __init__(self, request: Request):
         self.method = request.method
         self.operation_id = self._get_operation_id(request)
+        self.query_parameters_without_path_vars = dict(request.query_parameters)
         self.query_parameters = self._get_query_parameters(request)
         self.body = request.body
         self.json_body = None
