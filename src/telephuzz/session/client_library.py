@@ -643,7 +643,9 @@ class KiotaPythonCLC(PythonCLC):
         path_components = list(filter(None, path_components))
         for idx, path_component in enumerate(path_components):
             if path_component.startswith("{"):
-                component_name = path_component[1:][:-1]
+                component_name = transform_case(
+                    path_component[1:][:-1], self.method_case
+                )
                 value = invocation.query_parameters[component_name]
                 if isinstance(value, str):
                     value = f'"""{value}"""'
