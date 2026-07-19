@@ -324,7 +324,13 @@ def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
 
 
 @pytest.mark.parametrize(
-    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_json_body_array(clc_class, api_wfd: tuple[Network, str]):
@@ -374,7 +380,45 @@ def test_json_body_array(clc_class, api_wfd: tuple[Network, str]):
             request_empty,
             network,
             api_path,
-            "No User provided",
             expected_status=400,
         )
         _test_send_request(clc, request_two, network, api_path, expected_status=200)
+
+
+@pytest.mark.parametrize(
+    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_p(clc_class, api_wfd: tuple[Network, str]):
+    """Test request with path variables and body."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "PMGCFW",
+                    "Content-Type": "application/octet-stream",
+                    "Content-Length": "6",
+                }
+            ),
+            body="üý»©TÎ",
+            method=HTTPMethod.POST,
+            path="/pet/-1714/uploadImage",
+            query_parameters={"petId": -1714},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=400,
+        )

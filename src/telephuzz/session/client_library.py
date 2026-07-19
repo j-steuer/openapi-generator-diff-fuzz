@@ -15,7 +15,7 @@ from _hashlib import HASH
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import docker
 from docker.errors import ImageNotFound
@@ -649,13 +649,30 @@ class KiotaPythonCLC(PythonCLC):
                 value = invocation.query_parameters[component_name]
                 if isinstance(value, str):
                     value = f'"""{value}"""'
-                path_components[idx] = f"by_{component_name}({value})"
+                path_components[idx] = (
+                    f"by_{transform_case(component_name, self.method_case)}({value})"
+                )
+            else:
+                path_components[idx] = transform_case(path_component, self.method_case)
 
         path_components.append(f"{invocation.method.value.lower()}")
 
         return ".".join(path_components)
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+
+        def _parse_model(json_body: Any) -> str:
+            """Parse the model for a single json_body."""
+            parse_json_body: dict | str = json_body
+            if not isinstance(parse_json_body, str):
+                parse_json_body = json.dumps(parse_json_body)
+            parse_node = f"""JsonParseNodeFactory().get_root_parse_node(
+            "application/json",
+            {repr(parse_json_body)}.encode()
+            )"""
+            from_json = f"{parse_node}.get_object_value({model_name.capitalize()})"
+
+            return from_json
 
         path_components = resolve_path(
             invocation.path, *extract_paths(get_config().spec_str)
@@ -669,22 +686,10 @@ class KiotaPythonCLC(PythonCLC):
 
                 json_body = invocation.json_body
                 if isinstance(json_body, list):
-                    model_list = [
-                        f"{model_name.capitalize()}({body})" for body in json_body
-                    ]
+                    model_list = [_parse_model(body) for body in json_body]
                     body_kwargs = "body=[" + ", ".join(model_list) + "]"
                 elif isinstance(json_body, dict):
-                    parse_json_body: dict | str = json_body
-                    if not isinstance(parse_json_body, str):
-                        parse_json_body = json.dumps(parse_json_body)
-                    parse_node = f"""JsonParseNodeFactory().get_root_parse_node(
-                    "application/json",
-                    {repr(parse_json_body)}.encode(),
-                    )"""
-                    from_json = (
-                        f"{parse_node}.get_object_value({model_name.capitalize()})"
-                    )
-                    body_kwargs = f"body={from_json}"
+                    body_kwargs = f"body={_parse_model(json_body)}"
                 else:
                     raise NotImplementedError(
                         f"Unhandled body type {type(json_body)}: {invocation.body}"
@@ -709,9 +714,10 @@ class KiotaPythonCLC(PythonCLC):
                 f"from my_kiota_client.{request_builder_module} "
                 f"import {request_builder}"
             )
+            _qp = invocation.query_parameters_without_path_vars.items()
+            _eq = [f"{transform_case(k, self.method_case)}={repr(v)}" for k, v in _qp]
             query_params = f"""{request_builder}.{request_builder}GetQueryParameters(
-                name="Alice",
-                age=30,
+                {",".join(_eq)}
             )"""
             request_config = f"""request_config = RequestConfiguration(
                 query_parameters={query_params}
