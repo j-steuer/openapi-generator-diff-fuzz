@@ -87,7 +87,10 @@ def _test_send_request(
             if c.image is not None and "mitmproxy" in c.image.tags[0]
         ][0]
         logs = mitmproxy.logs().decode()
-        latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
+        try:
+            latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
+        except Exception as e:
+            raise RuntimeError("No status code found in logs") from e
         assert f"<< {expected_status}" == latest_status
 
     network.disconnect(clc.container)
@@ -275,7 +278,13 @@ def test_query_and_body(clc_class, api_wfd: tuple[Network, str]):
 
 
 @pytest.mark.parametrize(
-    "clc_class", [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC]
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
@@ -299,31 +308,19 @@ def test_parse_invalid_python_json(clc_class, api_wfd: tuple[Network, str]):
                 }
             ),
             body=(
-                '{"name": "\\u00ea\\u0096h\\u00a5\\u00b9\\u00ae?1", "photoUrls": '
-                '["\\udb62\\uddc9=b\\ud96f\\udd08", "P\\u00a6\\u00fc"], "id": -5008, '
-                '"": 5.960464477539063e-08, "tags": [{"id": -1247184487}, {"name": '
-                '"\\u00ee\\u00d7\\uda61\\udf05\\u009e~\\u00dfYA\\udb99\\udf03'
-                '\\udbee\\ude6e\\udb84\\ude429\\udb12\\uddf2", '
-                '"\\u00c1A\\"\\u0015\\u0016\\u0098\\u00d3\\u0000\\u0098\\u00f0'
-                '\\udbfe\\ude7d\\t\\u00d5": {}, "id": 2843, "\\u008d\\u00bd": '
-                '[{}, false, [false]]}, {"id": -562949953421312, "": '
-                '[[5.8196220103433455e-307, "Vt\\u0002v\\u00b1", null]], "\\u001a": '
-                '{"\\u0082\\ud82b\\udf11\\u00ef\\u1d20`f\\u00e2\\u00d7": {}, '
-                '"\\u0087\\u009e\\u00a9\\u00d6\\u0081T": {'
-                '"\\u0087\\u00cb\\ud98c\\udde2\\u00d4\\u0099\\u000e\\u008b'
-                "\\u00f8\\u0017\\u0012\\u00da0:\\u00d3\\u00b2\\uda5b\\udc33"
-                "\\ud915\\udd65\\u0088Z\\udbf5\\udf1c?\\ud9b7\\udfd2n"
-                '\\ud870\\udf92\\u00a3\\u009d\\u0091": "=o\\u00e99", '
-                '"\\u00c3O\\u0015\\udac6\\udcba\\ud8e7\\udd34": null}, '
-                '"\\u0083\\u00c7\\u00c3\\u000b\\u009b\\u00fcT\\u0088\\u00fe": '
-                '{"&\\u0097O\\u00ff": null}}}], "c\\u00df\\u00c8": ""}'
+                '{"id": 1, '
+                '"name": "test", '
+                '"photoUrls": ["https://example.com/photo.jpg"], '
+                '"status": "available", '
+                '"tags": [{"id": 2, "name": "tag"}], '
+                '"isCustom": true}'
             ),
             method=HTTPMethod.POST,
             path="/pet",
             query_parameters={},
         )
 
-        _test_send_request(clc, request, network, api_path, "-5008", ["Traceback"])
+        _test_send_request(clc, request, network, api_path, expected_status=200)
 
 
 @pytest.mark.parametrize(

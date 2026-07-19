@@ -674,7 +674,16 @@ class KiotaPythonCLC(PythonCLC):
                     ]
                     body_kwargs = "body=[" + ", ".join(model_list) + "]"
                 elif isinstance(json_body, dict):
-                    from_json = f"{model_name.capitalize()}({json_body})"
+                    parse_json_body: dict | str = json_body
+                    if not isinstance(parse_json_body, str):
+                        parse_json_body = json.dumps(parse_json_body)
+                    parse_node = f"""JsonParseNodeFactory().get_root_parse_node(
+                    "application/json",
+                    {repr(parse_json_body)}.encode(),
+                    )"""
+                    from_json = (
+                        f"{parse_node}.get_object_value({model_name.capitalize()})"
+                    )
                     body_kwargs = f"body={from_json}"
                 else:
                     raise NotImplementedError(
@@ -716,6 +725,10 @@ class KiotaPythonCLC(PythonCLC):
 
         kwargs = ",".join(list(filter(None, [body_kwargs, request_config])))
 
+        node_factory_import = (
+            "from kiota_serialization_json.json_parse_node_factory"
+            " import JsonParseNodeFactory"
+        )
         content = textwrap.dedent(f"""
         import asyncio
 
@@ -725,7 +738,8 @@ class KiotaPythonCLC(PythonCLC):
 
         from kiota_http.httpx_request_adapter import HttpxRequestAdapter
         from kiota_abstractions.base_request_configuration import RequestConfiguration
-
+        {node_factory_import}
+        
         from my_kiota_client.posts_client import PostsClient
         {model_name_str}
         {import_query}
@@ -740,7 +754,7 @@ class KiotaPythonCLC(PythonCLC):
 
             response = await client.{method_name}({kwargs})
 
-            print(response.decode())
+            print(response)
 
 
         asyncio.run(main())
