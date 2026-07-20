@@ -434,7 +434,9 @@ def _get_model_name(invocation: InvocationData) -> str:
     """
     model_name: str | None = ""
     if invocation.body and invocation.content_type == "application/json":
-        model_name = get_args(get_config().spec_str, invocation.method, invocation.path)
+        model_name = get_args(
+            get_config().spec_str, invocation.method, invocation.path
+        )["requestBody"]
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
         f"{invocation.path} with body {invocation.body}"

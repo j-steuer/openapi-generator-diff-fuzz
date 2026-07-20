@@ -104,7 +104,7 @@ def find_operation(spec: dict, operation_id: str) -> dict | None:
 
 
 @cache
-def get_args(spec: str, method: HTTPMethod, path: str) -> str | None:
+def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
     """Obtain a list of arguments for the given operation id.
 
     Spec must be passed as string using json.dumps to enable caching.
@@ -114,19 +114,22 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> str | None:
     operation = find_operation(json.loads(spec), operation_id)
 
     if operation is None:
-        return None
+        raise ValueError(f"Operation at {method} {path} not found.")
 
     assert isinstance(operation, dict)
-    # get request body
+    args = dict()
     if "requestBody" in operation:
+        # get request body
         content = operation["requestBody"]["content"]
         _ref = set(_find_all(content, "$ref"))
         assert len(_ref) == 1
         ref = _ref.pop()
         assert isinstance(ref, str)
-        return ref[ref.rfind("/") + 1 :].capitalize()
+        args["requestBody"] = ref[ref.rfind("/") + 1 :].capitalize()
+    if "parameters" in operation:
+        args.update({p["name"]: p["schema"]["type"] for p in operation["parameters"]})
 
-    return None
+    return args
 
 
 def get_api_url_path(spec: dict) -> str:

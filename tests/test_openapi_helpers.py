@@ -121,16 +121,16 @@ def test_find_args():
         spec = json.dumps(json.load(f))
 
     # concrete path should resolve
-    arg = get_args(spec, HTTPMethod.POST, "/pet")
-    assert arg == "Pet"
+    args = get_args(spec, HTTPMethod.POST, "/pet")
+    assert args == {"requestBody": "Pet"}
 
     # non-concrete path should resolve
-    arg = get_args(spec, HTTPMethod.PUT, "/user/123")
-    assert arg == "User"
+    args = get_args(spec, HTTPMethod.PUT, "/user/123")
+    assert args == {"requestBody": "User", "username": "string"}
 
     # concrete path should not resolve to non-concrete path
-    arg = get_args(spec, HTTPMethod.GET, "/user/login")
-    assert arg is None
+    args = get_args(spec, HTTPMethod.GET, "/user/login")
+    assert args == {"username": "string", "password": "string"}
 
     # nonexistent path should raise error
     with pytest.raises(ValueError):
