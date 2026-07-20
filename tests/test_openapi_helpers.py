@@ -177,6 +177,15 @@ def test_resolve_invalid_path(basic_oas_json: _TemporaryFileWrapper):
         resolve_path("/item/&123%", basic_oas_json.read())
 
 
+def test_resolve_with_path_parameters():
+    """Test resolving the path ignores query parameters."""
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.dumps(json.load(f))
+
+    path = "/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6"
+    assert resolve_path(path, spec) == "/pet/findByTags"
+
+
 def test_resolve_request_id_concrete(basic_oas_json: _TemporaryFileWrapper):
     """Test resolving a request id with concrete path."""
     method = HTTPMethod.GET

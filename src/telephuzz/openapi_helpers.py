@@ -208,6 +208,8 @@ def resolve_path(path: str, spec_json: str) -> str:
     3. Raise error if no match
     """
 
+    path = _path_without_query(path)
+
     concrete_paths, non_concrete_paths = extract_paths(spec_json)
 
     # 1. Exact match
@@ -260,13 +262,17 @@ def _split(path: str) -> list[str]:
     return [p for p in path.strip("/").split("/") if p]
 
 
+def _path_without_query(path: str) -> str:
+    """Strip the query parameters from a path"""
+    if "?" in path:
+        return path[: path.find("?")]
+    return path
+
+
 def resolve_request_id(method: HTTPMethod, path: str, spec_str: str) -> str:
     operation_id = generate_operation_id(method.value, path)
 
-    if "?" in path:
-        path_only = path[: path.find("?")]
-    else:
-        path_only = path
+    path_only = _path_without_query(path)
 
     path = resolve_path(path_only, spec_str)
 
