@@ -428,3 +428,53 @@ def test_file_upload(clc_class, api_wfd: tuple[Network, str]):
             api_path,
             expected_status=404,
         )
+
+
+@pytest.mark.skip(reason="Fails for OpenAPI python client TODO fix")
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_surrogate_encoding(clc_class, api_wfd: tuple[Network, str]):
+    """Test encoding with surrogates."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "NkdOLM",
+                    "Content-Type": "application/json",
+                    "Content-Length": "150",
+                }
+            ),
+            body=(
+                '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
+                '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
+                '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336}'
+            ),
+            method=HTTPMethod.PUT,
+            path="/pet",
+            query_parameters={},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=404,
+        )
