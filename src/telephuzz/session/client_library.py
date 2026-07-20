@@ -603,8 +603,12 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
                     raise NotImplementedError(
                         f"Unhandled body type {type(json_body)}: {invocation.body}"
                     )
-            else:
+            elif invocation.content_type == "application/octet-stream":
                 raw_body: str = invocation.body
+                bytes_io = f"BytesIO({raw_body.encode()!r})"
+                body_kwargs = f"body=File({bytes_io})"
+            else:
+                raw_body = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"
 
             kwargs += f"{', ' if invocation.query_parameters else ''}{body_kwargs}"
@@ -612,10 +616,12 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         api = _get_main_path(invocation.path).lower()
 
         content = textwrap.dedent(f"""
+        from io import BytesIO
         from pprint import pprint
 
         from {self.module_name} import Client
         from {self.module_name}.api.{api} import {method_name}
+        from {self.module_name}.types import File
         {model_name_str}
 
 
