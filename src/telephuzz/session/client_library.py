@@ -734,7 +734,7 @@ class KiotaPythonCLC(PythonCLC):
             query_params = f"""{request_builder}.{request_builder}{_mth}QueryParameters(
                 {",".join(_eq)}
             )"""
-            request_config = f"""request_config = RequestConfiguration(
+            request_config = f"""request_configuration = RequestConfiguration(
                 query_parameters={query_params}
             )"""
         else:
