@@ -396,7 +396,7 @@ def test_json_body_array(clc_class, api_wfd: tuple[Network, str]):
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
 def test_file_upload(clc_class, api_wfd: tuple[Network, str]):
-    """Test request with path variables and body."""
+    """Test request with file upload."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 

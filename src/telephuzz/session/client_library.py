@@ -26,7 +26,7 @@ from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import extract_paths, get_args, resolve_path
+from telephuzz.openapi_helpers import get_args, resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -643,9 +643,9 @@ class KiotaPythonCLC(PythonCLC):
     generator_script = "kiota-python.sh"
 
     def _get_method_name(self, invocation: InvocationData):
-        path_components = resolve_path(
-            invocation.path, *extract_paths(get_config().spec_str)
-        ).split("/")
+        path_components = resolve_path(invocation.path, get_config().spec_str).split(
+            "/"
+        )
         path_components = list(filter(None, path_components))
         for idx, path_component in enumerate(path_components):
             if path_component.startswith("{"):
@@ -667,6 +667,8 @@ class KiotaPythonCLC(PythonCLC):
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
 
+        model_name_str = ""
+
         def _parse_model(json_body: Any) -> str:
             """Parse the model for a single json_body."""
             parse_json_body: dict | str = json_body
@@ -680,9 +682,9 @@ class KiotaPythonCLC(PythonCLC):
 
             return from_json
 
-        path_components = resolve_path(
-            invocation.path, *extract_paths(get_config().spec_str)
-        ).split("/")
+        path_components = resolve_path(invocation.path, get_config().spec_str).split(
+            "/"
+        )
 
         if invocation.body:
             if invocation.content_type == "application/json":
@@ -709,20 +711,25 @@ class KiotaPythonCLC(PythonCLC):
 
         query_parameters = invocation.query_parameters_without_path_vars
         if query_parameters:
-            path_components = list(
-                filter(lambda x: x and "{" not in x, path_components)
-            )
+            path_components = [
+                transform_case(c, self.method_case) if "{" not in c else "item"
+                for c in path_components
+                if c
+            ]
             request_builder_module = (
                 f"{'.'.join(path_components)}.{path_components[-1]}_request_builder"
             )
-            request_builder = f"{path_components[0].capitalize()}RequestBuilder"
+            request_builder = (
+                f"{transform_case(path_components[-1], Case.PASCAL)}RequestBuilder"
+            )
             import_query = (
                 f"from my_kiota_client.{request_builder_module} "
                 f"import {request_builder}"
             )
             _qp = invocation.query_parameters_without_path_vars.items()
             _eq = [f"{transform_case(k, self.method_case)}={repr(v)}" for k, v in _qp]
-            query_params = f"""{request_builder}.{request_builder}GetQueryParameters(
+            _mth = invocation.method.value.capitalize()
+            query_params = f"""{request_builder}.{request_builder}{_mth}QueryParameters(
                 {",".join(_eq)}
             )"""
             request_config = f"""request_config = RequestConfiguration(

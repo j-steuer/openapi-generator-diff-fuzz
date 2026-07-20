@@ -24,6 +24,7 @@ from telephuzz.invocation_data import InvocationData
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
     OpenAPIGenPythonCLC,
+    OpenAPIPythonClientCLC,
     OperationIdBasedCLC,
     PythonCLC,
     SwaggerCodegenPythonCLC,
@@ -375,7 +376,7 @@ def test_send_petshop(client_generator):
 
 @pytest.mark.parametrize(
     "client_class",
-    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC],
+    [OpenAPIGenPythonCLC, SwaggerCodegenPythonCLC, OpenAPIPythonClientCLC],
 )
 def test_loop_petshop(client_class: type, client_generator):
     """Tets the fuzzing loop with the petshop API and six identical clients."""

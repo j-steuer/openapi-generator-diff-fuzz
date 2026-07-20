@@ -163,34 +163,18 @@ def test_extract_paths(basic_oas_json: _TemporaryFileWrapper):
 
 def test_resolve_concrete_path(basic_oas_json: _TemporaryFileWrapper):
     """Test resolving a concrete path."""
-    concrete, non_concrete = extract_paths(basic_oas_json.read())
-
-    assert (
-        resolve_path("/items", concrete_paths=concrete, non_concrete_paths=non_concrete)
-        == "/items"
-    )
+    assert resolve_path("/items", basic_oas_json.read()) == "/items"
 
 
 def test_resolve_non_concrete_path(basic_oas_json: _TemporaryFileWrapper):
     """Test resolving a non-concrete path."""
-    concrete, non_concrete = extract_paths(basic_oas_json.read())
-
-    assert (
-        resolve_path(
-            "/items/&123%", concrete_paths=concrete, non_concrete_paths=non_concrete
-        )
-        == "/items/{id}"
-    )
+    assert resolve_path("/items/&123%", basic_oas_json.read()) == "/items/{id}"
 
 
 def test_resolve_invalid_path(basic_oas_json: _TemporaryFileWrapper):
     """Test resolving a path that does not exist."""
-    concrete, non_concrete = extract_paths(basic_oas_json.read())
-
     with pytest.raises(ValueError):
-        resolve_path(
-            "/item/&123%", concrete_paths=concrete, non_concrete_paths=non_concrete
-        )
+        resolve_path("/item/&123%", basic_oas_json.read())
 
 
 def test_resolve_request_id_concrete(basic_oas_json: _TemporaryFileWrapper):

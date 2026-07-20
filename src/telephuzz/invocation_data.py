@@ -9,7 +9,6 @@ from telephuzz.http_message import Request
 from telephuzz.openapi_helpers import (
     extract_path_parameters,
     extract_path_variable_types,
-    extract_paths,
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -23,8 +22,10 @@ class InvocationData:
     def __init__(self, request: Request):
         self.method = request.method
         self.operation_id = self._get_operation_id(request)
+
         self.query_parameters_without_path_vars = dict(request.query_parameters)
         self.query_parameters = self._get_query_parameters(request)
+
         self.body = request.body
         self.json_body = None
         self.path = request.path
@@ -57,6 +58,11 @@ class InvocationData:
         if "{" in path:
             _path_params = extract_path_parameters(path, path_only)
 
+            # remove path variables from pure query parameters if present
+            for path_param in _path_params.keys():
+                if path_param in self.query_parameters_without_path_vars:
+                    del self.query_parameters_without_path_vars[path_param]
+
             # cast integers
             path_parameter_types = extract_path_variable_types(
                 get_config().spec_str, path
@@ -74,9 +80,7 @@ class InvocationData:
     def _resolve_path(self, path: str) -> str:
         """Resolve the concrete path."""
         path = self._path_only(path)
-
-        concrete, non_concrete = extract_paths(json.dumps(get_config().spec))
-        return resolve_path(path, concrete, non_concrete)
+        return resolve_path(path, get_config().spec_str)
 
     def _path_only(self, path: str) -> str:
         """Return the path without query parameters."""

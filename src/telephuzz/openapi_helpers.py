@@ -191,15 +191,15 @@ def extract_path_variable_types(spec_json: str, path: str) -> dict[str, str]:
     raise KeyError(f"Path {path!r} not found")
 
 
-def resolve_path(
-    path: str, concrete_paths: set[str], non_concrete_paths: set[str]
-) -> str:
+def resolve_path(path: str, spec_json: str) -> str:
     """
     Resolve an incoming API path to:
     1. Exact match in concrete paths, or
     2. Best match among non-concrete paths, or
     3. Raise error if no match
     """
+
+    concrete_paths, non_concrete_paths = extract_paths(spec_json)
 
     # 1. Exact match
     if path in concrete_paths:
@@ -254,13 +254,12 @@ def _split(path: str) -> list[str]:
 def resolve_request_id(method: HTTPMethod, path: str, spec_str: str) -> str:
     operation_id = generate_operation_id(method.value, path)
 
-    concrete, non_concrete = extract_paths(spec_str)
     if "?" in path:
         path_only = path[: path.find("?")]
     else:
         path_only = path
 
-    path = resolve_path(path_only, concrete, non_concrete)
+    path = resolve_path(path_only, spec_str)
 
     operation_id = generate_operation_id(method.value, path)
     return operation_id
