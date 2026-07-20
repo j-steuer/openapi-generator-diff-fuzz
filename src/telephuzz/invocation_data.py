@@ -9,6 +9,7 @@ from telephuzz.http_message import Request
 from telephuzz.openapi_helpers import (
     extract_path_parameters,
     extract_path_variable_types,
+    get_args,
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -23,8 +24,12 @@ class InvocationData:
         self.method = request.method
         self.operation_id = self._get_operation_id(request)
 
-        self.query_parameters_without_path_vars = dict(request.query_parameters)
-        self.query_parameters = self._get_query_parameters(request)
+        self.query_parameters_without_path_vars = self._cast_parameters(
+            dict(request.query_parameters), request
+        )
+        self.query_parameters = self._cast_parameters(
+            self._get_query_parameters(request), request
+        )
 
         self.body = request.body
         self.json_body = None
@@ -42,6 +47,16 @@ class InvocationData:
     def __repr__(self) -> str:
         """Repr method."""
         return str(self.__dict__)
+
+    def _cast_parameters(self, query_parameters: dict, request: Request) -> dict:
+        """Cast query parameters to correct type."""
+        _params = dict(query_parameters)
+        args = get_args(get_config().spec_str, request.method, request.path)
+        for parameter, value in _params.items():
+            if args[parameter] == "array" and not isinstance(value, list):
+                _params[parameter] = [value]
+
+        return _params
 
     def _get_operation_id(self, request: Request) -> str:
         """Resolve the operation id."""

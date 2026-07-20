@@ -121,11 +121,17 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
     if "requestBody" in operation:
         # get request body
         content = operation["requestBody"]["content"]
-        _ref = set(_find_all(content, "$ref"))
-        assert len(_ref) == 1
-        ref = _ref.pop()
-        assert isinstance(ref, str)
-        args["requestBody"] = ref[ref.rfind("/") + 1 :].capitalize()
+        ref = set(_find_all(content, "$ref"))
+        if ref:
+            assert len(ref) == 1
+            ref = ref.pop()
+            assert isinstance(ref, str)
+            args["requestBody"] = ref[ref.rfind("/") + 1 :].capitalize()
+        else:
+            schemas = _find_all(content, "schema")
+            assert len(schemas) == 1
+            schema = schemas.pop()
+            args["requestBody"] = schema["type"]
     if "parameters" in operation:
         args.update({p["name"]: p["schema"]["type"] for p in operation["parameters"]})
 

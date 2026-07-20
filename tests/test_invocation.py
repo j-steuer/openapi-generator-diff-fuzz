@@ -34,3 +34,27 @@ def test_strip_path_variables():
 
     invocation = InvocationData(request)
     assert not invocation.query_parameters_without_path_vars
+
+
+def test_cast_strings_to_array():
+    """String parameters should be cast to array if type is array."""
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "W02CUe",
+            }
+        ),
+        body="",
+        method=HTTPMethod.GET,
+        path="/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6",
+        query_parameters={"tags": "\x80𨕳\U00048b13ö"},
+    )
+
+    invocation = InvocationData(request)
+    assert "tags" in invocation.query_parameters
+    assert invocation.query_parameters["tags"] == [request.query_parameters["tags"]]
