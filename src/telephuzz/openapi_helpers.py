@@ -108,6 +108,7 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
     """Obtain a list of arguments for the given operation id.
 
     Spec must be passed as string using json.dumps to enable caching.
+    Returns "enum" as type if spec defines an enum.
     """
     # search operation id
     operation_id = resolve_request_id(method, path, spec)
@@ -133,7 +134,12 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
             schema = schemas.pop()
             args["requestBody"] = schema["type"]
     if "parameters" in operation:
-        args.update({p["name"]: p["schema"]["type"] for p in operation["parameters"]})
+        args.update(
+            {
+                p["name"]: p["schema"]["type"] if "enum" not in p["schema"] else "enum"
+                for p in operation["parameters"]
+            }
+        )
 
     return args
 

@@ -132,6 +132,10 @@ def test_find_args():
     args = get_args(spec, HTTPMethod.GET, "/user/login")
     assert args == {"username": "string", "password": "string"}
 
+    # args that are enum should return enum as type
+    args = get_args(spec, HTTPMethod.GET, "/pet/findByStatus")
+    assert args == {"status": "enum"}
+
     # nonexistent path should raise error
     with pytest.raises(ValueError):
         get_args(spec, HTTPMethod.GET, "/nonexistent")
