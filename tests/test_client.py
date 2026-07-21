@@ -567,3 +567,47 @@ def test_empty_octet_body(clc_class, api_wfd: tuple[Network, str]):
             api_path,
             expected_status=400,
         )
+
+
+@pytest.mark.skip(reason="TODO fix enums for python client")
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_enum_query_parameter(clc_class, api_wfd: tuple[Network, str]):
+    """Test sending octet-stream with empty body."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "VzpLIV",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/pet/findByStatus?status=pending",
+            query_parameters={"status": "pending"},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=200,
+        )
