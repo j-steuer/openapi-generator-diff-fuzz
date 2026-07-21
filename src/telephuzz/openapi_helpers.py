@@ -104,13 +104,8 @@ def find_operation(spec: dict, operation_id: str) -> dict | None:
 
 
 @cache
-def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
-    """Obtain a list of arguments for the given operation id.
-
-    Spec must be passed as string using json.dumps to enable caching.
-    Returns "enum" as type if spec defines an enum.
-    """
-    # search operation id
+def _search_operation(spec: str, method: HTTPMethod, path: str) -> dict:
+    """Search operation in spec."""
     operation_id = resolve_request_id(method, path, spec)
     operation = find_operation(json.loads(spec), operation_id)
 
@@ -118,6 +113,19 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
         raise ValueError(f"Operation at {method} {path} not found.")
 
     assert isinstance(operation, dict)
+    return operation
+
+
+@cache
+def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
+    """Obtain a list of arguments for the given operation id.
+
+    Spec must be passed as string using json.dumps to enable caching.
+    Returns "enum" as type if spec defines an enum.
+    """
+    # search operation id
+    operation = _search_operation(spec, method, path)
+
     args = dict()
     if "requestBody" in operation:
         # get request body
@@ -142,6 +150,17 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
         )
 
     return args
+
+
+@cache
+def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
+    """Get content tpy eof operation if available"""
+    operation = _search_operation(spec, method, path)
+
+    if "requestBody" not in operation:
+        return None
+
+    return list(operation["requestBody"]["content"].keys())[0]
 
 
 def get_api_url_path(spec: dict) -> str:

@@ -10,6 +10,7 @@ from telephuzz.openapi_helpers import (
     extract_path_parameters,
     extract_path_variable_types,
     get_args,
+    get_content_type,
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -34,7 +35,14 @@ class InvocationData:
         self.body = request.body
         self.json_body = None
         self.path = request.path
+
         self.content_type = request.headers.get("Content-Type", None)
+        if self.content_type is None:
+            # infer content type from spec
+            self.content_type = get_content_type(
+                get_config().spec_str, request.method, request.path
+            )
+
         self.authorization = request.headers.get("Authorization", None)
 
         if self.content_type == JSON_CONTENT:

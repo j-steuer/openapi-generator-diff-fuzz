@@ -19,6 +19,7 @@ from telephuzz.openapi_helpers import (
     find_operation,
     get_api_url_path,
     get_args,
+    get_content_type,
     preprocess_oas,
     resolve_path,
     resolve_request_id,
@@ -139,6 +140,19 @@ def test_find_args():
     # nonexistent path should raise error
     with pytest.raises(ValueError):
         get_args(spec, HTTPMethod.GET, "/nonexistent")
+
+
+def test_get_content_type():
+    """Test obtaining the content type from the spec."""
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.dumps(json.load(f))
+
+    assert (
+        get_content_type(spec, HTTPMethod.POST, "/user/createWithList")
+        == "application/json"
+    )
+
+    assert get_content_type(spec, HTTPMethod.GET, "/user/login") is None
 
 
 def test_get_api_url_path_no_servers():
