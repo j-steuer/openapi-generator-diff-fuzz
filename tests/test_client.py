@@ -521,3 +521,49 @@ def test_single_explode_string(clc_class, api_wfd: tuple[Network, str]):
             api_path,
             expected_status=200,
         )
+
+
+@pytest.mark.skip(reason="Swagger issue, need to fix without breaking basic_petshoop")
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_empty_octet_body(clc_class, api_wfd: tuple[Network, str]):
+    """Test sending octet-stream with empty body."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "O4kobp",
+                    "Content-Type": "application/octet-stream",
+                    "Content-Length": "0",
+                }
+            ),
+            body="",
+            method=HTTPMethod.POST,
+            path="/pet/1/uploadImage",
+            query_parameters={"petId": 1},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=400,
+        )
