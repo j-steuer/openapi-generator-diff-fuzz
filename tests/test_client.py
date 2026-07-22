@@ -5,6 +5,7 @@ import re
 import tomllib
 from copy import deepcopy
 from pathlib import Path
+from time import sleep
 
 import pytest
 from conftest import TEST_CONFIG_BASE_PATH
@@ -87,10 +88,16 @@ def _test_send_request(
             if c.image is not None and "mitmproxy" in c.image.tags[0]
         ][0]
         logs = mitmproxy.logs().decode()
-        try:
-            latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
-        except Exception as e:
-            raise RuntimeError("No status code found in logs") from e
+        latest_status = None
+        for _ in range(50):
+            try:
+                latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
+                break
+            except Exception:
+                sleep(0.1)
+                logs = mitmproxy.logs().decode()
+        if latest_status is None:
+            raise TimeoutError("No answer received in time")
         assert f"<< {expected_status}" == latest_status
 
     network.disconnect(clc.container)
@@ -178,7 +185,6 @@ def test_client_basic_petshop(clc_class, api_wfd: tuple[Network, str]) -> None:
             path="/user/%C2%B4i%C2%84%C3%B2X2%C2%BA%3A%3D%C3%B5%F1%BA%86%8D",
             query_parameters={},
         )
-
         _test_send_request(clc, request, network, api_path, expected_status=404)
 
 
