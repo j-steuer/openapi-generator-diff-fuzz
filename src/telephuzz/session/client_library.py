@@ -51,6 +51,7 @@ class ClientLibraryContainer(ABC):
     container: Container | None
     method_case: Case = Case("snake")
     generator_script: str
+    worker_script: str
 
     registry: dict = {}
 
@@ -77,7 +78,6 @@ class ClientLibraryContainer(ABC):
 
         container = client.containers.run(
             image=image,
-            command="sleep infinity",  # keep container alive
             detach=True,
         )
 
@@ -145,7 +145,7 @@ class ClientLibraryContainer(ABC):
         try:
             # return Image if it already exists
             return client.images.get(tag)
-        except ImageNotFound:
+        except ImageNotFound as e:
             # create new Image
             with tempfile.TemporaryDirectory() as tmpdir:
                 # copy library into build context
@@ -154,6 +154,15 @@ class ClientLibraryContainer(ABC):
                     shutil.copytree(library_path, lib_dest)
                 else:
                     shutil.copy(library_path, lib_dest)
+
+                # copy worker into build context
+                worker_path = (
+                    GENERATORS_PATH / "dockerfiles" / "workers" / self.worker_script
+                )
+                if not worker_path.exists():
+                    raise ValueError(f"Worker path not found: {worker_path}") from e
+                worker_dest = tmpdir
+                shutil.copy(worker_path, worker_dest)
 
                 dockerfile_path = os.path.join(tmpdir, "Dockerfile")
 
@@ -238,6 +247,7 @@ class PythonCLC(ClientLibraryContainer):
 
     method_case = Case.SNAKE
     base_image = "python:3.11-slim"
+    worker_script = "worker.py"
 
     def __init__(self):
         """Initialize a Python-based client library."""
@@ -262,16 +272,21 @@ class PythonCLC(ClientLibraryContainer):
 
         self.container.put_archive("/tmp", tar_stream)
 
-        return "python3 /tmp/invocation.py"
+        return "touch /tmp/run.trigger"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Python-based libraries."""
         dockerfile = f"""
-                    FROM {self.base_image}
-                    WORKDIR {LIB_PATH}
-                    COPY lib {LIB_PATH}/lib
-                    RUN pip install -e {LIB_PATH}/lib
-                    """
+            FROM {self.base_image}
+            WORKDIR {LIB_PATH}
+
+            COPY lib {LIB_PATH}/lib
+            RUN pip install -e {LIB_PATH}/lib
+
+            COPY {self.worker_script} worker.py
+
+            CMD ["python", "worker.py"]
+        """
         return super()._get_image_by_hash(
             library_path=library_path,
             dockerfile=dockerfile,

@@ -6,6 +6,7 @@ import socket
 import tempfile
 from contextlib import ExitStack
 from pathlib import Path
+from time import sleep
 
 import docker
 from docker.models.networks import Network
@@ -54,10 +55,15 @@ class Session:
 
         def _get_response() -> Response:
             response_dir = response_output / f"api{self.id}"
-            try:
-                response_path = next(response_dir.iterdir())
-            except StopIteration as e:
-                raise RuntimeError("No response file found") from e
+            response_path = None
+            for _ in range(100):
+                try:
+                    response_path = next(response_dir.iterdir())
+                    break
+                except (FileNotFoundError, StopIteration):
+                    sleep(0.1)
+            if response_path is None:
+                raise TimeoutError("Response not received in time")
 
             response = Response.from_json(response_path)
 

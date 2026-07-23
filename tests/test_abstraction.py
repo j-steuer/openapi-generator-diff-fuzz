@@ -54,11 +54,22 @@ class TestAbstractor:
 
     def test_standard_headers(self, basic_request: Request, basic_response: Response):
         """Test abstraction for standard headers."""
+        basic_request.headers = CaseInsensitiveDict(
+            {
+                "Date": "2000-01-01",
+                "Etag": "Etag",
+                "x-custom-header": 1,
+                "X-Test-Header": 2,
+                "content-type": "application/json",
+            }
+        )
+
         basic_response.headers = CaseInsensitiveDict(
             {
                 "Date": "2000-01-01",
                 "Etag": "Etag",
                 "x-custom-header": 1,
+                "X-Test-Header": 2,
                 "content-type": "application/json",
             }
         )
@@ -66,12 +77,20 @@ class TestAbstractor:
         result = dummy_result(basic_request, basic_response)
 
         abstractor.abstract(result)
-        headers = result.response.headers
+        request_headers = result.request.headers
+        response_headers = result.response.headers
 
-        assert headers["Date"] == ABSTRACTED
-        assert headers["Etag"] == ABSTRACTED
-        assert headers["x-custom-header"] == ABSTRACTED
-        assert headers["content-type"] == "application/json"
+        assert "Date" not in request_headers
+        assert "Etag" not in request_headers
+        assert "x-custom-header" not in request_headers
+        assert "X-Test-Header" not in request_headers
+        assert request_headers["content-type"] == "application/json"
+
+        assert response_headers["Date"] == ABSTRACTED
+        assert response_headers["Etag"] == ABSTRACTED
+        assert response_headers["x-custom-header"] == ABSTRACTED
+        assert response_headers["X-Test-Header"] == ABSTRACTED
+        assert response_headers["content-type"] == "application/json"
 
     @pytest.mark.parametrize(
         "method, path, regex_component",

@@ -117,3 +117,22 @@ def test_logging():
 
     assert len(libs) == 1
     assert len(os.listdir(evaluator.log_path)) == 1
+
+
+def test_no_custom_header_diff(basic_request, basic_response):
+    """Custom x-headers should not factor in evaluation."""
+    request1 = deepcopy(basic_request)
+    request1.headers["X-Test"] = "Test"
+
+    request2 = deepcopy(basic_request)
+    request2.headers["X-Test"] = "Othertest"
+
+    request3 = deepcopy(request1)
+    del request3.headers["X-Test"]
+    request3.headers["X-Test2"] = "Test2"
+
+    evaluator = DiffEvaluator()
+    result1 = RequestResult("lib1", request1, basic_response, None, None)
+    result2 = RequestResult("lib2", request2, basic_response, None, None)
+    result3 = RequestResult("lib3", request3, basic_response, None, None)
+    assert not evaluator.eval({result1, result2, result3}, request1)
