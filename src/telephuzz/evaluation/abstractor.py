@@ -6,6 +6,8 @@ import re
 from _collections_abc import Mapping
 from typing import Any
 
+from requests.models import CaseInsensitiveDict
+
 from telephuzz.config import get_config
 from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
 from telephuzz.request_result import RequestResult
@@ -62,21 +64,33 @@ class Abstractor:
 
     def abstract(self, result: RequestResult) -> None:
         """Transform all non-deterministic components of responses with constants."""
+
         # handle non-deterministic headers
-        nondeterministic_headers = ["Date", "Etag"] + self.custom_headers
+        def _handle_nd_headers(headers: CaseInsensitiveDict, remove=False) -> None:
+            """Abstract headers that match nondeterministic header patterns.
+
+            Either remove headers completely (requests) or
+            apply abstraction to content (responses).
+            """
+            nondeterministic_headers = ["Date", "Etag"] + self.custom_headers
+            for pattern in self.nondeterministic_headers_pattern:
+                nondeterministic_headers += [
+                    h
+                    for h in headers.keys()
+                    if re.fullmatch(pattern, h, flags=re.IGNORECASE)
+                ]
+
+            for nondeterministic_header in nondeterministic_headers:
+                if nondeterministic_header in headers:
+                    if remove:
+                        del headers[nondeterministic_header]
+                    else:
+                        headers[nondeterministic_header] = ABSTRACTED
 
         request, response = result.request, result.response
 
-        for pattern in self.nondeterministic_headers_pattern:
-            nondeterministic_headers += [
-                h
-                for h in response.headers.keys()
-                if re.fullmatch(pattern, h, flags=re.IGNORECASE)
-            ]
-
-        for nondeterministic_header in nondeterministic_headers:
-            if nondeterministic_header in response.headers:
-                response.headers[nondeterministic_header] = ABSTRACTED
+        _handle_nd_headers(request.headers, remove=True)
+        _handle_nd_headers(response.headers, remove=False)
 
         # handle custom nondeterministic components
         for nondeterministic_component in self.custom_ndt_components:
