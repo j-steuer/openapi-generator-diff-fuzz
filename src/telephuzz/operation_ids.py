@@ -24,28 +24,49 @@ class Case(Enum):
         return None
 
 
+def _hash_suffix(data: str, length: int = 7) -> str:
+    """Return a deterministic lowercase alphabetic hash suffix.
+
+    Having the suffix only consists of lowercase letters makes
+    naming schemes based on the operation id used by generators
+    more consistent and predictable.
+    """
+    value = int.from_bytes(hashlib.sha1(data.encode()).digest()[:5])
+    chars = []
+    while value:
+        value, rem = divmod(value, 26)
+        chars.append(chr(ord("a") + rem))
+
+    suffix = "".join(reversed(chars))
+    return suffix.rjust(length, "a")[-length:]
+
+
 def generate_operation_id(method: str, path: str) -> str:
     """Generate an operation id based on the method and path."""
-    # handle default path
+    # Handle default path
     if path == "/":
         return f"{method.lower()}_default"
 
-    # ignore query parameters
-    path_segment = path[: path.find("?")] if "?" in path else path
+    # Ignore query parameters
+    path_segment = path.split("?", 1)[0]
 
-    # ignore mitmproxy target prefix
+    # Ignore mitmproxy target prefix
     if ":" in path_segment[: path_segment.find("/", 1)]:
         path_segment = path_segment[path_segment.find("/", 1) :]
 
     path_part = (
-        path_segment.strip("/").replace("/", "_").replace("{", "").replace("}", "")
+        path_segment.strip("/")
+        .replace("/", "_")
+        .replace("{", "")
+        .replace("}", "")
+        .lower()
     )
-    operation_id = f"{method.lower()}_{path_part.lower()}"
-    # add hash of full path to avoid collisions
-    hash_input = f"{method.upper()}:{path_segment}"
-    operation_id += f"_h{hashlib.sha1(hash_input.encode()).hexdigest()[:8]}"
 
-    return operation_id
+    # Add a deterministic alphabetic suffix to avoid collisions
+    hash_input = f"{method.upper()}:{path_segment}"
+    suffix = _hash_suffix(hash_input)
+
+    return f"{method.lower()}_{path_part}_{suffix}"
 
 
 def transform_case(string: str, case: Case) -> str:

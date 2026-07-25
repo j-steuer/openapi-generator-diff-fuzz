@@ -1,5 +1,7 @@
 """File for testing operation id related methods."""
 
+import re
+
 from telephuzz.operation_ids import Case, generate_operation_id, transform_case
 
 
@@ -98,3 +100,11 @@ def test_mixed_case_path() -> None:
 
     # paths where only case differs should still produce different ids
     assert operation_id != generate_operation_id("GET", path.lower())
+
+
+def test_suffix_is_lowercase_alpha() -> None:
+    """Suffix should only consists of lowercase letters."""
+    operation_id = generate_operation_id("GET", "/test")
+    regex = r"[a-z]+"
+
+    assert re.fullmatch(regex, operation_id.split("_")[-1])

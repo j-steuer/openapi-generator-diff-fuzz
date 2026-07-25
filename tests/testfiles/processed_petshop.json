@@ -11,7 +11,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.0.27-SNAPSHOT"
+    "version": "0.0.0"
   },
   "externalDocs": {
     "description": "Find out more about Swagger",
@@ -52,21 +52,11 @@
         ],
         "summary": "Update an existing pet.",
         "description": "Update an existing pet by Id.",
-        "operationId": "put_pet_h69779eb9",
+        "operationId": "put_pet_kjcesyb",
         "requestBody": {
           "description": "Update an existent pet in the store",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Pet"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/Pet"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/Pet"
               }
@@ -118,21 +108,11 @@
         ],
         "summary": "Add a new pet to the store.",
         "description": "Add a new pet to the store.",
-        "operationId": "post_pet_hcec649da",
+        "operationId": "post_pet_owkffnc",
         "requestBody": {
           "description": "Create a new pet in the store",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Pet"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/Pet"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/Pet"
               }
@@ -183,7 +163,7 @@
         ],
         "summary": "Finds Pets by status.",
         "description": "Multiple status values can be provided with comma separated strings.",
-        "operationId": "get_pet_findbystatus_hec64a00d",
+        "operationId": "get_pet_findbystatus_krcufpt",
         "parameters": [
           {
             "name": "status",
@@ -248,7 +228,7 @@
         ],
         "summary": "Finds Pets by tags.",
         "description": "Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
-        "operationId": "get_pet_findbytags_hebd14161",
+        "operationId": "get_pet_findbytags_crahzmm",
         "parameters": [
           {
             "name": "tags",
@@ -310,7 +290,7 @@
         ],
         "summary": "Find pet by ID.",
         "description": "Returns a single pet.",
-        "operationId": "get_pet_petid_hf9a54eea",
+        "operationId": "get_pet_petid_mxugoqm",
         "parameters": [
           {
             "name": "petId",
@@ -367,7 +347,7 @@
         ],
         "summary": "Updates a pet in the store with form data.",
         "description": "Updates a pet resource based on the form data.",
-        "operationId": "post_pet_petid_h01e21e77",
+        "operationId": "post_pet_petid_aeuhyqc",
         "parameters": [
           {
             "name": "petId",
@@ -434,7 +414,7 @@
         ],
         "summary": "Deletes a pet.",
         "description": "Delete a pet.",
-        "operationId": "delete_pet_petid_h6084b060",
+        "operationId": "delete_pet_petid_pydypnj",
         "parameters": [
           {
             "name": "api_key",
@@ -484,7 +464,7 @@
         ],
         "summary": "Uploads an image.",
         "description": "Upload image of the pet.",
-        "operationId": "post_pet_petid_uploadimage_h203ea313",
+        "operationId": "post_pet_petid_uploadimage_gibcztv",
         "parameters": [
           {
             "name": "petId",
@@ -554,7 +534,7 @@
         ],
         "summary": "Returns pet inventories by status.",
         "description": "Returns a map of status codes to quantities.",
-        "operationId": "get_store_inventory_h68d20131",
+        "operationId": "get_store_inventory_bjfweap",
         "responses": {
           "200": {
             "description": "successful operation",
@@ -588,20 +568,10 @@
         ],
         "summary": "Place an order for a pet.",
         "description": "Place a new order in the store.",
-        "operationId": "post_store_order_h5572a197",
+        "operationId": "post_store_order_sahpmsv",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Order"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/Order"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/Order"
               }
@@ -638,7 +608,7 @@
         ],
         "summary": "Find purchase order by ID.",
         "description": "For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.",
-        "operationId": "get_store_order_orderid_h958e4b9d",
+        "operationId": "get_store_order_orderid_ziofsna",
         "parameters": [
           {
             "name": "orderId",
@@ -684,7 +654,7 @@
         ],
         "summary": "Delete purchase order by identifier.",
         "description": "For valid response try integer IDs with value < 1000. Anything above 1000 or non-integers will generate API errors.",
-        "operationId": "delete_store_order_orderid_h80d4c8fb",
+        "operationId": "delete_store_order_orderid_xewbfoy",
         "parameters": [
           {
             "name": "orderId",
@@ -720,21 +690,11 @@
         ],
         "summary": "Create user.",
         "description": "This can only be done by the logged in user.",
-        "operationId": "post_user_hf0ab63e3",
+        "operationId": "post_user_sczmypr",
         "requestBody": {
           "description": "Created user object",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/User"
               }
@@ -770,7 +730,7 @@
         ],
         "summary": "Creates list of users with given input array.",
         "description": "Creates list of users with given input array.",
-        "operationId": "post_user_createwithlist_hc3ca8e48",
+        "operationId": "post_user_createwithlist_sebmnri",
         "requestBody": {
           "content": {
             "application/json": {
@@ -812,7 +772,7 @@
         ],
         "summary": "Logs user into the system.",
         "description": "Log into the system.",
-        "operationId": "get_user_login_h79ec355b",
+        "operationId": "get_user_login_fdnhvoa",
         "parameters": [
           {
             "name": "username",
@@ -881,7 +841,7 @@
         ],
         "summary": "Logs out current logged in user session.",
         "description": "Log user out of the system.",
-        "operationId": "get_user_logout_hffd3a403",
+        "operationId": "get_user_logout_uwdiawk",
         "parameters": [],
         "responses": {
           "200": {
@@ -900,7 +860,7 @@
         ],
         "summary": "Get user by user name.",
         "description": "Get user detail based on username.",
-        "operationId": "get_user_username_h749d9e95",
+        "operationId": "get_user_username_jjcrgji",
         "parameters": [
           {
             "name": "username",
@@ -945,7 +905,7 @@
         ],
         "summary": "Update user resource.",
         "description": "This can only be done by the logged in user.",
-        "operationId": "put_user_username_h2a02c887",
+        "operationId": "put_user_username_mckkbvc",
         "parameters": [
           {
             "name": "username",
@@ -961,16 +921,6 @@
           "description": "Update an existent user in the store",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/User"
               }
@@ -998,7 +948,7 @@
         ],
         "summary": "Delete user resource.",
         "description": "This can only be done by the logged in user.",
-        "operationId": "delete_user_username_hec284b85",
+        "operationId": "delete_user_username_hjxvwvj",
         "parameters": [
           {
             "name": "username",
