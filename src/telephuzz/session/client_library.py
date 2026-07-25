@@ -63,7 +63,7 @@ class ClientLibraryContainer(ABC):
                 json.dump(get_config().spec, spec)
 
         generator_path = GENERATORS_PATH / self.generator_script
-        library_path = CLIENT_PATH / self.id.replace(":", "_")
+        library_path = CLIENT_PATH / self._get_library_dir_name()
         try:
             subprocess.run([generator_path, library_path], check=True)
         except subprocess.CalledProcessError as e:
@@ -109,6 +109,12 @@ class ClientLibraryContainer(ABC):
             self.container.remove(force=True)
 
             self.container = None
+
+    def _get_library_dir_name(self) -> str:
+        """Get name of directory where client library is stored."""
+        spec_bytes = get_config().spec_str.encode()
+        target_hash = hashlib.sha1(spec_bytes).hexdigest()[:8]
+        return f"{self.id.replace(':', '-')}_{target_hash}"
 
     def _hash_file(self, path: Path, hash_func: HASH) -> None:
         with open(path, "rb") as f:
@@ -588,7 +594,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         # obtain main module name (should be only directory)
         if not hasattr(self, "module_name"):
-            dir_name = self.id.replace(":", "_")
+            dir_name = self._get_library_dir_name()
             first_dir = next(d for d in CLIENT_PATH.iterdir() if dir_name in d.name)
             second_dir = next(
                 d
