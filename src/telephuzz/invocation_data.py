@@ -31,6 +31,7 @@ class InvocationData:
         self.query_parameters = self._cast_parameters(
             self._get_query_parameters(request), request
         )
+        self.arg_types = get_args(get_config().spec_str, request.method, request.path)
 
         self.body = request.body
         self.json_body = None

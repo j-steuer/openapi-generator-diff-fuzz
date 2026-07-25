@@ -26,7 +26,7 @@ from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import get_args, resolve_path
+from telephuzz.openapi_helpers import resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -449,9 +449,7 @@ def _get_model_name(invocation: InvocationData) -> str:
     """
     model_name: str | None = ""
     if invocation.body and invocation.content_type == "application/json":
-        model_name = get_args(
-            get_config().spec_str, invocation.method, invocation.path
-        )["requestBody"]
+        model_name = invocation.arg_types["requestBody"]
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
         f"{invocation.path} with body {invocation.body}"
@@ -595,6 +593,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
             self.module_name = second_dir.name
 
         method_name = self._get_method_name(invocation)
+
         kwargs = ", ".join(
             f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
         )

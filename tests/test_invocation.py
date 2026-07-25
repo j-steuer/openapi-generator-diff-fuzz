@@ -102,3 +102,32 @@ def test_infer_content_type():
 
     invocation = InvocationData(request_without_ctype)
     assert invocation.content_type is None
+
+
+def test_arg_types():
+    """Test obtaining parameter and body types from invocation."""
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "PMGCFW",
+                "Content-Type": "application/octet-stream",
+                "Content-Length": "6",
+            }
+        ),
+        body="üý»©TÎ",
+        method=HTTPMethod.POST,
+        path="/pet/-1714/uploadImage",
+        query_parameters={"petId": -1714},
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.arg_types == {
+        "petId": "integer",
+        "additionalMetadata": "string",
+        "requestBody": "string",
+    }
