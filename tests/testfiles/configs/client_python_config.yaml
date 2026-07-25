@@ -1,0 +1,9 @@
+targets:
+  - id : "openapi-generator:python"
+  - id : "swagger-codegen:python"
+  - id : "openapi-python-client:python"
+  - id : "kiota:python"
+
+fuzzing:
+  log-path: "/tmp/logs/telephuzz"
+  timeout: 180
