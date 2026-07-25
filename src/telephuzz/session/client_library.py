@@ -231,7 +231,10 @@ class ClientLibraryContainer(ABC):
         """Apply method case to relevant invocation data."""
 
         def transform_dict(d: dict) -> dict:
-            return {transform_case(k, self.method_case): v for k, v in d.items()}
+            return {
+                transform_case(k, self.method_case) if k != "requestBody" else k: v
+                for k, v in d.items()
+            }
 
         cased_invocation = deepcopy(invocation)
 
