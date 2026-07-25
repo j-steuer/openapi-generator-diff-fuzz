@@ -575,7 +575,6 @@ def test_empty_octet_body(clc_class, api_wfd: tuple[Network, str]):
         )
 
 
-@pytest.mark.skip(reason="TODO fix enums for python client")
 @pytest.mark.parametrize(
     "clc_class",
     [

@@ -594,9 +594,24 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
 
         method_name = self._get_method_name(invocation)
 
-        kwargs = ", ".join(
-            f"{k}={repr(v)}" for k, v in invocation.query_parameters.items()
-        )
+        # resolve enums
+        enum_import = ""
+        joinable_values = dict()
+        for parameter, value in invocation.query_parameters.items():
+            if invocation.arg_types[parameter] == "enum":
+                if not enum_import:
+                    enum_import = (
+                        f"from {self.module_name}.models.{invocation.operation_id}"
+                        "_status import *"
+                    )
+                enum_class_name = (
+                    f"{transform_case(invocation.operation_id, Case.PASCAL)}Status"
+                )
+                joinable_values[parameter] = f"{enum_class_name}({repr(value)})"
+            else:
+                joinable_values[parameter] = repr(value)
+
+        kwargs = ", ".join(f"{k}={v}" for k, v in joinable_values.items())
 
         model_name_str = ""
         if invocation.body:
@@ -639,6 +654,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         from {self.module_name}.api.{api} import {method_name}
         from {self.module_name}.types import File
         {model_name_str}
+        {enum_import}
 
 
         client = Client("{api_path}")
