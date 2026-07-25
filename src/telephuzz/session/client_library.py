@@ -223,6 +223,10 @@ class ClientLibraryContainer(ABC):
 
     def _apply_case_to_invocation(self, invocation: InvocationData) -> InvocationData:
         """Apply method case to relevant invocation data."""
+
+        def transform_dict(d: dict) -> dict:
+            return {transform_case(k, self.method_case): v for k, v in d.items()}
+
         cased_invocation = deepcopy(invocation)
 
         # operation id
@@ -231,10 +235,11 @@ class ClientLibraryContainer(ABC):
         )
 
         # query parameters
-        cased_invocation.query_parameters = {
-            transform_case(k, self.method_case): v
-            for k, v in invocation.query_parameters.items()
-        }
+        cased_invocation.query_parameters = transform_dict(invocation.query_parameters)
+        cased_invocation.query_parameters_without_path_vars = transform_dict(
+            invocation.query_parameters_without_path_vars
+        )
+        cased_invocation.arg_types = transform_dict(invocation.arg_types)
 
         return cased_invocation
 
