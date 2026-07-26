@@ -171,5 +171,6 @@ def test_content_header_diff(basic_request, basic_response):
     result3 = RequestResult("lib3", request1, basic_response, None, None)
     assert not evaluator.eval({result1, result2, result3}, request1)
 
+    result2 = RequestResult("lib2", request1, basic_response, None, None)
     result3 = RequestResult("lib3", request3, basic_response, None, None)
     assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}

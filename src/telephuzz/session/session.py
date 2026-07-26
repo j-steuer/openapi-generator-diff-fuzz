@@ -53,7 +53,7 @@ class Session:
         """Send a request to the API through the client library."""
         logger.debug(f"Sending request through clients: {request}")
 
-        def _get_response() -> Response:
+        def _get_response() -> tuple[Request, Response]:
             response_dir = response_output / f"api{self.id}"
             response_path = None
             for _ in range(100):
@@ -65,10 +65,11 @@ class Session:
             if response_path is None:
                 raise TimeoutError("Response not received in time")
 
+            request = Request.from_json(response_path)
             response = Response.from_json(response_path)
 
             response_path.unlink()
-            return response
+            return request, response
 
         # process request to invocation data if not done already
         if invocation is None:
@@ -77,14 +78,16 @@ class Session:
         # send message
         if not isinstance(self.api, APIWithDatabaseContainer):
             self.client.send(invocation, api_path)
-            response = _get_response()
-            result = RequestResult(self.client.id, request, response, None, None)
+            client_request, client_response = _get_response()
+            result = RequestResult(
+                self.client.id, client_request, client_response, None, None
+            )
         else:
             out_before = Path("/tmp/before")
             out_after = Path("/out/after")
             self.api.get_state(out_before)
             self.client.send(invocation, api_path)
-            response = _get_response()
+            client_request, client_response = _get_response()
             self.api.get_state(out_after)
 
             # TODO path within project?
@@ -95,7 +98,11 @@ class Session:
             write_to_host(self.api.db_container, str(out_after), out_after_host)
 
             result = RequestResult(
-                self.client.id, request, response, out_before_host, out_after_host
+                self.client.id,
+                client_request,
+                client_response,
+                out_before_host,
+                out_after_host,
             )
 
         if result.response.status in [502, 503]:
