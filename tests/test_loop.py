@@ -46,6 +46,14 @@ CLIENT_FAULTY_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_faulty_config.y
 
 LOG_PATH = Path("/tmp/logs/telephuzz")
 
+BASIC_CLIENT_REQUEST = Request(
+    headers=CaseInsensitiveDict({"Test": ["test"]}),
+    body=None,
+    method=HTTPMethod.GET,
+    path="/greet",
+    query_parameters={"name": "Alice", "age": 30},
+)
+
 
 def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     """Initialize and send basic message to test API."""
@@ -60,19 +68,16 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
         headers=CaseInsensitiveDict({"Test": ["test"]}),
         body=None,
         method=HTTPMethod.GET,
-        path="dummytarget.org/test",
-        query_parameters={},
+        path="/greet",
+        query_parameters={"name": "Alice", "age": 30},
     )
-    request.path = "/greet"
-    request.method = HTTPMethod("GET")
-    request.query_parameters = {"name": "Alice", "age": 30}
 
     if auth:
         request.headers["Authorization"] = "mock-token"
 
-    response = clc.send(InvocationData(request), api)
-    assert isinstance(response, str)
-    assert "Hello Alice, you are 30 years old!" in response
+    clc.send(InvocationData(request), api)
+    sleep(1)
+    assert "Hello Alice, you are 30 years old!" in clc.container.logs().decode()
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -254,6 +259,42 @@ def test_session_manager_faulty(client_generator):
 
         results = session_manager.send(request=request)
         assert any("Faulty" in repr(r) for r in results), results
+
+
+@pytest.mark.skip(reason="TODO fix header issue")
+def test_extra_headers():
+    """Test handling extra headers attached by clients."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
+
+    with SessionManager() as session_manager:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "gsSjqx",
+                    "Content-Type": "application/json",
+                    "Content-Length": "2",
+                }
+            ),
+            body="[]",
+            method=HTTPMethod.POST,
+            path="/user/createWithList",
+            query_parameters={},
+        )
+
+        # attempt to send with session manager
+        results = session_manager.send(request)
+        assert len(results) == 4
+
+        evaluator = DiffEvaluator()
+        evaluator.eval(results, request)
+
+        assert len(os.listdir(LOG_PATH)) == 0
 
 
 def test_diff_eval(client_generator):

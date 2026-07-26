@@ -2,13 +2,13 @@
     "openapi": "3.1.0",
     "info": {
         "title": "FastAPI",
-        "version": "0.1.0"
+        "version": "0.0.0"
     },
     "paths": {
         "/greet": {
             "get": {
                 "summary": "Greet",
-                "operationId": "get_greet_ca4d7baf",
+                "operationId": "get_greet_erwiiix",
                 "parameters": [
                     {
                         "name": "name",
@@ -59,7 +59,7 @@
         "/user": {
             "get": {
                 "summary": "Get User",
-                "operationId": "get_user_3a2fd62b",
+                "operationId": "get_user_czvfdpt",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -97,7 +97,7 @@
             },
             "post": {
                 "summary": "Create User",
-                "operationId": "post_user_f0ab63e3",
+                "operationId": "post_user_sczmypr",
                 "requestBody": {
                     "required": true,
                     "content": {
