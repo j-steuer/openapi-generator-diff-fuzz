@@ -136,3 +136,40 @@ def test_no_custom_header_diff(basic_request, basic_response):
     result2 = RequestResult("lib2", request2, basic_response, None, None)
     result3 = RequestResult("lib3", request3, basic_response, None, None)
     assert not evaluator.eval({result1, result2, result3}, request1)
+
+
+def test_no_header_request_comparison(basic_request, basic_response):
+    """Headers should generally not be evaluated for requests."""
+    request1 = deepcopy(basic_request)
+    request1.headers["TestHeader"] = "Tag1"
+
+    request2 = deepcopy(basic_request)
+    request2.headers["TestHeader"] = "Tag2"
+
+    evaluator = DiffEvaluator()
+    result1 = RequestResult("lib1", request1, basic_response, None, None)
+    result2 = RequestResult("lib2", request2, basic_response, None, None)
+    result3 = RequestResult("lib3", basic_request, basic_response, None, None)
+    assert not evaluator.eval({result1, result2, result3}, request1)
+
+
+def test_content_header_diff(basic_request, basic_response):
+    """If content header in both expected and diff and different, log diff."""
+    request1 = deepcopy(basic_request)
+    request1.headers["Content-Type"] = "application/json"
+
+    request2 = deepcopy(basic_request)
+    if "Content-Type" in request2.headers:
+        del request2.headers["Content-Type"]
+
+    request3 = deepcopy(basic_request)
+    request3.headers["Content-Type"] = "application/xml"
+
+    evaluator = DiffEvaluator()
+    result1 = RequestResult("lib1", request1, basic_response, None, None)
+    result2 = RequestResult("lib2", request2, basic_response, None, None)
+    result3 = RequestResult("lib3", request1, basic_response, None, None)
+    assert not evaluator.eval({result1, result2, result3}, request1)
+
+    result3 = RequestResult("lib3", request3, basic_response, None, None)
+    assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}

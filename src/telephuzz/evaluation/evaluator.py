@@ -126,42 +126,52 @@ class DiffEvaluator:
                             diff_path,
                             diff_parameters,
                             diff_body,
-                            diff_headers,
                         ]
                     ):
-                        raise RuntimeError(
-                            "Diff in request detected, but exact diff not found."
-                        )
+                        if diff_headers:
+                            content_type = "Content-Type"
+                            original_content = original_request.headers.get(
+                                content_type
+                            )
+                            diff_content = diff_request.headers.get(content_type)
+                            if (
+                                original_content is None
+                                or diff_content is None
+                                or original_content == diff_content
+                            ):
+                                # ignore header diff if not content type
+                                del libs_to_reset[libs_to_reset.index(library)]
+                                continue
+                            else:
+                                detail += (
+                                    f"Content type {original_content} expected"
+                                    f", got {diff_content}"
+                                )
+                        else:
+                            raise RuntimeError(
+                                "Diff in request detected, but exact diff not found."
+                            )
 
                     if diff_method:
-                        detail += f"- Method {original_request.method} expected, "
-                        f"but got {diff_request.method}.\n"
+                        detail += (
+                            f"- Method {original_request.method} expected, "
+                            f"but got {diff_request.method}.\n"
+                        )
                     if diff_path:
-                        detail += f"- Path {original_request.path} expected, "
-                        f"but got {diff_request.path}.\n"
+                        detail += (
+                            f"- Path {original_request.path} expected, "
+                            f"but got {diff_request.path}.\n"
+                        )
                     if diff_parameters:
-                        detail += f"- Parameters {original_request.query_parameters} "
-                        f"expected, but got {diff_request.query_parameters}.\n"
+                        detail += (
+                            f"- Parameters {original_request.query_parameters} "
+                            f"expected, but got {diff_request.query_parameters}.\n"
+                        )
                     if diff_body:
-                        detail += f"- Body '{pformat(original_request.body)}' "
-                        f"expected, but got '{pformat(diff_request.body)}.'\n"
-                    if diff_headers:
-                        # TODO write method, currently duplicate code with request
-                        for header in original_request.headers.keys():
-                            if header not in diff_request.headers:
-                                detail += f"- Header '{header}' expected, "
-                                "but is not present in response.\n"
-                            elif (
-                                original_request.headers[header]
-                                != diff_request.headers[header]
-                            ):
-                                detail += f"- Header '{header}' has content "
-                                f"{diff_request.headers[header]}, expected "
-                                f"{original_request.headers[header]}.\n"
-
-                            for header in diff_request.headers.keys():
-                                if header not in original_request.headers:
-                                    detail += f"- Unexpected header: '{header}'"
+                        detail += (
+                            f"- Body '{pformat(original_request.body)}' "
+                            f"expected, but got '{pformat(diff_request.body)}.'\n"
+                        )
 
                     report = DiffReport(
                         library_id=library,
@@ -204,8 +214,10 @@ class DiffEvaluator:
 
                 unique = len(libraries) == 1
                 detail = "---\nDiff in response found\n---\n"
-                detail = f"{count_true_libs}/{len(results)} other libraries "
-                "agree on the source of truth.\n"
+                detail = (
+                    f"{count_true_libs}/{len(results)} other libraries "
+                    "agree on the source of truth.\n"
+                )
 
                 for library in libraries:
                     if not any([diff_status, diff_body, diff_headers]):
@@ -214,19 +226,29 @@ class DiffEvaluator:
                         )
 
                     if diff_status:
-                        detail += f"- Status code {true_response.status} expected, "
-                        f"but got {diff_response.status}.\n"
-                        logger.debug(f"Different status {diff_response.status}")
+                        detail += (
+                            f"- Status code {true_response.status} expected, "
+                            f"but got {diff_response.status}.\n"
+                        )
+                        logger.debug(
+                            f"Different status {diff_response.status} in {library}"
+                        )
                     if diff_body:
-                        detail += f"- Body '{pformat(true_response.body)}' "
-                        f"expected, but got '{pformat(diff_response.body)}.'\n"
-                        logger.debug(f"Different body {diff_response.body}")
+                        detail += (
+                            f"- Body '{pformat(true_response.body)}' "
+                            f"expected, but got '{pformat(diff_response.body)}.'\n"
+                        )
+                        logger.debug(
+                            f"Different body {diff_response.body} in {library}"
+                        )
                     if diff_headers:
                         for header in true_response.headers.keys():
                             if header not in diff_response.headers:
                                 detail += f"- Header '{header}' expected, "
                                 "but is not present in response.\n"
-                                logger.debug(f"Header {header} not present")
+                                logger.debug(
+                                    f"Header {header} not present in {library}"
+                                )
                             elif (
                                 true_response.headers[header]
                                 != diff_response.headers[header]
@@ -236,13 +258,16 @@ class DiffEvaluator:
                                 f"{diff_header}, expected "
                                 f"{true_response.headers[header]}.\n"
                                 logger.debug(
-                                    f"Header {header} has content {diff_header}"
+                                    (
+                                        f"Header {header} has content {diff_header} "
+                                        f"in {library}"
+                                    )
                                 )
 
                             for header in diff_response.headers.keys():
                                 if header not in true_response.headers:
                                     detail += f"- Unexpected header: '{header}'"
-                                logger.debug(f"Extra header {header}")
+                                logger.debug(f"Extra header {header} in {library}")
 
                     report = DiffReport(
                         library_id=library,
