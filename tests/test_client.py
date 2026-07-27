@@ -436,7 +436,6 @@ def test_file_upload(clc_class, api_wfd: tuple[Network, str]):
         )
 
 
-@pytest.mark.skip(reason="Fails for OpenAPI python client TODO fix")
 @pytest.mark.parametrize(
     "clc_class",
     [

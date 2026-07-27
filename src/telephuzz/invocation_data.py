@@ -1,6 +1,5 @@
 """Store information relevant for client library request source code generation."""
 
-import ast
 import json
 from typing import Any
 
@@ -48,10 +47,7 @@ class InvocationData:
 
         if self.content_type == JSON_CONTENT:
             # process body to usable JSON
-            try:
-                self.json_body = ast.literal_eval(request.body)
-            except ValueError:
-                self.json_body = json.loads(request.body)
+            self.json_body = json.loads(request.body)
 
     def __repr__(self) -> str:
         """Repr method."""
