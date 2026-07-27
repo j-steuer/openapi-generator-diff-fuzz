@@ -14,8 +14,9 @@ import textwrap
 from _hashlib import HASH
 from abc import ABC, abstractmethod
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 import docker
 from docker.errors import ImageNotFound
@@ -34,6 +35,14 @@ LibraryId = str
 LIB_PATH = "/app"
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ModelCode:
+    """Data class for code concerning JSON models."""
+
+    import_code: str | None
+    creation_code: str
 
 
 def decode_output(output: bytes | Iterable[bytes]) -> str:
@@ -251,6 +260,13 @@ class ClientLibraryContainer(ABC):
         cased_invocation.arg_types = transform_dict(invocation.arg_types)
 
         return cased_invocation
+
+    # source code components
+
+    @abstractmethod
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        """Generate code for handling custom models."""
+        raise NotImplementedError
 
 
 # --- Language-based Abstractions ---
@@ -477,6 +493,34 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
     id = "openapi-generator:python"
     generator_script = "openapi-generator-python.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        """Generate models for JSON bodies."""
+        model_name = _get_model_name(invocation)
+        import_code = (
+            f"from openapi_client.models.{model_name.lower()} "
+            f"import {model_name.capitalize()}"
+        )
+
+        eval_body = invocation.json_body
+        if isinstance(eval_body, list):
+            # create list of objects
+            model_list = [
+                f"{model_name.capitalize()}.from_json({json.dumps(json.dumps(body))})"
+                for body in eval_body
+            ]
+            creation_code = "[" + ", ".join(model_list) + "]"
+        elif isinstance(eval_body, dict):
+            body = json.dumps(eval_body)
+            model_name_case = transform_case(model_name, self.method_case)
+            from_json = f"{model_name.capitalize()}.from_json({body!r}"
+            creation_code = f"{model_name_case}={from_json})"
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(eval_body)}: {invocation.body}"
+            )
+
+        return ModelCode(import_code=import_code, creation_code=creation_code)
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         model_name_str = ""
         query_parameters = invocation.query_parameters
@@ -487,28 +531,10 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         if invocation.body:
             if invocation.content_type == "application/json":
-                model_name = _get_model_name(invocation)
-                model_name_str = f"from openapi_client.models.{model_name.lower()} "
-                model_name_str += f"import {model_name.capitalize()}"
+                model_code = self._generate_code_models(invocation)
+                model_name_str += cast(str, model_code.import_code)
+                body_kwargs = model_code.creation_code
 
-                # TODO parse in Request object
-                eval_body = invocation.json_body
-                if isinstance(eval_body, list):
-                    # create list of objects
-                    model_list = [
-                        f"{model_name.capitalize()}.from_json({json.dumps(json.dumps(body))})"
-                        for body in eval_body
-                    ]
-                    body_kwargs = "[" + ", ".join(model_list) + "]"
-                elif isinstance(eval_body, dict):
-                    body = json.dumps(eval_body)
-                    model_name_case = transform_case(model_name, self.method_case)
-                    from_json = f"{model_name.capitalize()}.from_json({body!r}"
-                    body_kwargs = f"{model_name_case}={from_json})"
-                else:
-                    raise NotImplementedError(
-                        f"Unhandled body type {type(eval_body)}: {invocation.body}"
-                    )
             else:
                 raw_body: str = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"
@@ -547,6 +573,9 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
     id = "swagger-codegen:python"
     generator_script = "swagger-codegen-python.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        return ModelCode(None, f"body={invocation.json_body}")
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         query_parameters = invocation.query_parameters
 
@@ -556,7 +585,7 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
 
         if invocation.body:
             if invocation.json_body is not None:
-                body_kwargs = f"body={invocation.json_body}"
+                body_kwargs = self._generate_code_models(invocation).creation_code
             else:
                 raw_body: str = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"
@@ -594,6 +623,29 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         method_name = super()._get_method_name(invocation)
         return method_name[:-8] + method_name[-8:]
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        model_name = _get_model_name(invocation)
+        import_code = (
+            f"from {self.module_name}.models.{model_name.lower()} "
+            f"import {model_name.capitalize()}"
+        )
+
+        json_body = invocation.json_body
+        if isinstance(json_body, list):
+            model_list = [
+                f"{model_name.capitalize()}.from_dict({body})" for body in json_body
+            ]
+            creation_code = "body=[" + ", ".join(model_list) + "]"
+        elif isinstance(json_body, dict):
+            from_json = f"{model_name.capitalize()}.from_dict({json_body})"
+            creation_code = f"body={from_json}"
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(json_body)}: {invocation.body}"
+            )
+
+        return ModelCode(import_code=import_code, creation_code=creation_code)
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         # obtain main module name (should be only directory)
         if not hasattr(self, "module_name"):
@@ -630,24 +682,10 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         model_name_str = ""
         if invocation.body:
             if invocation.content_type == "application/json":
-                model_name = _get_model_name(invocation)
-                model_name_str = f"from {self.module_name}.models.{model_name.lower()} "
-                model_name_str += f"import {model_name.capitalize()}"
+                model_code = self._generate_code_models(invocation)
+                model_name_str = cast(str, model_code.import_code)
+                body_kwargs = model_code.creation_code
 
-                json_body = invocation.json_body
-                if isinstance(json_body, list):
-                    model_list = [
-                        f"{model_name.capitalize()}.from_dict({body})"
-                        for body in json_body
-                    ]
-                    body_kwargs = "body=[" + ", ".join(model_list) + "]"
-                elif isinstance(json_body, dict):
-                    from_json = f"{model_name.capitalize()}.from_dict({json_body})"
-                    body_kwargs = f"body={from_json}"
-                else:
-                    raise NotImplementedError(
-                        f"Unhandled body type {type(json_body)}: {invocation.body}"
-                    )
             elif invocation.content_type == "application/octet-stream":
                 raw_body: str = invocation.body
                 bytes_io = f"BytesIO({raw_body.encode()!r})"
@@ -688,6 +726,39 @@ class KiotaPythonCLC(PythonCLC):
     id = "kiota:python"
     generator_script = "kiota-python.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        def _parse_model(json_body: Any) -> str:
+            """Parse the model for a single json_body."""
+            parse_json_body: dict | str = json_body
+            if not isinstance(parse_json_body, str):
+                parse_json_body = json.dumps(parse_json_body)
+            parse_node = f"""JsonParseNodeFactory().get_root_parse_node(
+                    "application/json",
+                    {repr(parse_json_body)}.encode()
+                    )"""
+            from_json = f"{parse_node}.get_object_value({model_name.capitalize()})"
+
+            return from_json
+
+        model_name = _get_model_name(invocation)
+        import_code = (
+            f"from my_kiota_client.models.{model_name.lower()} "
+            f"import {model_name.capitalize()}"
+        )
+
+        json_body = invocation.json_body
+        if isinstance(json_body, list):
+            model_list = [_parse_model(body) for body in json_body]
+            creation_code = "body=[" + ", ".join(model_list) + "]"
+        elif isinstance(json_body, dict):
+            creation_code = f"body={_parse_model(json_body)}"
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(json_body)}: {invocation.body}"
+            )
+
+        return ModelCode(import_code=import_code, creation_code=creation_code)
+
     def _get_method_name(self, invocation: InvocationData):
         path_components = resolve_path(invocation.path, get_config().spec_str).split(
             "/"
@@ -714,40 +785,15 @@ class KiotaPythonCLC(PythonCLC):
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
 
         model_name_str = ""
-
-        def _parse_model(json_body: Any) -> str:
-            """Parse the model for a single json_body."""
-            parse_json_body: dict | str = json_body
-            if not isinstance(parse_json_body, str):
-                parse_json_body = json.dumps(parse_json_body)
-            parse_node = f"""JsonParseNodeFactory().get_root_parse_node(
-            "application/json",
-            {repr(parse_json_body)}.encode()
-            )"""
-            from_json = f"{parse_node}.get_object_value({model_name.capitalize()})"
-
-            return from_json
-
         path_components = resolve_path(invocation.path, get_config().spec_str).split(
             "/"
         )
 
         if invocation.body:
             if invocation.content_type == "application/json":
-                model_name = _get_model_name(invocation)
-                model_name_str = f"from my_kiota_client.models.{model_name.lower()} "
-                model_name_str += f"import {model_name.capitalize()}"
-
-                json_body = invocation.json_body
-                if isinstance(json_body, list):
-                    model_list = [_parse_model(body) for body in json_body]
-                    body_kwargs = "body=[" + ", ".join(model_list) + "]"
-                elif isinstance(json_body, dict):
-                    body_kwargs = f"body={_parse_model(json_body)}"
-                else:
-                    raise NotImplementedError(
-                        f"Unhandled body type {type(json_body)}: {invocation.body}"
-                    )
+                model_code = self._generate_code_models(invocation)
+                model_name_str = cast(str, model_code.import_code)
+                body_kwargs = model_code.creation_code
             else:
                 raw_body: str = invocation.body
                 body_kwargs = f"body={raw_body.encode()!r}"
