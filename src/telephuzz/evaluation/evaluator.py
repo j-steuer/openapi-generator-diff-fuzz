@@ -7,6 +7,8 @@ from pathlib import Path
 from pprint import pformat
 from typing import Any
 
+from requests.models import CaseInsensitiveDict
+
 from telephuzz.config import get_config
 from telephuzz.evaluation.abstractor import Abstractor
 from telephuzz.evaluation.report import DiffReport
@@ -59,6 +61,9 @@ class DiffEvaluator:
             for result in results:
                 if not hasattr(result, attr):
                     raise ValueError(f"Results do not have attribute {attr}")
+
+                # ignore headers for now TODO support?
+                result.response.headers = CaseInsensitiveDict()
 
                 component = getattr(result, attr)
 
