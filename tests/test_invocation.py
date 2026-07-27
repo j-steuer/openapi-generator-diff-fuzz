@@ -208,3 +208,36 @@ def test_parse_surrogate_encoding():
     invocation = InvocationData(request)
     assert invocation.json_body is not None
     f"{invocation.json_body}".encode()
+
+
+def test_strip_nested_array():
+    """Nested arrays should be stripped from the body."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "NkdOLM",
+                "Content-Type": "application/json",
+                "Content-Length": "150",
+            }
+        ),
+        body=(
+            '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
+            '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
+            '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336'
+            ', "additional": [[1]]}'
+        ),
+        method=HTTPMethod.PUT,
+        path="/pet",
+        query_parameters={},
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.json_body is not None
+    assert "additional" not in invocation.json_body

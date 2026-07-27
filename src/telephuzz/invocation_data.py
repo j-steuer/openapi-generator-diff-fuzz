@@ -48,6 +48,27 @@ class InvocationData:
         if self.content_type == JSON_CONTENT:
             # process body to usable JSON
             self.json_body = json.loads(request.body)
+            assert isinstance(self.json_body, dict)
+
+            # strip of unusable components
+            # request generators may generate requests not serializable by all clients
+            # for all stripped components, at least one source will be provided
+            # showing that one of the supported clients can not serialize it
+
+            stripped_json_body = dict(self.json_body)
+
+            for key, value in self.json_body.items():
+                # strip nesteds array (https://github.com/microsoft/kiota/issues/5159)
+                # while not a full match, kiota has several issues regarding
+                # (de-)serialization of nested arrays. As they are rarely used
+                # in OpenAPI schemas, this tool will not support them for the sake
+                # of simplicity and other client tools that may not (fully) support it
+
+                if isinstance(value, list):
+                    if any(isinstance(v, list) for v in self.json_body[key]):
+                        del stripped_json_body[key]
+
+            self.json_body = stripped_json_body
 
     def __repr__(self) -> str:
         """Repr method."""
