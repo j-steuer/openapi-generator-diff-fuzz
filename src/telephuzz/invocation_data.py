@@ -31,6 +31,7 @@ class InvocationData:
             self._get_query_parameters(request), request
         )
         self.arg_types = get_args(get_config().spec_str, request.method, request.path)
+        self.send_body = "requestBody" in self.arg_types
 
         self.body = request.body
         self.json_body = None
@@ -48,27 +49,39 @@ class InvocationData:
         if self.content_type == JSON_CONTENT:
             # process body to usable JSON
             self.json_body = json.loads(request.body)
-            assert isinstance(self.json_body, dict)
 
-            # strip of unusable components
-            # request generators may generate requests not serializable by all clients
-            # for all stripped components, at least one source will be provided
-            # showing that one of the supported clients can not serialize it
+            bodies = (
+                list(self.json_body)
+                if isinstance(self.json_body, list)
+                else [dict(self.json_body)]
+            )
 
-            stripped_json_body = dict(self.json_body)
+            for idx, body in enumerate(bodies):
+                assert isinstance(body, dict)
 
-            for key, value in self.json_body.items():
-                # strip nesteds array (https://github.com/microsoft/kiota/issues/5159)
-                # while not a full match, kiota has several issues regarding
-                # (de-)serialization of nested arrays. As they are rarely used
-                # in OpenAPI schemas, this tool will not support them for the sake
-                # of simplicity and other client tools that may not (fully) support it
+                # strip of unusable components
+                # request generators may generate requests not
+                # serializable by all clients
+                # for all stripped components, at least one source will be provided
+                # showing that one of the supported clients can not serialize it
 
-                if isinstance(value, list):
-                    if any(isinstance(v, list) for v in self.json_body[key]):
-                        del stripped_json_body[key]
+                stripped_json_body = dict(body)
 
-            self.json_body = stripped_json_body
+                for key, value in body.items():
+                    # strip nested arrays
+                    # (https://github.com/microsoft/kiota/issues/5159)
+                    # while not a full match, kiota has several issues regarding
+                    # (de-)serialization of nested arrays. As they are rarely used
+                    # in OpenAPI schemas, this tool will not support them for the sake
+                    # of simplicity and other client tools that may not support it
+
+                    if isinstance(value, list):
+                        if any(isinstance(v, list) for v in body[key]):
+                            del stripped_json_body[key]
+
+                bodies[idx] = stripped_json_body
+
+            self.json_body = bodies if isinstance(self.json_body, list) else bodies[0]
 
     def __repr__(self) -> str:
         """Repr method."""

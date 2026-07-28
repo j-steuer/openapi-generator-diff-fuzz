@@ -528,7 +528,6 @@ def test_single_explode_string(clc_class, api_wfd: tuple[Network, str]):
         )
 
 
-@pytest.mark.skip(reason="Swagger issue, need to fix without breaking basic_petshoop")
 @pytest.mark.parametrize(
     "clc_class",
     [

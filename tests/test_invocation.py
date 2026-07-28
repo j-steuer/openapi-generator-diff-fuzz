@@ -1,5 +1,6 @@
 """Test invocation data processing."""
 
+import json
 from copy import deepcopy
 
 from conftest import TEST_CONFIG_BASE_PATH
@@ -175,6 +176,7 @@ def test_parse_json_body():
 
     invocation = InvocationData(body_request)
     assert invocation.json_body is not None
+    assert isinstance(invocation.json_body, dict)
     assert invocation.json_body["id"] == 1
 
 
@@ -210,6 +212,61 @@ def test_parse_surrogate_encoding():
     f"{invocation.json_body}".encode()
 
 
+def test_parse_array():
+    """Array JSON should be parsable."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "rD5pQN",
+                "Content-Type": "application/json",
+                "Content-Length": "2",
+            }
+        ),
+        body="[]",
+        method=HTTPMethod.POST,
+        path="/user/createWithList",
+        query_parameters={},
+    )
+
+    request.body = json.dumps(
+        [
+            {
+                "id": 10,
+                "username": "theUser",
+                "firstName": "John",
+                "lastName": "James",
+                "email": "john@email.com",
+                "password": "12345",
+                "phone": "12345",
+                "userStatus": 1,
+            },
+            {
+                "id": 11,
+                "username": "theUser",
+                "firstName": "John",
+                "lastName": "James",
+                "email": "john@email.com",
+                "password": "12345",
+                "phone": "12345",
+                "userStatus": 1,
+            },
+        ]
+    )
+
+    invocation = InvocationData(request)
+    assert isinstance(invocation.json_body, list)
+    assert len(invocation.json_body) == 2
+    assert invocation.json_body[0]["id"] != invocation.json_body[1]["id"]
+    assert invocation.json_body[0]["password"] == invocation.json_body[1]["password"]
+
+
 def test_strip_nested_array():
     """Nested arrays should be stripped from the body."""
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
@@ -241,3 +298,15 @@ def test_strip_nested_array():
     invocation = InvocationData(request)
     assert invocation.json_body is not None
     assert "additional" not in invocation.json_body
+
+    # strip array
+    valid_body = request.body.replace("[[1]]", "[1]")
+    request.body = f"[{request.body}, {valid_body}]"
+    invocation = InvocationData(request)
+    assert isinstance(invocation.json_body, list)
+    assert "additional" not in invocation.json_body[0]
+
+    invocation = InvocationData(request)
+    assert invocation.json_body is not None
+    assert "additional" not in invocation.json_body[0]
+    assert "additional" in invocation.json_body[1]

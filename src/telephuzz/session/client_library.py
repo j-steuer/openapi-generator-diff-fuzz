@@ -529,7 +529,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
-        if invocation.body:
+        if invocation.send_body:
             if invocation.content_type == "application/json":
                 model_code = self._generate_code_models(invocation)
                 model_name_str += cast(str, model_code.import_code)
@@ -583,12 +583,12 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
-        if invocation.body:
+        if invocation.send_body:
             if invocation.json_body is not None:
                 body_kwargs = self._generate_code_models(invocation).creation_code
             else:
                 raw_body: str = invocation.body
-                body_kwargs = f"body={raw_body.encode()!r}"
+                body_kwargs = f"body={repr(raw_body)}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -680,7 +680,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         kwargs = ", ".join(f"{k}={v}" for k, v in joinable_values.items())
 
         model_name_str = ""
-        if invocation.body:
+        if invocation.send_body:
             if invocation.content_type == "application/json":
                 model_code = self._generate_code_models(invocation)
                 model_name_str = cast(str, model_code.import_code)
@@ -789,7 +789,7 @@ class KiotaPythonCLC(PythonCLC):
             "/"
         )
 
-        if invocation.body:
+        if invocation.send_body:
             if invocation.content_type == "application/json":
                 model_code = self._generate_code_models(invocation)
                 model_name_str = cast(str, model_code.import_code)
