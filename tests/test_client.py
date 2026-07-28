@@ -624,8 +624,8 @@ def test_enum_query_parameter(clc_class, api_wfd: tuple[Network, str]):
     ],
 )
 @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-def test_request_end_with_query_parameter(clc_class, api_wfd: tuple[Network, str]):
-    """Test sending a request whose path ends with a query parameter."""
+def test_request_end_with_path_variable(clc_class, api_wfd: tuple[Network, str]):
+    """Test sending a request whose path ends with a path variable."""
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
