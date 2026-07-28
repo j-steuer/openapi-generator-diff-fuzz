@@ -818,11 +818,16 @@ class KiotaPythonCLC(PythonCLC):
                 for c in path_components
                 if c
             ]
+            builder_module_prefix = (
+                path_components[-1]
+                if path_components[-1] != "item"
+                else f"with_{path_components[-2]}_item"
+            )
             request_builder_module = (
-                f"{'.'.join(path_components)}.{path_components[-1]}_request_builder"
+                f"{'.'.join(path_components)}.{builder_module_prefix}_request_builder"
             )
             request_builder = (
-                f"{transform_case(path_components[-1], Case.PASCAL)}RequestBuilder"
+                f"{transform_case(builder_module_prefix, Case.PASCAL)}RequestBuilder"
             )
             import_query = (
                 f"from my_kiota_client.{request_builder_module} "

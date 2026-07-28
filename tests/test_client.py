@@ -612,3 +612,50 @@ def test_enum_query_parameter(clc_class, api_wfd: tuple[Network, str]):
 
         _test_send_request(clc, request_empty, network, api_path, expected_status=400)
         _test_send_request(clc, request, network, api_path, expected_status=200)
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
+def test_request_end_with_query_parameter(clc_class, api_wfd: tuple[Network, str]):
+    """Test sending a request whose path ends with a query parameter."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "k18bhp",
+                    "Content-Length": "0",
+                }
+            ),
+            body="",
+            method=HTTPMethod.POST,
+            path="/pet/5714?status=%C3%A3%C2%88%F2%86%AD%9A%C2%A1g%F3%95%B2%BB%0B%F2%B7%99%89%E9%BB%A5%C3%B19%0B%C3%957%C2%97n%7B",
+            query_parameters={
+                "status": "ã\x88\U00086b5a¡g\U000d5cbb\x0b\U000b7649黥ñ9\x0bÕ7\x97n{",
+                "petId": 5714,
+            },
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=400,
+        )
