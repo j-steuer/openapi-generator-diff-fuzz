@@ -663,18 +663,28 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         # resolve enums
         enum_import = ""
         joinable_values = dict()
-        for parameter, value in invocation.query_parameters.items():
-            if invocation.arg_types[parameter] == "enum":
-                if not enum_import:
-                    enum_import = (
-                        f"from {self.module_name}.models.{invocation.operation_id}"
-                        "_status import *"
-                    )
-                enum_class_name = (
-                    f"{transform_case(invocation.operation_id, Case.PASCAL)}Status"
+
+        # enums
+        for parameter in [p for p, v in invocation.arg_types.items() if v == "enum"]:
+            if not enum_import:
+                enum_import = (
+                    f"from {self.module_name}.models.{invocation.operation_id}"
+                    "_status import *"
                 )
+
+            enum_class_name = (
+                f"{transform_case(invocation.operation_id, Case.PASCAL)}Status"
+            )
+            value = invocation.query_parameters.get(parameter)
+            if value is not None:
                 joinable_values[parameter] = f"{enum_class_name}({repr(value)})"
             else:
+                # have to specifically set Unset, chooses default from enum otherwise
+                joinable_values[parameter] = "Unset()"
+
+        # other parameters
+        for parameter, value in invocation.query_parameters.items():
+            if invocation.arg_types[parameter] != "enum":
                 joinable_values[parameter] = repr(value)
 
         kwargs = ", ".join(f"{k}={v}" for k, v in joinable_values.items())
@@ -704,7 +714,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
 
         from {self.module_name} import Client
         from {self.module_name}.api.{api} import {method_name}
-        from {self.module_name}.types import File
+        from {self.module_name}.types import File, Unset
         {model_name_str}
         {enum_import}
 

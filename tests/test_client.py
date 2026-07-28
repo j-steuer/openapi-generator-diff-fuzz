@@ -607,10 +607,8 @@ def test_enum_query_parameter(clc_class, api_wfd: tuple[Network, str]):
             query_parameters={"status": "pending"},
         )
 
-        _test_send_request(
-            clc,
-            request,
-            network,
-            api_path,
-            expected_status=200,
-        )
+        request_empty = deepcopy(request)
+        request_empty.query_parameters.clear()
+
+        _test_send_request(clc, request_empty, network, api_path, expected_status=400)
+        _test_send_request(clc, request, network, api_path, expected_status=200)
