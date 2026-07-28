@@ -1,7 +1,9 @@
 """File for custom request and response handling for MITMProxyContainer."""
 
 import json
+import logging
 import os
+import sys
 import time
 from pathlib import Path
 from urllib.parse import urlparse
@@ -9,6 +11,14 @@ from urllib.parse import urlparse
 from mitmproxy import http
 
 RESPONSE_PATH = "/responses"
+
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
 def request(flow: http.HTTPFlow):
@@ -37,6 +47,21 @@ def request(flow: http.HTTPFlow):
     flow.request.host = host
     flow.request.port = port_number
     flow.request.path = "/" + rest
+
+    # log request
+    log_str = f"""
+    Sending request:
+    --------------------------------------
+    Client: {flow.client_conn.peername}
+    Method: {flow.request.method}
+    Path: {flow.request.path}
+    Full URL: {flow.request.url}
+    Headers: {flow.request.headers}
+    Body length: {len(flow.request.raw_content) if flow.request.raw_content else 0}
+    Raw body content: {flow.request.raw_content!r}
+    """
+
+    logger.info(log_str)
 
 
 def response(flow: http.HTTPFlow):
@@ -68,3 +93,17 @@ def response(flow: http.HTTPFlow):
 
     with open(response_path / f"response_{response_id}.json", "w") as f:
         json.dump(entry, f)
+
+    # log response
+    log_str = f"""
+    --------------------------------------
+    Got response:
+    --------------------------------------
+    Client: {flow.client_conn.peername}
+    Status: {flow.response.status_code}
+    Headers: {flow.response.headers}
+    Body length: {len(flow.response.raw_content) if flow.response.raw_content else 0}
+    Raw body content: {flow.response.raw_content!r}
+    """
+
+    logger.info(log_str)
