@@ -391,11 +391,11 @@ def test_json_body_array(clc_class, api_wfd: tuple[Network, str]):
         _test_send_request(clc, request_two, network, api_path, expected_status=200)
 
 
-# TODO bug with swagger codegen?
 @pytest.mark.parametrize(
     "clc_class",
     [
         OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
         OpenAPIPythonClientCLC,
         KiotaPythonCLC,
     ],
