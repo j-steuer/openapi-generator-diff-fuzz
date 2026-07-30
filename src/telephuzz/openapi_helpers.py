@@ -12,7 +12,7 @@ from telephuzz.http_message import HTTPMethod
 from telephuzz.operation_ids import generate_operation_id
 
 DEFAULT_VERSION = "0.0.0"
-UNSUPPORTED_MEDIA_TYPES = {"application/xml", "application/x-www-form-urlencoded"}
+RESTRICTED_MEDIA_TYPES = {"application/xml", "application/x-www-form-urlencoded"}
 
 
 def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
@@ -53,8 +53,14 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
             if isinstance(request_body, dict):
                 content = request_body.get("content")
                 if isinstance(content, dict):
-                    for media_type in UNSUPPORTED_MEDIA_TYPES:
-                        content.pop(media_type, None)
+                    # remove restricted media types if it does not leave content empty
+                    if any(
+                        media
+                        for media in content
+                        if media not in RESTRICTED_MEDIA_TYPES
+                    ):
+                        for media_type in RESTRICTED_MEDIA_TYPES:
+                            content.pop(media_type, None)
 
                     if not content:
                         raise ValueError(

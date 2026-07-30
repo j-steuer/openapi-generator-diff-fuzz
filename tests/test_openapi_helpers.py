@@ -11,7 +11,7 @@ import yaml  # type: ignore
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     DEFAULT_VERSION,
-    UNSUPPORTED_MEDIA_TYPES,
+    RESTRICTED_MEDIA_TYPES,
     _find_all,
     extract_path_parameters,
     extract_path_variable_types,
@@ -80,9 +80,11 @@ class TestPreprocessing:
 
         assert count == len(operation_ids)
 
-    def test_unsupported_media_type(self):
-        """Test filtering out unsupported media types."""
-        processed_spec = preprocess_oas(Path("tests/testfiles/processed_petshop.json"))
+    def test_restricting_media_type(self):
+        """Test filtering out restricted media types."""
+        processed_spec = preprocess_oas(
+            Path("wfd/openapi-swagger/swagger-petstore.json")
+        )
         for methods in cast(dict, processed_spec).get("paths", {}).values():
             assert isinstance(methods, dict), "Methods were not loaded as a dict"
             for operation in methods.values():
@@ -95,8 +97,18 @@ class TestPreprocessing:
                 if not isinstance(content, dict):
                     continue
 
-                for media_type in UNSUPPORTED_MEDIA_TYPES:
+                for media_type in RESTRICTED_MEDIA_TYPES:
                     assert media_type not in content
+
+        processed_spec = preprocess_oas(Path("wfd/openapi-swagger/quartz-manager.json"))
+        login = "/quartz-manager/auth/login"
+        media_type = cast(dict, processed_spec)["paths"][login]["post"]["requestBody"][
+            "content"
+        ]
+        # should not remove if only possible content
+        urlencoded = "application/x-www-form-urlencoded"
+        assert urlencoded in RESTRICTED_MEDIA_TYPES
+        assert urlencoded in media_type
 
     def test_default_version(self):
         """Version should be fixed regardless of spec."""
