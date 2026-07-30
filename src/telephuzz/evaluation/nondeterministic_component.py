@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from telephuzz.http_message import HTTPMethod
 
 
-@dataclass
+@dataclass(slots=True)
 class NondeterministicComponent:
     r"""Describes which parts of matching responses should be abstracted.
 
@@ -39,6 +39,7 @@ class NondeterministicComponent:
     path: str | None = None  # TODO startswith?
     json_component: str | None = None
     regex_component: str | None = None
+    component_count: int = 0
 
     def __post_init__(self) -> None:
         """Run compatibility checks."""

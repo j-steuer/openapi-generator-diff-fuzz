@@ -37,7 +37,7 @@ LIB_PATH = "/app"
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(slots=True)
 class ModelCode:
     """Data class for code concerning JSON models."""
 

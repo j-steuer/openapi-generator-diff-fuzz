@@ -7,7 +7,7 @@ from telephuzz.http_message import Request
 from telephuzz.session.client_library import LibraryId
 
 
-@dataclass
+@dataclass(slots=True)
 class DiffReport:
     """Class for storing and writing the results of an evaluation."""
 

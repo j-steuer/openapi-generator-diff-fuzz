@@ -7,7 +7,7 @@ from telephuzz.http_message import Request, Response
 from telephuzz.session.client_library import LibraryId
 
 
-@dataclass
+@dataclass(slots=True)
 class RequestResult:
     """Store request result data important for the evaluation."""
 

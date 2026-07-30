@@ -41,7 +41,7 @@ class HTTPMessage:
     body: Any
 
 
-@dataclass
+@dataclass(slots=True)
 class Request(HTTPMessage):
     """Class for HTTP request fields relevant for the evaluation."""
 
@@ -115,7 +115,7 @@ class Request(HTTPMessage):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class Response(HTTPMessage):
     """Class for HTTP response fields relevant for the evaluation."""
 
