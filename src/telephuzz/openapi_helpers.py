@@ -92,6 +92,15 @@ def _find_all(spec: dict, element: str) -> list[Any]:
     return results
 
 
+def get_version(spec: dict) -> str:
+    try:
+        return spec.get("openapi") or spec["swagger"]
+    except KeyError as e:
+        raise ValueError(
+            "Provided spec is invalid, does not contain version information."
+        ) from e
+
+
 def find_operation(spec: dict, operation_id: str) -> dict | None:
     """Find operation with operation id."""
 

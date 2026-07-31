@@ -29,6 +29,7 @@ from telephuzz.session.client_library import (
     OpenAPIGenPythonCLC,
     OpenAPIGenTypeScriptCLC,
     OpenAPIPythonClientCLC,
+    OpenAPIVersion,
     OperationIdBasedCLC,
     OrvalCLC,
     SwaggerCodegenCsharpCLC,
@@ -107,6 +108,27 @@ def test_from_id():
     """Test obtaining a class based on id."""
     client_type = ClientLibraryContainer.from_id("openapi-generator:python")
     assert client_type == OpenAPIGenPythonCLC
+
+
+def test_supported_version():
+    """Test assigning the supported version."""
+    assert OpenAPIVersion("2.0") == OpenAPIVersion.V_2
+    assert OpenAPIVersion("3.0.1") == OpenAPIVersion.V_3_0
+    assert OpenAPIVersion("3.1.0") == OpenAPIVersion.V_3_1
+
+    with pytest.raises(ValueError):
+        OpenAPIVersion("1.0")
+
+
+def test_unsupported_version():
+    """Test that client raises error if version is not supported."""
+    # version 2.0 schema
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+
+    # client does not support 2.0.x
+    with pytest.raises(ValueError, match="is not supported by"):
+        with OpenAPIPythonClientCLC():
+            pass
 
 
 def test_get_method_name_opid_mixin(monkeypatch):

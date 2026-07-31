@@ -27,6 +27,7 @@ from telephuzz.session.client_library import (
     ModelCode,
     OpenAPIGenPythonCLC,
     OpenAPIPythonClientCLC,
+    OpenAPIVersion,
     OperationIdBasedCLC,
     PythonCLC,
     SwaggerCodegenPythonCLC,
@@ -91,6 +92,7 @@ def setup_loop():
 class BasicClient(PythonCLC, OperationIdBasedCLC):
     id = "basicclient"
     generator_script = "basic-client.sh"
+    supported_versions = {OpenAPIVersion.V_3_1}
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         return ModelCode(import_code="", creation_code="")

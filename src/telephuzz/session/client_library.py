@@ -15,6 +15,7 @@ from _hashlib import HASH
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable, cast
 
@@ -27,7 +28,7 @@ from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import resolve_path
+from telephuzz.openapi_helpers import get_version, resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -35,6 +36,21 @@ LibraryId = str
 LIB_PATH = "/app"
 
 logger = logging.getLogger(__name__)
+
+
+class OpenAPIVersion(Enum):
+    V_2 = "2.0.x"
+    V_3_0 = "3.0.x"
+    V_3_1 = "3.1.x"
+
+    @classmethod
+    def _missing_(cls, value):
+        """Fix case where input is not capitalized."""
+        if isinstance(value, str):
+            for member in cls:
+                if member.value.startswith(".".join(value.split(".")[:2])):
+                    return member
+        return None
 
 
 @dataclass(slots=True)
@@ -61,6 +77,7 @@ class ClientLibraryContainer(ABC):
     method_case: Case = Case("snake")
     generator_script: str
     worker_script: str
+    supported_versions: set[OpenAPIVersion]
 
     registry: dict = {}
 
@@ -70,6 +87,8 @@ class ClientLibraryContainer(ABC):
         if not SPEC_PATH.exists():
             with open(SPEC_PATH, "w") as spec:
                 json.dump(get_config().spec, spec)
+
+        self._check_version()
 
         generator_path = GENERATORS_PATH / self.generator_script
         library_path = CLIENT_PATH / self._get_library_dir_name()
@@ -118,6 +137,19 @@ class ClientLibraryContainer(ABC):
             self.container.remove(force=True)
 
             self.container = None
+
+    def _check_version(self) -> None:
+        """Verify that the tool supports the OpenAPI version."""
+        _spec_version = get_version(get_config().spec)
+        try:
+            spec_version = OpenAPIVersion(_spec_version)
+        except ValueError as e:
+            raise ValueError(f"Unknown OpenAPI version: {_spec_version}") from e
+
+        if spec_version not in self.supported_versions:
+            raise ValueError(
+                f"OpenAPI version {spec_version.value} is not supported by {self.id}"
+            )
 
     def _get_library_dir_name(self) -> str:
         """Get name of directory where client library is stored."""
@@ -450,6 +482,29 @@ class OperationIdBasedCLC(ClientLibraryContainer):
         return library_method_name
 
 
+# --- Tool-based abstractions ---
+
+
+class OpenAPIGen(OperationIdBasedCLC):
+    supported_versions = {
+        OpenAPIVersion.V_2,
+        OpenAPIVersion.V_3_0,
+        OpenAPIVersion.V_3_1,
+    }
+
+
+class SwaggerCodegen(OperationIdBasedCLC):
+    supported_versions = {OpenAPIVersion.V_3_0}
+
+
+class OpenAPIPythonClient(OperationIdBasedCLC):
+    supported_versions = {OpenAPIVersion.V_3_0, OpenAPIVersion.V_3_1}
+
+
+class Kiota:
+    supported_versions = {OpenAPIVersion.V_3_0}
+
+
 # --- Concrete Python Client Classes ---
 
 
@@ -487,7 +542,7 @@ def _get_model_name(invocation: InvocationData) -> str:
     return model_name
 
 
-class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
+class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
     """Concrete client library for OpenAPI Generator Python."""
 
     id = "openapi-generator:python"
@@ -567,7 +622,7 @@ class OpenAPIGenPythonCLC(PythonCLC, OperationIdBasedCLC):
         return content
 
 
-class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
+class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
     """Client library class for Swagger Codegen Python."""
 
     id = "swagger-codegen:python"
@@ -612,7 +667,7 @@ class SwaggerCodegenPythonCLC(PythonCLC, OperationIdBasedCLC):
         return content
 
 
-class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
+class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
     """Client library class for openapi-python-client."""
 
     id = "openapi-python-client:python"
@@ -730,7 +785,7 @@ class OpenAPIPythonClientCLC(PythonCLC, OperationIdBasedCLC):
         return content
 
 
-class KiotaPythonCLC(PythonCLC):
+class KiotaPythonCLC(Kiota, PythonCLC):
     """Client library class for Kiota Python."""
 
     id = "kiota:python"
@@ -892,7 +947,7 @@ class KiotaPythonCLC(PythonCLC):
 # --- Concrete Go Client Classes ---
 
 
-class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
+class OpenAPIGenGoCLC(OpenAPIGen, GoCLC):
     """Client library class for OpenAPI Generator Go."""
 
     id = "openapi-generator:go"
@@ -944,7 +999,7 @@ class OpenAPIGenGoCLC(GoCLC, OperationIdBasedCLC):
         return content
 
 
-class SwaggerCodegenGoCLC(GoCLC, OperationIdBasedCLC):  # TODO might be broken
+class SwaggerCodegenGoCLC(SwaggerCodegen, GoCLC):  # TODO might be broken
     """Client library class for Swagger Codegen Go."""
 
     id = "swagger-codegen:go"
@@ -1048,7 +1103,7 @@ class OapiGeneratorCLC(GoCLC, OperationIdBasedCLC):
 # --- Concrete TypeScript Client classes
 
 
-class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
+class OpenAPIGenTypeScriptCLC(OpenAPIGen, TypeScriptCLC):
     """Concrete client library for OpenAPI Generator TypeScript (Axios)."""
 
     id = "openapi-generator:typescript"
@@ -1083,7 +1138,7 @@ class OpenAPIGenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
         return content
 
 
-class SwaggerCodegenTypeScriptCLC(TypeScriptCLC, OperationIdBasedCLC):
+class SwaggerCodegenTypeScriptCLC(SwaggerCodegen, TypeScriptCLC):
     """Concrete client library for Swagger Codegen TypeScript (Axios)."""
 
     id = "swagger-codegen:typescript"
@@ -1292,7 +1347,7 @@ class OrvalCLC(TypeScriptCLC, OperationIdBasedCLC):
 # --- Concrete C# Client classes ---
 
 
-class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
+class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
     """Concrete client library class for OpenAPI Generator C#."""
 
     id = "openapi-generator:csharp"
@@ -1362,7 +1417,7 @@ class OpenAPIGenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
         return content
 
 
-class SwaggerCodegenCsharpCLC(CsharpCLC, OperationIdBasedCLC):
+class SwaggerCodegenCsharpCLC(SwaggerCodegen, CsharpCLC):
     """Concrete client library class for Swagger Codegen C#."""
 
     id = "swagger-codegen:csharp"
@@ -1457,7 +1512,7 @@ class NswagCSharpCLC(CsharpCLC, OperationIdBasedCLC):
         return content
 
 
-class KiotaCSharpCLC(CsharpCLC):
+class KiotaCSharpCLC(Kiota, CsharpCLC):
     """Concrete client library class for Kiota C#."""
 
     id = "kiota:csharp"

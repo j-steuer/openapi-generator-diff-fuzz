@@ -20,6 +20,7 @@ from telephuzz.openapi_helpers import (
     get_api_url_path,
     get_args,
     get_content_type,
+    get_version,
     preprocess_oas,
     resolve_path,
     resolve_request_id,
@@ -264,3 +265,16 @@ def test_extract_path_variable_types():
 
     with pytest.raises(KeyError):
         extract_path_variable_types(spec, "none")
+
+
+def test_get_version():
+    """Test obtaining version from 2.0 and 3.x OpenAPI specs."""
+    spec = {"openapi": "3.0.1"}
+    assert get_version(spec) == "3.0.1"
+
+    spec = {"swagger": "2.0"}
+    assert get_version(spec) == "2.0"
+
+    spec = {"version": "2.0"}
+    with pytest.raises(ValueError):
+        get_version(spec)
