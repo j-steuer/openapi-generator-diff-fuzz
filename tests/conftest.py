@@ -19,6 +19,7 @@ from docker.errors import ImageNotFound
 from docker.models.containers import Container
 from requests.structures import CaseInsensitiveDict
 
+import telephuzz.config as cfg
 from telephuzz.config import Config
 from telephuzz.constants import BASE_PATH, CLIENT_PATH, SPEC_PATH
 from telephuzz.docker_helpers import compose_down, compose_up
@@ -259,6 +260,9 @@ def setup():
     original = Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH
     Config.API_CONFIG_PATH = TEST_API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = TEST_CLIENT_CONFIG_PATH
+
+    # make config regenerate for each tes
+    cfg._config = None
     yield
     Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH = original
 
