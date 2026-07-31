@@ -465,3 +465,11 @@ def test_python_petshop() -> None:
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
+
+
+def test_python_springbatch() -> None:
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
+
+    fuzzer = TelePhuzz()
+    fuzzer.start_fuzzing_session()
