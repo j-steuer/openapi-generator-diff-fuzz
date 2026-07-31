@@ -64,7 +64,7 @@ class TelePhuzz:
             compose_up(config.compose_path, env=env, project=SCHEMATHESIS_PROJECT)
 
             # check that API server is ready
-            timeout = 5
+            timeout = 60
             for i in range(timeout + 1):
                 try:
                     requests.get("http://localhost:8000/", timeout=1)
