@@ -42,6 +42,7 @@ class Session:
         self.id = id
         self.api = api
         self.client = client
+        self.first: bool = True
 
     def send(
         self,
@@ -49,11 +50,14 @@ class Session:
         api_path: str,
         response_output: Path,
         invocation: InvocationData | None = None,
-    ) -> RequestResult:
-        """Send a request to the API through the client library."""
+    ) -> RequestResult | None:
+        """Send a request to the API through the client library.
+
+        Returns None if no response could be retrieved in time.
+        """
         logger.debug(f"Sending request through clients: {request}")
 
-        def _get_response() -> Response:
+        def _get_response() -> Response | None:
             response_dir = response_output / f"api{self.id}"
             response_path = None
             for _ in range(100):
@@ -63,7 +67,7 @@ class Session:
                 except (FileNotFoundError, StopIteration):
                     sleep(0.1)
             if response_path is None:
-                raise TimeoutError("Response not received in time")
+                return None
 
             response = Response.from_json(response_path)
 
@@ -78,6 +82,24 @@ class Session:
         if not isinstance(self.api, APIWithDatabaseContainer):
             self.client.send(invocation, api_path)
             response = _get_response()
+            if response is None:
+                if not self.first:
+                    raise TimeoutError("Response could not be retrived in time.")
+
+                for _ in range(5):
+                    sleep(1)
+                    self.client.send(invocation, api_path)
+                    response = _get_response()
+
+                    if response is not None:
+                        self.first = False
+                        break
+
+                if self.first:
+                    raise TimeoutError("Response could not be retrieved in time.")
+
+            if not response:
+                raise ValueError("Response was not parsed into response object.")
             result = RequestResult(self.client.id, request, response, None, None)
         else:
             out_before = Path("/tmp/before")
@@ -94,6 +116,7 @@ class Session:
             write_to_host(self.api.db_container, str(out_before), out_before_host)
             write_to_host(self.api.db_container, str(out_after), out_after_host)
 
+            assert isinstance(response, Response)
             result = RequestResult(
                 self.client.id, request, response, out_before_host, out_after_host
             )
@@ -292,10 +315,10 @@ class SessionManager:
             # process into invocation data to do it once per request
             invocation = InvocationData(request)
 
-            results.add(
-                session.send(
-                    request, api_url, Path(self.result_dir), invocation=invocation
-                )
+            result = session.send(
+                request, api_url, Path(self.result_dir), invocation=invocation
             )
+            assert result
+            results.add(result)
 
         return results

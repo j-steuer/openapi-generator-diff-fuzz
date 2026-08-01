@@ -29,7 +29,7 @@ def compose_up(
     cmd = ["docker", "compose", "-f", str(compose_path)]
     if project:
         cmd += ["-p", project]
-    cmd += ["up", "-d"]
+    cmd += ["up", "-d", "--wait"]
     subprocess.run(
         cmd,
         env=env,
