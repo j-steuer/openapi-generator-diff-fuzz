@@ -8,3 +8,4 @@ port-names:
 - JACOCO_PORT
 nondeterministic_components:
   - json_component: timestamp
+  - json_component: _links
