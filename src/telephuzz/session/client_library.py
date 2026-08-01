@@ -601,20 +601,26 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
         else:
             auth = ""
 
-        api = _get_main_path(invocation.path)
+        # TODO move replace to transforming invocation
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
+        api_class = transform_case(api, Case.PASCAL)
 
         content = textwrap.dedent(f"""
         from pprint import pprint
 
         from openapi_client import Configuration, ApiClient
-        from openapi_client.api.{api}_api import {api.capitalize()}Api
+        from openapi_client.api.{api}_api import {api_class}Api
         {model_name_str}
 
         config = Configuration(host="{api_path}"{auth})
 
         client = ApiClient(configuration=config)
 
-        api = {api.capitalize()}Api(api_client=client)
+        api = {api_class}Api(api_client=client)
 
         pprint(api.{self._get_method_name(invocation)}({kwargs}))
         """).encode()
@@ -647,8 +653,12 @@ class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
-        api = _get_main_path(invocation.path).capitalize()
-
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
+        api_class = transform_case(api, Case.PASCAL)
         content = textwrap.dedent(f"""
         from pprint import pprint
 
@@ -658,7 +668,7 @@ class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
 
         config = Configuration()
         config.host = "{api_path}"
-        api_instance = swagger_client.{api}Api(swagger_client.ApiClient(config))
+        api_instance = swagger_client.{api_class}Api(swagger_client.ApiClient(config))
 
         api_response = api_instance.{self._get_method_name(invocation)}({kwargs})
         pprint(api_response)
@@ -761,7 +771,11 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
             kwargs += f"{', ' if invocation.query_parameters else ''}{body_kwargs}"
 
-        api = _get_main_path(invocation.path).lower()
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
 
         content = textwrap.dedent(f"""
         from io import BytesIO

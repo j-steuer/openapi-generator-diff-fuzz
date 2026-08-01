@@ -21,6 +21,7 @@ from telephuzz.session.client_library import (
     ClientLibraryContainer,
     KiotaCSharpCLC,
     KiotaPythonCLC,
+    ModelCode,
     NswagCSharpCLC,
     NswagTypeScriptCLC,
     OapiGeneratorCLC,
@@ -90,7 +91,7 @@ def _test_send_request(
         ][0]
         logs = mitmproxy.logs().decode()
         latest_status = None
-        for _ in range(50):
+        for _ in range(100):
             try:
                 latest_status = re.findall(r"<< [0-9]{3}", logs)[-1]
                 break
@@ -142,6 +143,9 @@ def test_get_method_name_opid_mixin(monkeypatch):
     monkeypatch.setattr(config, "spec_str", json.dumps(spec))
 
     class Dummy(OperationIdBasedCLC):
+        def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+            return ModelCode(None, "")
+
         def _translate(
             self, invocation: InvocationData, api_path: str
         ) -> str | list[str]:
@@ -680,4 +684,50 @@ def test_request_end_with_path_variable(clc_class, api_wfd: tuple[Network, str])
             network,
             api_path,
             expected_status=400,
+        )
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["spring-batch-rest"], indirect=True)
+def test_tag_module_resolve(clc_class, api_wfd: tuple[Network, str]):
+    """Test resolving the module through a tag different than the base path."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    # wait for spring-batch-rest-mitmproxy to be ready
+    sleep(10)
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "nEfZ5y",
+                }
+            ),
+            body="",
+            method=HTTPMethod.GET,
+            path="/jobs",
+            query_parameters={},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=404,
         )

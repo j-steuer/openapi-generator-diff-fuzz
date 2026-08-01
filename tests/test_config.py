@@ -1,11 +1,13 @@
 """Tests for config helper methods."""
 
+import pytest
 from conftest import TEST_CONFIG_BASE_PATH
 
 import telephuzz.config as cfg
 from telephuzz.config import Config, get_config
 from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
 from telephuzz.http_message import HTTPMethod
+from telephuzz.operation_ids import generate_operation_id
 
 
 def test_get_config():
@@ -42,3 +44,39 @@ def test_get_config():
     assert config.timeout == 3600
 
     cfg._config = None
+
+
+def test_operation_id_lookup() -> None:
+    """Test the operation_id_lookup method."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    config = get_config()
+
+    # Test a known operation
+    method = "GET"
+    path = "/user/login"
+    operation_id = config.operation_id_lookup(method, path)
+    assert operation_id == generate_operation_id(method, path)
+
+    # Test an unknown operation
+    method = "POST"
+    path = "/unknown"
+    with pytest.raises(ValueError):
+        config.operation_id_lookup(method, path)
+
+
+def test_tag_lookup() -> None:
+    """Test the tag_lookup method."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    config = get_config()
+
+    # Test a known tag
+    method = "GET"
+    path = "/jobs"
+    tag = config.tag_lookup(method, path)
+    assert tag == "job-controller"
+
+    # Test an unknown tag
+    method = "POST"
+    path = "/unknown"
+    with pytest.raises(ValueError):
+        config.tag_lookup(method, path)

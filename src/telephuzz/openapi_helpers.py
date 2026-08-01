@@ -341,3 +341,40 @@ def extract_path_parameters(template: str, path: str) -> dict[str, Any]:
             )
 
     return params
+
+
+def build_operation_lookup(spec: dict) -> dict[tuple[str, str], dict[str, Any]]:
+    """Build a lookup index for operations keyed by (method, path)."""
+    lookup: dict[tuple[str, str], dict[str, Any]] = {}
+
+    for path, methods in spec.get("paths", {}).items():
+        if not isinstance(methods, dict):
+            continue
+
+        for method, operation in methods.items():
+            if not isinstance(operation, dict):
+                continue
+
+            try:
+                HTTPMethod(method)
+            except ValueError:
+                continue
+
+            normalized_method = method.lower()
+            operation_id = operation.get("operationId")
+
+            tags = operation.get("tags")
+            tag: str | None = None
+            if isinstance(tags, list) and tags:
+                tag = tags[0]
+            elif isinstance(tags, str):
+                tag = tags
+
+            lookup[(normalized_method, path)] = {
+                "method": normalized_method,
+                "path": path,
+                "operation_id": operation_id,
+                "tag": tag,
+            }
+
+    return lookup

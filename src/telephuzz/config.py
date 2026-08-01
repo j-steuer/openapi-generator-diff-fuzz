@@ -1,4 +1,4 @@
-"""Helper methods related to reading and parsing config."""
+"""Helper methods related to reading and parsing config and storing metadata."""
 
 import json
 from pathlib import Path
@@ -7,7 +7,11 @@ import yaml  # type: ignore
 
 from telephuzz.constants import BASE_PATH
 from telephuzz.evaluation.nondeterministic_component import NondeterministicComponent
-from telephuzz.openapi_helpers import preprocess_oas
+from telephuzz.openapi_helpers import (
+    build_operation_lookup,
+    preprocess_oas,
+    resolve_path,
+)
 
 
 class Config:
@@ -49,6 +53,8 @@ class Config:
         self.log_path = fuzzing_config["log-path"]
         self.timeout = fuzzing_config["timeout"]
 
+        self.operation_lookup = build_operation_lookup(self.spec)
+
     def _get_config(self) -> tuple[dict, dict]:
         """Obtain the config as a dict."""
         if not self.CLIENT_CONFIG_PATH.exists():
@@ -62,6 +68,22 @@ class Config:
                     return yaml.safe_load(api_stream), yaml.safe_load(client_stream)
                 except yaml.YAMLError as e:
                     raise ValueError(f"Invalid YAML in config: {e}") from e
+
+    def operation_id_lookup(self, method: str, path: str) -> str:
+        """Get the operation ID for a given method and path."""
+        resolved_path = resolve_path(path, self.spec_str)
+        key = (method.lower(), resolved_path)
+        if key not in self.operation_lookup:
+            raise ValueError(f"No operation found for {method} {path}.")
+        return self.operation_lookup[key]["operation_id"]
+
+    def tag_lookup(self, method: str, path: str) -> str:
+        """Get the tag for a given method and path."""
+        resolved_path = resolve_path(path, self.spec_str)
+        key = (method.lower(), resolved_path)
+        if key not in self.operation_lookup:
+            raise ValueError(f"No operation found for {method} {path}.")
+        return self.operation_lookup[key]["tag"]
 
 
 # ---- lazy singleton state ----

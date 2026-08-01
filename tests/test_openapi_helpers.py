@@ -13,6 +13,7 @@ from telephuzz.openapi_helpers import (
     DEFAULT_VERSION,
     RESTRICTED_MEDIA_TYPES,
     _find_all,
+    build_operation_lookup,
     extract_path_parameters,
     extract_path_variable_types,
     extract_paths,
@@ -278,3 +279,17 @@ def test_get_version():
     spec = {"version": "2.0"}
     with pytest.raises(ValueError):
         get_version(spec)
+
+
+def test_build_operation_lookup():
+    """Test building the operation lookup index from a spec."""
+    with open("tests/testfiles/processed_petshop.json", "r") as f:
+        spec = json.load(f)
+
+    lookup = build_operation_lookup(spec)
+
+    assert ("post", "/pet") in lookup
+    pet_lookup = lookup[("post", "/pet")]
+    assert pet_lookup["operation_id"] == generate_operation_id("POST", "/pet")
+    assert pet_lookup["tag"] == "pet"
+    assert lookup[("get", "/pet/{petId}")]["path"] == "/pet/{petId}"
