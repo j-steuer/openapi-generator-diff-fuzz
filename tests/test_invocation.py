@@ -341,3 +341,28 @@ def test_cast_query_parameter_integers():
     assert invocation.query_parameters["jobName"] == ""
     assert invocation.query_parameters["exitCode"] == "\U00078637\U000d1b8eNf"
     assert invocation.query_parameters["limitPerJob"] == -137438953472
+
+
+def test_no_sending_body_when_empty() -> None:
+    """Body should not be sent if it is empty."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Content-Type": "application/json",
+            }
+        ),
+        body="",
+        method=HTTPMethod.POST,
+        path="/jobExecutions",
+        query_parameters={},
+    )
+
+    invocation = InvocationData(request)
+    assert not invocation.send_body
+
+    # should still send for empty JSON
+    request.body = "{}"
+    invocation = InvocationData(request)
+    assert invocation.send_body

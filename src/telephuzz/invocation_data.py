@@ -31,9 +31,10 @@ class InvocationData:
             self._get_query_parameters(request), request
         )
         self.arg_types = get_args(get_config().spec_str, request.method, request.path)
-        self.send_body = "requestBody" in self.arg_types
 
         self.body = request.body
+        self.send_body = "requestBody" in self.arg_types and self.body not in (None, "")
+
         self.json_body = None
         self.path = request.path
 
@@ -46,7 +47,7 @@ class InvocationData:
 
         self.authorization = request.headers.get("Authorization", None)
 
-        if self.content_type == JSON_CONTENT:
+        if self.content_type == JSON_CONTENT and self.send_body:
             # process body to usable JSON
             self.json_body = json.loads(request.body)
 
