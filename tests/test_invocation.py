@@ -310,3 +310,34 @@ def test_strip_nested_array():
     assert invocation.json_body is not None
     assert "additional" not in invocation.json_body[0]
     assert "additional" in invocation.json_body[1]
+
+
+def test_cast_query_parameter_integers():
+    """Test casting integers"""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "Bi9xCz",
+            }
+        ),
+        body="",
+        method=HTTPMethod.GET,
+        path="/jobExecutions?jobName=&exitCode=%F1%B8%98%B7%F3%91%AE%8ENf&limitPerJob=-137438953472",
+        query_parameters={
+            "jobName": "",
+            "exitCode": "\U00078637\U000d1b8eNf",
+            "limitPerJob": "-137438953472",
+        },
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.query_parameters["jobName"] == ""
+    assert invocation.query_parameters["exitCode"] == "\U00078637\U000d1b8eNf"
+    assert invocation.query_parameters["limitPerJob"] == -137438953472

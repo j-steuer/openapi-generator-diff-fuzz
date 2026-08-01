@@ -94,6 +94,8 @@ class InvocationData:
         for parameter, value in _params.items():
             if args[parameter] == "array" and not isinstance(value, list):
                 _params[parameter] = [value]
+            if args[parameter] == "integer" and isinstance(value, str):
+                _params[parameter] = int(value)
 
         return _params
 
