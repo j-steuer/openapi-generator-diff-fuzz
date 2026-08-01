@@ -6,3 +6,5 @@ port-names:
 - HOST_PORT
 - AUTH_PORT
 - JACOCO_PORT
+nondeterministic_components:
+  - json_component: timestamp
