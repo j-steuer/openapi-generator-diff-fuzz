@@ -7,7 +7,9 @@ from typing import cast
 
 import pytest
 import yaml  # type: ignore
+from conftest import TEST_CONFIG_BASE_PATH
 
+from telephuzz.config import Config, get_config
 from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     DEFAULT_VERSION,
@@ -154,6 +156,14 @@ def test_find_args():
     # nonexistent path should raise error
     with pytest.raises(ValueError):
         get_args(spec, HTTPMethod.GET, "/nonexistent")
+
+
+def test_find_args_body_case():
+    """Body case should be preserved."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
+    assert args["requestBody"] == "JobConfig"
 
 
 def test_get_content_type():

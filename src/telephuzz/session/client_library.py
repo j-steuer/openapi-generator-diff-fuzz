@@ -508,22 +508,6 @@ class Kiota:
 # --- Concrete Python Client Classes ---
 
 
-def _get_main_path(path: str) -> str:
-    """Return main component of the API path.
-
-    Used to determine the name of the client class for some
-    generators.
-    """
-    if path == "/":
-        return "default"
-    else:
-        cutoff = path.find("/", 1)
-        if cutoff != -1:
-            return path[:cutoff][1:]
-        else:
-            return path[1:]
-
-
 def _get_model_name(invocation: InvocationData) -> str:
     """Obtain the name of a model.
 
@@ -551,24 +535,24 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         """Generate models for JSON bodies."""
         model_name = _get_model_name(invocation)
+        model_name_module = transform_case(model_name, Case.SNAKE)
+        model_name_class = transform_case(model_name, Case.PASCAL)
         import_code = (
-            f"from openapi_client.models.{model_name.lower()} "
-            f"import {model_name.capitalize()}"
+            f"from openapi_client.models.{model_name_module} import {model_name_class}"
         )
 
         eval_body = invocation.json_body
         if isinstance(eval_body, list):
             # create list of objects
             model_list = [
-                f"{model_name.capitalize()}.from_json({json.dumps(json.dumps(body))})"
+                f"{model_name_class}.from_json({json.dumps(json.dumps(body))})"
                 for body in eval_body
             ]
             creation_code = "[" + ", ".join(model_list) + "]"
         elif isinstance(eval_body, dict):
             body = json.dumps(eval_body)
-            model_name_case = transform_case(model_name, self.method_case)
-            from_json = f"{model_name.capitalize()}.from_json({body!r}"
-            creation_code = f"{model_name_case}={from_json})"
+            from_json = f"{model_name_class}.from_json({body!r}"
+            creation_code = f"{model_name_module}={from_json})"
         else:
             raise NotImplementedError(
                 f"Unhandled body type {type(eval_body)}: {invocation.body}"
@@ -690,19 +674,19 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         model_name = _get_model_name(invocation)
+        model_name_module = transform_case(model_name, Case.SNAKE)
+        model_name_class = transform_case(model_name, Case.PASCAL)
         import_code = (
-            f"from {self.module_name}.models.{model_name.lower()} "
-            f"import {model_name.capitalize()}"
+            f"from {self.module_name}.models.{model_name_module} "
+            f"import {model_name_class}"
         )
 
         json_body = invocation.json_body
         if isinstance(json_body, list):
-            model_list = [
-                f"{model_name.capitalize()}.from_dict({body})" for body in json_body
-            ]
+            model_list = [f"{model_name_class}.from_dict({body})" for body in json_body]
             creation_code = "body=[" + ", ".join(model_list) + "]"
         elif isinstance(json_body, dict):
-            from_json = f"{model_name.capitalize()}.from_dict({json_body})"
+            from_json = f"{model_name_class}.from_dict({json_body})"
             creation_code = f"body={from_json}"
         else:
             raise NotImplementedError(
@@ -815,14 +799,15 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                     "application/json",
                     {repr(parse_json_body)}.encode()
                     )"""
-            from_json = f"{parse_node}.get_object_value({model_name.capitalize()})"
+            from_json = f"{parse_node}.get_object_value({model_name_class})"
 
             return from_json
 
         model_name = _get_model_name(invocation)
+        model_name_module = transform_case(model_name, Case.SNAKE)
+        model_name_class = transform_case(model_name, Case.PASCAL)
         import_code = (
-            f"from my_kiota_client.models.{model_name.lower()} "
-            f"import {model_name.capitalize()}"
+            f"from my_kiota_client.models.{model_name_module} import {model_name_class}"
         )
 
         json_body = invocation.json_body

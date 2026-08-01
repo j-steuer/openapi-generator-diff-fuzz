@@ -731,3 +731,58 @@ def test_tag_module_resolve(clc_class, api_wfd: tuple[Network, str]):
             api_path,
             expected_status=404,
         )
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        OpenAPIGenPythonCLC,
+        SwaggerCodegenPythonCLC,
+        OpenAPIPythonClientCLC,
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["spring-batch-rest"], indirect=True)
+def test_model_capitalization(clc_class, api_wfd: tuple[Network, str]):
+    """Test capitalizing the model names correctly."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    # wait for spring-batch-rest-mitmproxy to be ready
+    sleep(10)
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "lUGSOO",
+                    "Content-Type": "application/json",
+                    "Content-Length": "253",
+                }
+            ),
+            body=(
+                '{"\\udad6\\udefb\\u00e2\\ud812\\ude26": [], '
+                '"\\u00e2\\ud806\\udd92\\ud8a4\\udff4": {"": "", '
+                '"\\ud926\\uddf4\\u00a5u\\u00d6\\uda66\\ude3c\\u00ee~\\udad1'
+                '\\udead\\u0086\\ud974\\udd63\\u00dbo": '
+                '"a\\u0000\\u00d5D\\u0094\\u001e\\u00ddO[\\ud919\\udf63", '
+                '"i": "%\\u0083"}, "__main__": [null]}'
+            ),
+            method=HTTPMethod.POST,
+            path="/jobExecutions",
+            query_parameters={},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=404,
+        )
