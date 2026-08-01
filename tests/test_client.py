@@ -786,3 +786,87 @@ def test_model_capitalization(clc_class, api_wfd: tuple[Network, str]):
             api_path,
             expected_status=404,
         )
+
+
+@pytest.mark.skip("TODO fix")
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        KiotaPythonCLC,
+    ],
+)
+@pytest.mark.parametrize("api_wfd", ["spring-batch-rest"], indirect=True)
+def test_p(clc_class, api_wfd: tuple[Network, str]):
+    """Test capitalizing the model names correctly."""
+
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+
+    # wait for spring-batch-rest-mitmproxy to be ready
+    sleep(10)
+
+    network, api_path = api_wfd
+    with clc_class() as clc:
+        request = Request(
+            headers=CaseInsensitiveDict(
+                {
+                    "Host": "localhost:8000",
+                    "User-Agent": "schemathesis/4.15.2",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept": "*/*",
+                    "Connection": "keep-alive",
+                    "X-Schemathesis-TestCaseId": "fcl9z3",
+                    "Content-Type": "application/json",
+                    "Content-Length": "2311",
+                }
+            ),
+            body='{"": {"\\udb72\\udc13F\\ud9a8\\udeea\\u00fb\\u0086\\ud890'
+            '\\ude72\\udaef\\udc6d": [{}], "\\u0016\\u009a": [[{"\\u00eb\\u00ab'
+            '\\u00f6+\\u00d0\\udad5\\udd47": true, "JI3\\u00da": true, "\\u00f1'
+            '\\u00c1\\u00d6\\udbae\\udff0n\\u00f3": 15122}, [9703,'
+            ' 2.617169824053021e+82, null]], {}], "\\u00c2\\u00c8\\u001b22\\u00d4":'
+            ' {"\\udb2f\\udff0x\\u0012;": [-4.392955261783056e+16, "\\u0097\\u008e'
+            '\\ud960\\udfe7\\u0082 \\u0014\\u00f30\\uda33\\ude17P",'
+            ' 3.169622120857146e+263], "\\u00f4": 1.7976931348623157e+308, "\\b'
+            '\\u00ed": [-26216, 2.2250738585e-313, -25257]}}, "\\uda83\\ude5a'
+            "\\u0099\\udb8c\\udf53\\u001b\\u00cf\\ud8b8\\uded5\\u00a7\\u00e3\\u008cd"
+            '\\u00f7\\udb66\\udf21\\u00e0\\u00b2": [{"+\\u0081": true, "Infinity": '
+            '"\\u00d3\\bp\\udac5\\udcfa\\u0091\\u0003\\ud8c0\\udf2d\\u00ffS"}, false'
+            ', {"\\u00173\\u00b6": [null, "\\udad2\\ude7d\\ud9e4\\udf98}g\\u00b8'
+            '\\\\_\\u00a5\\u00c8.G", "\\ud81d\\uddd1\\b"]}], "name": "\\u00824^'
+            '\\u000b5\\u0084\\u0081\\uda91\\udcbd", "\\u0287\\u01dd\\u026f\\u0250'
+            " \\u0287\\u1d09s \\u0279olop \\u026fnsd\\u1d09 \\u026f\\u01dd\\u0279o"
+            '\\u02e5": {}, "\\u00e1\\udbbd\\ude5a": {"": "\\u0002", "A\\udbc2\\udd09'
+            '\\u00b4\\u0015\\u00db\\udac1\\udc44\\u001e\\u008f": -5e-324, "\\ud8f0'
+            '\\udd82": null}, "asynchronous": true, "properties": {"\\u008e\\u008c;'
+            "\\u00f8\\u00d8\\u00a2\\ud9cd\\udcd7\\u00f5\\u00f1h\\u0005;;\\u0011"
+            '\\u000e\\ud95c\\udf29": {"": {"$\\u0017\\u00a8\\u00f4-\\udafe\\udf59'
+            '\\ud8c9\\udde8": {"\\u00fe": [null, false, "E\\u00a6{"], "\\u0089\\udac3'
+            '\\ude5cz\\u00e2\\u0083\\u0097\\u00b6\\ud8b7\\udf57\\u0080\\u00b4\\u00bf"'
+            ': {"lorem \\u0644\\u0627 \\u0628\\u0633\\u0645 \\u0627\\u0644\\u0644'
+            '\\u0647 ipsum \\u4f60\\u597d1234\\u4f60\\u597d": 1.1, "{": true,'
+            ' "\\u00922\\uda38\\udcd8Y\\u00c2z\\ud8a4\\udeba+\\u00bc\\u00cc\\u00ed'
+            '\\u00d96\\u009dK": false}, "\\u00c1\\u00b7\\u0001\\u0087": '
+            '[-4432312178479263.0, false, null]}}, "\\ud9bf\\udc85\\ud9ec\\udff1JF'
+            '\\u0085\\u00efq": {"\\u00a1": "k\\u00a1\\uda72\\udf7c\\u0089\\u00dc'
+            '\\u00af", "\\u00f4\\udb49\\ude70Z": {"\\ud9fd\\udff5\\u00bfau'
+            '\\u00e2/\\u00cdE": [], "\\u00dcj\\uda1f\\udd83\\u00f2\\u00ef":'
+            ' [{"Y": false, "0\\u00f5": null}], "[?": {"": 2.617169824053021e+82,'
+            ' ".exe": [], "H\\uda39\\ude71\\u0003\\u00d15": {"\\u00b6\\u00e4": false'
+            ', "\\u008ao\\u00e4": -16221, "\\u0003o\\f\\u42c0\\uda9c\\udf83'
+            '\\ud9f6\\udc34\\u0091": -3.3676470985717345e+169}}}, "\\u00d5": 5}'
+            ', "!6": {"\\udb41\\udf0b\\u0001\\u008d\\u0085\\ud82a\\udc63\\u00c4i^'
+            "\\ud9da\\udddd\\u008f\\u009fEH\\u00c2\\u0087\\uda9b\\udd30\\u0083\\udafb"
+            '\\udcc4\\u00c8\\u0019\\udb5d\\ude04": false, "": 2.2898095081575256e+16,'
+            ' "\\ud92e\\udd80\\"": true}}}}',
+            method=HTTPMethod.POST,
+            path="/jobExecutions",
+            query_parameters={},
+        )
+
+        _test_send_request(
+            clc,
+            request,
+            network,
+            api_path,
+            expected_status=404,
+        )
