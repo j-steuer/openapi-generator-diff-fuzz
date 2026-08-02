@@ -1,5 +1,6 @@
 """Tests for client libraries."""
 
+import datetime
 import json
 import re
 import tomllib
@@ -108,6 +109,8 @@ def _test_send_request(
 
     network.connect(clc.container)
 
+    timestamp = datetime.datetime.now(datetime.timezone.utc)
+
     response = clc.send(InvocationData(request), api_path=api_path)
     network.reload()
     assert isinstance(response, str)
@@ -124,7 +127,7 @@ def _test_send_request(
             for c in network.containers
             if c.image is not None and "mitmproxy" in c.image.tags[0]
         ][0]
-        logs = mitmproxy.logs().decode()
+        logs = mitmproxy.logs(since=timestamp).decode()
         latest_status = None
         for _ in range(100):
             try:
@@ -132,7 +135,7 @@ def _test_send_request(
                 break
             except Exception:
                 sleep(0.1)
-                logs = mitmproxy.logs().decode()
+                logs = mitmproxy.logs(since=timestamp).decode()
         if latest_status is None:
             raise TimeoutError("No answer received in time")
         assert f"<< {expected_status}" == latest_status
@@ -212,7 +215,15 @@ class TestGeneral:
             assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
 
 
-class TestPesthop:
+@pytest.fixture(scope="class")
+def petshop():
+    network, api_path = api_wfd("swagger-petstore")
+    yield network, api_path
+    api_down(network, "swagger-petstore")
+
+
+@pytest.mark.usefixtures("petshop")
+class TestPetshop:
     """Tests that use the petshop API/CLC."""
 
     def test_version_overwrite(self) -> None:
@@ -235,49 +246,11 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_client_basic_petshop(
-        self, clc_class, api_wfd: tuple[Network, str]
-    ) -> None:
-        """Test that client library works with one of the default test targets."""
+    def test_resolve_path_params(self, clc_class, petshop: tuple[Network, str]):
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
-        with clc_class() as clc:
-            request = Request(
-                headers=CaseInsensitiveDict(
-                    {
-                        "Host": "localhost:8000",
-                        "User-Agent": "schemathesis/4.15.2",
-                        "Accept-Encoding": "gzip, deflate, br",
-                        "Accept": "*/*",
-                        "Connection": "keep-alive",
-                        "X-Schemathesis-TestCaseId": "dPIEin",
-                    }
-                ),
-                body="",
-                method=HTTPMethod.GET,
-                path="/user/%C2%B4i%C2%84%C3%B2X2%C2%BA%3A%3D%C3%B5%F1%BA%86%8D",
-                query_parameters={},
-            )
-            _test_send_request(clc, request, network, api_path, expected_status=404)
-
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-        ],
-    )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_resolve_path_params(self, clc_class, api_wfd: tuple[Network, str]):
-
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request_int = Request(
                 headers=CaseInsensitiveDict(
@@ -316,6 +289,7 @@ class TestPesthop:
             )
 
             _test_send_request(clc, request_int, network, api_path, expected_status=404)
+            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request_str, network, api_path, expected_status=404)
 
     @pytest.mark.parametrize(
@@ -327,51 +301,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_query_and_body(self, clc_class, api_wfd: tuple[Network, str]):
-        """Test request with path variables and body."""
-
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-
-        network, api_path = api_wfd
-        with clc_class() as clc:
-            request = Request(
-                headers=CaseInsensitiveDict(
-                    {
-                        "Host": "localhost:8000",
-                        "User-Agent": "schemathesis/4.15.2",
-                        "Accept-Encoding": "gzip, deflate, br",
-                        "Accept": "*/*",
-                        "Connection": "keep-alive",
-                        "X-Schemathesis-TestCaseId": "nwZmwH",
-                        "Content-Type": "application/json",
-                        "Content-Length": "2",
-                    }
-                ),
-                body="{}",
-                method=HTTPMethod.PUT,
-                path="/user/%C2%A6g%F4%84%82%90%C2%BB%C2%8F%C2%80%0Cr",
-                query_parameters={},
-            )
-
-            _test_send_request(clc, request, network, api_path, expected_status=404)
-
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-        ],
-    )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_parse_invalid_python_json(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_parse_invalid_python_json(self, clc_class, petshop: tuple[Network, str]):
         """Test parsing a JSON body not parseable through literal_eval."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -410,13 +345,49 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_json_body_array(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_query_and_body(self, clc_class, petshop: tuple[Network, str]):
         """Test request with path variables and body."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(
+                    {
+                        "Host": "localhost:8000",
+                        "User-Agent": "schemathesis/4.15.2",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept": "*/*",
+                        "Connection": "keep-alive",
+                        "X-Schemathesis-TestCaseId": "nwZmwH",
+                        "Content-Type": "application/json",
+                        "Content-Length": "2",
+                    }
+                ),
+                body="{}",
+                method=HTTPMethod.PUT,
+                path="/user/%C2%A6g%F4%84%82%90%C2%BB%C2%8F%C2%80%0Cr",
+                query_parameters={},
+            )
+
+            _test_send_request(clc, request, network, api_path, expected_status=404)
+
+    @pytest.mark.parametrize(
+        "clc_class",
+        [
+            OpenAPIGenPythonCLC,
+            SwaggerCodegenPythonCLC,
+            OpenAPIPythonClientCLC,
+            KiotaPythonCLC,
+        ],
+    )
+    def test_json_body_array(self, clc_class, petshop: tuple[Network, str]):
+        """Test request with path variables and body."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+        network, api_path = petshop
         with clc_class() as clc:
             request_empty = Request(
                 headers=CaseInsensitiveDict(
@@ -460,6 +431,7 @@ class TestPesthop:
                 api_path,
                 expected_status=400,
             )
+            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request_two, network, api_path, expected_status=200)
 
     @pytest.mark.parametrize(
@@ -471,13 +443,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_file_upload(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_file_upload(self, clc_class, petshop: tuple[Network, str]):
         """Test request with file upload."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -515,13 +486,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_surrogate_encoding(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_surrogate_encoding(self, clc_class, petshop: tuple[Network, str]):
         """Test encoding with surrogates."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -564,13 +534,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_single_explode_string(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_single_explode_string(self, clc_class, petshop: tuple[Network, str]):
         """Test sending explode array with single string."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -606,13 +575,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_empty_octet_body(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_empty_octet_body(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -650,13 +618,12 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
-    def test_enum_query_parameter(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_enum_query_parameter(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -679,8 +646,13 @@ class TestPesthop:
             request_empty.query_parameters.clear()
 
             _test_send_request(
-                clc, request_empty, network, api_path, expected_status=400
+                clc,
+                request_empty,
+                network,
+                api_path,
+                expected_status=400,
             )
+            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request, network, api_path, expected_status=200)
 
     @pytest.mark.parametrize(
@@ -692,15 +664,14 @@ class TestPesthop:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["swagger-petstore"], indirect=True)
     def test_request_end_with_path_variable(
-        self, clc_class, api_wfd: tuple[Network, str]
+        self, clc_class, petshop: tuple[Network, str]
     ):
         """Test sending a request whose path ends with a path variable."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
 
-        network, api_path = api_wfd
+        network, api_path = petshop
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -732,6 +703,13 @@ class TestPesthop:
             )
 
 
+@pytest.fixture(scope="class")
+def spring_batch():
+    network, api_name = api_wfd("spring-batch-rest")
+    yield network, api_name
+    api_down(network, "spring-batch-rest")
+
+
 class TestSpringBatch:
     """Tests that use the spring-batch-rest API."""
 
@@ -744,8 +722,7 @@ class TestSpringBatch:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["spring-batch-rest"], indirect=True)
-    def test_tag_module_resolve(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_tag_module_resolve(self, clc_class, spring_batch: tuple[Network, str]):
         """Test resolving the module through a tag different than the base path."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
@@ -753,7 +730,7 @@ class TestSpringBatch:
         # wait for spring-batch-rest-mitmproxy to be ready
         sleep(10)
 
-        network, api_path = api_wfd
+        network, api_path = spring_batch
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(
@@ -789,8 +766,7 @@ class TestSpringBatch:
             KiotaPythonCLC,
         ],
     )
-    @pytest.mark.parametrize("api_wfd", ["spring-batch-rest"], indirect=True)
-    def test_model_capitalization(self, clc_class, api_wfd: tuple[Network, str]):
+    def test_model_capitalization(self, clc_class, spring_batch: tuple[Network, str]):
         """Test capitalizing the model names correctly."""
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
@@ -798,7 +774,7 @@ class TestSpringBatch:
         # wait for spring-batch-rest-mitmproxy to be ready
         sleep(10)
 
-        network, api_path = api_wfd
+        network, api_path = spring_batch
         with clc_class() as clc:
             request = Request(
                 headers=CaseInsensitiveDict(

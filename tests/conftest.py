@@ -22,7 +22,6 @@ from requests.structures import CaseInsensitiveDict
 import telephuzz.config as cfg
 from telephuzz.config import Config
 from telephuzz.constants import BASE_PATH, CLIENT_PATH, SPEC_PATH
-from telephuzz.docker_helpers import compose_down, compose_up
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
@@ -392,36 +391,6 @@ def api_oauth():
     yield network, "http://api_oauth:8001"
 
     container.kill()
-    network.remove()
-
-
-@pytest.fixture()
-def api_wfd(request):
-    """Run a WFD api."""
-    api_name = request.param
-    client = docker.from_env()
-    name = "api_wfd_fixture"
-    network = client.networks.create(name)
-
-    compose_base_path = BASE_PATH / "wfd/dockerfiles"
-    compose_path = compose_base_path / f"{api_name}.yaml"
-    compose_up(compose_path=compose_path, project=name)
-
-    api_containers = client.containers.list(
-        all=True,
-        filters={"label": f"com.docker.compose.project={name}"},
-    )
-    for api_container in api_containers:
-        if api_name in api_container.name:
-            network.connect(api_container, aliases=[api_name])
-        elif "mitmproxy" in str(api_container.name):
-            network.connect(api_container, aliases=["mitmproxy"])
-        else:
-            network.connect(api_container)
-
-    yield network, "http://mitmproxy:8080/api/v3"
-
-    compose_down(compose_path=compose_path, project=name)
     network.remove()
 
 
