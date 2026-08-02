@@ -5,6 +5,7 @@ from copy import deepcopy
 
 from requests.models import CaseInsensitiveDict
 
+from telephuzz.config import get_config
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.request_result import RequestResult
@@ -173,3 +174,50 @@ def test_content_header_diff(basic_request, basic_response):
 
     result3 = RequestResult("lib3", request3, basic_response, None, None)
     assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}
+
+
+def test_none_response(basic_request):
+    """None response should always be raised in report."""
+    result1 = RequestResult("lib1", basic_request, None, None, None)
+    result2 = deepcopy(result1)
+    result3 = deepcopy(result1)
+    result2.library = "lib2"
+    result3.library = "lib3"
+
+    evaluator = DiffEvaluator()
+    # should not appear in result, as there is no need to reset
+    assert evaluator.eval({result1, result2, result3}, basic_request) == set()
+
+    # should produce report for each lib
+    reports = os.listdir(get_config().log_path)
+    assert len(reports) == 3
+    assert len([r for r in reports if "lib1" in r]) == 1
+    assert len([r for r in reports if "lib2" in r]) == 1
+    assert len([r for r in reports if "lib3" in r]) == 1
+
+
+def test_none_other_responses(basic_request, basic_response):
+    """Other responses should be evaluated independently from None."""
+    result1 = RequestResult("lib1", basic_request, basic_response, None, None)
+    result2 = deepcopy(result1)
+    result2.library = "lib2"
+    result3 = deepcopy(result1)
+    result3.library = "lib3"
+    result4 = deepcopy(result1)
+    result4.library, result4.response = "lib4", None
+
+    evaluator = DiffEvaluator()
+    assert evaluator.eval({result1, result2, result3, result4}, basic_request) == set()
+    reports = os.listdir(get_config().log_path)
+    assert len(reports) == 1
+    assert len([r for r in reports if "lib4" in r]) == 1
+
+    assert result3.response is not None
+    result3.response.body = "otherbody"
+    assert evaluator.eval({result1, result2, result3, result4}, basic_request) == {
+        "lib3"
+    }
+    reports = os.listdir(get_config().log_path)
+    assert len(reports) == 2
+    assert len([r for r in reports if "lib3" in r]) == 1
+    assert len([r for r in reports if "lib4" in r]) == 1

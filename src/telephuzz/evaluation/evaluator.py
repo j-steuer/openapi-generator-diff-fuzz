@@ -63,7 +63,8 @@ class DiffEvaluator:
                     raise ValueError(f"Results do not have attribute {attr}")
 
                 # ignore headers for now TODO support?
-                result.response.headers = CaseInsensitiveDict()
+                if result.response is not None:
+                    result.response.headers = CaseInsensitiveDict()
 
                 component = getattr(result, attr)
 
@@ -191,7 +192,24 @@ class DiffEvaluator:
                     diff_reports[library].append(report)
 
         # compare responses
-        response_groups: dict[Response, list[LibraryId]] = _get_groups("response")
+        response_groups: dict[Response | None, list[LibraryId]] = _get_groups(
+            "response"
+        )
+
+        # raise separate diff for None response
+        if None in response_groups:
+            for library in response_groups[None]:
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    persistent=False,
+                    request_chain=[result.request],
+                    request_only=True,
+                    unique=len(response_groups[None]) > 1,
+                    detail="Error while building request",
+                )
+                diff_reports[library].append(report)
+            del response_groups[None]
 
         if len(response_groups) > 1:
             # use response of largest group as source of truth
@@ -212,7 +230,10 @@ class DiffEvaluator:
                 itertools.chain.from_iterable(response_groups.values())
             )
 
+            assert true_response is not None
+
             for diff_response, libraries in response_groups.items():
+                assert diff_response is not None
                 diff_status = true_response.status != diff_response.status
                 diff_body = true_response.body != diff_response.body
                 diff_headers = true_response.headers != diff_response.headers

@@ -90,7 +90,8 @@ class Abstractor:
         request, response = result.request, result.response
 
         _handle_nd_headers(request.headers, remove=True)
-        _handle_nd_headers(response.headers, remove=False)
+        if response is not None:
+            _handle_nd_headers(response.headers, remove=False)
 
         # handle custom nondeterministic components
         for nondeterministic_component in self.custom_ndt_components:
@@ -113,39 +114,40 @@ class Abstractor:
                 continue
 
             # apply abstraction
-            if nondeterministic_component.component_count == 0:
-                response.body = ABSTRACTED
-            else:
-                if nondeterministic_component.json_component:
-                    try:
-                        response_data = json.loads(response.body)
-                    except json.decoder.JSONDecodeError:
-                        method_str = (
-                            "all"
-                            if nondeterministic_component.method is None
-                            else nondeterministic_component.method
-                        )
-                        path_str = (
-                            "all"
-                            if nondeterministic_component.path is None
-                            else nondeterministic_component.path
-                        )
-                        logger.warning(
-                            f"json_component abstraction intended for "
-                            f"{method_str} {path_str}, "
-                            f"but request returned non-JSON body."
-                        )
-                        continue
+            if response is not None:
+                if nondeterministic_component.component_count == 0:
+                    response.body = ABSTRACTED
+                else:
+                    if nondeterministic_component.json_component:
+                        try:
+                            response_data = json.loads(response.body)
+                        except json.decoder.JSONDecodeError:
+                            method_str = (
+                                "all"
+                                if nondeterministic_component.method is None
+                                else nondeterministic_component.method
+                            )
+                            path_str = (
+                                "all"
+                                if nondeterministic_component.path is None
+                                else nondeterministic_component.path
+                            )
+                            logger.warning(
+                                f"json_component abstraction intended for "
+                                f"{method_str} {path_str}, "
+                                f"but request returned non-JSON body."
+                            )
+                            continue
 
-                    response_data = self._transform_json(
-                        response_data, nondeterministic_component.json_component
-                    )
+                        response_data = self._transform_json(
+                            response_data, nondeterministic_component.json_component
+                        )
 
-                    response.body = json.dumps(response_data)
+                        response.body = json.dumps(response_data)
 
-                elif nondeterministic_component.regex_component:
-                    response.body = re.sub(
-                        nondeterministic_component.regex_component,
-                        ABSTRACTED,
-                        response.body,
-                    )
+                    elif nondeterministic_component.regex_component:
+                        response.body = re.sub(
+                            nondeterministic_component.regex_component,
+                            ABSTRACTED,
+                            response.body,
+                        )

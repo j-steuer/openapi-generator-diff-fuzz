@@ -82,10 +82,7 @@ class Session:
         if not isinstance(self.api, APIWithDatabaseContainer):
             self.client.send(invocation, api_path)
             response = _get_response()
-            if response is None:
-                if not self.first:
-                    raise TimeoutError("Response could not be retrived in time.")
-
+            if response is None and self.first:
                 for _ in range(5):
                     sleep(1)
                     self.client.send(invocation, api_path)
@@ -95,10 +92,7 @@ class Session:
                         self.first = False
                         break
 
-                if self.first:
-                    raise TimeoutError("Response could not be retrieved in time.")
-
-            if not response:
+            if not (isinstance(response, Response) or response is None):
                 raise ValueError("Response was not parsed into response object.")
             result = RequestResult(self.client.id, request, response, None, None)
         else:
@@ -121,7 +115,7 @@ class Session:
                 self.client.id, request, response, out_before_host, out_after_host
             )
 
-        if result.response.status in [502, 503]:
+        if result.response and result.response.status in [502, 503]:
             raise RuntimeError(
                 "API server could not be reached, please check the configuration."
             )
