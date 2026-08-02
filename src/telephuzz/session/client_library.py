@@ -92,10 +92,11 @@ class ClientLibraryContainer(ABC):
 
         generator_path = GENERATORS_PATH / self.generator_script
         library_path = CLIENT_PATH / self._get_library_dir_name()
-        try:
-            subprocess.run([generator_path, library_path], check=True)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError("Error while generating client") from e
+        if not library_path.exists():
+            try:
+                subprocess.run([generator_path, library_path], check=True)
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError("Error while generating client") from e
 
         image = self.get_image_by_hash(library_path)
         if image is None:

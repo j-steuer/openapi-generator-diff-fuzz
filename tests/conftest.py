@@ -21,7 +21,7 @@ from requests.structures import CaseInsensitiveDict
 
 import telephuzz.config as cfg
 from telephuzz.config import Config
-from telephuzz.constants import BASE_PATH, CLIENT_PATH, SPEC_PATH
+from telephuzz.constants import BASE_PATH, SPEC_PATH
 from telephuzz.http_message import HTTPMethod, Request, Response
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 from telephuzz.session.client_library import ClientLibraryContainer
@@ -249,10 +249,7 @@ def basic_oas_yaml():
 @pytest.fixture(autouse=True)
 def setup():
     """Basic setup for all tests."""
-    # clear clients and spec
-    if os.listdir(CLIENT_PATH):
-        shutil.rmtree(CLIENT_PATH)
-        os.mkdir(CLIENT_PATH)
+    # clear spec
     if SPEC_PATH.exists():
         os.remove(SPEC_PATH)
 

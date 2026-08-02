@@ -2,10 +2,11 @@
 
 import datetime
 import json
+import os
 import re
+import shutil
 import tomllib
 from copy import deepcopy
-from pathlib import Path
 from time import sleep
 
 import docker
@@ -15,7 +16,7 @@ from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import Config, get_config
-from telephuzz.constants import BASE_PATH
+from telephuzz.constants import BASE_PATH, CLIENT_PATH
 from telephuzz.docker_helpers import compose_down, compose_up
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
@@ -42,7 +43,6 @@ from telephuzz.session.client_library import (
     SwaggerTsAPICLC,
 )
 
-CLIENT_PATH = Path(__file__).resolve().parent / "testfiles" / "clients"
 CLIENT_CASES_NO_AUTH = [
     OpenAPIGenCsharpCLC,
     OpenAPIGenGoCLC,
@@ -60,6 +60,14 @@ CLIENT_CASES_NO_AUTH = [
     KiotaCSharpCLC,
     KiotaPythonCLC,
 ]
+
+
+@pytest.fixture(scope="class", autouse=True)
+def setup_client():
+    """Clear clients"""
+    if os.listdir(CLIENT_PATH):
+        shutil.rmtree(CLIENT_PATH)
+        os.mkdir(CLIENT_PATH)
 
 
 def api_wfd(api_name: str) -> tuple[Network, str]:
@@ -289,7 +297,6 @@ class TestPetshop:
             )
 
             _test_send_request(clc, request_int, network, api_path, expected_status=404)
-            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request_str, network, api_path, expected_status=404)
 
     @pytest.mark.parametrize(
@@ -431,7 +438,6 @@ class TestPetshop:
                 api_path,
                 expected_status=400,
             )
-            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request_two, network, api_path, expected_status=200)
 
     @pytest.mark.parametrize(
@@ -652,7 +658,6 @@ class TestPetshop:
                 api_path,
                 expected_status=400,
             )
-            self.timestamp = datetime.datetime.now(datetime.timezone.utc)
             _test_send_request(clc, request, network, api_path, expected_status=200)
 
     @pytest.mark.parametrize(
