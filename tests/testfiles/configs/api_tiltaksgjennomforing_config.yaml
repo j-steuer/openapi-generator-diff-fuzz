@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/tiltaksgjennomforing.yaml
+spec-path: wfd/openapi-swagger/tiltaksgjennomforing.json
+container-name: mitmproxy
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

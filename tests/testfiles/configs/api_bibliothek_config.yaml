@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/bibliothek.yaml
+spec-path: wfd/openapi-swagger/bibliothek.json
+container-name: mitmproxy
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

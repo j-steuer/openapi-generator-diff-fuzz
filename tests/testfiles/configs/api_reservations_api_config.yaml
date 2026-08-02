@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/reservations-api.yaml
+spec-path: wfd/openapi-swagger/reservations-api.json
+container-name: mitmproxy
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

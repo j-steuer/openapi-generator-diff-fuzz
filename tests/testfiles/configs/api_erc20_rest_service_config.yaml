@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/erc20-rest-service.yaml
+spec-path: wfd/openapi-swagger/erc20-rest-service.json
+container-name: mitmproxy
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT

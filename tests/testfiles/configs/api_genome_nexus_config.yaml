@@ -1,0 +1,8 @@
+api-port-name: HOST_PORT
+compose-path: wfd/dockerfiles/genome-nexus.yaml
+spec-path: wfd/openapi-swagger/genome-nexus.json
+container-name: mitmproxy
+port-names:
+- HOST_PORT
+- AUTH_PORT
+- JACOCO_PORT
