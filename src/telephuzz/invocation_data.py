@@ -33,7 +33,6 @@ class InvocationData:
         self.arg_types = get_args(get_config().spec_str, request.method, request.path)
 
         self.body = request.body
-        self.send_body = "requestBody" in self.arg_types and self.body not in (None, "")
 
         self.json_body = None
         self.path = request.path
@@ -44,6 +43,10 @@ class InvocationData:
             self.content_type = get_content_type(
                 get_config().spec_str, request.method, request.path
             )
+
+        self.send_body = "requestBody" in self.arg_types and (
+            self.content_type != JSON_CONTENT or self.body not in (None, "")
+        )
 
         self.authorization = request.headers.get("Authorization", None)
 
