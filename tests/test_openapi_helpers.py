@@ -139,11 +139,11 @@ def test_find_args():
 
     # concrete path should resolve
     args = get_args(spec, HTTPMethod.POST, "/pet")
-    assert args == {"requestBody": "Pet"}
+    assert args == {"requestBody": {"Pet"}}
 
     # non-concrete path should resolve
     args = get_args(spec, HTTPMethod.PUT, "/user/123")
-    assert args == {"requestBody": "User", "username": "string"}
+    assert args == {"requestBody": {"User"}, "username": "string"}
 
     # concrete path should not resolve to non-concrete path
     args = get_args(spec, HTTPMethod.GET, "/user/login")
@@ -163,7 +163,15 @@ def test_find_args_body_case():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
-    assert args["requestBody"] == "JobConfig"
+    assert args["requestBody"] == {"JobConfig"}
+
+
+def test_find_args_no_refs():
+    """Test getting all args without refs."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
+
+    args = get_args(get_config().spec_str, HTTPMethod.PATCH, "/contacts/{id}")
+    assert args["requestBody"] == {"object"}
 
 
 def test_get_content_type():

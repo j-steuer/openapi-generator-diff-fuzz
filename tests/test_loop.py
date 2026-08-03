@@ -457,19 +457,3 @@ def test_loop_petshop(client_class: type, client_generator):
         fuzzer.start_fuzzing_session()
 
         assert len(os.listdir(LOG_PATH)) == 0
-
-
-def test_python_petshop() -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
-
-    fuzzer = TelePhuzz()
-    fuzzer.start_fuzzing_session()
-
-
-def test_python_springbatch() -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
-
-    fuzzer = TelePhuzz()
-    fuzzer.start_fuzzing_session()

@@ -135,7 +135,7 @@ def test_arg_types():
     assert invocation.arg_types == {
         "petId": "integer",
         "additionalMetadata": "string",
-        "requestBody": "string",
+        "requestBody": {"string"},
     }
 
 

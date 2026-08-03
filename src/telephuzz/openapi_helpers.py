@@ -150,12 +150,11 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
             assert len(ref) == 1
             ref = ref.pop()
             assert isinstance(ref, str)
-            args["requestBody"] = ref[ref.rfind("/") + 1 :]
+            args["requestBody"] = {ref[ref.rfind("/") + 1 :]}
         else:
             schemas = _find_all(content, "schema")
-            assert len(schemas) == 1
-            schema = schemas.pop()
-            args["requestBody"] = schema["type"]
+            schema_types = {schema["type"] for schema in schemas}
+            args["requestBody"] = schema_types
     if "parameters" in operation:
         args.update(
             {
