@@ -859,19 +859,6 @@ class KiotaPythonCLC(Kiota, PythonCLC):
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
 
-        def _get_module_path_prefix(path_components: list[str]) -> str:
-            path_components = [
-                transform_case(c, self.method_case) if "{" not in c else "item"
-                for c in path_components
-                if c
-            ]
-            builder_module_prefix = (
-                path_components[-1]
-                if path_components[-1] != "item"
-                else f"with_{path_components[-2]}_item"
-            )
-            return builder_module_prefix
-
         model_name_str = ""
         path_components = resolve_path(invocation.path, get_config().spec_str).split(
             "/"
@@ -910,7 +897,16 @@ class KiotaPythonCLC(Kiota, PythonCLC):
 
         query_parameters = invocation.query_parameters_without_path_vars
         if query_parameters:
-            builder_module_prefix = _get_module_path_prefix(path_components)
+            path_components = [
+                transform_case(c, self.method_case) if "{" not in c else "item"
+                for c in path_components
+                if c
+            ]
+            builder_module_prefix = (
+                path_components[-1]
+                if path_components[-1] != "item"
+                else f"with_{path_components[-2]}_item"
+            )
             request_builder_module = (
                 f"{'.'.join(path_components)}.{builder_module_prefix}_request_builder"
             )
