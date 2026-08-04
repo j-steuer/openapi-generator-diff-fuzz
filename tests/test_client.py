@@ -2,9 +2,7 @@
 
 import datetime
 import json
-import os
 import re
-import shutil
 import tomllib
 from copy import deepcopy
 from time import sleep
@@ -16,7 +14,7 @@ from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import Config, get_config
-from telephuzz.constants import BASE_PATH, CLIENT_PATH
+from telephuzz.constants import BASE_PATH
 from telephuzz.docker_helpers import compose_down, compose_up
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
@@ -60,14 +58,6 @@ CLIENT_CASES_NO_AUTH = [
     KiotaCSharpCLC,
     KiotaPythonCLC,
 ]
-
-
-@pytest.fixture(scope="class", autouse=True)
-def setup_client():
-    """Clear clients"""
-    if os.listdir(CLIENT_PATH):
-        shutil.rmtree(CLIENT_PATH)
-        os.mkdir(CLIENT_PATH)
 
 
 def api_wfd(api_name: str) -> tuple[Network, str]:
@@ -715,6 +705,7 @@ def spring_batch():
     api_down(network, "spring-batch-rest")
 
 
+@pytest.mark.usefixtures("spring_batch")
 class TestSpringBatch:
     """Tests that use the spring-batch-rest API."""
 
@@ -805,6 +796,75 @@ class TestSpringBatch:
                 method=HTTPMethod.POST,
                 path="/jobExecutions",
                 query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def http_patch_spring():
+    network, api_name = api_wfd("http-patch-spring")
+    yield network, api_name
+    api_down(network, "http-patch-spring")
+
+
+@pytest.mark.usefixtures("http_patch_spring")
+class TestPatchSpring:
+    @pytest.mark.parametrize(
+        "clc_class",
+        [
+            OpenAPIGenPythonCLC,
+            SwaggerCodegenPythonCLC,
+            OpenAPIPythonClientCLC,
+            KiotaPythonCLC,
+        ],
+    )
+    def test_alternate_json_with_pure_body(
+        self, clc_class, http_patch_spring: tuple[Network, str]
+    ):
+        """Test sending with alternate JSON type."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
+        )
+
+        sleep(5)
+
+        network, api_path = http_patch_spring
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(
+                    {
+                        "Host": "localhost:8000",
+                        "User-Agent": "schemathesis/4.15.2",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept": "*/*",
+                        "Connection": "keep-alive",
+                        "X-Schemathesis-TestCaseId": "Dd1aWs",
+                        "Content-Type": "application/merge-patch+json",
+                        "Content-Length": "331",
+                    }
+                ),
+                body=(
+                    '{"\\udbba\\udd85fW\\u00cc\\u00e1x\\u0014[q'
+                    "\\ud8da\\ude98\\ud800\\udeab\\ud8ad\\udd22kTn"
+                    '\\u00cb:\\udaea\\udf4d": {}, ",\\u0017\\u00a2'
+                    '\\u00d0": {}, "\\u00a0\\ud8e2\\udd5c5\\u00fd'
+                    '\\uda7f\\ude00\\u00ae\\u00bb\\u00a4\\u0017\\u00de": '
+                    '{"\\u0080\\u00a1\\u00c0i\\ud8d3\\udf05w\\u00f5'
+                    '\\u00ca\\u00cde\\u00ea\\u00ee\\ud8e1\\udc23": 0}, '
+                    '"+\\u00b9q\\u00de\\u00be\\u00d3 \\u00c0": [], '
+                    '"": 0}'
+                ),
+                method=HTTPMethod.PATCH,
+                path="/contacts/70",
+                query_parameters={"id": 70},
             )
 
             _test_send_request(

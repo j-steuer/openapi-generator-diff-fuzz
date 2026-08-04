@@ -1,7 +1,7 @@
 """Store information relevant for client library request source code generation."""
 
 import json
-from typing import Any
+from typing import Any, cast
 
 from telephuzz.config import get_config
 from telephuzz.http_message import Request
@@ -13,8 +13,6 @@ from telephuzz.openapi_helpers import (
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
-
-JSON_CONTENT = "application/json"
 
 
 class InvocationData:
@@ -45,12 +43,16 @@ class InvocationData:
             )
 
         self.send_body = "requestBody" in self.arg_types and (
-            self.content_type != JSON_CONTENT or self.body not in (None, "")
+            "json" not in cast(str, self.content_type) or self.body not in (None, "")
         )
 
         self.authorization = request.headers.get("Authorization", None)
 
-        if self.content_type == JSON_CONTENT and self.send_body:
+        if (
+            self.content_type is not None
+            and "json" in self.content_type
+            and self.send_body
+        ):
             # process body to usable JSON
             self.json_body = json.loads(request.body)
 

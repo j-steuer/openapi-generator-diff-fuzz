@@ -518,7 +518,7 @@ def _get_model_name(invocation: InvocationData) -> str:
     queried endpoint and the OpenAPI spec.
     """
     model_name: str | None = ""
-    if invocation.body and invocation.content_type == "application/json":
+    if invocation.json_body is not None:
         model_name = min(cast(set, invocation.arg_types["requestBody"]))
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
@@ -569,11 +569,17 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
+        print(
+            "DEBUG:", invocation.send_body, invocation.json_body, invocation.arg_types
+        )
         if invocation.send_body:
-            if invocation.content_type == "application/json":
-                model_code = self._generate_code_models(invocation)
-                model_name_str += cast(str, model_code.import_code)
-                body_kwargs = model_code.creation_code
+            if invocation.json_body is not None:
+                if invocation.arg_types["requestBody"] != {"object"}:
+                    model_code = self._generate_code_models(invocation)
+                    model_name_str += cast(str, model_code.import_code)
+                    body_kwargs = model_code.creation_code
+                else:
+                    body_kwargs = f"body={repr(invocation.json_body)}"
 
             else:
                 raw_body: str = invocation.body
@@ -674,7 +680,11 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
         return method_name[:-8] + method_name[-8:]
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
-        model_name = _get_model_name(invocation)
+
+        if invocation.arg_types["requestBody"] != {"object"}:
+            model_name = _get_model_name(invocation)
+        else:
+            model_name = f"{invocation.operation_id}_json_body"
         model_name_module = transform_case(model_name, Case.SNAKE)
         model_name_class = transform_case(model_name, Case.PASCAL)
         import_code = (
@@ -741,7 +751,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
         model_name_str = ""
         if invocation.send_body:
-            if invocation.content_type == "application/json":
+            if invocation.json_body is not None:
                 model_code = self._generate_code_models(invocation)
                 model_name_str = cast(str, model_code.import_code)
                 body_kwargs = model_code.creation_code
@@ -849,25 +859,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
 
-        model_name_str = ""
-        path_components = resolve_path(invocation.path, get_config().spec_str).split(
-            "/"
-        )
-
-        if invocation.send_body:
-            if invocation.content_type == "application/json":
-                model_code = self._generate_code_models(invocation)
-                model_name_str = cast(str, model_code.import_code)
-                body_kwargs = model_code.creation_code
-            else:
-                raw_body: str = invocation.body
-                body_kwargs = f"body={raw_body.encode()!r}"
-        else:
-            model_name_str = ""
-            body_kwargs = ""
-
-        query_parameters = invocation.query_parameters_without_path_vars
-        if query_parameters:
+        def _get_module_path_prefix(path_components: list[str]) -> str:
             path_components = [
                 transform_case(c, self.method_case) if "{" not in c else "item"
                 for c in path_components
@@ -878,6 +870,47 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                 if path_components[-1] != "item"
                 else f"with_{path_components[-2]}_item"
             )
+            return builder_module_prefix
+
+        model_name_str = ""
+        path_components = resolve_path(invocation.path, get_config().spec_str).split(
+            "/"
+        )
+
+        json_object = invocation.json_body and invocation.arg_types["requestBody"] == {
+            "object"
+        }
+
+        import_json_object = ""
+        model_name_str = ""
+        body_kwargs = ""
+        if invocation.send_body:
+            if not json_object:
+                if invocation.json_body is not None:
+                    model_code = self._generate_code_models(invocation)
+                    model_name_str = cast(str, model_code.import_code)
+                    body_kwargs = model_code.creation_code
+                else:
+                    raw_body: str = invocation.body
+                    body_kwargs = f"body={raw_body.encode()!r}"
+            else:
+                base_path = [pc for pc in path_components if pc][0]
+                module_path_prefix = ".".join(
+                    [pc if "{" not in pc else "item" for pc in path_components if pc]
+                )
+                module_name = (
+                    f"{base_path}_{invocation.method.value.lower()}_request_body"
+                )
+                module_path = f"{module_path_prefix}.{module_name}"
+                class_name = transform_case(module_name, Case.PASCAL)
+                import_json_object = (
+                    f"from my_kiota_client.{module_path} import {class_name}"
+                )
+                body_kwargs = f"body={class_name}({repr(invocation.json_body)})"
+
+        query_parameters = invocation.query_parameters_without_path_vars
+        if query_parameters:
+            builder_module_prefix = _get_module_path_prefix(path_components)
             request_builder_module = (
                 f"{'.'.join(path_components)}.{builder_module_prefix}_request_builder"
             )
@@ -924,6 +957,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
         from my_kiota_client.posts_client import PostsClient
         {model_name_str}
         {import_query}
+        {import_json_object}
 
         async def main():
             auth_provider = AnonymousAuthenticationProvider()
