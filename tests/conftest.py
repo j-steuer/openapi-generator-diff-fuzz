@@ -253,6 +253,9 @@ def setup():
     if SPEC_PATH.exists():
         os.remove(SPEC_PATH)
 
+    # clear logs
+    shutil.rmtree("/tmp/logs/telephuzz", ignore_errors=True)
+
     original = Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH
     Config.API_CONFIG_PATH = TEST_API_CONFIG_PATH
     Config.CLIENT_CONFIG_PATH = TEST_CLIENT_CONFIG_PATH
@@ -261,8 +264,6 @@ def setup():
     cfg._config = None
     yield
     Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH = original
-
-    shutil.rmtree("/tmp/logs/telephuzz", ignore_errors=True)
 
 
 @pytest.fixture
