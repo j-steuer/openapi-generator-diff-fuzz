@@ -89,12 +89,27 @@ class DiffEvaluator:
             )
 
         # compare requests
-        request_groups: dict[Request, list[LibraryId]] = _get_groups("request")
+        request_groups: dict[Request | None, list[LibraryId]] = _get_groups("request")
         identical_requests = [r for r in request_groups.keys() if r == original_request]
         for request in identical_requests:
             del request_groups[request]
 
         original_invocation = InvocationData(original_request)
+
+        if None in request_groups:
+            for library in request_groups[None]:
+                result = {r for r in results if r.library == library}.pop()
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    request_chain=[original_request],
+                    unique=len(request_groups[None]) > 1,
+                    produced_request=None,
+                    detail="Error while building request",
+                )
+                diff_reports[library].append(report)
+                logger.debug(f"{library} failed to generate request")
+            del request_groups[None]
 
         if original_request not in request_groups or len(request_groups) > 1:
             if original_request in request_groups:
@@ -105,6 +120,7 @@ class DiffEvaluator:
             )
 
             for diff_request, libraries in request_groups.items():
+                assert diff_request is not None
                 diff_invocation = InvocationData(diff_request)
 
                 diff_method = original_request.method != diff_request.method

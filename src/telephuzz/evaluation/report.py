@@ -14,7 +14,7 @@ class DiffReport:
     library_id: LibraryId
     error_id: str
     request_chain: list[Request]
-    produced_request: Request
+    produced_request: Request | None
     unique: bool = True
     detail: str = ""
 
@@ -143,7 +143,13 @@ class DiffReport:
         for request in self.request_chain:
             error_str += repr(request) + "\n"
         error_str += "Produced Request:\n"
-        error_str += repr(self.produced_request) + "\n"
+        if self.produced_request is not None:
+            error_str += repr(self.produced_request) + "\n"
+        else:
+            error_str += (
+                "Failed to produce request. "
+                "This could be an error caused by the fuzzer.\n"
+            )
         error_str += "----------------------------\n"
 
         error_str += f"Error occured in library {self.library_id}:\n"

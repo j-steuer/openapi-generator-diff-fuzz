@@ -11,7 +11,7 @@ class RequestResult:
     """Store request result data important for the evaluation."""
 
     library: LibraryId
-    request: Request
+    request: Request | None
 
     def __hash__(self):
         """Hash method."""

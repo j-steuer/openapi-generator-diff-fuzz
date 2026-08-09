@@ -239,3 +239,12 @@ def test_ignore_extra_params():
     result = RequestResult("lib1", eval_request)
 
     assert not evaluator.eval({result}, original_request)
+
+
+def test_request_none_report(basic_request, mock_invocation_data):
+    """Report should show if request was not generated."""
+    original_request = basic_request
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", None)
+
+    assert evaluator.eval({result}, original_request) == set()
