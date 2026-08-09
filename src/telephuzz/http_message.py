@@ -10,6 +10,14 @@ from urllib.parse import urlsplit
 from requests.structures import CaseInsensitiveDict
 
 
+def path_only(path: str) -> str:
+    """Return the path without query parameters."""
+    if "?" in path:
+        path = path[: path.find("?")]
+
+    return path
+
+
 class HTTPMethod(Enum):
     """Enum for HTTP methods."""
 
@@ -112,6 +120,26 @@ class Request(HTTPMessage):
                 json.dumps(body, sort_keys=True) if body is not None else body,
                 json.dumps(dict(self.headers), sort_keys=True),
             )
+        )
+
+    def __eq__(self, other) -> bool:
+        """Equal method."""
+        if not isinstance(other, Request):
+            return False
+
+        try:
+            self_body = json.loads(self.body)
+            other_body = json.loads(other.body)
+            body = self_body == other_body
+        except Exception:
+            body = self.body == other.body
+
+        return (
+            self.method == other.method
+            and path_only(self.path) == path_only(other.path)
+            and self.query_parameters == other.query_parameters
+            and body
+            and self.headers == other.headers
         )
 
 

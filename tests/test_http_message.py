@@ -1,5 +1,7 @@
 """Unit tests for HTTP message classes."""
 
+from copy import deepcopy
+
 from requests.models import CaseInsensitiveDict
 
 from telephuzz.http_message import HTTPMethod, Request, Response
@@ -69,3 +71,23 @@ def test_response_from_json():
     assert len(response.headers) == 1
     assert response.headers["testheader"] == 1
     assert response.body == "Test body"
+
+
+def test_base_path_equivalence(basic_request):
+    """Test that order of query parameters does not matter for __eq__."""
+    request1 = deepcopy(basic_request)
+    request1.path = "/greet?age=0&name="
+    request2 = deepcopy(basic_request)
+    request2.path = "/greet?name=&age=0"
+
+    assert request1 == request2
+
+
+def test_json_body_equivalence(basic_request):
+    """Test that bodies loadable as json are evaluated as json."""
+    request1 = deepcopy(basic_request)
+    request1.body = '{"age": 4800, "name": ""}'
+    request2 = deepcopy(basic_request)
+    request2.body = '{"name": "", "age": 4800}'
+
+    assert request1 == request2

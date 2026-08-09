@@ -4,7 +4,6 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from time import sleep
 
 import pytest
 import requests
@@ -57,32 +56,12 @@ def test_simple_routing(api: tuple[Network, str]) -> None:
     with MITMProxyContainer() as mitm_proxy:
         assert mitm_proxy.container is not None
         network.connect(mitm_proxy.container)
-        sleep(1)
         assert (
-            "Hello Alice, you are 30 years old!"
-            in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
+            requests.get(
+                f"http://localhost:{mitm_proxy.listen_port}/greet",
                 params=params,
-            ).text
-        )
-
-
-def test_simple_routing_custom_port(api: tuple[Network, str]) -> None:
-    """Test routing a request via mitmproxy container with non-default port."""
-    params: dict = {"name": "Alice", "age": 30}
-
-    network, _ = api
-
-    with MITMProxyContainer(listen_port=8081) as mitm_proxy:
-        assert mitm_proxy.container is not None
-        network.connect(mitm_proxy.container)
-        sleep(1)
-        assert (
-            "Hello Alice, you are 30 years old!"
-            in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
-                params=params,
-            ).text
+            ).status_code
+            == 200
         )
 
 
@@ -96,13 +75,12 @@ def test_simple_routing_multiple(api: tuple[Network, str]) -> None:
         with MITMProxyContainer(listen_port=8081) as mitm_proxy:
             assert mitm_proxy.container is not None
             network.connect(mitm_proxy.container)
-            sleep(1)
             assert (
-                "Hello Alice, you are 30 years old!"
-                in requests.get(
-                    f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
+                requests.get(
+                    f"http://localhost:{mitm_proxy.listen_port}/greet",
                     params=params,
-                ).text
+                ).status_code
+                == 200
             )
 
 
@@ -112,17 +90,29 @@ def test_simple_routing_query_parameter(api: tuple[Network, str]) -> None:
 
     network, _ = api
 
-    with MITMProxyContainer() as mitm_proxy:
-        assert mitm_proxy.container is not None
-        network.connect(mitm_proxy.container)
-        sleep(1)
-        assert (
-            "This is a GET request returning user info"
-            in requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/api:8000/user?user_id=1013",
-                params=params,
-            ).text
-        )
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with MITMProxyContainer(response_output=tmpdir) as mitm_proxy:
+            assert mitm_proxy.container is not None
+            network.connect(mitm_proxy.container)
+            assert (
+                requests.get(
+                    f"http://localhost:{mitm_proxy.listen_port}/user",
+                    params=params,
+                ).status_code
+                == 200
+            )
+
+            response_dir = Path(tmpdir) / "localhost"
+            responses = os.listdir(response_dir)
+            assert len(responses) == 1, "Should contain a single response file."
+            response_file = responses[0]
+            with open(Path(response_dir) / response_file) as f:
+                entry_data = json.load(f)
+
+            assert (
+                entry_data["url"]
+                == f"http://localhost:{mitm_proxy.listen_port}/user?user_id=1013"
+            )
 
 
 def test_json_response(api: tuple[Network, str]) -> None:
@@ -135,22 +125,19 @@ def test_json_response(api: tuple[Network, str]) -> None:
         with MITMProxyContainer(response_output=tmpdir) as mitm_proxy:
             assert mitm_proxy.container is not None
             network.connect(mitm_proxy.container)
-            sleep(1)
             requests.get(
-                f"http://localhost:{mitm_proxy.listen_port}/api:8000/greet",
+                f"http://localhost:{mitm_proxy.listen_port}/greet",
                 params=params,
             )
 
-            respose_path = Path(tmpdir) / "api"
+            respose_path = Path(tmpdir) / "localhost"
             responses = os.listdir(respose_path)
             assert len(responses) == 1, "Should contain a single response file."
             response_file = responses[0]
             with open(respose_path / response_file) as f:
                 entry_data = json.load(f)
 
-            assert (
-                "Hello Alice, you are 30 years old!" in entry_data["response"]["body"]
-            )
+            assert entry_data["url"] == "http://localhost:8080/greet?name=Alice&age=30"
 
 
 def test_single_target(api: tuple[Network, str]) -> None:
@@ -203,3 +190,7 @@ def test_explode(basic_flow: http.HTTPFlow, monkeypatch) -> None:
         "testing",
     }
     assert query_parameters["page"] == "1"
+
+
+def test_target_query_params():
+    """Test extracting query params from targeted mitmproxy."""

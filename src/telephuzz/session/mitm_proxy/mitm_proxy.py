@@ -1,10 +1,13 @@
 """File for the container with MiTMProxy."""
 
+import os
+import shutil
 import socket
 import time
 from pathlib import Path
 
 import docker
+import requests
 from docker.models.containers import Container
 
 from telephuzz.session.mitm_proxy.proxy_hooks import RESPONSE_PATH
@@ -33,8 +36,15 @@ class MITMProxyContainer:
         client = docker.from_env()
         hooks_path = "/scripts/hooks.py"
 
-        if target is None:
-            # dynamic routing mode (used for main fuzzing loop)
+        # set up response path
+        response_path = Path(self.response_output)
+        if response_path.exists() and len(os.listdir(response_path)) != 0:
+            shutil.rmtree(response_path)
+        os.makedirs(response_path, exist_ok=True)
+
+        self.target = target
+        if self.target is None:
+            # set up without target, returning dummy response through hook
             container = client.containers.run(
                 image=f"mitmproxy/mitmproxy:{version}",
                 command=[
@@ -81,14 +91,29 @@ class MITMProxyContainer:
     def _wait_until_ready(self, timeout: float = 10.0) -> None:
         start = time.time()
 
+        latest_error = None
         while time.time() - start < timeout:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if s.connect_ex(("localhost", self.listen_port)) == 0:
-                    return
+                    if self.target is not None:
+                        return
+                    try:
+                        if (
+                            requests.get(
+                                f"http://localhost:{self.listen_port}/__mitmproxy_health"
+                            ).status_code
+                            == 200
+                        ):
+                            return
+                    except Exception as e:
+                        latest_error = e
                 else:
                     time.sleep(0.2)
         # timeout
-        raise RuntimeError("mitmproxy did not become ready in time.")
+        if latest_error is None:
+            raise RuntimeError("mitmproxy did not become ready in time.")
+        else:
+            raise RuntimeError("Could not start mitmproxy") from latest_error
 
     def __enter__(self):
         """Make mitmproxy container a context manager."""

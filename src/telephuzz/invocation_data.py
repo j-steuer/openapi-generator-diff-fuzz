@@ -4,12 +4,13 @@ import json
 from typing import Any, cast
 
 from telephuzz.config import get_config
-from telephuzz.http_message import Request
+from telephuzz.http_message import Request, path_only
 from telephuzz.openapi_helpers import (
     extract_path_parameters,
     extract_path_variable_types,
     get_args,
     get_content_type,
+    get_request_body_properties,
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -56,6 +57,10 @@ class InvocationData:
             # process body to usable JSON
             self.json_body = json.loads(request.body)
 
+            allowed_request_body_properties = get_request_body_properties(
+                get_config().spec_str, request.method, request.path
+            )
+
             bodies = (
                 list(self.json_body)
                 if isinstance(self.json_body, list)
@@ -73,6 +78,11 @@ class InvocationData:
 
                 stripped_json_body = dict(body)
 
+                if allowed_request_body_properties is not None:
+                    for key in list(stripped_json_body):
+                        if key not in allowed_request_body_properties:
+                            del stripped_json_body[key]
+
                 for key, value in body.items():
                     # strip nested arrays
                     # (https://github.com/microsoft/kiota/issues/5159)
@@ -83,7 +93,7 @@ class InvocationData:
 
                     if isinstance(value, list):
                         if any(isinstance(v, list) for v in body[key]):
-                            del stripped_json_body[key]
+                            stripped_json_body.pop(key, None)
 
                 bodies[idx] = stripped_json_body
 
@@ -113,12 +123,12 @@ class InvocationData:
     def _get_query_parameters(self, request: Request) -> dict[str, Any]:
         """Resolve query parameters (including path variables)."""
         # check for path variables
-        path_only = self._path_only(request.path)
+        base_path = path_only(request.path)
         path = self._resolve_path(request.path)
 
         query_parameters = request.query_parameters
         if "{" in path:
-            _path_params = extract_path_parameters(path, path_only)
+            _path_params = extract_path_parameters(path, base_path)
 
             # remove path variables from pure query parameters if present
             for path_param in _path_params.keys():
@@ -141,10 +151,8 @@ class InvocationData:
 
     def _resolve_path(self, path: str) -> str:
         """Resolve the concrete path."""
-        path = self._path_only(path)
+        path = path_only(path)
         return resolve_path(path, get_config().spec_str)
-
-    def _path_only(self, path: str) -> str:
         """Return the path without query parameters."""
         if "?" in path:
             path = path[: path.find("?")]

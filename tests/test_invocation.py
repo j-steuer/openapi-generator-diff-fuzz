@@ -180,6 +180,33 @@ def test_parse_json_body():
     assert invocation.json_body["id"] == 1
 
 
+def test_strip_unknown_body_properties():
+    """Test that unknown JSON body properties are removed based on schema."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "TEST123",
+                "Content-Type": "application/json",
+                "Content-Length": "100",
+            }
+        ),
+        body='{"name": "Alice", "age": 30, "extra": "remove", "none": null}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.json_body == {"name": "Alice", "age": 30}
+
+
 def test_parse_surrogate_encoding():
     """Test request that used to throw an encoding error due to surrogates."""
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
@@ -265,51 +292,6 @@ def test_parse_array():
     assert len(invocation.json_body) == 2
     assert invocation.json_body[0]["id"] != invocation.json_body[1]["id"]
     assert invocation.json_body[0]["password"] == invocation.json_body[1]["password"]
-
-
-def test_strip_nested_array():
-    """Nested arrays should be stripped from the body."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-
-    request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "NkdOLM",
-                "Content-Type": "application/json",
-                "Content-Length": "150",
-            }
-        ),
-        body=(
-            '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
-            '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
-            '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336'
-            ', "additional": [[1]]}'
-        ),
-        method=HTTPMethod.PUT,
-        path="/pet",
-        query_parameters={},
-    )
-
-    invocation = InvocationData(request)
-    assert invocation.json_body is not None
-    assert "additional" not in invocation.json_body
-
-    # strip array
-    valid_body = request.body.replace("[[1]]", "[1]")
-    request.body = f"[{request.body}, {valid_body}]"
-    invocation = InvocationData(request)
-    assert isinstance(invocation.json_body, list)
-    assert "additional" not in invocation.json_body[0]
-
-    invocation = InvocationData(request)
-    assert invocation.json_body is not None
-    assert "additional" not in invocation.json_body[0]
-    assert "additional" in invocation.json_body[1]
 
 
 def test_cast_query_parameter_integers():

@@ -177,6 +177,71 @@ def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
     return list(operation["requestBody"]["content"].keys())[0]
 
 
+def _resolve_ref(spec: dict, ref: str) -> dict:
+    """Resolve a local JSON reference within the spec."""
+    if not isinstance(ref, str) or not ref.startswith("#/"):
+        raise ValueError(f"Unsupported ref: {ref}")
+
+    current: Any = spec
+    for path_part in ref[2:].split("/"):
+        path_part = path_part.replace("~1", "/").replace("~0", "~")
+        current = current[path_part]
+    assert isinstance(current, dict)
+    return current
+
+
+def _resolve_schema(spec: dict, schema: dict) -> dict:
+    """Resolve schema objects, including refs and composed schemas."""
+    if not isinstance(schema, dict):
+        return {}
+
+    if "$ref" in schema:
+        return _resolve_schema(spec, _resolve_ref(spec, schema["$ref"]))
+
+    if "allOf" in schema:
+        properties: dict[str, Any] = {}
+        for subschema in schema["allOf"]:
+            resolved = _resolve_schema(spec, subschema)
+            properties.update(resolved.get("properties", {}))
+        return {"type": "object", "properties": properties}
+
+    if "oneOf" in schema or "anyOf" in schema:
+        options = schema.get("oneOf") or schema.get("anyOf") or []
+        properties = {}
+        for subschema in options:
+            resolved = _resolve_schema(spec, subschema)
+            properties.update(resolved.get("properties", {}))
+        return {"type": "object", "properties": properties}
+
+    return schema
+
+
+@cache
+def get_request_body_properties(
+    spec: str, method: HTTPMethod, path: str
+) -> set[str] | None:
+    """Return allowed top-level request body keys for the given operation."""
+    operation = _search_operation(spec, method, path)
+    if "requestBody" not in operation:
+        return None
+
+    content = operation["requestBody"]["content"]
+    if not content:
+        return None
+
+    schema = next(iter(content.values())).get("schema", {})
+    spec_dict = json.loads(spec)
+    resolved_schema = _resolve_schema(spec_dict, schema)
+
+    if resolved_schema.get("type") == "array":
+        resolved_schema = _resolve_schema(spec_dict, resolved_schema.get("items", {}))
+
+    if resolved_schema.get("type") == "object" or "properties" in resolved_schema:
+        return set(resolved_schema.get("properties", {}).keys())
+
+    return None
+
+
 def get_api_url_path(spec: dict) -> str:
     """Obtain the base path of the API."""
     assert isinstance(spec, dict)

@@ -569,9 +569,6 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
         if query_parameters:
             kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
 
-        print(
-            "DEBUG:", invocation.send_body, invocation.json_body, invocation.arg_types
-        )
         if invocation.send_body:
             if invocation.json_body is not None:
                 if invocation.arg_types["requestBody"] != {"object"}:
