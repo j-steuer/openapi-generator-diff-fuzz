@@ -48,7 +48,7 @@ class Session:
         def _get_request() -> Request | None:
             response_dir = response_output / "mitmproxy"
             response_path = None
-            for _ in range(100):
+            for _ in range(30):
                 try:
                     response_path = next(response_dir.iterdir())
                     break
@@ -70,14 +70,16 @@ class Session:
         self.client.send(invocation, api_path)
         library_request = _get_request()
         if library_request is None and self.first:
-            for _ in range(5):
+            for i in range(5):
                 sleep(1)
                 self.client.send(invocation, api_path)
                 library_request = _get_request()
 
-                if library_request is not None:
+                if library_request is not None or i == 5:
                     self.first = False
                     break
+        elif self.first:
+            self.first = False
 
         if not (isinstance(library_request, Request) or library_request is None):
             raise ValueError("Response was not parsed into response object.")
