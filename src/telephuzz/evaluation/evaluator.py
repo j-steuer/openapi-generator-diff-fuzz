@@ -195,6 +195,8 @@ class DiffEvaluator:
                             f"expected, but got '{pformat(diff_request.body)}.'\n"
                         )
 
+                    logger.debug(f"{library} produced diff in response: {detail}")
+
                     result = {r for r in results if r.library == library}.pop()
 
                     report = DiffReport(
