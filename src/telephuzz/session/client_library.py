@@ -210,7 +210,10 @@ class ClientLibraryContainer(ABC):
                 if not worker_path.exists():
                     raise ValueError(f"Worker path not found: {worker_path}") from e
                 worker_dest = tmpdir
-                shutil.copy(worker_path, worker_dest)
+                if worker_path.is_dir():
+                    shutil.copytree(worker_path, worker_dest)
+                else:
+                    shutil.copy(worker_path, worker_dest)
 
                 dockerfile_path = os.path.join(tmpdir, "Dockerfile")
 
@@ -379,6 +382,7 @@ class CsharpCLC(ClientLibraryContainer):
 
     method_case = Case.PASCAL
     base_image = "mcr.microsoft.com/dotnet/sdk:10.0"
+    worker_script = "csharp-worker"
 
     def __init__(self):
         """Initialize a C#-based client library."""
@@ -403,7 +407,7 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
-        return "dotnet script invocation.csx"
+        return "touch /tmp/run.trigger"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
@@ -423,6 +427,15 @@ class CsharpCLC(ClientLibraryContainer):
                     WORKDIR {LIB_PATH}/lib
                     RUN dotnet build
 
+                    RUN dotnet publish CsharpWorker/CsharpWorker.csproj \
+                        -c Release \
+                        -o /opt/csharp-worker \
+                        --no-self-contained 
+                        
+                    RUN mkdir -p /worker 
+                    
+                    CMD ["dotnet", "/opt/csharp-worker/CsharpWorker.dll"] 
+                    
                     WORKDIR {LIB_PATH}
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
@@ -1380,8 +1393,65 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
     id = "openapi-generator:csharp"
     generator_script = "openapi-generator-csharp.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        """Generate models for JSON bodies."""
+        model_name = _get_model_name(invocation)
+        model_name_module = transform_case(model_name, Case.PASCAL)
+        model_name_class = transform_case(model_name, Case.PASCAL)
+        import_code = (
+            f"from openapi_client.models.{model_name_module} import {model_name_class}"
+        )
+
+        eval_body = invocation.json_body
+        if isinstance(eval_body, list):
+            # create list of objects
+            model_list = [
+                f"{model_name_class}.from_json({json.dumps(json.dumps(body))})"
+                for body in eval_body
+            ]
+            creation_code = "[" + ", ".join(model_list) + "]"
+        elif isinstance(eval_body, dict):
+            body = json.dumps(eval_body)
+            from_json = f"{model_name_class}.from_json({body!r}"
+            creation_code = f"{model_name_module}={from_json})"
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(eval_body)}: {invocation.body}"
+            )
+
+        return ModelCode(import_code=import_code, creation_code=creation_code)
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
+        model_name_str = ""
+        query_parameters = invocation.query_parameters
+
+        kwargs = ""
+        if query_parameters:
+            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
+
+        if invocation.send_body:
+            if invocation.json_body is not None:
+                if invocation.arg_types["requestBody"] != {"object"}:
+                    model_code = self._generate_code_models(invocation)
+                    model_name_str += cast(str, model_code.import_code)
+                    body_kwargs = model_code.creation_code
+                else:
+                    body_kwargs = f"body={repr(invocation.json_body)}"
+
+            else:
+                raw_body: str = invocation.body
+                body_kwargs = f"body={raw_body.encode()!r}"
+
+            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
+
+        # TODO move replace to transforming invocation
+        # api = (
+        #    get_config()
+        #    .tag_lookup(invocation.method.value, invocation.path)
+        #    .replace("-", "_")
+        # )
+        # api_class = transform_case(api, Case.PASCAL)
+
         method_name = self._get_method_name(invocation)
 
         content = textwrap.dedent(f"""
