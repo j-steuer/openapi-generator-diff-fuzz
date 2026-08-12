@@ -739,6 +739,52 @@ class TestPetshop:
                 expected_status=400,
             )
 
+    @pytest.mark.parametrize(
+        "clc_class",
+        [
+            OpenAPIGenPythonCLC,
+            SwaggerCodegenPythonCLC,
+            OpenAPIPythonClientCLC,
+            KiotaPythonCLC,
+        ],
+    )
+    def test_p2(self, clc_class, petshop: tuple[Network, str]):
+        """Test sending a request whose path ends with a path variable."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+        network, api_path = petshop
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(
+                    {
+                        "Host": "localhost:8000",
+                        "User-Agent": "schemathesis/4.15.2",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept": "*/*",
+                        "Connection": "keep-alive",
+                        "X-Schemathesis-TestCaseId": "TLon0G",
+                        "Content-Type": "application/octet-stream",
+                        "Content-Length": "7",
+                    }
+                ),
+                body="}\x8dH<;\t\x04",
+                method=HTTPMethod.POST,
+                path="/pet/36/uploadImage?additionalMetadata=%C3%87%F2%AC%B0%BB%C2%BF%14",
+                query_parameters={
+                    "additionalMetadata": "Ç\U000acc3b¿\x14",
+                    "petId": 36,
+                },
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
 
 @pytest.fixture(scope="class")
 def spring_batch():
