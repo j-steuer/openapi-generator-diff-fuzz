@@ -3,6 +3,7 @@ clients/
 config.yaml
 spec/*.json
 local_testfiles
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
