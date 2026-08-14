@@ -44,7 +44,7 @@ class InvocationData:
             )
 
         self.send_body = "requestBody" in self.arg_types and (
-            "json" not in cast(str, self.content_type) or self.body not in (None, "")
+            "json" not in cast(str, self.content_type) or self.body not in (None, b"")
         )
 
         self.authorization = request.headers.get("Authorization", None)
@@ -55,6 +55,7 @@ class InvocationData:
             and self.send_body
         ):
             # process body to usable JSON
+            assert request.body is not None, "JSON body not provided for JSON request"
             self.json_body = json.loads(request.body)
 
             allowed_request_body_properties = get_request_body_properties(

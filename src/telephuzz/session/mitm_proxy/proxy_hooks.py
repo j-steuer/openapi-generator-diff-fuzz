@@ -1,5 +1,6 @@
 """File for custom request and response handling for MITMProxyContainer."""
 
+import base64
 import json
 import logging
 import os
@@ -52,7 +53,11 @@ def request(flow: http.HTTPFlow):
         "url": flow.request.pretty_url,
         "query_parameters": query_parameters,
         "headers": dict(flow.request.headers),
-        "body": flow.request.get_text(),
+        "body": (
+            base64.b64encode(flow.request.raw_content).decode("ascii")
+            if flow.request.raw_content is not None
+            else None
+        ),
     }
 
     response_id = time.time_ns()

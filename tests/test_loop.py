@@ -209,7 +209,7 @@ def test_session_manager_setup(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -255,7 +255,7 @@ def test_session_manager_faulty(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -284,7 +284,7 @@ def test_diff_eval(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -373,7 +373,7 @@ def test_send_petshop(client_generator):
                 "X-Schemathesis-TestCaseId": "q2GdK4",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.GET,
         path="/store/inventory",
         query_parameters={},

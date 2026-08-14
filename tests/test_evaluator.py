@@ -33,7 +33,7 @@ def test_same_request_responses(mock_invocation_data):
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
@@ -53,13 +53,13 @@ def test_same_diff_request(mock_invocation_data):
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
     )
     wrong_request = deepcopy(request)
-    request.body = "Wrong body."
+    request.body = b"Wrong body."
     # TODO adjust when db comp implemented
     result1 = RequestResult("Lib1", request)
     result2 = RequestResult("Lib2", wrong_request)
@@ -77,13 +77,13 @@ def test_logging(mock_invocation_data):
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
     )
     wrong_request = deepcopy(request)
-    request.body = "Wrong body."
+    request.body = b"Wrong body."
     result1 = RequestResult("Lib1", request)
     result2 = RequestResult("Lib2", wrong_request)
     result3 = RequestResult("Lib3", request)
@@ -180,14 +180,14 @@ def test_normalize_json_body():
                 "Content-Length": "400",
             }
         ),
-        body='{"age": 4800, "name": ""}',
+        body=b'{"age": 4800, "name": ""}',
         method=HTTPMethod.POST,
         path="/user",
         query_parameters={},
     )
 
     eval_request = deepcopy(original_request)
-    eval_request.body = '{"name": "", "age": 4800}'
+    eval_request.body = b'{"name": "", "age": 4800}'
 
     evaluator = DiffEvaluator()
     result = RequestResult("lib1", eval_request)
@@ -211,7 +211,7 @@ def test_ignore_extra_params():
                 "Content-Length": "400",
             }
         ),
-        body='{"age": 19011, "name": "dan", "c": "gone"}',
+        body=b'{"age": 19011, "name": "dan", "c": "gone"}',
         method=HTTPMethod.POST,
         path="/user",
         query_parameters={},
@@ -229,7 +229,7 @@ def test_ignore_extra_params():
                 "Content-Type": "application/json",
             }
         ),
-        body='{"name": "dan", "age": 19011}',
+        body=b'{"name": "dan", "age": 19011}',
         method=HTTPMethod.POST,
         path="/user",
         query_parameters={},

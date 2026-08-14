@@ -191,7 +191,7 @@ class TestGeneral:
 
         request = Request(
             CaseInsensitiveDict(),
-            body="",
+            body=b"",
             method=HTTPMethod.DELETE,
             path="/user/123",
             query_parameters={},
@@ -262,7 +262,7 @@ class TestPetshop:
                         "X-Schemathesis-TestCaseId": "GGvhsb",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.GET,
                 path="/pet/105",
                 query_parameters={},
@@ -280,7 +280,7 @@ class TestPetshop:
                         "X-Schemathesis-TestCaseId": "GGvhsb",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.GET,
                 path="/user/105",
                 query_parameters={},
@@ -319,12 +319,12 @@ class TestPetshop:
                     }
                 ),
                 body=(
-                    '{"id": 1, '
-                    '"name": "test", '
-                    '"photoUrls": ["https://example.com/photo.jpg"], '
-                    '"status": "available", '
-                    '"tags": [{"id": 2, "name": "tag"}], '
-                    '"isCustom": true}'
+                    b'{"id": 1, '
+                    b'"name": "test", '
+                    b'"photoUrls": ["https://example.com/photo.jpg"], '
+                    b'"status": "available", '
+                    b'"tags": [{"id": 2, "name": "tag"}], '
+                    b'"isCustom": true}'
                 ),
                 method=HTTPMethod.POST,
                 path="/pet",
@@ -362,7 +362,7 @@ class TestPetshop:
                         "Content-Length": "2",
                     }
                 ),
-                body="{}",
+                body=b"{}",
                 method=HTTPMethod.PUT,
                 path="/user/%C2%A6g%F4%84%82%90%C2%BB%C2%8F%C2%80%0Cr",
                 query_parameters={},
@@ -399,7 +399,7 @@ class TestPetshop:
                         "Content-Length": "2",
                     }
                 ),
-                body="[]",
+                body=b"[]",
                 method=HTTPMethod.POST,
                 path="/user/createWithList",
                 query_parameters={},
@@ -419,7 +419,7 @@ class TestPetshop:
                         "userStatus": 1,
                     }
                 ]
-            )
+            ).encode()
 
             _test_send_request(
                 clc,
@@ -459,7 +459,7 @@ class TestPetshop:
                         "Content-Length": "6",
                     }
                 ),
-                body="üý»©TÎ",
+                body=b"a",
                 method=HTTPMethod.POST,
                 path="/pet/-1714/uploadImage",
                 query_parameters={"petId": -1714},
@@ -503,10 +503,10 @@ class TestPetshop:
                     }
                 ),
                 body=(
-                    '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
-                    '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
-                    '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"],'
-                    ' "id": -24336}'
+                    b'{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
+                    b'"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
+                    b'"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"],'
+                    b' "id": -24336}'
                 ),
                 method=HTTPMethod.PUT,
                 path="/pet",
@@ -548,7 +548,7 @@ class TestPetshop:
                         "X-Schemathesis-TestCaseId": "W02CUe",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.GET,
                 path="/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6",
                 query_parameters={"tags": "\x80𨕳\U00048b13ö"},
@@ -591,7 +591,7 @@ class TestPetshop:
                         "Content-Length": "0",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.POST,
                 path="/pet/1/uploadImage",
                 query_parameters={"petId": 1},
@@ -632,7 +632,7 @@ class TestPetshop:
                         "X-Schemathesis-TestCaseId": "VzpLIV",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.GET,
                 path="/pet/findByStatus?status=pending",
                 query_parameters={"status": "pending"},
@@ -680,7 +680,7 @@ class TestPetshop:
                         "Content-Length": "0",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.POST,
                 path="/pet/5714?status=%C3%A3%C2%88%F2%86%AD%9A%C2%A1g%F3%95%B2%BB%0B%F2%B7%99%89%E9%BB%A5%C3%B19%0B%C3%957%C2%97n%7B",
                 query_parameters={
@@ -725,7 +725,7 @@ class TestPetshop:
                         "Content-Length": "0",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.POST,
                 path="/store/order",
                 query_parameters={},
@@ -763,18 +763,15 @@ class TestPetshop:
                         "Accept-Encoding": "gzip, deflate, br",
                         "Accept": "*/*",
                         "Connection": "keep-alive",
-                        "X-Schemathesis-TestCaseId": "TLon0G",
+                        "X-Schemathesis-TestCaseId": "1P42ZP",
                         "Content-Type": "application/octet-stream",
-                        "Content-Length": "7",
+                        "Content-Length": "1",
                     }
                 ),
-                body="}\x8dH<;\t\x04",
+                body=b"a",
                 method=HTTPMethod.POST,
-                path="/pet/36/uploadImage?additionalMetadata=%C3%87%F2%AC%B0%BB%C2%BF%14",
-                query_parameters={
-                    "additionalMetadata": "Ç\U000acc3b¿\x14",
-                    "petId": 36,
-                },
+                path="/pet/17930/uploadImage",
+                query_parameters={"petId": 17930},
             )
 
             _test_send_request(
@@ -827,7 +824,7 @@ class TestSpringBatch:
                         "X-Schemathesis-TestCaseId": "nEfZ5y",
                     }
                 ),
-                body="",
+                body=b"",
                 method=HTTPMethod.GET,
                 path="/jobs",
                 query_parameters={},
@@ -874,12 +871,12 @@ class TestSpringBatch:
                     }
                 ),
                 body=(
-                    '{"\\udad6\\udefb\\u00e2\\ud812\\ude26": [], '
-                    '"\\u00e2\\ud806\\udd92\\ud8a4\\udff4": {"": "", '
-                    '"\\ud926\\uddf4\\u00a5u\\u00d6\\uda66\\ude3c\\u00ee~\\udad1'
-                    '\\udead\\u0086\\ud974\\udd63\\u00dbo": '
-                    '"a\\u0000\\u00d5D\\u0094\\u001e\\u00ddO[\\ud919\\udf63", '
-                    '"i": "%\\u0083"}, "__main__": [null]}'
+                    b'{"\\udad6\\udefb\\u00e2\\ud812\\ude26": [], '
+                    b'"\\u00e2\\ud806\\udd92\\ud8a4\\udff4": {"": "", '
+                    b'"\\ud926\\uddf4\\u00a5u\\u00d6\\uda66\\ude3c\\u00ee~\\udad1'
+                    b'\\udead\\u0086\\ud974\\udd63\\u00dbo": '
+                    b'"a\\u0000\\u00d5D\\u0094\\u001e\\u00ddO[\\ud919\\udf63", '
+                    b'"i": "%\\u0083"}, "__main__": [null]}'
                 ),
                 method=HTTPMethod.POST,
                 path="/jobExecutions",
@@ -940,15 +937,15 @@ class TestPatchSpring:
                     }
                 ),
                 body=(
-                    '{"\\udbba\\udd85fW\\u00cc\\u00e1x\\u0014[q'
-                    "\\ud8da\\ude98\\ud800\\udeab\\ud8ad\\udd22kTn"
-                    '\\u00cb:\\udaea\\udf4d": {}, ",\\u0017\\u00a2'
-                    '\\u00d0": {}, "\\u00a0\\ud8e2\\udd5c5\\u00fd'
-                    '\\uda7f\\ude00\\u00ae\\u00bb\\u00a4\\u0017\\u00de": '
-                    '{"\\u0080\\u00a1\\u00c0i\\ud8d3\\udf05w\\u00f5'
-                    '\\u00ca\\u00cde\\u00ea\\u00ee\\ud8e1\\udc23": 0}, '
-                    '"+\\u00b9q\\u00de\\u00be\\u00d3 \\u00c0": [], '
-                    '"": 0}'
+                    b'{"\\udbba\\udd85fW\\u00cc\\u00e1x\\u0014[q'
+                    b"\\ud8da\\ude98\\ud800\\udeab\\ud8ad\\udd22kTn"
+                    b'\\u00cb:\\udaea\\udf4d": {}, ",\\u0017\\u00a2'
+                    b'\\u00d0": {}, "\\u00a0\\ud8e2\\udd5c5\\u00fd'
+                    b'\\uda7f\\ude00\\u00ae\\u00bb\\u00a4\\u0017\\u00de": '
+                    b'{"\\u0080\\u00a1\\u00c0i\\ud8d3\\udf05w\\u00f5'
+                    b'\\u00ca\\u00cde\\u00ea\\u00ee\\ud8e1\\udc23": 0}, '
+                    b'"+\\u00b9q\\u00de\\u00be\\u00d3 \\u00c0": [], '
+                    b'"": 0}'
                 ),
                 method=HTTPMethod.PATCH,
                 path="/contacts/70",

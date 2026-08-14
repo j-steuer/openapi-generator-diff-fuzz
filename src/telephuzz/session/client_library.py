@@ -26,7 +26,6 @@ from docker.models.images import Image
 
 from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
-from telephuzz.http_message import Response
 from telephuzz.invocation_data import InvocationData
 from telephuzz.openapi_helpers import get_version, resolve_path
 from telephuzz.operation_ids import Case, transform_case
@@ -250,7 +249,7 @@ class ClientLibraryContainer(ABC):
         """
         raise NotImplementedError
 
-    def send(self, invocation: InvocationData, api_path: str) -> Response | str:
+    def send(self, invocation: InvocationData, api_path: str) -> str:
         """Send a request through the client library."""
         logger.debug(
             f"{self.id} sending request to API at {api_path}: {repr(invocation)}"
@@ -522,7 +521,7 @@ def _get_model_name(invocation: InvocationData) -> str:
         model_name = min(cast(set, invocation.arg_types["requestBody"]))
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
-        f"{invocation.path} with body {invocation.body}"
+        f"{invocation.path} with body {invocation.body!r}"
     )
     return model_name
 
@@ -556,7 +555,7 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
             creation_code = f"{model_name_module}={from_json})"
         else:
             raise NotImplementedError(
-                f"Unhandled body type {type(eval_body)}: {invocation.body}"
+                f"Unhandled body type {type(eval_body)}: {invocation.body!r}"
             )
 
         return ModelCode(import_code=import_code, creation_code=creation_code)
@@ -579,8 +578,8 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
                     body_kwargs = f"body={repr(invocation.json_body)}"
 
             else:
-                raw_body: str = invocation.body
-                body_kwargs = f"body={raw_body.encode()!r}"
+                raw_body: bytes | None = invocation.body
+                body_kwargs = f"body={raw_body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -636,8 +635,8 @@ class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
             if invocation.json_body is not None:
                 body_kwargs = self._generate_code_models(invocation).creation_code
             else:
-                raw_body: str = invocation.body
-                body_kwargs = f"body={repr(raw_body)}"
+                raw_body: bytes | None = invocation.body
+                body_kwargs = f"body={raw_body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -698,7 +697,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
             creation_code = f"body={from_json}"
         else:
             raise NotImplementedError(
-                f"Unhandled body type {type(json_body)}: {invocation.body}"
+                f"Unhandled body type {type(json_body)}: {invocation.body!r}"
             )
 
         return ModelCode(import_code=import_code, creation_code=creation_code)
@@ -754,12 +753,12 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
                 body_kwargs = model_code.creation_code
 
             elif invocation.content_type == "application/octet-stream":
-                raw_body: str = invocation.body
-                bytes_io = f"BytesIO({raw_body.encode()!r})"
+                raw_body: bytes | None = invocation.body
+                bytes_io = f"BytesIO({raw_body!r})"
                 body_kwargs = f"body=File({bytes_io})"
             else:
                 raw_body = invocation.body
-                body_kwargs = f"body={raw_body.encode()!r}"
+                body_kwargs = f"body={raw_body!r}"
 
             kwargs += f"{', ' if invocation.query_parameters else ''}{body_kwargs}"
 
@@ -826,7 +825,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
             creation_code = f"body={_parse_model(json_body)}"
         else:
             raise NotImplementedError(
-                f"Unhandled body type {type(json_body)}: {invocation.body}"
+                f"Unhandled body type {type(json_body)}: {invocation.body!r}"
             )
 
         return ModelCode(import_code=import_code, creation_code=creation_code)
@@ -875,8 +874,8 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                     model_name_str = cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
                 else:
-                    raw_body: str = invocation.body
-                    body_kwargs = f"body={raw_body.encode()!r}"
+                    raw_body: bytes | None = invocation.body
+                    body_kwargs = f"body={raw_body!r}"
             else:
                 base_path = [pc for pc in path_components if pc][0]
                 module_path_prefix = ".".join(
