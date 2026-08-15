@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
@@ -32,7 +31,7 @@ def test_same_request_responses(mock_invocation_data):
     evaluator = DiffEvaluator()
 
     request = Request(
-        headers=CaseInsensitiveDict({"test_header": 123}),
+        content_type="text/plain",
         body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
@@ -52,7 +51,7 @@ def test_same_diff_request(mock_invocation_data):
     evaluator = DiffEvaluator()
 
     request = Request(
-        headers=CaseInsensitiveDict({"test_header": 123}),
+        content_type="text/plain",
         body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
@@ -76,7 +75,7 @@ def test_logging(mock_invocation_data):
     evaluator = DiffEvaluator()
 
     request = Request(
-        headers=CaseInsensitiveDict({"test_header": 123}),
+        content_type="text/plain",
         body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
@@ -93,51 +92,24 @@ def test_logging(mock_invocation_data):
     assert len(os.listdir(evaluator.log_path)) == 1
 
 
-def test_no_custom_header_diff(basic_request, mock_invocation_data):
-    """Custom x-headers should not factor in evaluation."""
-    request1 = deepcopy(basic_request)
-    request1.headers["X-Test"] = "Test"
-
-    request2 = deepcopy(basic_request)
-    request2.headers["X-Test"] = "Othertest"
-
-    request3 = deepcopy(request1)
-    del request3.headers["X-Test"]
-    request3.headers["X-Test2"] = "Test2"
-
-    evaluator = DiffEvaluator()
-    result1 = RequestResult("lib1", request1)
-    result2 = RequestResult("lib2", request2)
-    result3 = RequestResult("lib3", request3)
-    assert not evaluator.eval({result1, result2, result3}, request1)
-
-
-def test_no_header_request_comparison(basic_request, mock_invocation_data):
-    """Headers should generally not be evaluated for requests."""
-    request1 = deepcopy(basic_request)
-    request1.headers["TestHeader"] = "Tag1"
-
-    request2 = deepcopy(basic_request)
-    request2.headers["TestHeader"] = "Tag2"
-
-    evaluator = DiffEvaluator()
-    result1 = RequestResult("lib1", request1)
-    result2 = RequestResult("lib2", request2)
-    result3 = RequestResult("lib3", basic_request)
-    assert not evaluator.eval({result1, result2, result3}, request1)
-
-
-def test_content_header_diff(basic_request, mock_invocation_data):
+def test_content_header_diff():
     """If content header in both expected and diff and different, log diff."""
-    request1 = deepcopy(basic_request)
-    request1.headers["Content-Type"] = "application/json"
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
-    request2 = deepcopy(basic_request)
-    if "Content-Type" in request2.headers:
-        del request2.headers["Content-Type"]
+    original_request = Request(
+        content_type="application/json",
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+    request1 = deepcopy(original_request)
 
-    request3 = deepcopy(basic_request)
-    request3.headers["Content-Type"] = "application/xml"
+    request2 = deepcopy(original_request)
+    request2.content_type = None
+
+    request3 = deepcopy(original_request)
+    request3.content_type = "application/xml"
 
     evaluator = DiffEvaluator()
     result1 = RequestResult("lib1", request1)
@@ -147,6 +119,29 @@ def test_content_header_diff(basic_request, mock_invocation_data):
 
     result3 = RequestResult("lib3", request3)
     assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}
+
+
+def test_ignore_original_content_header_if_empty():
+    """Do not log error if original content header is empty."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
+
+    original_request = Request(
+        content_type=None,
+        body=b"",
+        method=HTTPMethod.GET,
+        path="/pet/findByTags?tags=L&tags=9&tags=",
+        query_parameters={"tags": ["L", "9", ""]},
+    )
+
+    request2 = deepcopy(original_request)
+    request2.content_type = "application/json"
+
+    evaluator = DiffEvaluator()
+    result2 = RequestResult("lib2", request2)
+
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert not evaluator.eval({result2}, original_request)
+        mock_report.assert_not_called()
 
 
 def test_normalize_query(basic_request, mock_invocation_data):
@@ -168,18 +163,7 @@ def test_normalize_json_body():
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
     original_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "vsojI1",
-                "Content-Type": "application/json",
-                "Content-Length": "400",
-            }
-        ),
+        content_type="application/json",
         body=b'{"age": 4800, "name": ""}',
         method=HTTPMethod.POST,
         path="/user",
@@ -200,18 +184,7 @@ def test_json_value_diff():
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
     original_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "vsojI1",
-                "Content-Type": "application/json",
-                "Content-Length": "400",
-            }
-        ),
+        content_type="application/json",
         body=b'{"age": 4800, "name": ""}',
         method=HTTPMethod.POST,
         path="/user",
@@ -240,18 +213,7 @@ def test_json_element_diff():
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
     original_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "vsojI1",
-                "Content-Type": "application/json",
-                "Content-Length": "400",
-            }
-        ),
+        content_type="application/json",
         body=b'{"age": 4800, "name": ""}',
         method=HTTPMethod.POST,
         path="/user",
@@ -277,18 +239,7 @@ def test_ignore_extra_params():
     """Test original request containing superfluous body elements."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
     original_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "vsojI1",
-                "Content-Type": "application/json",
-                "Content-Length": "400",
-            }
-        ),
+        content_type="application/json",
         body=b'{"age": 19011, "name": "dan", "c": "gone"}',
         method=HTTPMethod.POST,
         path="/user",
@@ -296,17 +247,7 @@ def test_ignore_extra_params():
     )
 
     eval_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "mitmproxy:8080",
-                "User-Agent": "python-requests/2.33.1",
-                "Accept-Encoding": "gzip, deflate",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "Content-Length": "169",
-                "Content-Type": "application/json",
-            }
-        ),
+        content_type="application/json",
         body=b'{"name": "dan", "age": 19011}',
         method=HTTPMethod.POST,
         path="/user",

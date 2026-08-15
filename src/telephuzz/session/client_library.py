@@ -583,11 +583,6 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
-        if invocation.authorization is not None:
-            auth = f', access_token="{invocation.authorization}"'
-        else:
-            auth = ""
-
         # TODO move replace to transforming invocation
         api = (
             get_config()
@@ -603,7 +598,7 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
         from openapi_client.api.{api}_api import {api_class}Api
         {model_name_str}
 
-        config = Configuration(host="{api_path}"{auth})
+        config = Configuration(host="{api_path}")
 
         client = ApiClient(configuration=config)
 

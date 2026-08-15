@@ -17,7 +17,6 @@ import requests
 import yaml  # type: ignore
 from docker.errors import ImageNotFound
 from docker.models.containers import Container
-from requests.structures import CaseInsensitiveDict
 
 import telephuzz.config as cfg
 from telephuzz.config import Config
@@ -269,7 +268,7 @@ def setup():
 def basic_request():
     """Fixture for dummy request."""
     return Request(
-        headers=CaseInsensitiveDict({"Test": ["test"]}),
+        content_type="text/plain",
         body=None,
         method=HTTPMethod.GET,
         path="dummytarget.org/test",

@@ -115,10 +115,6 @@ class DiffEvaluator:
             if original_request in request_groups:
                 del request_groups[original_request]
 
-            erroneous_libs.extend(
-                itertools.chain.from_iterable(request_groups.values())
-            )
-
             for diff_request, libraries in request_groups.items():
                 assert diff_request is not None
                 diff_invocation = InvocationData(diff_request)
@@ -140,7 +136,9 @@ class DiffEvaluator:
                     diff_json = diff_invocation.json_body
                     diff_body = original_json != diff_json
 
-                diff_headers = original_request.headers != diff_request.headers
+                diff_content = (
+                    original_invocation.content_type != diff_invocation.content_type
+                )
 
                 unique = len(libraries) == 1
                 detail = "---\nDiff in request found\n---\n"
@@ -152,31 +150,34 @@ class DiffEvaluator:
                             diff_path,
                             diff_parameters,
                             diff_body,
+                            diff_content,
                         ]
                     ):
-                        if diff_headers:
-                            content_type = "Content-Type"
-                            original_content = original_request.headers.get(
-                                content_type
-                            )
-                            diff_content = diff_request.headers.get(content_type)
-                            if (
-                                original_content is None
-                                or diff_content is None
-                                or original_content == diff_content
-                            ):
-                                # ignore header diff if not content type
-                                del erroneous_libs[erroneous_libs.index(library)]
+                        # log expected edge cases
+                        if (
+                            original_invocation.json_body is not None
+                            and diff_invocation.json_body is not None
+                        ):
+                            if original_request.body != diff_request.body:
+                                logger.warning("Raw JSON bodies do not match")
                                 continue
-                            else:
-                                detail += (
-                                    f"Content type {original_content} expected"
-                                    f", got {diff_content}"
-                                )
-                        else:
-                            raise RuntimeError(
-                                "Diff in request detected, but exact diff not found."
+
+                        if (
+                            original_request.content_type is None
+                            or diff_request.content_type is None
+                        ):
+                            logger.warning(
+                                "At least one request did not provide a content type"
                             )
+                            continue
+
+                        raise RuntimeError("Unexpected diff in requests occured")
+
+                    if diff_content:
+                        detail += (
+                            f"- Content type {original_invocation.content_type} "
+                            f"expected, but got {diff_invocation.content_type}.\n"
+                        )
 
                     if diff_method:
                         detail += (
@@ -241,6 +242,7 @@ class DiffEvaluator:
                     )
 
                     diff_reports[library].append(report)
+                    erroneous_libs += libraries
 
         logging.debug(f"Evaluation results: {diff_reports}")
 

@@ -36,7 +36,7 @@ class InvocationData:
         self.json_body = None
         self.path = request.path
 
-        self.content_type = request.headers.get("Content-Type", None)
+        self.content_type = request.content_type
         if self.content_type is None:
             # infer content type from spec
             self.content_type = get_content_type(
@@ -46,8 +46,6 @@ class InvocationData:
         self.send_body = "requestBody" in self.arg_types and (
             "json" not in cast(str, self.content_type) or self.body not in (None, b"")
         )
-
-        self.authorization = request.headers.get("Authorization", None)
 
         if (
             self.content_type is not None

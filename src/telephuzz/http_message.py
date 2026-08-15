@@ -46,7 +46,7 @@ class HTTPMethod(Enum):
 class HTTPMessage:
     """Abstract class for shared fields of Request and Response."""
 
-    headers: CaseInsensitiveDict
+    content_type: str | None
     body: bytes | None
 
 
@@ -97,7 +97,7 @@ class Request(HTTPMessage):
 
         try:
             return Request(
-                headers=CaseInsensitiveDict(data["headers"]),
+                content_type=CaseInsensitiveDict(data["headers"]).get("content-type"),
                 body=body,
                 method=HTTPMethod(data["method"]),
                 path=full_path,
@@ -116,7 +116,7 @@ class Request(HTTPMessage):
                 self.path,
                 json.dumps(self.query_parameters, sort_keys=True),
                 self.body,
-                json.dumps(dict(self.headers), sort_keys=True),
+                self.content_type,
             )
         )
 
@@ -138,5 +138,5 @@ class Request(HTTPMessage):
             and path_only(self.path) == path_only(other.path)
             and self.query_parameters == other.query_parameters
             and body
-            and self.headers == other.headers
+            and self.content_type == other.content_type
         )
