@@ -3,7 +3,7 @@
 import os
 from copy import deepcopy
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from requests.models import CaseInsensitiveDict
@@ -193,6 +193,84 @@ def test_normalize_json_body():
     result = RequestResult("lib1", eval_request)
 
     assert not evaluator.eval({result}, original_request)
+
+
+def test_json_value_diff():
+    """Test detail when value of JSON element differs."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = deepcopy(original_request)
+    eval_request.body = b'{"name": "", "age": 4801}'
+
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", eval_request)
+
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert evaluator.eval({result}, original_request) == {"lib1"}
+
+        mock_report.assert_called_once()
+        kwargs = mock_report.call_args.kwargs
+
+        assert (
+            "Unequal values for element 'age' in body: 4800 != 4801" in kwargs["detail"]
+        )
+
+
+def test_json_element_diff():
+    """Test detail when element only exists in original."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = deepcopy(original_request)
+    eval_request.body = b'{"name": ""}'
+
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", eval_request)
+
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert evaluator.eval({result}, original_request) == {"lib1"}
+
+        mock_report.assert_called_once()
+        kwargs = mock_report.call_args.kwargs
+
+        assert "Element 'age' only exists in original body" in kwargs["detail"]
 
 
 def test_ignore_extra_params():

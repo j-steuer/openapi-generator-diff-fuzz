@@ -130,12 +130,16 @@ class DiffEvaluator:
                 diff_parameters = (
                     original_request.query_parameters != diff_request.query_parameters
                 )
+
+                original_json = None
+                diff_json = None
                 if original_invocation.json_body is None:
                     diff_body = original_request.body != diff_request.body
                 else:
-                    diff_body = (
-                        original_invocation.json_body != diff_invocation.json_body
-                    )
+                    original_json = original_invocation.json_body
+                    diff_json = diff_invocation.json_body
+                    diff_body = original_json != diff_json
+
                 diff_headers = original_request.headers != diff_request.headers
 
                 unique = len(libraries) == 1
@@ -189,11 +193,39 @@ class DiffEvaluator:
                             f"- Parameters {original_request.query_parameters} "
                             f"expected, but got {diff_request.query_parameters}.\n"
                         )
+
                     if diff_body:
-                        detail += (
-                            f"- Body '{pformat(original_request.body)}' "
-                            f"expected, but got '{pformat(diff_request.body)}.'\n"
-                        )
+                        if not (
+                            isinstance(original_json, dict)
+                            and isinstance(diff_json, dict)
+                        ):
+                            detail += (
+                                f"- Body '{pformat(original_request.body)}' "
+                                f"expected, but got '{pformat(diff_request.body)}.'\n"
+                            )
+                        else:
+                            for element in [
+                                k for k in original_json.keys() if k not in diff_json
+                            ]:
+                                detail += (
+                                    f"Element '{element}' only exists in original body."
+                                )
+                            for element in [
+                                k for k in diff_json.keys() if k not in original_json
+                            ]:
+                                detail += (
+                                    f"Element '{element}' only exists in produced body."
+                                )
+                            for element in [
+                                k
+                                for k in original_json.keys()
+                                if k in diff_json and original_json[k] != diff_json[k]
+                            ]:
+                                detail += (
+                                    f"Unequal values for element '{element}' in "
+                                    f"body: {original_json[element]} != "
+                                    f"{diff_json[element]}"
+                                )
 
                     logger.debug(f"{library} produced diff in response: {detail}")
 
