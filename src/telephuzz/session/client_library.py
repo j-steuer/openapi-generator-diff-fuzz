@@ -211,7 +211,7 @@ class ClientLibraryContainer(ABC):
                     raise ValueError(f"Worker path not found: {worker_path}") from e
                 worker_dest = tmpdir
                 if worker_path.is_dir():
-                    shutil.copytree(worker_path, worker_dest)
+                    shutil.copytree(worker_path, Path(worker_dest) / worker_path.name)
                 else:
                     shutil.copy(worker_path, worker_dest)
 
@@ -427,7 +427,10 @@ class CsharpCLC(ClientLibraryContainer):
                     WORKDIR {LIB_PATH}/lib
                     RUN dotnet build
 
-                    RUN dotnet publish CsharpWorker/CsharpWorker.csproj \
+                    WORKDIR {LIB_PATH}
+                    COPY csharp-worker {LIB_PATH}/csharp-worker
+
+                    RUN dotnet publish csharp-worker/CsharpWorker.csproj \
                         -c Release \
                         -o /opt/csharp-worker \
                         --no-self-contained 
