@@ -425,7 +425,11 @@ class CsharpCLC(ClientLibraryContainer):
                     RUN dotnet script /tmp/warmup.csx
 
                     WORKDIR {LIB_PATH}/lib
-                    RUN dotnet build
+                    RUN dotnet build -c Debug
+
+                    RUN echo "=== OpenAPI DLL ===" \
+                    && find /app -name "Org.OpenAPITools.dll" -print \
+                    && test -f /app/lib/bin/Debug/net10.0/Org.OpenAPITools.dll
 
                     WORKDIR {LIB_PATH}
                     COPY csharp-worker {LIB_PATH}/csharp-worker

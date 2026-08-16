@@ -1,14 +1,19 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.IO;
 using System.Threading;
 
-const string ScriptPath = "/tmp/invocation.csx";
+const string AppRoot = "/app";
+const string ScriptPath = $"{AppRoot}/invocation.csx";
 const string TriggerPath = "/tmp/run.trigger";
 const int PollIntervalMs = 50;
 
 Console.WriteLine("Worker started.");
+Console.WriteLine($"Working directory: {Environment.CurrentDirectory}");
+Console.WriteLine($"Script path: {ScriptPath}");
+Console.WriteLine($"Script exists: {File.Exists(ScriptPath)}");
 
 while (true)
 {
@@ -45,17 +50,45 @@ static async Task RunScriptAsync()
 
     try
     {
+        // Make sure the script actually exists.
+        if (!File.Exists(ScriptPath))
+        {
+            throw new FileNotFoundException(
+                "Script file was not found.",
+                ScriptPath);
+        }
+
+        // This is the DLL referenced by #r in invocation.csx.
+        var libraryPath =
+            $"{AppRoot}/lib/bin/Debug/net10.0/Org.OpenAPITools.dll";
+
+        Console.WriteLine($"Library path: {libraryPath}");
+        Console.WriteLine($"Library exists: {File.Exists(libraryPath)}");
+
+        if (!File.Exists(libraryPath))
+        {
+            throw new FileNotFoundException(
+                "Org.OpenAPITools.dll was not found.",
+                libraryPath);
+        }
+
         var code = await File.ReadAllTextAsync(ScriptPath);
 
         var options = ScriptOptions.Default
-            .WithImports(
-                "System",
-                "System.IO",
-                "System.Linq",
-                "System.Collections.Generic",
-                "System.Threading",
-                "System.Threading.Tasks"
-            );
+        .WithImports(
+        "System",
+        "System.IO",
+        "System.Linq",
+        "System.Collections.Generic",
+        "System.Threading",
+        "System.Threading.Tasks"
+        )
+        .AddReferences(
+            MetadataReference.CreateFromFile(
+                "/usr/share/dotnet/shared/Microsoft.AspNetCore.App/10.0.8/Microsoft.Extensions.Logging.Abstractions.dll"
+        )
+        )
+        .WithFilePath(ScriptPath);
 
         await CSharpScript.RunAsync(code, options);
 
