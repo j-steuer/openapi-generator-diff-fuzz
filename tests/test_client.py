@@ -21,6 +21,7 @@ from telephuzz.invocation_data import InvocationData
 from telephuzz.operation_ids import generate_operation_id
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
+    CsharpCLC,
     KiotaCSharpCLC,
     KiotaPythonCLC,
     ModelCode,
@@ -35,6 +36,7 @@ from telephuzz.session.client_library import (
     OpenAPIVersion,
     OperationIdBasedCLC,
     OrvalCLC,
+    PythonCLC,
     SwaggerCodegenCsharpCLC,
     SwaggerCodegenPythonCLC,
     SwaggerCodegenTypeScriptCLC,
@@ -211,6 +213,29 @@ class TestGeneral:
                 data = tomllib.load(f)
 
             assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
+
+    def test_variable_case(self, monkeypatch) -> None:
+        """Test that variable cases are applied correctly."""
+
+        def _test_case(clc_class, query, expected):
+            monkeypatch.setattr(clc_class, "__abstractmethods__", set())
+            invocation = InvocationData.__new__(InvocationData)
+            invocation.query_parameters = query
+            invocation.operation_id = "get_test"
+            invocation.query_parameters_without_path_vars = {}
+            invocation.arg_types = {}
+
+            clc = clc_class.__new__(clc_class)
+            cased_parameters = clc._apply_case_to_invocation(invocation)
+            assert cased_parameters.query_parameters == expected
+
+        # Python should apply snake case
+        query = {"TestId": 1, "birthDate": "2000-01-01"}
+        _test_case(PythonCLC, query, {"test_id": 1, "birth_date": "2000-01-01"})
+
+        # C# should apply camel case
+        query = {"test_id": 1, "birthDate": "2000-01-01"}
+        _test_case(CsharpCLC, query, {"testId": 1, "birthDate": "2000-01-01"})
 
 
 @pytest.fixture(scope="class")

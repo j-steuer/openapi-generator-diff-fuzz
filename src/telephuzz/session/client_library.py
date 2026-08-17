@@ -75,6 +75,7 @@ class ClientLibraryContainer(ABC):
     id: LibraryId
     container: Container | None
     method_case: Case = Case("snake")
+    variable_case: Case = Case("snake")
     generator_script: str
     worker_script: str
     supported_versions: set[OpenAPIVersion]
@@ -277,7 +278,7 @@ class ClientLibraryContainer(ABC):
 
         def transform_dict(d: dict) -> dict:
             return {
-                transform_case(k, self.method_case) if k != "requestBody" else k: v
+                transform_case(k, self.variable_case) if k != "requestBody" else k: v
                 for k, v in d.items()
             }
 
@@ -312,6 +313,7 @@ class PythonCLC(ClientLibraryContainer):
     """Abstract class for python-based client library containers."""
 
     method_case = Case.SNAKE
+    variable_case = Case.SNAKE
     base_image = "python:3.11-slim"
     worker_script = "worker.py"
 
@@ -363,6 +365,7 @@ class GoCLC(ClientLibraryContainer):
     """Abstract class for Go-based client library containers."""
 
     method_case = Case.PASCAL
+    variable_case = Case.CAMEL
     base_image = "golang:1.26"
     library_name: str
 
@@ -381,6 +384,7 @@ class CsharpCLC(ClientLibraryContainer):
     """Abstract class for C#-based client library containers."""
 
     method_case = Case.PASCAL
+    variable_case = Case.CAMEL
     base_image = "mcr.microsoft.com/dotnet/sdk:10.0"
     worker_script = "csharp-worker"
 
@@ -452,6 +456,7 @@ class TypeScriptCLC(ClientLibraryContainer):
     """Abstract class for TypeScript-based client library containers."""
 
     method_case = Case.CAMEL
+    variable_case = Case.CAMEL
     base_image = "node:20-alpine"
 
     def __init__(self):
@@ -1451,13 +1456,12 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
-        # TODO move replace to transforming invocation
-        # api = (
-        #    get_config()
-        #    .tag_lookup(invocation.method.value, invocation.path)
-        #    .replace("-", "_")
-        # )
-        # api_class = transform_case(api, Case.PASCAL)
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
+        api_class = transform_case(api, Case.PASCAL)
 
         method_name = self._get_method_name(invocation)
 
@@ -1487,12 +1491,12 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         var jsonOptionsProvider = new JsonSerializerOptionsProvider(jsonOptions);
 
         // DI requirements
-        var logger = NullLogger<DefaultApi>.Instance;
+        var logger = NullLogger<{api_class}Api>.Instance;
         var loggerFactory = NullLoggerFactory.Instance;
-        var events = new DefaultApiEvents();
+        var events = new {api_class}ApiEvents();
 
         // API client
-        var api = new DefaultApi(
+        var api = new {api_class}Api(
             logger,
             loggerFactory,
             httpClient,
