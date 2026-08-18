@@ -411,6 +411,8 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
+        input("continue")
+
         return "touch /tmp/run.trigger"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
@@ -1408,24 +1410,21 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         """Generate models for JSON bodies."""
         model_name = _get_model_name(invocation)
-        model_name_module = transform_case(model_name, Case.PASCAL)
         model_name_class = transform_case(model_name, Case.PASCAL)
-        import_code = (
-            f"from openapi_client.models.{model_name_module} import {model_name_class}"
-        )
+        import_code = None
 
         eval_body = invocation.json_body
         if isinstance(eval_body, list):
             # create list of objects
             model_list = [
-                f"{model_name_class}.from_json({json.dumps(json.dumps(body))})"
+                f"JsonSerializer.Deserialize<{model_name_class}>({json.dumps(json.dumps(body))})"
                 for body in eval_body
             ]
-            creation_code = "[" + ", ".join(model_list) + "]"
+            creation_code = "{" + ", ".join(model_list) + "}"
         elif isinstance(eval_body, dict):
             body = json.dumps(eval_body)
-            from_json = f"{model_name_class}.from_json({body!r}"
-            creation_code = f"{model_name_module}={from_json})"
+            from_json = f"JsonSerializer.Deserialize<{model_name_class}>({body!r}"
+            creation_code = from_json
         else:
             raise NotImplementedError(
                 f"Unhandled body type {type(eval_body)}: {invocation.body}"
@@ -1434,25 +1433,23 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         return ModelCode(import_code=import_code, creation_code=creation_code)
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        model_name_str = ""
         query_parameters = invocation.query_parameters
 
         kwargs = ""
         if query_parameters:
-            kwargs = ", ".join(f"{k}={repr(v)}" for k, v in query_parameters.items())
+            kwargs = ", ".join(f"{k}: {repr(v)}" for k, v in query_parameters.items())
 
         if invocation.send_body:
             if invocation.json_body is not None:
                 if invocation.arg_types["requestBody"] != {"object"}:
                     model_code = self._generate_code_models(invocation)
-                    model_name_str += cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
                 else:
-                    body_kwargs = f"body={repr(invocation.json_body)}"
+                    body_kwargs = f"{repr(invocation.json_body)}"
 
             else:
                 raw_body: str = invocation.body
-                body_kwargs = f"body={raw_body.encode()!r}"
+                body_kwargs = f"body={raw_body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -1471,17 +1468,49 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         using System;
         using System.Net.Http;
         using System.Text.Json;
+        using System.Threading;
+        using System.Threading.Tasks;
         using Microsoft.Extensions.Logging.Abstractions;
+        using Org.OpenAPITools;
         using Org.OpenAPITools.Api;
         using Org.OpenAPITools.Client;
+        using Org.OpenAPITools.Model;
 
-        // HTTP client
+        class NoOpApiKeyTokenProvider : TokenProvider<ApiKeyToken>
+        {{
+            protected override ValueTask<ApiKeyToken> GetAsync(
+                string header = "",
+                CancellationToken cancellation = default)
+            {{
+                // Empty API key. The mock API does not require authentication.
+                return ValueTask.FromResult(
+                    new ApiKeyToken(
+                        "",
+                        ClientUtils.ApiKeyHeader.Api_key,
+                        "api_key",
+                        null));
+            }}
+        }}
+
+        class NoOpOAuthTokenProvider : TokenProvider<OAuthToken>
+        {{
+            protected override ValueTask<OAuthToken> GetAsync(
+                string header = "",
+                CancellationToken cancellation = default)
+            {{
+                // Empty OAuth token. The mock API does not require authentication.
+                return ValueTask.FromResult(
+                    new OAuthToken(
+                        "",
+                        null));
+            }}
+        }}
+
         var httpClient = new HttpClient
         {{
             BaseAddress = new Uri("{api_path}")
         }};
 
-        // JSON options (THIS is the missing piece)
         var jsonOptions = new JsonSerializerOptions
         {{
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -1490,36 +1519,34 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         var jsonOptionsProvider = new JsonSerializerOptionsProvider(jsonOptions);
 
-        // DI requirements
         var logger = NullLogger<{api_class}Api>.Instance;
         var loggerFactory = NullLoggerFactory.Instance;
         var events = new {api_class}ApiEvents();
 
-        // API client
         var api = new {api_class}Api(
             logger,
             loggerFactory,
             httpClient,
             jsonOptionsProvider,
-            events
+            events,
+            new NoOpApiKeyTokenProvider(),
+            new NoOpOAuthTokenProvider()
         );
 
-        // call endpoint
-        var response = await api.{method_name}OrDefaultAsync({kwargs});
-
-        if (response == null)
+        try
         {{
-            Console.WriteLine("Request failed (null response)");
-            return;
+            var response = await api.{method_name}Async({kwargs});
+
+            var payload = response.Ok();
+
+            Console.WriteLine("Payload:");
+            Console.WriteLine(payload);
         }}
-
-        Console.WriteLine("Status:");
-        Console.WriteLine(response.StatusCode);
-
-        var payload = response.Ok();
-
-        Console.WriteLine("Payload:");
-        Console.WriteLine(payload);
+        catch (Exception ex)
+        {{
+            Console.WriteLine("Request failed:");
+            Console.WriteLine(ex);
+        }}
         """).encode()
 
         return content

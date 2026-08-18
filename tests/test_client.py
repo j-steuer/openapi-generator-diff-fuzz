@@ -267,6 +267,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_resolve_path_params(self, clc_class, petshop: tuple[Network, str]):
@@ -321,6 +322,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_parse_invalid_python_json(self, clc_class, petshop: tuple[Network, str]):
