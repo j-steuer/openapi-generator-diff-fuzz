@@ -410,9 +410,7 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
-        input("continue")
-
-        return "touch /tmp/run.trigger"
+        return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for C#-based libraries."""
@@ -1421,8 +1419,10 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
             ]
             creation_code = "{" + ", ".join(model_list) + "}"
         elif isinstance(eval_body, dict):
-            body = json.dumps(eval_body)
-            from_json = f"JsonSerializer.Deserialize<{model_name_class}>({body!r}"
+            from_json = (
+                f"JsonSerializer.Deserialize<{model_name_class}>("
+                f'"""{json.dumps(eval_body, separators=(",", ":"))}""", jsonOptions)!'
+            )
             creation_code = from_json
         else:
             raise NotImplementedError(
@@ -1436,7 +1436,9 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         kwargs = ""
         if query_parameters:
-            kwargs = ", ".join(f"{k}: {repr(v)}" for k, v in query_parameters.items())
+            kwargs = ", ".join(
+                f"{k}: {json.dumps(v)}" for k, v in query_parameters.items()
+            )
 
         if invocation.send_body:
             if invocation.json_body is not None:
@@ -1460,7 +1462,9 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         method_name = self._get_method_name(invocation)
 
+        jsop = "JsonSerializerOptionsProvider"
         content = textwrap.dedent(f"""
+        #r "nuget: Microsoft.Extensions.DependencyInjection, 10.0.0"
         #r "./lib/bin/Debug/net10.0/Org.OpenAPITools.dll"
 
         using System;
@@ -1468,6 +1472,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         using System.Text.Json;
         using System.Threading;
         using System.Threading.Tasks;
+        using Microsoft.Extensions.DependencyInjection;
         using Microsoft.Extensions.Logging.Abstractions;
         using Org.OpenAPITools;
         using Org.OpenAPITools.Api;
@@ -1504,18 +1509,17 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
             }}
         }}
 
+        var services = new ServiceCollection();
+        var hostConfiguration = new HostConfiguration(services);
+        var serviceProvider = services.BuildServiceProvider();
+
         var httpClient = new HttpClient
         {{
             BaseAddress = new Uri("{api_path}")
         }};
 
-        var jsonOptions = new JsonSerializerOptions
-        {{
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
-        }};
-
-        var jsonOptionsProvider = new JsonSerializerOptionsProvider(jsonOptions);
+        var jsonOptionsProvider = serviceProvider.GetRequiredService<{jsop}>();
+        var jsonOptions = jsonOptionsProvider.Options;
 
         var logger = NullLogger<{api_class}Api>.Instance;
         var loggerFactory = NullLoggerFactory.Instance;
