@@ -1,5 +1,6 @@
 """File for objects relating to requests and responses."""
 
+import base64
 import json
 from dataclasses import dataclass
 from enum import Enum
@@ -46,7 +47,7 @@ class HTTPMessage:
     """Abstract class for shared fields of Request and Response."""
 
     headers: CaseInsensitiveDict
-    body: Any
+    body: bytes | None
 
 
 @dataclass(slots=True)
@@ -92,10 +93,12 @@ class Request(HTTPMessage):
         if query:
             full_path += f"?{query}"
 
+        body = base64.b64decode(data["body"]) if data["body"] is not None else None
+
         try:
             return Request(
                 headers=CaseInsensitiveDict(data["headers"]),
-                body=data["body"],
+                body=body,
                 method=HTTPMethod(data["method"]),
                 path=full_path,
                 query_parameters=(
@@ -107,17 +110,12 @@ class Request(HTTPMessage):
 
     def __hash__(self) -> int:
         """Hash method."""
-        try:
-            body = dict(self.body)
-        except (TypeError, ValueError):
-            body = self.body
-
         return hash(
             (
                 self.method,
                 self.path,
                 json.dumps(self.query_parameters, sort_keys=True),
-                json.dumps(body, sort_keys=True) if body is not None else body,
+                self.body,
                 json.dumps(dict(self.headers), sort_keys=True),
             )
         )
@@ -128,9 +126,10 @@ class Request(HTTPMessage):
             return False
 
         try:
-            self_body = json.loads(self.body)
-            other_body = json.loads(other.body)
-            body = self_body == other_body
+            # normalize json bodies
+            assert self.body is not None
+            assert other.body is not None
+            body = json.loads(self.body) == json.loads(other.body)
         except Exception:
             body = self.body == other.body
 
@@ -140,51 +139,4 @@ class Request(HTTPMessage):
             and self.query_parameters == other.query_parameters
             and body
             and self.headers == other.headers
-        )
-
-
-@dataclass(slots=True)
-class Response(HTTPMessage):
-    """Class for HTTP response fields relevant for the evaluation."""
-
-    status: int
-
-    @classmethod
-    def from_json(cls, json_data: Path | str):
-        """Create a response from JSON."""
-        if isinstance(json_data, Path):
-            assert (
-                json_data.exists()
-                and json_data.is_file()
-                and json_data.suffix == ".json"
-            ), "Path must lead to a JSON file."
-
-            with open(json_data, "r") as f:
-                data = json.load(f)
-
-        else:
-            data = json.loads(json_data)
-
-        if "response" in data:
-            data = data["response"]
-
-        return Response(
-            headers=CaseInsensitiveDict(data["headers"]),
-            body=data["body"],
-            status=data["status_code"],
-        )
-
-    def __hash__(self) -> int:
-        """Hash method."""
-        try:
-            body = dict(self.body)
-        except (TypeError, ValueError):
-            body = self.body
-
-        return hash(
-            (
-                self.status,
-                (json.dumps(body, sort_keys=True) if body is not None else body),
-                json.dumps(dict(self.headers), sort_keys=True),
-            )
         )

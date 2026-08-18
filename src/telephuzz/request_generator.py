@@ -13,7 +13,7 @@ from contextlib import ExitStack
 from pathlib import Path
 
 from telephuzz.constants import BASE_PATH
-from telephuzz.http_message import Request, Response
+from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 SCHEMATHESIS_CONFIG_PATH = BASE_PATH / "schemathesis.toml"
@@ -25,9 +25,7 @@ class RequestGenerator(ABC):
     """Abstract class for the request generator."""
 
     @abstractmethod
-    def generate(
-        self, previous_responses: list[Response] | None = None
-    ) -> list[Request] | None:
+    def generate(self) -> list[Request] | None:
         """Abstract method for generating a request chain."""
         raise NotImplementedError
 
@@ -156,9 +154,7 @@ class FuzzerBasedGenerator(OASRequestGenerator):
         if len(responses) < self.batch_size and not self.running:
             self.run()
 
-    def generate(
-        self, previous_responses: list[Response] | None = None
-    ) -> list[Request] | None:
+    def generate(self) -> list[Request] | None:
         """Return pregenerated requests in captured order until empty."""
         if not self.pregenerated_requests:
             self._collect_responses()

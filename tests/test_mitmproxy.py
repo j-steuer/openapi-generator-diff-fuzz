@@ -1,5 +1,6 @@
 """Tests for the mitmproxy container."""
 
+import base64
 import json
 import os
 import tempfile
@@ -138,6 +139,36 @@ def test_json_response(api: tuple[Network, str]) -> None:
                 entry_data = json.load(f)
 
             assert entry_data["url"] == "http://localhost:8080/greet?name=Alice&age=30"
+
+
+def test_json_response_body(api: tuple[Network, str]) -> None:
+    """Test encoding of raw body in JSON."""
+    network, _ = api
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with MITMProxyContainer(response_output=tmpdir) as mitm_proxy:
+            assert mitm_proxy.container is not None
+            network.connect(mitm_proxy.container)
+            json_data = (
+                {
+                    "name": "John Doe",
+                    "age": 30,
+                },
+            )
+            requests.post(
+                f"http://localhost:{mitm_proxy.listen_port}/user", json=json_data
+            )
+
+            respose_path = Path(tmpdir) / "localhost"
+            responses = os.listdir(respose_path)
+            assert len(responses) == 1, "Should contain a single response file."
+            response_file = responses[0]
+            with open(respose_path / response_file) as f:
+                entry_data = json.load(f)
+
+            assert entry_data["body"] == base64.b64encode(
+                json.dumps(json_data).encode()
+            ).decode("ascii")
 
 
 def test_single_target(api: tuple[Network, str]) -> None:

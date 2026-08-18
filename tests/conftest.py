@@ -22,9 +22,8 @@ from requests.structures import CaseInsensitiveDict
 import telephuzz.config as cfg
 from telephuzz.config import Config
 from telephuzz.constants import BASE_PATH, SPEC_PATH
-from telephuzz.http_message import HTTPMethod, Request, Response
+from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
-from telephuzz.session.client_library import ClientLibraryContainer
 
 TESTFILES_PATH = BASE_PATH / "tests" / "testfiles"
 TEST_CONFIG_BASE_PATH = TESTFILES_PATH / "configs"
@@ -279,14 +278,6 @@ def basic_request():
 
 
 @pytest.fixture
-def basic_response():
-    """Fixture for dummy response."""
-    return Response(
-        headers=CaseInsensitiveDict({"Test": ["test"]}), body=None, status=404
-    )
-
-
-@pytest.fixture
 def spec_factory():
     """Create a minimal OpenAPI spec."""
 
@@ -420,21 +411,6 @@ def mongodb():
         client.images.build(path=path, dockerfile="mongodb.dockerfile", tag=mongodb)
 
     yield mongodb
-
-
-@pytest.fixture()
-def mock_client():
-    """Mock client library class."""
-    mock_client = Mock(spec=ClientLibraryContainer)
-    mock_client.mock_body = "MOCK_BODY"
-    mock_client.send.return_value = Response(
-        headers=CaseInsensitiveDict(),
-        body=mock_client.mock_body,
-        status=200,
-    )
-    mock_client.id = "MOCK_ID"
-
-    return mock_client
 
 
 @pytest.fixture()
