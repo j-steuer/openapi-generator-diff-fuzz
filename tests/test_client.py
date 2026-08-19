@@ -367,6 +367,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_query_and_body(self, clc_class, petshop: tuple[Network, str]):
@@ -404,6 +405,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_json_body_array(self, clc_class, petshop: tuple[Network, str]):
@@ -464,6 +466,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_file_upload(self, clc_class, petshop: tuple[Network, str]):

@@ -410,6 +410,8 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
+        input("continue")
+
         return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
@@ -1413,11 +1415,20 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         eval_body = invocation.json_body
         if isinstance(eval_body, list):
             # create list of objects
-            model_list = [
-                f"JsonSerializer.Deserialize<{model_name_class}>({json.dumps(json.dumps(body))})"
-                for body in eval_body
-            ]
-            creation_code = "{" + ", ".join(model_list) + "}"
+            if not eval_body:
+                creation_code = f"new List<{model_name_class}>()"
+            else:
+                model_list = [
+                    f"JsonSerializer.Deserialize<{model_name_class}>("
+                    f'"""{json.dumps(body, separators=(",", ":"))}""", jsonOptions)!'
+                    for body in eval_body
+                ]
+                creation_code = (
+                    f"new List<{model_name_class}>"
+                    + " { "
+                    + ", ".join(model_list)
+                    + " }"
+                )
         elif isinstance(eval_body, dict):
             from_json = (
                 f"JsonSerializer.Deserialize<{model_name_class}>("
@@ -1449,7 +1460,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                     body_kwargs = f"{repr(invocation.json_body)}"
 
             else:
-                body_kwargs = f"body={invocation.body!r}"
+                body_kwargs = f"{invocation.body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -1539,10 +1550,8 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         {{
             var response = await api.{method_name}Async({kwargs});
 
-            var payload = response.Ok();
-
-            Console.WriteLine("Payload:");
-            Console.WriteLine(payload);
+            Console.WriteLine("Response:");
+            Console.WriteLine(response);
         }}
         catch (Exception ex)
         {{
