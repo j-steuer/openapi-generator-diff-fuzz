@@ -1468,10 +1468,10 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                 "file.bin",
                 "application/octet-stream"
                 )""")
+                body_kwargs = f"body: {body_kwargs}"
             else:
                 body_kwargs = f"{invocation.body!r}"
 
-            body_kwargs = f"body: {body_kwargs}"
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
         api = (
