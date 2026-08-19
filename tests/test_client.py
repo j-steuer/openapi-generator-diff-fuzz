@@ -503,6 +503,7 @@ class TestPetshop:
                 expected_status=404,
             )
 
+    # TODO: potential bug in OpenAPIGenCsharpCLC with optional status
     @pytest.mark.parametrize(
         "clc_class",
         [
