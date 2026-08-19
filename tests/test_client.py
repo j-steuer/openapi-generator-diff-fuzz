@@ -552,6 +552,7 @@ class TestPetshop:
                 expected_status=404,
             )
 
+    # TODO fix csharp (optional) list parameter handling
     @pytest.mark.parametrize(
         "clc_class",
         [
@@ -600,6 +601,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_empty_octet_body(self, clc_class, petshop: tuple[Network, str]):
@@ -643,6 +645,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_enum_query_parameter(self, clc_class, petshop: tuple[Network, str]):
@@ -688,6 +691,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_request_end_with_path_variable(
@@ -821,6 +825,7 @@ def spring_batch():
     api_down(network, "spring-batch-rest")
 
 
+# TODO generalize source code generation
 @pytest.mark.usefixtures("spring_batch")
 class TestSpringBatch:
     """Tests that use the spring-batch-rest API."""
