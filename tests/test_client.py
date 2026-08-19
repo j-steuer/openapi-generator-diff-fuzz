@@ -837,6 +837,7 @@ class TestSpringBatch:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_tag_module_resolve(self, clc_class, spring_batch: tuple[Network, str]):

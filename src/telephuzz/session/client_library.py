@@ -410,8 +410,6 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
-        input("continue")
-
         return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
@@ -1483,6 +1481,47 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         method_name = self._get_method_name(invocation)
 
+        if get_config().spec.get("components", {}).get("securitySchemes"):
+            auth = textwrap.dedent("""
+            class NoOpApiKeyTokenProvider : TokenProvider<ApiKeyToken>
+            {
+                protected override ValueTask<ApiKeyToken> GetAsync(
+                    string header = "",
+                    CancellationToken cancellation = default)
+                {
+                    // Empty API key. The mock API does not require authentication.
+                    return ValueTask.FromResult(
+                        new ApiKeyToken(
+                            "",
+                            ClientUtils.ApiKeyHeader.Api_key,
+                            "api_key",
+                            null));
+                }
+            }
+
+            class NoOpOAuthTokenProvider : TokenProvider<OAuthToken>
+            {
+                protected override ValueTask<OAuthToken> GetAsync(
+                    string header = "",
+                    CancellationToken cancellation = default)
+                {
+                    // Empty OAuth token. The mock API does not require authentication.
+                    return ValueTask.FromResult(
+                        new OAuthToken(
+                            "",
+                            null));
+                }
+            }
+            """)
+            auth_component = textwrap.dedent("""
+            ,
+            new NoOpApiKeyTokenProvider(),
+            new NoOpOAuthTokenProvider()
+            """)
+        else:
+            auth = ""
+            auth_component = ""
+
         jsop = "JsonSerializerOptionsProvider"
         content = textwrap.dedent(f"""
         #r "nuget: Microsoft.Extensions.DependencyInjection, 10.0.0"
@@ -1500,35 +1539,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         using Org.OpenAPITools.Client;
         using Org.OpenAPITools.Model;
 
-        class NoOpApiKeyTokenProvider : TokenProvider<ApiKeyToken>
-        {{
-            protected override ValueTask<ApiKeyToken> GetAsync(
-                string header = "",
-                CancellationToken cancellation = default)
-            {{
-                // Empty API key. The mock API does not require authentication.
-                return ValueTask.FromResult(
-                    new ApiKeyToken(
-                        "",
-                        ClientUtils.ApiKeyHeader.Api_key,
-                        "api_key",
-                        null));
-            }}
-        }}
-
-        class NoOpOAuthTokenProvider : TokenProvider<OAuthToken>
-        {{
-            protected override ValueTask<OAuthToken> GetAsync(
-                string header = "",
-                CancellationToken cancellation = default)
-            {{
-                // Empty OAuth token. The mock API does not require authentication.
-                return ValueTask.FromResult(
-                    new OAuthToken(
-                        "",
-                        null));
-            }}
-        }}
+        {auth}
 
         var services = new ServiceCollection();
         var hostConfiguration = new HostConfiguration(services);
@@ -1549,9 +1560,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
             logger,
             httpClient,
             jsonOptionsProvider,
-            events,
-            new NoOpApiKeyTokenProvider(),
-            new NoOpOAuthTokenProvider()
+            events{auth_component}
         );
 
         try
