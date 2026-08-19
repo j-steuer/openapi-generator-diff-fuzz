@@ -1459,9 +1459,19 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                 else:
                     body_kwargs = f"{repr(invocation.json_body)}"
 
+            elif invocation.content_type == "application/octet-stream":
+                assert invocation.body is not None
+                cs_bytes = ", ".join(f"0x{b:02X}" for b in invocation.body)
+
+                body_kwargs = textwrap.dedent(f"""new FileParameter(
+                new MemoryStream(new byte[] {{ {cs_bytes} }}),
+                "file.bin",
+                "application/octet-stream"
+                )""")
             else:
                 body_kwargs = f"{invocation.body!r}"
 
+            body_kwargs = f"body: {body_kwargs}"
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
         api = (
@@ -1533,12 +1543,10 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         var jsonOptions = jsonOptionsProvider.Options;
 
         var logger = NullLogger<{api_class}Api>.Instance;
-        var loggerFactory = NullLoggerFactory.Instance;
         var events = new {api_class}ApiEvents();
 
         var api = new {api_class}Api(
             logger,
-            loggerFactory,
             httpClient,
             jsonOptionsProvider,
             events,
