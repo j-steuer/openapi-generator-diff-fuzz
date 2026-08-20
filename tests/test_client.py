@@ -946,6 +946,7 @@ class TestPatchSpring:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_alternate_json_with_pure_body(

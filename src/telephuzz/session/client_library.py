@@ -410,6 +410,8 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
+        input("continue")
+
         return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
@@ -1469,7 +1471,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
-                    body_kwargs = f"{repr(invocation.json_body)}"
+                    body_kwargs = f"new {repr(invocation.json_body)}"
 
             elif invocation.content_type == "application/octet-stream":
                 assert invocation.body is not None
