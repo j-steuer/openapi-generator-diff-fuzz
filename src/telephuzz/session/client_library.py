@@ -595,7 +595,7 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"].schema_type != {"object"}:
+                if invocation.arg_types["requestBody"].schema_type != "object":
                     model_code = self._generate_code_models(invocation)
                     model_name_str += cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
@@ -702,7 +702,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
 
-        if invocation.arg_types["requestBody"].schema_type != {"object"}:
+        if invocation.arg_types["requestBody"].schema_type != "object":
             model_name = _get_model_name(invocation)
         else:
             model_name = f"{invocation.operation_id}_json_body"
@@ -1465,7 +1465,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"].schema_type != {"object"}:
+                if invocation.arg_types["requestBody"].schema_type != "object":
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
