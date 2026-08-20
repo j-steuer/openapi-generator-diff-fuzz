@@ -170,7 +170,7 @@ def test_find_args_body_case():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
-    assert args["requestBody"] == {"JobConfig"}
+    assert args["requestBody"] == ParameterType("JobConfig", None, False)
 
 
 def test_find_args_no_refs():
@@ -178,7 +178,7 @@ def test_find_args_no_refs():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.PATCH, "/contacts/{id}")
-    assert args["requestBody"] == {"object"}
+    assert args["requestBody"] == ParameterType("object", None, True)
 
 
 def test_get_content_type():
