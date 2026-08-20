@@ -543,7 +543,7 @@ def _get_model_name(invocation: InvocationData) -> str:
     """
     model_name: str | None = ""
     if invocation.json_body is not None:
-        model_name = min(cast(set, invocation.arg_types["requestBody"]))
+        model_name = invocation.arg_types["requestBody"].schema_type
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
         f"{invocation.path} with body {invocation.body!r}"

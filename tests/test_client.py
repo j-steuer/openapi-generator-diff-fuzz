@@ -882,6 +882,7 @@ class TestSpringBatch:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_model_capitalization(self, clc_class, spring_batch: tuple[Network, str]):
