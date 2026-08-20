@@ -9,6 +9,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.config import Config
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
+from telephuzz.openapi_helpers import ParameterType
 
 
 def test_strip_path_variables():
@@ -133,9 +134,21 @@ def test_arg_types():
 
     invocation = InvocationData(request)
     assert invocation.arg_types == {
-        "petId": "integer",
-        "additionalMetadata": "string",
-        "requestBody": {"string"},
+        "petId": ParameterType(
+            schema_type="integer",
+            item_type=None,
+            required=True,
+        ),
+        "additionalMetadata": ParameterType(
+            schema_type="string",
+            item_type=None,
+            required=False,
+        ),
+        "requestBody": ParameterType(
+            schema_type="string",
+            item_type=None,
+            required=False,
+        ),
     }
 
 

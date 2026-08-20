@@ -14,6 +14,7 @@ from telephuzz.http_message import HTTPMethod
 from telephuzz.openapi_helpers import (
     DEFAULT_VERSION,
     RESTRICTED_MEDIA_TYPES,
+    ParameterType,
     _find_all,
     build_operation_lookup,
     extract_path_parameters,
@@ -139,19 +140,25 @@ def test_find_args():
 
     # concrete path should resolve
     args = get_args(spec, HTTPMethod.POST, "/pet")
-    assert args == {"requestBody": {"Pet"}}
+    assert args == {"requestBody": ParameterType("Pet", None, True)}
 
     # non-concrete path should resolve
     args = get_args(spec, HTTPMethod.PUT, "/user/123")
-    assert args == {"requestBody": {"User"}, "username": "string"}
+    assert args == {
+        "requestBody": ParameterType("User", None, False),
+        "username": ParameterType("string", None, True),
+    }
 
     # concrete path should not resolve to non-concrete path
     args = get_args(spec, HTTPMethod.GET, "/user/login")
-    assert args == {"username": "string", "password": "string"}
+    assert args == {
+        "username": ParameterType("string", None, False),
+        "password": ParameterType("string", None, False),
+    }
 
     # args that are enum should return enum as type
     args = get_args(spec, HTTPMethod.GET, "/pet/findByStatus")
-    assert args == {"status": "enum"}
+    assert args == {"status": ParameterType("enum", None, False)}
 
     # nonexistent path should raise error
     with pytest.raises(ValueError):

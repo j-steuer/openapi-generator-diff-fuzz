@@ -552,7 +552,6 @@ class TestPetshop:
                 expected_status=404,
             )
 
-    # TODO fix csharp (optional) list parameter handling
     @pytest.mark.parametrize(
         "clc_class",
         [
@@ -560,6 +559,7 @@ class TestPetshop:
             SwaggerCodegenPythonCLC,
             OpenAPIPythonClientCLC,
             KiotaPythonCLC,
+            OpenAPIGenCsharpCLC,
         ],
     )
     def test_single_explode_string(self, clc_class, petshop: tuple[Network, str]):

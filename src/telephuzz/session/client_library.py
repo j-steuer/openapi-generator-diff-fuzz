@@ -27,7 +27,7 @@ from docker.models.images import Image
 from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import get_version, resolve_path
+from telephuzz.openapi_helpers import ParameterType, get_version, resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -595,7 +595,7 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"] != {"object"}:
+                if invocation.arg_types["requestBody"].schema_type != {"object"}:
                     model_code = self._generate_code_models(invocation)
                     model_name_str += cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
@@ -702,7 +702,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
 
-        if invocation.arg_types["requestBody"] != {"object"}:
+        if invocation.arg_types["requestBody"].schema_type != {"object"}:
             model_name = _get_model_name(invocation)
         else:
             model_name = f"{invocation.operation_id}_json_body"
@@ -746,7 +746,9 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
         joinable_values = dict()
 
         # enums
-        for parameter in [p for p, v in invocation.arg_types.items() if v == "enum"]:
+        for parameter in [
+            p for p, v in invocation.arg_types.items() if v.schema_type == "enum"
+        ]:
             if not enum_import:
                 enum_import = (
                     f"from {self.module_name}.models.{invocation.operation_id}"
@@ -765,7 +767,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
         # other parameters
         for parameter, value in invocation.query_parameters.items():
-            if invocation.arg_types[parameter] != "enum":
+            if invocation.arg_types[parameter].schema_type != "enum":
                 joinable_values[parameter] = repr(value)
 
         kwargs = ", ".join(f"{k}={v}" for k, v in joinable_values.items())
@@ -885,9 +887,9 @@ class KiotaPythonCLC(Kiota, PythonCLC):
             "/"
         )
 
-        json_object = invocation.json_body and invocation.arg_types["requestBody"] == {
-            "object"
-        }
+        json_object = invocation.json_body and invocation.arg_types[
+            "requestBody"
+        ].schema_type == {"object"}
 
         import_json_object = ""
         model_name_str = ""
@@ -1441,17 +1443,29 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         return ModelCode(import_code=import_code, creation_code=creation_code)
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
+        def _generate_csharp_value(value, parameter_type: ParameterType) -> str:
+            if parameter_type.schema_type == "array":
+                item_type = parameter_type.item_type
+                if item_type is None:
+                    raise ValueError("Array parameter has no item type")
+
+                values = ", ".join(json.dumps(item) for item in value)
+
+                return f"new List<String> {{ {values} }}"
+            return json.dumps(value)
+
         query_parameters = invocation.query_parameters
 
         kwargs = ""
         if query_parameters:
             kwargs = ", ".join(
-                f"{k}: {json.dumps(v)}" for k, v in query_parameters.items()
+                f"{k}: {_generate_csharp_value(v, invocation.arg_types[k])}"
+                for k, v in query_parameters.items()
             )
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"] != {"object"}:
+                if invocation.arg_types["requestBody"].schema_type != {"object"}:
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
