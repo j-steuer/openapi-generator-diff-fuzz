@@ -27,11 +27,22 @@ class DiffEvaluator:
         self.log_path = Path(get_config().log_path)
         # create log path if necessary
         os.makedirs(self.log_path, exist_ok=True)
+        self.seen_errors = set()
 
-    def _get_error_id(self, result: RequestResult) -> str:
+    def _get_error_id(
+        self, result: RequestResult, original_request: Request, detail: str
+    ) -> str:
         """Given an erroneous request result, obtain an error id."""
-        # TODO include db state
-        return f"Error_{hash((hash(result.library), hash(result.request)))}"
+        error_hash = hash(
+            (
+                hash(result.library),
+                hash(original_request.path),
+                hash(original_request.method),
+                hash(detail),
+            )
+        )
+
+        return f"Error_{error_hash}"
 
     def eval(
         self,
@@ -99,13 +110,14 @@ class DiffEvaluator:
         if None in request_groups:
             for library in request_groups[None]:
                 result = {r for r in results if r.library == library}.pop()
+                detail = "Error while building request"
                 report = DiffReport(
                     library,
-                    self._get_error_id(result),
+                    self._get_error_id(result, original_request, detail),
                     request_chain=[original_request],
                     unique=len(request_groups[None]) > 1,
                     produced_request=None,
-                    detail="Error while building request",
+                    detail=detail,
                 )
                 diff_reports[library].append(report)
                 logger.debug(f"{library} failed to generate request")
@@ -233,7 +245,7 @@ class DiffEvaluator:
 
                     report = DiffReport(
                         library_id=library,
-                        error_id=self._get_error_id(result),
+                        error_id=self._get_error_id(result, original_request, detail),
                         request_chain=[original_request],
                         produced_request=diff_request,
                         unique=unique,
@@ -250,6 +262,9 @@ class DiffEvaluator:
 
             # log all reports
             for report in itertools.chain.from_iterable(diff_reports.values()):
+                if report.error_id in self.seen_errors:
+                    continue
                 report.to_log(self.log_path)
+                self.seen_errors.add(report.error_id)
 
         return set(erroneous_libs)

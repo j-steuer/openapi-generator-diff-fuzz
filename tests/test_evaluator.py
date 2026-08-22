@@ -326,3 +326,58 @@ def test_request_none_report(basic_request, mock_invocation_data):
     result = RequestResult("lib1", None)
 
     assert evaluator.eval({result}, original_request) == set()
+
+
+def test_ignore_seen_error(basic_request, mock_invocation_data, tmp_path):
+    """Test that same error id is not logged multiple times."""
+    evaluator = DiffEvaluator()
+    evaluator.log_path = tmp_path
+
+    original_request = basic_request
+    diff_request = deepcopy(original_request)
+    diff_request.path = original_request.path + "diff"
+
+    assert len(os.listdir(tmp_path)) == 0
+
+    result = RequestResult("lib1", diff_request)
+
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 1
+
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 1
+
+    assert result.request is not None
+    result.request.path += "diff"
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 2
+
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 2
+
+    result.request.body = b"Diff"
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 3
+
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 3
+
+    result.request.headers["DIFF"] = "DIFF"
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 3
+
+    result.request.query_parameters["diff"] = "diff"
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 4
+
+    # empty requests should also not be relogged
+    result.request = None
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 5
+
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 5
+
+    original_request.path += "diff"
+    evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 6
