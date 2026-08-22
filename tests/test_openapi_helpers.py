@@ -121,6 +121,21 @@ class TestPreprocessing:
         assert processed_spec is not None
         assert processed_spec["info"]["version"] == DEFAULT_VERSION
 
+    def test_disable_additional_properties(self):
+        """Additional properties for JSON body definitions should be disabled."""
+
+        processed_spec = preprocess_oas(Path("tests/testfiles/processed_petshop.json"))
+
+        assert processed_spec is not None
+
+        schemas = processed_spec["components"]["schemas"]
+
+        assert schemas["Pet"]["additionalProperties"] is False
+        assert schemas["Category"]["additionalProperties"] is False
+
+        category_schema = schemas["Pet"]["properties"]["category"]
+        assert category_schema["$ref"] == "#/components/schemas/Category"
+
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
     """Test for finding operation based on operationId."""

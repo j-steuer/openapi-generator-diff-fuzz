@@ -40,6 +40,14 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
         if "version" in info:
             info["version"] = DEFAULT_VERSION
 
+    # set additional properties to false in JSON definitions
+    components = spec.get("components")
+    if isinstance(components, dict):
+        schemas = components.get("schemas")
+        if isinstance(schemas, dict):
+            for schema in schemas.values():
+                _close_object_schemas(schema)
+
     for path, methods in spec.get("paths", {}).items():
         assert isinstance(methods, dict), "Methods were not loaded as a dict"
         methods = cast(dict[str, dict], methods)
@@ -77,6 +85,44 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
                 yaml.safe_dump(spec, f)
 
     return spec
+
+
+def _close_object_schemas(schema: object) -> None:
+    """Disallow additional properties in object schemas."""
+    if not isinstance(schema, dict):
+        return
+
+    # If this schema explicitly represents an object, close it.
+    if schema.get("type") == "object":
+        schema.setdefault("additionalProperties", False)
+
+    # Recurse through nested schemas.
+    for key in (
+        "properties",
+        "patternProperties",
+        "additionalProperties",
+        "items",
+        "allOf",
+        "anyOf",
+        "oneOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "prefixItems",
+    ):
+        value = schema.get(key)
+
+        if isinstance(value, dict):
+            if key == "properties":
+                for property_schema in value.values():
+                    _close_object_schemas(property_schema)
+            else:
+                _close_object_schemas(value)
+
+        elif isinstance(value, list):
+            for item in value:
+                _close_object_schemas(item)
 
 
 def _find_all(spec: dict, element: str) -> list[Any]:
