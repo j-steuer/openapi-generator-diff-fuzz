@@ -503,7 +503,8 @@ class TestPetshop:
                 expected_status=404,
             )
 
-    # TODO: potential bug in OpenAPIGenCsharpCLC with optional status
+    # NOTE:
+    # - OpenAPI Generator C# does not support optional enum values
     @pytest.mark.parametrize(
         "clc_class",
         [
@@ -825,7 +826,6 @@ def spring_batch():
     api_down(network, "spring-batch-rest")
 
 
-# TODO generalize source code generation
 @pytest.mark.usefixtures("spring_batch")
 class TestSpringBatch:
     """Tests that use the spring-batch-rest API."""
