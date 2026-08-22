@@ -869,7 +869,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                 )
                 value = invocation.query_parameters[component_name]
                 if isinstance(value, str):
-                    value = f'"""{value}"""'
+                    value = repr(value)
                 path_components[idx] = (
                     f"by_{transform_case(component_name, self.method_case)}({value})"
                 )
