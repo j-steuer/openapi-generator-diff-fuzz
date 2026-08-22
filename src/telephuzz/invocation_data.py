@@ -109,9 +109,9 @@ class InvocationData:
         _params = dict(query_parameters)
         args = get_args(get_config().spec_str, request.method, request.path)
         for parameter, value in _params.items():
-            if args[parameter] == "array" and not isinstance(value, list):
+            if args[parameter].schema_type == "array" and not isinstance(value, list):
                 _params[parameter] = [value]
-            if args[parameter] == "integer" and isinstance(value, str):
+            if args[parameter].schema_type == "integer" and isinstance(value, str):
                 _params[parameter] = int(value)
 
         return _params

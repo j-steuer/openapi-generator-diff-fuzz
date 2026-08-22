@@ -27,7 +27,7 @@ from docker.models.images import Image
 from telephuzz.config import get_config
 from telephuzz.constants import CLIENT_PATH, GENERATORS_PATH, SPEC_PATH
 from telephuzz.invocation_data import InvocationData
-from telephuzz.openapi_helpers import get_version, resolve_path
+from telephuzz.openapi_helpers import ParameterType, get_version, resolve_path
 from telephuzz.operation_ids import Case, transform_case
 
 LibraryId = str
@@ -74,6 +74,7 @@ class ClientLibraryContainer(ABC):
     id: LibraryId
     container: Container | None
     method_case: Case = Case("snake")
+    variable_case: Case = Case("snake")
     generator_script: str
     worker_script: str
     supported_versions: set[OpenAPIVersion]
@@ -209,7 +210,10 @@ class ClientLibraryContainer(ABC):
                 if not worker_path.exists():
                     raise ValueError(f"Worker path not found: {worker_path}") from e
                 worker_dest = tmpdir
-                shutil.copy(worker_path, worker_dest)
+                if worker_path.is_dir():
+                    shutil.copytree(worker_path, Path(worker_dest) / worker_path.name)
+                else:
+                    shutil.copy(worker_path, worker_dest)
 
                 dockerfile_path = os.path.join(tmpdir, "Dockerfile")
 
@@ -273,7 +277,7 @@ class ClientLibraryContainer(ABC):
 
         def transform_dict(d: dict) -> dict:
             return {
-                transform_case(k, self.method_case) if k != "requestBody" else k: v
+                transform_case(k, self.variable_case) if k != "requestBody" else k: v
                 for k, v in d.items()
             }
 
@@ -308,6 +312,7 @@ class PythonCLC(ClientLibraryContainer):
     """Abstract class for python-based client library containers."""
 
     method_case = Case.SNAKE
+    variable_case = Case.SNAKE
     base_image = "python:3.11-slim"
     worker_script = "worker.py"
 
@@ -359,6 +364,7 @@ class GoCLC(ClientLibraryContainer):
     """Abstract class for Go-based client library containers."""
 
     method_case = Case.PASCAL
+    variable_case = Case.CAMEL
     base_image = "golang:1.26"
     library_name: str
 
@@ -377,7 +383,9 @@ class CsharpCLC(ClientLibraryContainer):
     """Abstract class for C#-based client library containers."""
 
     method_case = Case.PASCAL
+    variable_case = Case.CAMEL
     base_image = "mcr.microsoft.com/dotnet/sdk:10.0"
+    worker_script = "csharp-worker"
 
     def __init__(self):
         """Initialize a C#-based client library."""
@@ -420,8 +428,24 @@ class CsharpCLC(ClientLibraryContainer):
                     RUN dotnet script /tmp/warmup.csx
 
                     WORKDIR {LIB_PATH}/lib
-                    RUN dotnet build
+                    RUN dotnet build -c Debug
 
+                    RUN echo "=== OpenAPI DLL ===" \
+                    && find /app -name "Org.OpenAPITools.dll" -print \
+                    && test -f /app/lib/bin/Debug/net10.0/Org.OpenAPITools.dll
+
+                    WORKDIR {LIB_PATH}
+                    COPY csharp-worker {LIB_PATH}/csharp-worker
+
+                    RUN dotnet publish csharp-worker/CsharpWorker.csproj \
+                        -c Release \
+                        -o /opt/csharp-worker \
+                        --no-self-contained 
+                        
+                    RUN mkdir -p /worker 
+                    
+                    CMD ["dotnet", "/opt/csharp-worker/CsharpWorker.dll"] 
+                    
                     WORKDIR {LIB_PATH}
                     """
         return super()._get_image_by_hash(library_path, dockerfile=dockerfile)
@@ -431,6 +455,7 @@ class TypeScriptCLC(ClientLibraryContainer):
     """Abstract class for TypeScript-based client library containers."""
 
     method_case = Case.CAMEL
+    variable_case = Case.CAMEL
     base_image = "node:20-alpine"
 
     def __init__(self):
@@ -518,7 +543,7 @@ def _get_model_name(invocation: InvocationData) -> str:
     """
     model_name: str | None = ""
     if invocation.json_body is not None:
-        model_name = min(cast(set, invocation.arg_types["requestBody"]))
+        model_name = invocation.arg_types["requestBody"].schema_type
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
         f"{invocation.path} with body {invocation.body!r}"
@@ -570,7 +595,7 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"] != {"object"}:
+                if invocation.arg_types["requestBody"].schema_type != "object":
                     model_code = self._generate_code_models(invocation)
                     model_name_str += cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
@@ -677,7 +702,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
 
-        if invocation.arg_types["requestBody"] != {"object"}:
+        if invocation.arg_types["requestBody"].schema_type != "object":
             model_name = _get_model_name(invocation)
         else:
             model_name = f"{invocation.operation_id}_json_body"
@@ -721,7 +746,9 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
         joinable_values = dict()
 
         # enums
-        for parameter in [p for p, v in invocation.arg_types.items() if v == "enum"]:
+        for parameter in [
+            p for p, v in invocation.arg_types.items() if v.schema_type == "enum"
+        ]:
             if not enum_import:
                 enum_import = (
                     f"from {self.module_name}.models.{invocation.operation_id}"
@@ -740,7 +767,7 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
         # other parameters
         for parameter, value in invocation.query_parameters.items():
-            if invocation.arg_types[parameter] != "enum":
+            if invocation.arg_types[parameter].schema_type != "enum":
                 joinable_values[parameter] = repr(value)
 
         kwargs = ", ".join(f"{k}={v}" for k, v in joinable_values.items())
@@ -860,9 +887,9 @@ class KiotaPythonCLC(Kiota, PythonCLC):
             "/"
         )
 
-        json_object = invocation.json_body and invocation.arg_types["requestBody"] == {
-            "object"
-        }
+        json_object = invocation.json_body and invocation.arg_types[
+            "requestBody"
+        ].schema_type == {"object"}
 
         import_json_object = ""
         model_name_str = ""
@@ -1379,65 +1406,189 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
     id = "openapi-generator:csharp"
     generator_script = "openapi-generator-csharp.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        """Generate models for JSON bodies."""
+        model_name = _get_model_name(invocation)
+        model_name_class = transform_case(model_name, Case.PASCAL)
+        import_code = None
+
+        eval_body = invocation.json_body
+        if isinstance(eval_body, list):
+            # create list of objects
+            if not eval_body:
+                creation_code = f"new List<{model_name_class}>()"
+            else:
+                model_list = [
+                    f"JsonSerializer.Deserialize<{model_name_class}>("
+                    f'"""{json.dumps(body, separators=(",", ":"))}""", jsonOptions)!'
+                    for body in eval_body
+                ]
+                creation_code = (
+                    f"new List<{model_name_class}>"
+                    + " { "
+                    + ", ".join(model_list)
+                    + " }"
+                )
+        elif isinstance(eval_body, dict):
+            from_json = (
+                f"JsonSerializer.Deserialize<{model_name_class}>("
+                f'"""{json.dumps(eval_body, separators=(",", ":"))}""", jsonOptions)!'
+            )
+            creation_code = from_json
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(eval_body)}: {invocation.body!r}"
+            )
+
+        return ModelCode(import_code=import_code, creation_code=creation_code)
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
+        def _generate_csharp_value(value, parameter_type: ParameterType) -> str:
+            if parameter_type.schema_type == "array":
+                item_type = parameter_type.item_type
+                if item_type is None:
+                    raise ValueError("Array parameter has no item type")
+
+                values = ", ".join(json.dumps(item) for item in value)
+
+                return f"new List<String> {{ {values} }}"
+            return json.dumps(value)
+
+        query_parameters = invocation.query_parameters
+
+        kwargs = ""
+        if query_parameters:
+            kwargs = ", ".join(
+                f"{k}: {_generate_csharp_value(v, invocation.arg_types[k])}"
+                for k, v in query_parameters.items()
+            )
+
+        if invocation.send_body:
+            if invocation.json_body is not None:
+                if invocation.arg_types["requestBody"].schema_type != "object":
+                    model_code = self._generate_code_models(invocation)
+                    body_kwargs = model_code.creation_code
+                else:
+                    body_kwargs = f"new {repr(invocation.json_body)}"
+
+            elif invocation.content_type == "application/octet-stream":
+                assert invocation.body is not None
+                cs_bytes = ", ".join(f"0x{b:02X}" for b in invocation.body)
+
+                body_kwargs = textwrap.dedent(f"""new FileParameter(
+                new MemoryStream(new byte[] {{ {cs_bytes} }}),
+                "file.bin",
+                "application/octet-stream"
+                )""")
+                body_kwargs = f"body: {body_kwargs}"
+            else:
+                body_kwargs = f"{invocation.body!r}"
+
+            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
+
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
+        api_class = transform_case(api, Case.PASCAL)
+
         method_name = self._get_method_name(invocation)
 
+        if get_config().spec.get("components", {}).get("securitySchemes"):
+            auth = textwrap.dedent("""
+            class NoOpApiKeyTokenProvider : TokenProvider<ApiKeyToken>
+            {
+                protected override ValueTask<ApiKeyToken> GetAsync(
+                    string header = "",
+                    CancellationToken cancellation = default)
+                {
+                    // Empty API key. The mock API does not require authentication.
+                    return ValueTask.FromResult(
+                        new ApiKeyToken(
+                            "",
+                            ClientUtils.ApiKeyHeader.Api_key,
+                            "api_key",
+                            null));
+                }
+            }
+
+            class NoOpOAuthTokenProvider : TokenProvider<OAuthToken>
+            {
+                protected override ValueTask<OAuthToken> GetAsync(
+                    string header = "",
+                    CancellationToken cancellation = default)
+                {
+                    // Empty OAuth token. The mock API does not require authentication.
+                    return ValueTask.FromResult(
+                        new OAuthToken(
+                            "",
+                            null));
+                }
+            }
+            """)
+            auth_component = textwrap.dedent("""
+            ,
+            new NoOpApiKeyTokenProvider(),
+            new NoOpOAuthTokenProvider()
+            """)
+        else:
+            auth = ""
+            auth_component = ""
+
+        jsop = "JsonSerializerOptionsProvider"
         content = textwrap.dedent(f"""
+        #r "nuget: Microsoft.Extensions.DependencyInjection, 10.0.0"
         #r "./lib/bin/Debug/net10.0/Org.OpenAPITools.dll"
 
         using System;
         using System.Net.Http;
         using System.Text.Json;
+        using System.Threading;
+        using System.Threading.Tasks;
+        using Microsoft.Extensions.DependencyInjection;
         using Microsoft.Extensions.Logging.Abstractions;
+        using Org.OpenAPITools;
         using Org.OpenAPITools.Api;
         using Org.OpenAPITools.Client;
+        using Org.OpenAPITools.Model;
 
-        // HTTP client
+        {auth}
+
+        var services = new ServiceCollection();
+        var hostConfiguration = new HostConfiguration(services);
+        var serviceProvider = services.BuildServiceProvider();
+
         var httpClient = new HttpClient
         {{
             BaseAddress = new Uri("{api_path}")
         }};
 
-        // JSON options (THIS is the missing piece)
-        var jsonOptions = new JsonSerializerOptions
-        {{
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
-        }};
+        var jsonOptionsProvider = serviceProvider.GetRequiredService<{jsop}>();
+        var jsonOptions = jsonOptionsProvider.Options;
 
-        var jsonOptionsProvider = new JsonSerializerOptionsProvider(jsonOptions);
+        var logger = NullLogger<{api_class}Api>.Instance;
+        var events = new {api_class}ApiEvents();
 
-        // DI requirements
-        var logger = NullLogger<DefaultApi>.Instance;
-        var loggerFactory = NullLoggerFactory.Instance;
-        var events = new DefaultApiEvents();
-
-        // API client
-        var api = new DefaultApi(
+        var api = new {api_class}Api(
             logger,
-            loggerFactory,
             httpClient,
             jsonOptionsProvider,
-            events
+            events{auth_component}
         );
 
-        // call endpoint
-        var response = await api.{method_name}OrDefaultAsync({kwargs});
-
-        if (response == null)
+        try
         {{
-            Console.WriteLine("Request failed (null response)");
-            return;
+            var response = await api.{method_name}Async({kwargs});
+
+            Console.WriteLine("Response:");
+            Console.WriteLine(response);
         }}
-
-        Console.WriteLine("Status:");
-        Console.WriteLine(response.StatusCode);
-
-        var payload = response.Ok();
-
-        Console.WriteLine("Payload:");
-        Console.WriteLine(payload);
+        catch (Exception ex)
+        {{
+            Console.WriteLine("Request failed:");
+            Console.WriteLine(ex);
+        }}
         """).encode()
 
         return content

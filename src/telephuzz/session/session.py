@@ -172,12 +172,23 @@ class SessionManager:
         for session in self.sessions.values():
             api_url = f"http://{MITMPROXY_ALIAS}:{self.mitmproxy.listen_port}"
             # process into invocation data to do it once per request
-            invocation = InvocationData(request)
+            try:
+                invocation = InvocationData(request)
+            except Exception:
+                logger.error(
+                    "Error occured while transforming original "
+                    "request to invocation: {e}"
+                )
 
-            result = session.send(
-                request, api_url, Path(self.result_dir), invocation=invocation
-            )
-            assert result
-            results.add(result)
+            try:
+                result = session.send(
+                    request, api_url, Path(self.result_dir), invocation=invocation
+                )
+                assert result
+                results.add(result)
+            except Exception as e:
+                logger.error(
+                    f"Fuzzer error occured while sending request {repr(request)}: {e}"
+                )
 
         return results

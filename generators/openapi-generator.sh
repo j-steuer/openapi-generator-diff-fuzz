@@ -22,7 +22,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     -v "$(pwd)":/local \
     -v "$PARENT_DIR":/output \
-    openapitools/openapi-generator-cli:v7.22.0 \
+    openapitools/openapi-generator-cli:v7.24.0 \
     generate \
     -i /local/spec/openapi.json \
     -g "$LANG" \

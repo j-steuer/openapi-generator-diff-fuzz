@@ -1,6 +1,7 @@
 """Helper methods for reading and processing an OpenAPI spec."""
 
 import json
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
@@ -131,37 +132,88 @@ def _search_operation(spec: str, method: HTTPMethod, path: str) -> dict:
     return operation
 
 
-@cache
-def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
-    """Obtain a list of arguments for the given operation id.
+@dataclass(frozen=True, slots=True)
+class ParameterType:
+    schema_type: str
+    item_type: str | None
+    required: bool
 
-    Spec must be passed as string using json.dumps to enable caching.
-    Returns "enum" as type if spec defines an enum.
+
+@cache
+def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterType]:
+    """Obtain the argument types for the given operation.
+
+    Spec must be passed as a string using json.dumps to enable caching.
+
+    Each argument is represented by a ParameterType containing:
+      - schema_type: the OpenAPI schema type (e.g. string, array, enum)
+      - item_type: the item type for arrays, otherwise None
+      - required: whether the argument is required
     """
-    # search operation id
     operation = _search_operation(spec, method, path)
 
-    args = dict()
+    args: dict[str, ParameterType] = {}
+
     if "requestBody" in operation:
-        # get request body
         content = operation["requestBody"]["content"]
         ref = set(_find_all(content, "$ref"))
+
         if ref:
             assert len(ref) == 1
             ref = ref.pop()
             assert isinstance(ref, str)
-            args["requestBody"] = {ref[ref.rfind("/") + 1 :]}
+
+            args["requestBody"] = ParameterType(
+                schema_type=ref[ref.rfind("/") + 1 :],
+                item_type=None,
+                required=operation["requestBody"].get("required", False),
+            )
         else:
             schemas = _find_all(content, "schema")
             schema_types = {schema["type"] for schema in schemas}
-            args["requestBody"] = schema_types
-    if "parameters" in operation:
-        args.update(
-            {
-                p["name"]: p["schema"]["type"] if "enum" not in p["schema"] else "enum"
-                for p in operation["parameters"]
+
+            # Preserve the existing behaviour of returning the set of
+            # schema types, but ParameterType expects a single type.
+            if len(schema_types) != 1:
+                raise ValueError(
+                    f"Multiple request body schema types found: {schema_types}"
+                )
+
+            schema_type = next(iter(schema_types))
+
+            item_types = {
+                schema.get("items", {}).get("type")
+                for schema in schemas
+                if schema.get("type") == "array"
             }
-        )
+
+            item_type = next(iter(item_types)) if item_types else None
+
+            args["requestBody"] = ParameterType(
+                schema_type=schema_type,
+                item_type=item_type,
+                required=operation["requestBody"].get("required", False),
+            )
+
+    if "parameters" in operation:
+        for parameter in operation["parameters"]:
+            schema = parameter["schema"]
+
+            if "enum" in schema:
+                schema_type = "enum"
+            else:
+                schema_type = schema["type"]
+
+            item_type = None
+            if schema_type == "array":
+                items = schema.get("items", {})
+                item_type = items.get("type")
+
+            args[parameter["name"]] = ParameterType(
+                schema_type=schema_type,
+                item_type=item_type,
+                required=parameter.get("required", False),
+            )
 
     return args
 

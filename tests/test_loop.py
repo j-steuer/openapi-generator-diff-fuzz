@@ -297,7 +297,6 @@ def test_diff_eval(client_generator):
         evaluator = DiffEvaluator()
         evaluator.eval(results, request)
 
-        input("continue")
         assert len(os.listdir(LOG_PATH)) == 0
 
 

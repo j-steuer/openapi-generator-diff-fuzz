@@ -36,3 +36,13 @@ def test_python_http_patch_spring() -> None:
 
     fuzzer = TelePhuzz()
     fuzzer.start_fuzzing_session()
+
+
+def test_openapi_gen_csharp_petshop() -> None:
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.CLIENT_CONFIG_PATH = (
+        TEST_CONFIG_BASE_PATH / "client_openapigencsharp_config.yaml"
+    )
+
+    fuzzer = TelePhuzz()
+    fuzzer.start_fuzzing_session()
