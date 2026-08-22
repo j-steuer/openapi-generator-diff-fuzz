@@ -32,12 +32,12 @@ def get_user_czvfdpt(api: str, user_id: int) -> str:
 
 def post_user_sczmypr(api: str, name: str, age: int) -> str:
     """Post user method."""
-    params: dict[str, str | int] = {
+    body: dict[str, str | int] = {
         "name": "Faulty",
-        "age": 49,
+        "age": 42,
     }
 
-    response = requests.post(api + "/user", params=params)
+    response = requests.post(api + "/user", json=body)
     try:
         msg = response.json()
     except requests.exceptions.JSONDecodeError:

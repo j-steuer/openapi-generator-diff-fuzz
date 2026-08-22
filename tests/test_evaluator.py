@@ -2,125 +2,98 @@
 
 import os
 from copy import deepcopy
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
+import pytest
 from requests.models import CaseInsensitiveDict
 
-from telephuzz.config import get_config
+from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
-from telephuzz.http_message import HTTPMethod, Request, Response
+from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.request_result import RequestResult
 
 
-def test_same_request_responses():
+@pytest.fixture
+def mock_invocation_data(monkeypatch):
+    invocation_data = MagicMock()
+    invocation_data.json_body = None
+
+    monkeypatch.setattr(
+        "telephuzz.evaluation.evaluator.InvocationData",
+        lambda request: invocation_data,
+    )
+
+    return invocation_data
+
+
+def test_same_request_responses(mock_invocation_data):
     """Test that DiffFuzzer returns an empty set if no diffs."""
     evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
     )
-    response = Response(
-        headers=CaseInsensitiveDict({"response_header": "test"}),
-        body="This is a response body.",
-        status=404,
-    )
     # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, None, None)
-    result2 = RequestResult("Lib2", request, response, None, None)
-    result3 = RequestResult("Lib3", request, response, None, None)
+    result1 = RequestResult("Lib1", request)
+    result2 = RequestResult("Lib2", request)
+    result3 = RequestResult("Lib3", request)
     libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
 
     assert len(libs) == 0
 
 
-def test_same_diff_request():
+def test_same_diff_request(mock_invocation_data):
     """Test that DiffFuzzer recognizes a diff in requests and returns the library."""
     evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
-    )
-    response = Response(
-        headers=CaseInsensitiveDict({"response_header": "test"}),
-        body="This is a response body.",
-        status=404,
     )
     wrong_request = deepcopy(request)
-    request.body = "Wrong body."
+    request.body = b"Wrong body."
     # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, None, None)
-    result2 = RequestResult("Lib2", wrong_request, response, None, None)
-    result3 = RequestResult("Lib3", request, response, None, None)
+    result1 = RequestResult("Lib1", request)
+    result2 = RequestResult("Lib2", wrong_request)
+    result3 = RequestResult("Lib3", request)
     libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
 
     assert len(libs) == 1
     assert "Lib2" in libs
 
 
-def test_same_diff_response():
-    """Test that DiffFuzzer recognizes a diff in responses and returns the library."""
-    evaluator = DiffEvaluator()
-
-    request = Request(
-        headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
-        method=HTTPMethod.POST,
-        path="/example/path",
-        query_parameters={"test_parameter": 567},
-    )
-    response = Response(
-        headers=CaseInsensitiveDict({"response_header": "test"}),
-        body="This is a response body.",
-        status=404,
-    )
-    wrong_response = deepcopy(response)
-    wrong_response.body = "Wrong body."
-    # TODO adjust when db comp implemented
-    result1 = RequestResult("Lib1", request, response, None, None)
-    result2 = RequestResult("Lib2", request, wrong_response, None, None)
-    result3 = RequestResult("Lib3", request, response, None, None)
-    libs = evaluator.eval({result1, result2, result3}, request, log_errors=False)
-
-    assert len(libs) == 1
-    assert "Lib2" in libs
-
-
-def test_logging():
+def test_logging(mock_invocation_data):
     """Test that differences are logged."""
 
     evaluator = DiffEvaluator()
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
-        body="This is a test body.",
+        body=b"This is a test body.",
         method=HTTPMethod.POST,
         path="/example/path",
         query_parameters={"test_parameter": 567},
     )
-    response = Response(
-        headers=CaseInsensitiveDict({"response_header": "test"}),
-        body="This is a response body.",
-        status=404,
-    )
     wrong_request = deepcopy(request)
-    request.body = "Wrong body."
-    result1 = RequestResult("Lib1", request, response, None, None)
-    result2 = RequestResult("Lib2", wrong_request, response, None, None)
-    result3 = RequestResult("Lib3", request, response, None, None)
+    request.body = b"Wrong body."
+    result1 = RequestResult("Lib1", request)
+    result2 = RequestResult("Lib2", wrong_request)
+    result3 = RequestResult("Lib3", request)
     libs = evaluator.eval({result1, result2, result3}, request, log_errors=True)
 
     assert len(libs) == 1
     assert len(os.listdir(evaluator.log_path)) == 1
 
 
-def test_no_custom_header_diff(basic_request, basic_response):
+def test_no_custom_header_diff(basic_request, mock_invocation_data):
     """Custom x-headers should not factor in evaluation."""
     request1 = deepcopy(basic_request)
     request1.headers["X-Test"] = "Test"
@@ -133,13 +106,13 @@ def test_no_custom_header_diff(basic_request, basic_response):
     request3.headers["X-Test2"] = "Test2"
 
     evaluator = DiffEvaluator()
-    result1 = RequestResult("lib1", request1, basic_response, None, None)
-    result2 = RequestResult("lib2", request2, basic_response, None, None)
-    result3 = RequestResult("lib3", request3, basic_response, None, None)
+    result1 = RequestResult("lib1", request1)
+    result2 = RequestResult("lib2", request2)
+    result3 = RequestResult("lib3", request3)
     assert not evaluator.eval({result1, result2, result3}, request1)
 
 
-def test_no_header_request_comparison(basic_request, basic_response):
+def test_no_header_request_comparison(basic_request, mock_invocation_data):
     """Headers should generally not be evaluated for requests."""
     request1 = deepcopy(basic_request)
     request1.headers["TestHeader"] = "Tag1"
@@ -148,13 +121,13 @@ def test_no_header_request_comparison(basic_request, basic_response):
     request2.headers["TestHeader"] = "Tag2"
 
     evaluator = DiffEvaluator()
-    result1 = RequestResult("lib1", request1, basic_response, None, None)
-    result2 = RequestResult("lib2", request2, basic_response, None, None)
-    result3 = RequestResult("lib3", basic_request, basic_response, None, None)
+    result1 = RequestResult("lib1", request1)
+    result2 = RequestResult("lib2", request2)
+    result3 = RequestResult("lib3", basic_request)
     assert not evaluator.eval({result1, result2, result3}, request1)
 
 
-def test_content_header_diff(basic_request, basic_response):
+def test_content_header_diff(basic_request, mock_invocation_data):
     """If content header in both expected and diff and different, log diff."""
     request1 = deepcopy(basic_request)
     request1.headers["Content-Type"] = "application/json"
@@ -167,57 +140,189 @@ def test_content_header_diff(basic_request, basic_response):
     request3.headers["Content-Type"] = "application/xml"
 
     evaluator = DiffEvaluator()
-    result1 = RequestResult("lib1", request1, basic_response, None, None)
-    result2 = RequestResult("lib2", request2, basic_response, None, None)
-    result3 = RequestResult("lib3", request1, basic_response, None, None)
+    result1 = RequestResult("lib1", request1)
+    result2 = RequestResult("lib2", request2)
+    result3 = RequestResult("lib3", request1)
     assert not evaluator.eval({result1, result2, result3}, request1)
 
-    result3 = RequestResult("lib3", request3, basic_response, None, None)
+    result3 = RequestResult("lib3", request3)
     assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}
 
 
-def test_none_response(basic_request):
-    """None response should always be raised in report."""
-    result1 = RequestResult("lib1", basic_request, None, None, None)
-    result2 = deepcopy(result1)
-    result3 = deepcopy(result1)
-    result2.library = "lib2"
-    result3.library = "lib3"
+def test_normalize_query(basic_request, mock_invocation_data):
+    """Order of query parameters should not matter for evaluation."""
+    original_request = deepcopy(basic_request)
+    original_request.path = "/greet?age=0&name="
+
+    eval_request = deepcopy(basic_request)
+    eval_request.path = "/greet?name=&age=0"
 
     evaluator = DiffEvaluator()
-    # should not appear in result, as there is no need to reset
-    assert evaluator.eval({result1, result2, result3}, basic_request) == set()
+    result = RequestResult("lib1", eval_request)
 
-    # should produce report for each lib
-    reports = os.listdir(get_config().log_path)
-    assert len(reports) == 3
-    assert len([r for r in reports if "lib1" in r]) == 1
-    assert len([r for r in reports if "lib2" in r]) == 1
-    assert len([r for r in reports if "lib3" in r]) == 1
+    assert not evaluator.eval({result}, original_request)
 
 
-def test_none_other_responses(basic_request, basic_response):
-    """Other responses should be evaluated independently from None."""
-    result1 = RequestResult("lib1", basic_request, basic_response, None, None)
-    result2 = deepcopy(result1)
-    result2.library = "lib2"
-    result3 = deepcopy(result1)
-    result3.library = "lib3"
-    result4 = deepcopy(result1)
-    result4.library, result4.response = "lib4", None
+def test_normalize_json_body():
+    """JSON bodies should be compared as such."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = deepcopy(original_request)
+    eval_request.body = b'{"name": "", "age": 4800}'
 
     evaluator = DiffEvaluator()
-    assert evaluator.eval({result1, result2, result3, result4}, basic_request) == set()
-    reports = os.listdir(get_config().log_path)
-    assert len(reports) == 1
-    assert len([r for r in reports if "lib4" in r]) == 1
+    result = RequestResult("lib1", eval_request)
 
-    assert result3.response is not None
-    result3.response.body = "otherbody"
-    assert evaluator.eval({result1, result2, result3, result4}, basic_request) == {
-        "lib3"
-    }
-    reports = os.listdir(get_config().log_path)
-    assert len(reports) == 2
-    assert len([r for r in reports if "lib3" in r]) == 1
-    assert len([r for r in reports if "lib4" in r]) == 1
+    assert not evaluator.eval({result}, original_request)
+
+
+def test_json_value_diff():
+    """Test detail when value of JSON element differs."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = deepcopy(original_request)
+    eval_request.body = b'{"name": "", "age": 4801}'
+
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", eval_request)
+
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert evaluator.eval({result}, original_request) == {"lib1"}
+
+        mock_report.assert_called_once()
+        kwargs = mock_report.call_args.kwargs
+
+        assert (
+            "Unequal values for element 'age' in body: 4800 != 4801" in kwargs["detail"]
+        )
+
+
+def test_json_element_diff():
+    """Test detail when element only exists in original."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 4800, "name": ""}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = deepcopy(original_request)
+    eval_request.body = b'{"name": ""}'
+
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", eval_request)
+
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert evaluator.eval({result}, original_request) == {"lib1"}
+
+        mock_report.assert_called_once()
+        kwargs = mock_report.call_args.kwargs
+
+        assert "Element 'age' only exists in original body" in kwargs["detail"]
+
+
+def test_ignore_extra_params():
+    """Test original request containing superfluous body elements."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+    original_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "vsojI1",
+                "Content-Type": "application/json",
+                "Content-Length": "400",
+            }
+        ),
+        body=b'{"age": 19011, "name": "dan", "c": "gone"}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    eval_request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "mitmproxy:8080",
+                "User-Agent": "python-requests/2.33.1",
+                "Accept-Encoding": "gzip, deflate",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "Content-Length": "169",
+                "Content-Type": "application/json",
+            }
+        ),
+        body=b'{"name": "dan", "age": 19011}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", eval_request)
+
+    assert not evaluator.eval({result}, original_request)
+
+
+def test_request_none_report(basic_request, mock_invocation_data):
+    """Report should show if request was not generated."""
+    original_request = basic_request
+    evaluator = DiffEvaluator()
+    result = RequestResult("lib1", None)
+
+    assert evaluator.eval({result}, original_request) == set()

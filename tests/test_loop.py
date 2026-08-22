@@ -19,7 +19,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.config import Config
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.fuzzer import TelePhuzz
-from telephuzz.http_message import HTTPMethod, Request, Response
+from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
@@ -180,7 +180,7 @@ def test_session_manager_setup(client_generator):
         assert len(session_manager.networks) == 3
         for network in session_manager.networks:
             network.reload()
-            assert len(network.containers) == 3
+            assert len(network.containers) == 2
             assert session_manager.mitmproxy.container in network.containers
 
         assert "docker-compose-loop.yaml" in session_manager.api_docker_compose_path
@@ -194,9 +194,7 @@ def test_session_manager_setup(client_generator):
             f"{api_url}/api{session1.id}:8000/greet",
             params=params,
         ).text
-        assert "Hello Alice, you are 30 years old!" in text, (
-            f"Message was not routed correctly: {text}"
-        )
+        assert "OK" == text, f"Message was not routed correctly: {text}"
 
         # try to send a request through the send method
 
@@ -211,7 +209,7 @@ def test_session_manager_setup(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -257,7 +255,7 @@ def test_session_manager_faulty(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -265,42 +263,6 @@ def test_session_manager_faulty(client_generator):
 
         results = session_manager.send(request=request)
         assert any("Faulty" in repr(r) for r in results), results
-
-
-@pytest.mark.skip(reason="TODO fix header issue")
-def test_extra_headers():
-    """Test handling extra headers attached by clients."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
-
-    with SessionManager() as session_manager:
-        request = Request(
-            headers=CaseInsensitiveDict(
-                {
-                    "Host": "localhost:8000",
-                    "User-Agent": "schemathesis/4.15.2",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept": "*/*",
-                    "Connection": "keep-alive",
-                    "X-Schemathesis-TestCaseId": "gsSjqx",
-                    "Content-Type": "application/json",
-                    "Content-Length": "2",
-                }
-            ),
-            body="[]",
-            method=HTTPMethod.POST,
-            path="/user/createWithList",
-            query_parameters={},
-        )
-
-        # attempt to send with session manager
-        results = session_manager.send(request)
-        assert len(results) == 4
-
-        evaluator = DiffEvaluator()
-        evaluator.eval(results, request)
-
-        assert len(os.listdir(LOG_PATH)) == 0
 
 
 def test_diff_eval(client_generator):
@@ -322,7 +284,7 @@ def test_diff_eval(client_generator):
                     "X-Schemathesis-TestCaseId": "3ATnwX",
                 }
             ),
-            body="",
+            body=b"",
             method=HTTPMethod.GET,
             path="/greet?age=0&name=",
             query_parameters={"age": "0", "name": ""},
@@ -349,19 +311,18 @@ def test_mitmproxy_result_dir(client_generator):
         api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
         params = {"name": "Alice", "age": 30}
         assert (
-            "Hello Alice, you are 30 years old!"
+            "OK"
             in requests.get(
                 f"{api_url}/api0:8000/greet",
                 params=params,
             ).text
         ), "Message was not routed."
 
-        result_dir = Path(session_manager.result_dir) / "api0"
+        result_dir = Path(session_manager.result_dir) / "localhost"
         result_files = os.listdir(result_dir)
         assert len(result_files) == 1
         result_file = result_dir / result_files[0]
         Request.from_json(result_file)
-        Response.from_json(result_file)
 
 
 def test_loop_same_library(client_generator):
@@ -411,7 +372,7 @@ def test_send_petshop(client_generator):
                 "X-Schemathesis-TestCaseId": "q2GdK4",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.GET,
         path="/store/inventory",
         query_parameters={},

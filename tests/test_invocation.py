@@ -9,6 +9,7 @@ from requests.models import CaseInsensitiveDict
 from telephuzz.config import Config
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
+from telephuzz.openapi_helpers import ParameterType
 
 
 def test_strip_path_variables():
@@ -29,7 +30,7 @@ def test_strip_path_variables():
                 "Content-Length": "6",
             }
         ),
-        body="üý»©TÎ",
+        body=b"a",
         method=HTTPMethod.POST,
         path="/pet/-1714/uploadImage",
         query_parameters={"petId": -1714},
@@ -53,7 +54,7 @@ def test_cast_strings_to_array():
                 "X-Schemathesis-TestCaseId": "W02CUe",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.GET,
         path="/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6",
         query_parameters={"tags": "\x80𨕳\U00048b13ö"},
@@ -79,7 +80,7 @@ def test_infer_content_type():
                 "Content-Length": "6",
             }
         ),
-        body="üý»©TÎ",
+        body=b"a",
         method=HTTPMethod.POST,
         path="/pet/-1714/uploadImage",
         query_parameters={"petId": -1714},
@@ -99,7 +100,7 @@ def test_infer_content_type():
                 "X-Schemathesis-TestCaseId": "W02CUe",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.GET,
         path="/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6",
         query_parameters={"tags": "\x80𨕳\U00048b13ö"},
@@ -125,7 +126,7 @@ def test_arg_types():
                 "Content-Length": "6",
             }
         ),
-        body="üý»©TÎ",
+        body=b"a",
         method=HTTPMethod.POST,
         path="/pet/-1714/uploadImage",
         query_parameters={"petId": -1714},
@@ -133,9 +134,21 @@ def test_arg_types():
 
     invocation = InvocationData(request)
     assert invocation.arg_types == {
-        "petId": "integer",
-        "additionalMetadata": "string",
-        "requestBody": {"string"},
+        "petId": ParameterType(
+            schema_type="integer",
+            item_type=None,
+            required=True,
+        ),
+        "additionalMetadata": ParameterType(
+            schema_type="string",
+            item_type=None,
+            required=False,
+        ),
+        "requestBody": ParameterType(
+            schema_type="string",
+            item_type=None,
+            required=False,
+        ),
     }
 
 
@@ -156,19 +169,19 @@ def test_parse_json_body():
             }
         ),
         body=(
-            '{"id": 1, '
-            '"name": "test", '
-            '"photoUrls": ["https://example.com/photo.jpg"], '
-            '"status": "available", '
-            '"tags": [{"id": 2, "name": "tag"}], '
-            '"isCustom": true}'
+            b'{"id": 1, '
+            b'"name": "test", '
+            b'"photoUrls": ["https://example.com/photo.jpg"], '
+            b'"status": "available", '
+            b'"tags": [{"id": 2, "name": "tag"}], '
+            b'"isCustom": true}'
         ),
         method=HTTPMethod.POST,
         path="/pet",
         query_parameters={},
     )
     empty_request = deepcopy(body_request)
-    empty_request.body = "{}"
+    empty_request.body = b"{}"
 
     invocation = InvocationData(empty_request)
     assert invocation.json_body is not None
@@ -178,6 +191,33 @@ def test_parse_json_body():
     assert invocation.json_body is not None
     assert isinstance(invocation.json_body, dict)
     assert invocation.json_body["id"] == 1
+
+
+def test_strip_unknown_body_properties():
+    """Test that unknown JSON body properties are removed based on schema."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Host": "localhost:8000",
+                "User-Agent": "schemathesis/4.15.2",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "X-Schemathesis-TestCaseId": "TEST123",
+                "Content-Type": "application/json",
+                "Content-Length": "100",
+            }
+        ),
+        body=b'{"name": "Alice", "age": 30, "extra": "remove", "none": null}',
+        method=HTTPMethod.POST,
+        path="/user",
+        query_parameters={},
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.json_body == {"name": "Alice", "age": 30}
 
 
 def test_parse_surrogate_encoding():
@@ -198,9 +238,9 @@ def test_parse_surrogate_encoding():
             }
         ),
         body=(
-            '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
-            '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
-            '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336}'
+            b'{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
+            b'"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
+            b'"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336}'
         ),
         method=HTTPMethod.PUT,
         path="/pet",
@@ -229,7 +269,7 @@ def test_parse_array():
                 "Content-Length": "2",
             }
         ),
-        body="[]",
+        body=b"[]",
         method=HTTPMethod.POST,
         path="/user/createWithList",
         query_parameters={},
@@ -258,58 +298,13 @@ def test_parse_array():
                 "userStatus": 1,
             },
         ]
-    )
+    ).encode()
 
     invocation = InvocationData(request)
     assert isinstance(invocation.json_body, list)
     assert len(invocation.json_body) == 2
     assert invocation.json_body[0]["id"] != invocation.json_body[1]["id"]
     assert invocation.json_body[0]["password"] == invocation.json_body[1]["password"]
-
-
-def test_strip_nested_array():
-    """Nested arrays should be stripped from the body."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-
-    request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "NkdOLM",
-                "Content-Type": "application/json",
-                "Content-Length": "150",
-            }
-        ),
-        body=(
-            '{"name": "(", "photoUrls": ["\\u00d3", "\\u00c7", '
-            '"\\uda19\\uddbd\\u00de7\\ud815\\udd85M\\u00e6", '
-            '"\\udb9f\\udf7b\\u00e0\\udb96\\udf82\\u009d\\u00b5"], "id": -24336'
-            ', "additional": [[1]]}'
-        ),
-        method=HTTPMethod.PUT,
-        path="/pet",
-        query_parameters={},
-    )
-
-    invocation = InvocationData(request)
-    assert invocation.json_body is not None
-    assert "additional" not in invocation.json_body
-
-    # strip array
-    valid_body = request.body.replace("[[1]]", "[1]")
-    request.body = f"[{request.body}, {valid_body}]"
-    invocation = InvocationData(request)
-    assert isinstance(invocation.json_body, list)
-    assert "additional" not in invocation.json_body[0]
-
-    invocation = InvocationData(request)
-    assert invocation.json_body is not None
-    assert "additional" not in invocation.json_body[0]
-    assert "additional" in invocation.json_body[1]
 
 
 def test_cast_query_parameter_integers():
@@ -327,7 +322,7 @@ def test_cast_query_parameter_integers():
                 "X-Schemathesis-TestCaseId": "Bi9xCz",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.GET,
         path="/jobExecutions?jobName=&exitCode=%F1%B8%98%B7%F3%91%AE%8ENf&limitPerJob=-137438953472",
         query_parameters={
@@ -353,7 +348,7 @@ def test_no_sending_json_body_when_empty() -> None:
                 "Content-Type": "application/json",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.POST,
         path="/jobExecutions",
         query_parameters={},
@@ -363,7 +358,7 @@ def test_no_sending_json_body_when_empty() -> None:
     assert not invocation.send_body
 
     # should still send for empty JSON
-    request.body = "{}"
+    request.body = b"{}"
     invocation = InvocationData(request)
     assert invocation.send_body
 
@@ -378,7 +373,7 @@ def test_send_non_json_body_when_empty() -> None:
                 "Content-Type": "application/octet-stream",
             }
         ),
-        body="",
+        body=b"",
         method=HTTPMethod.POST,
         path="/jobExecutions",
         query_parameters={},

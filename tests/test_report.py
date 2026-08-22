@@ -4,9 +4,18 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from requests.models import CaseInsensitiveDict
 
 from telephuzz.evaluation.report import DiffReport
-from telephuzz.http_message import Request
+from telephuzz.http_message import HTTPMethod, Request
+
+BASIC_REQUEST = Request(
+    headers=CaseInsensitiveDict({"Test": ["test"]}),
+    body=None,
+    method=HTTPMethod.GET,
+    path="dummytarget.org/test",
+    query_parameters={},
+)
 
 
 def test_init(basic_request: Request) -> None:
@@ -17,40 +26,41 @@ def test_init(basic_request: Request) -> None:
     report = DiffReport(
         library_id=lib_id,
         error_id=err_id,
-        persistent=False,
         request_chain=[basic_request],
+        produced_request=basic_request,
     )
 
     assert report.library_id == lib_id
     assert report.error_id == err_id
-    assert not report.persistent
     assert len(report.request_chain) == 1 and report.request_chain[0] == basic_request
-    assert report.unique, "Default unique value should be True"
+    assert report.request_chain[0] == report.produced_request
     assert report.detail == "", "Default detail should be empty"
 
 
 def test_compare(basic_request: Request) -> None:
     """Test __hash__ and __eq__ methods."""
-    eq_report_1 = DiffReport("Eq1", "Err1", False, [basic_request])
-    # different request chain is not considered
-    eq_report_2 = DiffReport("Eq1", "Err1", False, [])
-    # persistance should cause it to be unequeal
-    uneq_report = DiffReport("Eq1", "Err1", True, [basic_request])
+    report1 = DiffReport("Eq1", "Err1", [basic_request], basic_request)
+    # different request chain
+    report2 = DiffReport("Eq1", "Err1", [], basic_request)
+    # uniqueness should cause it to be unequal
+    report3 = DiffReport("Eq1", "Err1", [basic_request], basic_request, unique=False)
 
-    assert eq_report_1 == eq_report_2
-    assert eq_report_1 != uneq_report
+    assert report1 != report2
+    assert report2 != report3
+    assert report1 != report3
 
-    assert len({eq_report_1, eq_report_2, uneq_report}) == 2
+    assert len({report1, report2, report3}) == 3
+    assert len({report1, report1, report2}) == 2
 
 
-def test_unify_persistent() -> None:
+def test_unify_persistent(basic_request) -> None:
     """Assert that persistent is True as long as one report claims persistancy."""
     reports = {
         frozenset(
             {
-                DiffReport("1", "2", persistent=False, request_chain=[]),
-                DiffReport("1", "2", persistent=True, request_chain=[]),
-                DiffReport("1", "2", persistent=False, request_chain=[]),
+                DiffReport("1", "2", request_chain=[], produced_request=basic_request),
+                DiffReport("1", "2", request_chain=[], produced_request=basic_request),
+                DiffReport("1", "2", request_chain=[], produced_request=basic_request),
             }
         )
     }
@@ -59,11 +69,11 @@ def test_unify_persistent() -> None:
     assert len(unified_reports) == 1
 
     assert unified_reports.pop() == DiffReport(
-        "1", "2", persistent=True, request_chain=[]
+        "1", "2", request_chain=[], produced_request=basic_request
     )
 
 
-def test_unify_detail() -> None:
+def test_unify_detail(basic_request) -> None:
     """Assert that details are concatenated."""
     reports = {
         frozenset(
@@ -71,15 +81,15 @@ def test_unify_detail() -> None:
                 DiffReport(
                     "1",
                     "2",
-                    persistent=False,
                     request_chain=[],
+                    produced_request=basic_request,
                     detail="Detail1",
                 ),
                 DiffReport(
                     "1",
                     "2",
-                    persistent=False,
                     request_chain=[],
+                    produced_request=basic_request,
                     detail="Detail2",
                 ),
             }
@@ -93,13 +103,13 @@ def test_unify_detail() -> None:
     assert "Detail1" in unified_detail and "Detail2" in unified_detail
 
 
-def test_unique_assignment() -> None:
+def test_unique_assignment(basic_request) -> None:
     """Test correct uniqueness assignment."""
-    unique_report = DiffReport("1", "1", False, [])
-    same_error_report1 = DiffReport("1", "2", False, [])
-    same_error_report2 = DiffReport("2", "2", False, [])
-    same_error_report3 = DiffReport("3", "2", False, [])
-    same_error_report4 = DiffReport("4", "2", False, [])
+    unique_report = DiffReport("1", "1", [], produced_request=basic_request)
+    same_error_report1 = DiffReport("1", "2", [], produced_request=basic_request)
+    same_error_report2 = DiffReport("2", "2", [], produced_request=basic_request)
+    same_error_report3 = DiffReport("3", "2", [], produced_request=basic_request)
+    same_error_report4 = DiffReport("4", "2", [], produced_request=basic_request)
 
     reports = reports = {
         frozenset({unique_report}),
@@ -121,8 +131,14 @@ def test_unique_assignment() -> None:
 @pytest.mark.parametrize(
     ["report1", "report2"],
     [
-        (DiffReport("1", "1", False, []), DiffReport("2", "1", False, [])),
-        (DiffReport("1", "1", False, []), DiffReport("1", "2", False, [])),
+        (
+            DiffReport("1", "1", [], produced_request=BASIC_REQUEST),
+            DiffReport("2", "1", [], produced_request=BASIC_REQUEST),
+        ),
+        (
+            DiffReport("1", "1", [], produced_request=BASIC_REQUEST),
+            DiffReport("1", "2", [], produced_request=BASIC_REQUEST),
+        ),
     ],
     ids=["library_id", "error_id"],
 )
@@ -134,8 +150,10 @@ def test_id_mismatch(report1: DiffReport, report2: DiffReport) -> None:
 
 def test_request_chain_mismatch(basic_request: Request, capsys) -> None:
     """Test that unify raises if request chain within same set is not the same."""
-    report1 = DiffReport("1", "1", False, [])
-    report2 = DiffReport("1", "1", True, [basic_request])  # TODO hash for Request
+    report1 = DiffReport("1", "1", request_chain=[], produced_request=BASIC_REQUEST)
+    report2 = DiffReport(
+        "1", "1", request_chain=[basic_request], produced_request=BASIC_REQUEST
+    )
     with pytest.raises(ValueError, match="conflicting request chains"):
         DiffReport.unify({frozenset({report1, report2})})
 
@@ -145,9 +163,8 @@ def test_to_log(basic_request: Request) -> None:
     report = DiffReport(
         "lib1",
         "err1",
-        persistent=False,
         request_chain=[basic_request],
-        request_only=True,
+        produced_request=basic_request,
         unique=True,
         detail="Test detail",
     )
@@ -160,9 +177,7 @@ def test_to_log(basic_request: Request) -> None:
 
     assert "lib1" in content
     assert "err1" in content
-    assert "Only the request" in content
     assert "Error was unique" in content
-    assert "No deviation in the database" in content
     assert basic_request.method.value in content
     assert basic_request.path in content
     assert "Test detail" in content

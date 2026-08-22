@@ -1,0 +1,6 @@
+targets:
+  - id : "openapi-generator:csharp"
+
+fuzzing:
+  log-path: "/tmp/logs/telephuzz"
+  timeout: 300

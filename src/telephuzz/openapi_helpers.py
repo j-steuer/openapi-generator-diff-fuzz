@@ -1,6 +1,7 @@
 """Helper methods for reading and processing an OpenAPI spec."""
 
 import json
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
@@ -131,37 +132,88 @@ def _search_operation(spec: str, method: HTTPMethod, path: str) -> dict:
     return operation
 
 
-@cache
-def get_args(spec: str, method: HTTPMethod, path: str) -> dict:
-    """Obtain a list of arguments for the given operation id.
+@dataclass(frozen=True, slots=True)
+class ParameterType:
+    schema_type: str
+    item_type: str | None
+    required: bool
 
-    Spec must be passed as string using json.dumps to enable caching.
-    Returns "enum" as type if spec defines an enum.
+
+@cache
+def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterType]:
+    """Obtain the argument types for the given operation.
+
+    Spec must be passed as a string using json.dumps to enable caching.
+
+    Each argument is represented by a ParameterType containing:
+      - schema_type: the OpenAPI schema type (e.g. string, array, enum)
+      - item_type: the item type for arrays, otherwise None
+      - required: whether the argument is required
     """
-    # search operation id
     operation = _search_operation(spec, method, path)
 
-    args = dict()
+    args: dict[str, ParameterType] = {}
+
     if "requestBody" in operation:
-        # get request body
         content = operation["requestBody"]["content"]
         ref = set(_find_all(content, "$ref"))
+
         if ref:
             assert len(ref) == 1
             ref = ref.pop()
             assert isinstance(ref, str)
-            args["requestBody"] = {ref[ref.rfind("/") + 1 :]}
+
+            args["requestBody"] = ParameterType(
+                schema_type=ref[ref.rfind("/") + 1 :],
+                item_type=None,
+                required=operation["requestBody"].get("required", False),
+            )
         else:
             schemas = _find_all(content, "schema")
             schema_types = {schema["type"] for schema in schemas}
-            args["requestBody"] = schema_types
-    if "parameters" in operation:
-        args.update(
-            {
-                p["name"]: p["schema"]["type"] if "enum" not in p["schema"] else "enum"
-                for p in operation["parameters"]
+
+            # Preserve the existing behaviour of returning the set of
+            # schema types, but ParameterType expects a single type.
+            if len(schema_types) != 1:
+                raise ValueError(
+                    f"Multiple request body schema types found: {schema_types}"
+                )
+
+            schema_type = next(iter(schema_types))
+
+            item_types = {
+                schema.get("items", {}).get("type")
+                for schema in schemas
+                if schema.get("type") == "array"
             }
-        )
+
+            item_type = next(iter(item_types)) if item_types else None
+
+            args["requestBody"] = ParameterType(
+                schema_type=schema_type,
+                item_type=item_type,
+                required=operation["requestBody"].get("required", False),
+            )
+
+    if "parameters" in operation:
+        for parameter in operation["parameters"]:
+            schema = parameter["schema"]
+
+            if "enum" in schema:
+                schema_type = "enum"
+            else:
+                schema_type = schema["type"]
+
+            item_type = None
+            if schema_type == "array":
+                items = schema.get("items", {})
+                item_type = items.get("type")
+
+            args[parameter["name"]] = ParameterType(
+                schema_type=schema_type,
+                item_type=item_type,
+                required=parameter.get("required", False),
+            )
 
     return args
 
@@ -175,6 +227,71 @@ def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
         return None
 
     return list(operation["requestBody"]["content"].keys())[0]
+
+
+def _resolve_ref(spec: dict, ref: str) -> dict:
+    """Resolve a local JSON reference within the spec."""
+    if not isinstance(ref, str) or not ref.startswith("#/"):
+        raise ValueError(f"Unsupported ref: {ref}")
+
+    current: Any = spec
+    for path_part in ref[2:].split("/"):
+        path_part = path_part.replace("~1", "/").replace("~0", "~")
+        current = current[path_part]
+    assert isinstance(current, dict)
+    return current
+
+
+def _resolve_schema(spec: dict, schema: dict) -> dict:
+    """Resolve schema objects, including refs and composed schemas."""
+    if not isinstance(schema, dict):
+        return {}
+
+    if "$ref" in schema:
+        return _resolve_schema(spec, _resolve_ref(spec, schema["$ref"]))
+
+    if "allOf" in schema:
+        properties: dict[str, Any] = {}
+        for subschema in schema["allOf"]:
+            resolved = _resolve_schema(spec, subschema)
+            properties.update(resolved.get("properties", {}))
+        return {"type": "object", "properties": properties}
+
+    if "oneOf" in schema or "anyOf" in schema:
+        options = schema.get("oneOf") or schema.get("anyOf") or []
+        properties = {}
+        for subschema in options:
+            resolved = _resolve_schema(spec, subschema)
+            properties.update(resolved.get("properties", {}))
+        return {"type": "object", "properties": properties}
+
+    return schema
+
+
+@cache
+def get_request_body_properties(
+    spec: str, method: HTTPMethod, path: str
+) -> set[str] | None:
+    """Return allowed top-level request body keys for the given operation."""
+    operation = _search_operation(spec, method, path)
+    if "requestBody" not in operation:
+        return None
+
+    content = operation["requestBody"]["content"]
+    if not content:
+        return None
+
+    schema = next(iter(content.values())).get("schema", {})
+    spec_dict = json.loads(spec)
+    resolved_schema = _resolve_schema(spec_dict, schema)
+
+    if resolved_schema.get("type") == "array":
+        resolved_schema = _resolve_schema(spec_dict, resolved_schema.get("items", {}))
+
+    if resolved_schema.get("type") == "object" or "properties" in resolved_schema:
+        return set(resolved_schema.get("properties", {}).keys())
+
+    return None
 
 
 def get_api_url_path(spec: dict) -> str:

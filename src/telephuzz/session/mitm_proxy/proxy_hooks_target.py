@@ -1,5 +1,6 @@
 """File for custom response handling for MITMProxyContainer in single target mode."""
 
+import base64
 import json
 import os
 import time
@@ -20,18 +21,15 @@ def response(flow: http.HTTPFlow):
         query_parameters[parameter] = values[0] if len(values) == 1 else values
 
     entry = {
-        "request": {
-            "method": flow.request.method,
-            "url": flow.request.pretty_url,
-            "headers": dict(flow.request.headers),
-            "body": flow.request.get_text(),
-            "query_parameters": query_parameters,
-        },
-        "response": {
-            "status_code": flow.response.status_code,
-            "headers": dict(flow.response.headers),
-            "body": flow.response.get_text(),
-        },
+        "method": flow.request.method,
+        "url": flow.request.pretty_url,
+        "query_parameters": query_parameters,
+        "headers": dict(flow.request.headers),
+        "body": (
+            base64.b64encode(flow.request.raw_content).decode("ascii")
+            if flow.request.raw_content is not None
+            else None
+        ),
     }
 
     response_id = time.time_ns()

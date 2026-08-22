@@ -7,12 +7,10 @@ from pathlib import Path
 from pprint import pformat
 from typing import Any
 
-from requests.models import CaseInsensitiveDict
-
 from telephuzz.config import get_config
-from telephuzz.evaluation.abstractor import Abstractor
 from telephuzz.evaluation.report import DiffReport
-from telephuzz.http_message import Request, Response
+from telephuzz.http_message import Request, path_only
+from telephuzz.invocation_data import InvocationData
 from telephuzz.request_result import RequestResult
 from telephuzz.session.client_library import LibraryId
 
@@ -26,8 +24,6 @@ class DiffEvaluator:
 
     def __init__(self):
         """Initialize the DiffEvaluator."""
-        self.abstractor = Abstractor()  # TODO config file to provide args
-
         self.log_path = Path(get_config().log_path)
         # create log path if necessary
         os.makedirs(self.log_path, exist_ok=True)
@@ -35,7 +31,7 @@ class DiffEvaluator:
     def _get_error_id(self, result: RequestResult) -> str:
         """Given an erroneous request result, obtain an error id."""
         # TODO include db state
-        return f"Error_{hash((hash(result.request), hash(result.response)))}"
+        return f"Error_{hash((hash(result.library), hash(result.request)))}"
 
     def eval(
         self,
@@ -62,10 +58,6 @@ class DiffEvaluator:
                 if not hasattr(result, attr):
                     raise ValueError(f"Results do not have attribute {attr}")
 
-                # ignore headers for now TODO support?
-                if result.response is not None:
-                    result.response.headers = CaseInsensitiveDict()
-
                 component = getattr(result, attr)
 
                 # normalize request paths
@@ -82,16 +74,12 @@ class DiffEvaluator:
 
             return groups
 
-        libs_to_reset: list[LibraryId] = []
+        erroneous_libs: list[LibraryId] = []
         diff_reports: dict[LibraryId, list[DiffReport]] = {
             l_id: [] for l_id in [r.library for r in results]
         }
 
         logger.debug(f"Evaluating results for request: {repr(original_request)}")
-
-        # input validation
-        if len(results) <= 2:
-            raise ValueError("Must have at least three results to compare.")
 
         library_id_list = [r.library for r in results]
         if len(library_id_list) != len(set(library_id_list)):
@@ -100,26 +88,58 @@ class DiffEvaluator:
                 "come from different libraries."
             )
 
-        # apply abstractions
-        for result in results:
-            self.abstractor.abstract(result)
-
         # compare requests
-        request_groups: dict[Request, list[LibraryId]] = _get_groups("request")
+        request_groups: dict[Request | None, list[LibraryId]] = _get_groups("request")
+        identical_requests = [r for r in request_groups.keys() if r == original_request]
+        for request in identical_requests:
+            del request_groups[request]
+
+        original_invocation = InvocationData(original_request)
+
+        if None in request_groups:
+            for library in request_groups[None]:
+                result = {r for r in results if r.library == library}.pop()
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    request_chain=[original_request],
+                    unique=len(request_groups[None]) > 1,
+                    produced_request=None,
+                    detail="Error while building request",
+                )
+                diff_reports[library].append(report)
+                logger.debug(f"{library} failed to generate request")
+            del request_groups[None]
 
         if original_request not in request_groups or len(request_groups) > 1:
             if original_request in request_groups:
                 del request_groups[original_request]
 
-            libs_to_reset.extend(itertools.chain.from_iterable(request_groups.values()))
+            erroneous_libs.extend(
+                itertools.chain.from_iterable(request_groups.values())
+            )
 
             for diff_request, libraries in request_groups.items():
+                assert diff_request is not None
+                diff_invocation = InvocationData(diff_request)
+
                 diff_method = original_request.method != diff_request.method
-                diff_path = original_request.path != diff_request.path
+                diff_path = path_only(original_request.path) != path_only(
+                    diff_request.path
+                )
                 diff_parameters = (
                     original_request.query_parameters != diff_request.query_parameters
                 )
-                diff_body = original_request.body != diff_request.body
+
+                original_json = None
+                diff_json = None
+                if original_invocation.json_body is None:
+                    diff_body = original_request.body != diff_request.body
+                else:
+                    original_json = original_invocation.json_body
+                    diff_json = diff_invocation.json_body
+                    diff_body = original_json != diff_json
+
                 diff_headers = original_request.headers != diff_request.headers
 
                 unique = len(libraries) == 1
@@ -146,7 +166,7 @@ class DiffEvaluator:
                                 or original_content == diff_content
                             ):
                                 # ignore header diff if not content type
-                                del libs_to_reset[libs_to_reset.index(library)]
+                                del erroneous_libs[erroneous_libs.index(library)]
                                 continue
                             else:
                                 detail += (
@@ -173,157 +193,54 @@ class DiffEvaluator:
                             f"- Parameters {original_request.query_parameters} "
                             f"expected, but got {diff_request.query_parameters}.\n"
                         )
+
                     if diff_body:
-                        detail += (
-                            f"- Body '{pformat(original_request.body)}' "
-                            f"expected, but got '{pformat(diff_request.body)}.'\n"
-                        )
+                        if not (
+                            isinstance(original_json, dict)
+                            and isinstance(diff_json, dict)
+                        ):
+                            detail += (
+                                f"- Body '{pformat(original_request.body)}' "
+                                f"expected, but got '{pformat(diff_request.body)}.'\n"
+                            )
+                        else:
+                            for element in [
+                                k for k in original_json.keys() if k not in diff_json
+                            ]:
+                                detail += (
+                                    f"Element '{element}' only exists in original body."
+                                )
+                            for element in [
+                                k for k in diff_json.keys() if k not in original_json
+                            ]:
+                                detail += (
+                                    f"Element '{element}' only exists in produced body."
+                                )
+                            for element in [
+                                k
+                                for k in original_json.keys()
+                                if k in diff_json and original_json[k] != diff_json[k]
+                            ]:
+                                detail += (
+                                    f"Unequal values for element '{element}' in "
+                                    f"body: {original_json[element]} != "
+                                    f"{diff_json[element]}"
+                                )
+
+                    logger.debug(f"{library} produced diff in response: {detail}")
+
+                    result = {r for r in results if r.library == library}.pop()
 
                     report = DiffReport(
                         library_id=library,
                         error_id=self._get_error_id(result),
-                        persistent=False,
-                        request_chain=[result.request],
-                        request_only=True,
+                        request_chain=[original_request],
+                        produced_request=diff_request,
                         unique=unique,
                         detail=detail,
                     )
 
                     diff_reports[library].append(report)
-
-        # compare responses
-        response_groups: dict[Response | None, list[LibraryId]] = _get_groups(
-            "response"
-        )
-
-        # raise separate diff for None response
-        if None in response_groups:
-            for library in response_groups[None]:
-                report = DiffReport(
-                    library,
-                    self._get_error_id(result),
-                    persistent=False,
-                    request_chain=[result.request],
-                    request_only=True,
-                    unique=len(response_groups[None]) > 1,
-                    detail="Error while building request",
-                )
-                diff_reports[library].append(report)
-            del response_groups[None]
-
-        if len(response_groups) > 1:
-            # use response of largest group as source of truth
-            largest_response_group = max(
-                [(k, v) for k, v in response_groups.items()], key=lambda x: len(x[1])
-            )
-            true_response, count_true_libs = (
-                largest_response_group[0],
-                len(largest_response_group[1]),
-            )
-
-            logger.debug(f"Diffs found, chose {true_response} as source of truth")
-
-            # compare against remaining responses
-            del response_groups[true_response]
-
-            libs_to_reset.extend(
-                itertools.chain.from_iterable(response_groups.values())
-            )
-
-            assert true_response is not None
-
-            for diff_response, libraries in response_groups.items():
-                assert diff_response is not None
-                diff_status = true_response.status != diff_response.status
-                diff_body = true_response.body != diff_response.body
-                diff_headers = true_response.headers != diff_response.headers
-
-                unique = len(libraries) == 1
-                detail = "---\nDiff in response found\n---\n"
-                detail = (
-                    f"{count_true_libs}/{len(results)} other libraries "
-                    "agree on the source of truth.\n"
-                )
-
-                for library in libraries:
-                    if not any([diff_status, diff_body, diff_headers]):
-                        raise RuntimeError(
-                            "Diff in response detected, but exact diff not found."
-                        )
-
-                    if diff_status:
-                        detail += (
-                            f"- Status code {true_response.status} expected, "
-                            f"but got {diff_response.status}.\n"
-                        )
-                        logger.debug(
-                            f"Different status {diff_response.status} in {library}"
-                        )
-                    if diff_body:
-                        detail += (
-                            f"- Body '{pformat(true_response.body)}' "
-                            f"expected, but got '{pformat(diff_response.body)}.'\n"
-                        )
-                        logger.debug(
-                            f"Different body {diff_response.body} in {library}"
-                        )
-                    if diff_headers:
-                        for header in true_response.headers.keys():
-                            if header not in diff_response.headers:
-                                detail += f"- Header '{header}' expected, "
-                                "but is not present in response.\n"
-                                logger.debug(
-                                    f"Header {header} not present in {library}"
-                                )
-                            elif (
-                                true_response.headers[header]
-                                != diff_response.headers[header]
-                            ):
-                                diff_header = diff_response.headers[header]
-                                detail += f"- Header '{header}' has content "
-                                f"{diff_header}, expected "
-                                f"{true_response.headers[header]}.\n"
-                                logger.debug(
-                                    (
-                                        f"Header {header} has content {diff_header} "
-                                        f"in {library}"
-                                    )
-                                )
-
-                            for header in diff_response.headers.keys():
-                                if header not in true_response.headers:
-                                    detail += f"- Unexpected header: '{header}'"
-                                logger.debug(f"Extra header {header} in {library}")
-
-                    report = DiffReport(
-                        library_id=library,
-                        error_id=self._get_error_id(result),
-                        persistent=False,
-                        request_chain=[result.request],
-                        request_only=False,
-                        unique=unique,
-                        detail=detail,
-                    )
-
-                    diff_reports[library].append(report)
-
-        # compare db state TODO way to check details if different
-        if result.db_state_before and result.db_state_after:
-            with open(result.db_state_before, "r") as f:
-                before = f.read()
-            with open(result.db_state_after, "r") as f:
-                after = f.read()
-            if before != after:
-                report = DiffReport(
-                    library_id=library,
-                    error_id=self._get_error_id(result),
-                    persistent=True,
-                    request_chain=[result.request],
-                    request_only=False,
-                    unique=unique,
-                    detail="",
-                )
-                diff_reports[library].append(report)
 
         logging.debug(f"Evaluation results: {diff_reports}")
 
@@ -335,4 +252,4 @@ class DiffEvaluator:
             for report in itertools.chain.from_iterable(diff_reports.values()):
                 report.to_log(self.log_path)
 
-        return set(libs_to_reset)
+        return set(erroneous_libs)

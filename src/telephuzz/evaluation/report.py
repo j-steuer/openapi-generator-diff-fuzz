@@ -13,9 +13,8 @@ class DiffReport:
 
     library_id: LibraryId
     error_id: str
-    persistent: bool
     request_chain: list[Request]
-    request_only: bool = True
+    produced_request: Request | None
     unique: bool = True
     detail: str = ""
 
@@ -65,9 +64,8 @@ class DiffReport:
 
             library_id = sample_report.library_id
             error_id = sample_report.error_id
-            persistent = False
-            request_only = True
             request_chain = sample_report.request_chain
+            produced_request = sample_report.produced_request
             details: list[str] = []
 
             for report in report_set:
@@ -85,14 +83,6 @@ class DiffReport:
                         f"conflicting request chains: {report_set}"
                     )
 
-                # request only as long as no report contradicts
-                request_only = (
-                    report.request_only if not report.request_only else request_only
-                )
-
-                # unified report is persistent as long as one report claims persistency
-                persistent = report.persistent if report.persistent else persistent
-
                 # collect all details
                 if report.detail:
                     details.append(report.detail)
@@ -101,9 +91,9 @@ class DiffReport:
                 DiffReport(
                     library_id=library_id,
                     error_id=error_id,
-                    persistent=persistent,
                     request_chain=request_chain,
-                    detail=" | ".join(sorted(details)),  # deterministic detail merging
+                    produced_request=produced_request,
+                    detail=" | ".join(sorted(details)),
                 )
             )
 
@@ -120,14 +110,16 @@ class DiffReport:
             self.library_id,
             self.error_id,
             self.unique,
-            self.persistent,
             self.detail,
+            self.produced_request,
+            self.request_chain,
         ) == (
             other.library_id,
             other.error_id,
             other.unique,
-            other.persistent,
             other.detail,
+            other.produced_request,
+            other.request_chain,
         )
 
     def __hash__(self):
@@ -137,7 +129,6 @@ class DiffReport:
                 self.library_id,
                 self.error_id,
                 self.unique,
-                self.persistent,
                 self.detail,
             )
         )
@@ -148,25 +139,24 @@ class DiffReport:
         error_str += "----------------------------\n"
 
         error_str += "Requests:\n"
+        error_str += "Original Requests:\n"
         for request in self.request_chain:
             error_str += repr(request) + "\n"
+        error_str += "Produced Request:\n"
+        if self.produced_request is not None:
+            error_str += repr(self.produced_request) + "\n"
+        else:
+            error_str += (
+                "Failed to produce request. "
+                "This could be an error caused by the fuzzer.\n"
+            )
         error_str += "----------------------------\n"
 
         error_str += f"Error occured in library {self.library_id}:\n"
 
-        request_only = "Only the request showed deviations.\n"
-        if self.request_only:
-            error_str += request_only
-
         unique = "Error was unique and only occured in this client.\n"
         not_unique = "Error was not unique and occured in other clients.\n"
         error_str += unique if self.unique else not_unique
-
-        persistent = (
-            "A change was detected in the database, implying a persistent error.\n"
-        )
-        not_persistent = "No deviation in the database state was detected.\n"
-        error_str += persistent if self.persistent else not_persistent
 
         error_str += self.detail
 
