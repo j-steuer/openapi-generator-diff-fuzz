@@ -410,8 +410,6 @@ class CsharpCLC(ClientLibraryContainer):
 
         self.container.put_archive("/app", tar_stream)
 
-        input("continue")
-
         return "dotnet script invocation.csx"
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
