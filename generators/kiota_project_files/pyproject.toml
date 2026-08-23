@@ -13,8 +13,8 @@ authors = [
 ]
 
 dependencies = [
-    "microsoft-kiota-authentication-azure==1.10.1",
-    "microsoft-kiota-bundle==1.10.1"
+    "microsoft-kiota-authentication-azure==1.11.7",
+    "microsoft-kiota-bundle==1.11.7"
 ]
 
 keywords = ["kiota", "openapi", "client", "sdk"]
