@@ -3,6 +3,7 @@
 import itertools
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from pprint import pformat
 from typing import Any
@@ -221,11 +222,33 @@ class DiffEvaluator:
                                 for k in original_json.keys()
                                 if k in diff_json and original_json[k] != diff_json[k]
                             ]:
-                                detail += (
-                                    f"Unequal values for element '{element}' in "
-                                    f"body: {original_json[element]} != "
-                                    f"{diff_json[element]}"
-                                )
+                                # special error message for semantically equivalent
+                                # date-time values
+                                try:
+                                    original_time = datetime.fromisoformat(
+                                        original_json[element]
+                                    )
+                                    diff_time = datetime.fromisoformat(
+                                        diff_json[element]
+                                    )
+                                    semantically_equivalent_time = (
+                                        original_time == diff_time
+                                    )
+                                except Exception:
+                                    semantically_equivalent_time = False
+
+                                if not semantically_equivalent_time:
+                                    detail += (
+                                        f"Unequal values for element '{element}' in "
+                                        f"body: {original_json[element]} != "
+                                        f"{diff_json[element]}"
+                                    )
+                                else:
+                                    detail += (
+                                        "Syntactically different but semantically "
+                                        "equivalent date-time detected. "
+                                        "This is likely not a bug in the client."
+                                    )
 
                     logger.debug(f"{library} produced diff in response: {detail}")
 

@@ -326,3 +326,50 @@ def test_request_none_report(basic_request, mock_invocation_data):
     result = RequestResult("lib1", None)
 
     assert evaluator.eval({result}, original_request) == set()
+
+
+def test_semantically_equivalent_datetime(tmp_path):
+    """Special message for only syntactically different date-time."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
+    request1 = Request(
+        headers=CaseInsensitiveDict(
+            {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            }
+        ),
+        body=(
+            b'{"id":1,'
+            b'"petId":10,'
+            b'"quantity":1,'
+            b'"shipDate":"7861-04-29T22:31:12.387165Z",'
+            b'"status":"placed",'
+            b'"complete":false}'
+        ),
+        method=HTTPMethod.POST,
+        path="/store/order",
+        query_parameters={},
+    )
+
+    request2 = deepcopy(request1)
+    request2.body = (
+        b'{"id":1,'
+        b'"petId":10,'
+        b'"quantity":1,'
+        b'"shipDate":"7861-04-29T22:31:12.387165+00:00",'
+        b'"status":"placed",'
+        b'"complete":false}'
+    )
+
+    evaluator = DiffEvaluator()
+    evaluator.log_path = tmp_path
+
+    result = RequestResult("lib1", request2)
+    evaluator.eval({result}, request1)
+    assert len(os.listdir(tmp_path)) == 1
+    with open(tmp_path / os.listdir(tmp_path)[0], "r") as f:
+        assert (
+            "Syntactically different but semantically "
+            "equivalent date-time detected. "
+            "This is likely not a bug in the client."
+        ) in f.read()
