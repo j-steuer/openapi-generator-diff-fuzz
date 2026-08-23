@@ -4,6 +4,7 @@ config.yaml
 spec/*.json
 local_testfiles
 logs/
+bug_scripts/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
