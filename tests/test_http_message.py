@@ -29,7 +29,7 @@ def test_request_from_json():
     data = f"""{{
         "method": "GET",
         "url": "http://localhost:8000/testpath?id=2",
-        "headers": {{"testheader": 1}},
+        "headers": {{"testheader": 1, "Content-Type": "application/json"}},
         "query_parameters": {{"id": 2}},
         "body": "{base64.b64encode(b"Test body").decode("ascii")}"
     }}"""
@@ -39,7 +39,7 @@ def test_request_from_json():
     assert request.method == HTTPMethod.GET
     assert request.path == "/testpath?id=2"
     assert len(request.headers) == 1
-    assert request.headers.get("testheader") == 1
+    assert request.headers.get("content-type") == "application/json"
     assert len(request.query_parameters) == 1
     assert request.query_parameters.get("id") == 2
     assert request.body == b"Test body"

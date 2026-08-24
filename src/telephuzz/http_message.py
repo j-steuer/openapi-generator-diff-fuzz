@@ -95,9 +95,17 @@ class Request(HTTPMessage):
 
         body = base64.b64decode(data["body"]) if data["body"] is not None else None
 
+        # only content type header matters
+        headers: CaseInsensitiveDict = CaseInsensitiveDict(data["headers"])
+        headers = (
+            CaseInsensitiveDict()
+            if "content-type" not in headers
+            else CaseInsensitiveDict({"content-type": headers["content-type"]})
+        )
+
         try:
             return Request(
-                headers=CaseInsensitiveDict(data["headers"]),
+                headers=headers,
                 body=body,
                 method=HTTPMethod(data["method"]),
                 path=full_path,
