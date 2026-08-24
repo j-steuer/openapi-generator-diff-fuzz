@@ -381,3 +381,22 @@ def test_send_non_json_body_when_empty() -> None:
 
     invocation = InvocationData(request)
     assert invocation.send_body
+
+
+def test_invocation_does_not_modify_path_parameters() -> None:
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict(),
+        body=b"",
+        method=HTTPMethod.GET,
+        path="/pet/0",
+        query_parameters={"petId": "0"},
+    )
+
+    before = deepcopy(request)
+
+    InvocationData(request)
+
+    assert request == before
+    assert request.query_parameters == {"petId": "0"}

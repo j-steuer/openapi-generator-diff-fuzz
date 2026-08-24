@@ -127,7 +127,7 @@ class InvocationData:
         base_path = path_only(request.path)
         path = self._resolve_path(request.path)
 
-        query_parameters = request.query_parameters
+        query_parameters = dict(request.query_parameters)
         if "{" in path:
             _path_params = extract_path_parameters(path, base_path)
 
