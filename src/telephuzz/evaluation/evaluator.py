@@ -141,6 +141,7 @@ class DiffEvaluator:
 
                 unique = len(libraries) == 1
                 detail = "---\nDiff in request found\n---\n"
+                only_syntactic_detail = ""
 
                 for library in libraries:
                     if not any(
@@ -166,7 +167,12 @@ class DiffEvaluator:
                                     f"Content type {original_content} expected"
                                     f", got {diff_content}"
                                 )
+                            else:
+                                only_syntactic_detail += "Different headers\n"
                         else:
+                            logger.debug(
+                                f"Original {original_request} | produced {diff_request}"
+                            )
                             raise RuntimeError(
                                 "Diff in request detected, but exact diff not found."
                             )
@@ -235,10 +241,20 @@ class DiffEvaluator:
                                         f"body: {original_json[element]} != "
                                         f"{diff_json[element]}"
                                     )
+                                else:
+                                    osdetail = (
+                                        "Syntactically different but "
+                                        "semantically equivalent date(-time)\n"
+                                    )
+                                    only_syntactic_detail += osdetail
 
                     if detail == "---\nDiff in request found\n---\n":
-                        # empty detail means semantically equivalent
-                        logger.debug("Only syntactic difference detected, skipping")
+                        # empty detail means semantically
+                        if not only_syntactic_detail:
+                            raise RuntimeError("Diff detected, but none found")
+                        logger.debug(
+                            f"Only syntactic diff detected: {only_syntactic_detail}"
+                        )
                         continue
 
                     logger.debug(f"{library} produced diff in response: {detail}")

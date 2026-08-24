@@ -1,5 +1,6 @@
 """Tests for DiffFuzzer."""
 
+import logging
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -93,8 +94,9 @@ def test_logging(mock_invocation_data):
     assert len(os.listdir(evaluator.log_path)) == 1
 
 
-def test_no_custom_header_diff(basic_request, mock_invocation_data):
+def test_no_custom_header_diff(basic_request, mock_invocation_data, caplog):
     """Custom x-headers should not factor in evaluation."""
+    caplog.set_level("DEBUG")
     request1 = deepcopy(basic_request)
     request1.headers["X-Test"] = "Test"
 
@@ -110,6 +112,8 @@ def test_no_custom_header_diff(basic_request, mock_invocation_data):
     result2 = RequestResult("lib2", request2)
     result3 = RequestResult("lib3", request3)
     assert not evaluator.eval({result1, result2, result3}, request1)
+
+    assert "Different headers" in caplog.text
 
 
 def test_no_header_request_comparison(basic_request, mock_invocation_data):
@@ -328,8 +332,9 @@ def test_request_none_report(basic_request, mock_invocation_data):
     assert evaluator.eval({result}, original_request) == set()
 
 
-def test_semantically_equivalent_datetime(tmp_path):
+def test_semantically_equivalent_datetime(tmp_path, caplog):
     """Special message for only syntactically different date-time."""
+    caplog.set_level(logging.DEBUG)
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
     request1 = Request(
         headers=CaseInsensitiveDict(
@@ -374,3 +379,5 @@ def test_semantically_equivalent_datetime(tmp_path):
     result.request.body = result.request.body.replace(b'"id":1', b'"id":2')
     assert evaluator.eval({result}, request1) == {"lib1"}
     assert len(os.listdir(tmp_path)) == 1
+
+    assert "Syntactically different but semantically equivalent date" in caplog.text
