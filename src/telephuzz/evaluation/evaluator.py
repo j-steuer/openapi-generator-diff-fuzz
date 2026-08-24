@@ -116,10 +116,6 @@ class DiffEvaluator:
             if original_request in request_groups:
                 del request_groups[original_request]
 
-            erroneous_libs.extend(
-                itertools.chain.from_iterable(request_groups.values())
-            )
-
             for diff_request, libraries in request_groups.items():
                 assert diff_request is not None
                 diff_invocation = InvocationData(diff_request)
@@ -161,15 +157,11 @@ class DiffEvaluator:
                                 content_type
                             )
                             diff_content = diff_request.headers.get(content_type)
-                            if (
+                            if not (
                                 original_content is None
                                 or diff_content is None
                                 or original_content == diff_content
                             ):
-                                # ignore header diff if not content type
-                                del erroneous_libs[erroneous_libs.index(library)]
-                                continue
-                            else:
                                 detail += (
                                     f"Content type {original_content} expected"
                                     f", got {diff_content}"
@@ -243,12 +235,11 @@ class DiffEvaluator:
                                         f"body: {original_json[element]} != "
                                         f"{diff_json[element]}"
                                     )
-                                else:
-                                    detail += (
-                                        "Syntactically different but semantically "
-                                        "equivalent date-time detected. "
-                                        "This is likely not a bug in the client."
-                                    )
+
+                    if detail == "---\nDiff in request found\n---\n":
+                        # empty detail means semantically equivalent
+                        logger.debug("Only syntactic difference detected, skipping")
+                        continue
 
                     logger.debug(f"{library} produced diff in response: {detail}")
 
@@ -263,6 +254,7 @@ class DiffEvaluator:
                         detail=detail,
                     )
 
+                    erroneous_libs.append(library)
                     diff_reports[library].append(report)
 
         logging.debug(f"Evaluation results: {diff_reports}")

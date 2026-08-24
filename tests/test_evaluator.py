@@ -365,11 +365,12 @@ def test_semantically_equivalent_datetime(tmp_path):
     evaluator.log_path = tmp_path
 
     result = RequestResult("lib1", request2)
-    evaluator.eval({result}, request1)
+    assert not evaluator.eval({result}, request1)
+    assert len(os.listdir(tmp_path)) == 0
+
+    # semantic differences should still be reported
+    assert result.request is not None
+    assert result.request.body is not None
+    result.request.body = result.request.body.replace(b'"id":1', b'"id":2')
+    assert evaluator.eval({result}, request1) == {"lib1"}
     assert len(os.listdir(tmp_path)) == 1
-    with open(tmp_path / os.listdir(tmp_path)[0], "r") as f:
-        assert (
-            "Syntactically different but semantically "
-            "equivalent date-time detected. "
-            "This is likely not a bug in the client."
-        ) in f.read()
