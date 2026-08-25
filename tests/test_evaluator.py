@@ -383,8 +383,8 @@ def test_semantically_equivalent_datetime(tmp_path, caplog):
     assert "Syntactically different but semantically equivalent date" in caplog.text
 
 
-def test_invalid_path(tmp_path, caplog):
-    """Invalid paths should also result in report."""
+def test_capture_invocation_error(tmp_path, caplog):
+    """Errors thrown while creating result invocation should create report."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
     caplog.set_level(logging.DEBUG)
 
