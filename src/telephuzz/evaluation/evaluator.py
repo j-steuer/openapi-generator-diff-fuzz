@@ -118,7 +118,31 @@ class DiffEvaluator:
 
             for diff_request, libraries in request_groups.items():
                 assert diff_request is not None
-                diff_invocation = InvocationData(diff_request)
+                try:
+                    diff_invocation = InvocationData(diff_request)
+                except Exception as e:
+                    logger.debug(
+                        f"Error while creating invocation for result: {repr(e)}"
+                    )
+                    detail = (
+                        f"Unexpected error occured while processing response. "
+                        f"This might have occured due to a bug in the client library:"
+                        f"{repr(e)}"
+                    )
+                    for library in libraries:
+                        result = {r for r in results if r.library == library}.pop()
+                        report = DiffReport(
+                            library_id=library,
+                            error_id=self._get_error_id(result),
+                            request_chain=[original_request],
+                            produced_request=diff_request,
+                            unique=len(libraries) > 1,
+                            detail=detail,
+                        )
+
+                        erroneous_libs.append(library)
+                        diff_reports[library].append(report)
+                    break
 
                 diff_method = original_request.method != diff_request.method
                 diff_path = path_only(original_request.path) != path_only(

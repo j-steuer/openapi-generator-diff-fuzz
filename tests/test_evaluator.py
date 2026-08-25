@@ -381,3 +381,29 @@ def test_semantically_equivalent_datetime(tmp_path, caplog):
     assert len(os.listdir(tmp_path)) == 1
 
     assert "Syntactically different but semantically equivalent date" in caplog.text
+
+
+def test_invalid_path(tmp_path, caplog):
+    """Invalid paths should also result in report."""
+    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
+    caplog.set_level(logging.DEBUG)
+
+    request1 = Request(
+        headers=CaseInsensitiveDict(),
+        body=b"",
+        method=HTTPMethod.GET,
+        path="/user/.",
+        query_parameters={},
+    )
+
+    request2 = deepcopy(request1)
+    request2.path = "/user/"
+
+    result = RequestResult("lib1", request2)
+
+    evaluator = DiffEvaluator()
+    evaluator.log_path = tmp_path
+    assert evaluator.eval({result}, request1) == {"lib1"}
+
+    assert len(os.listdir(tmp_path)) == 1
+    assert "Error while creating invocation for result" in caplog.text
