@@ -6,9 +6,11 @@ import runpy
 import sys
 import time
 import traceback
+from pathlib import Path
 
 SCRIPT_PATH = "/tmp/invocation.py"
 TRIGGER_PATH = "/tmp/run.trigger"
+OUT_PATH = "/tmp/out.trigger"
 POLL_INTERVAL = 0.05  # seconds
 
 logging.basicConfig(
@@ -30,6 +32,8 @@ def run_script():
         traceback.print_exc()
     else:
         logger.info("Script completed successfully")
+
+    Path(OUT_PATH).touch()
 
 
 def main():

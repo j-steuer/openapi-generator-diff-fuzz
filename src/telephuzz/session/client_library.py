@@ -339,7 +339,19 @@ class PythonCLC(ClientLibraryContainer):
 
         self.container.put_archive("/tmp", tar_stream)
 
-        return "touch /tmp/run.trigger"
+        input("continue")
+
+        return [
+            "sh",
+            "-c",
+            (
+                "rm -f /tmp/out.trigger; "
+                "touch /tmp/run.trigger; "
+                "timeout 60 sh -c 'while [ ! -e /tmp/out.trigger ]; "
+                "do sleep 0.05; done'; "
+                "rm -f /tmp/out.trigger"
+            ),
+        ]
 
     def get_image_by_hash(self, library_path: Path) -> Image | None:
         """Image creation for Python-based libraries."""
@@ -429,10 +441,6 @@ class CsharpCLC(ClientLibraryContainer):
 
                     WORKDIR {LIB_PATH}/lib
                     RUN dotnet build -c Debug
-
-                    RUN echo "=== OpenAPI DLL ===" \
-                    && find /app -name "Org.OpenAPITools.dll" -print \
-                    && test -f /app/lib/bin/Debug/net10.0/Org.OpenAPITools.dll
 
                     WORKDIR {LIB_PATH}
                     COPY csharp-worker {LIB_PATH}/csharp-worker
@@ -1594,39 +1602,168 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
         return content
 
 
-class SwaggerCodegenCsharpCLC(SwaggerCodegen, CsharpCLC):
+class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
     """Concrete client library class for Swagger Codegen C#."""
 
     id = "swagger-codegen:csharp"
     generator_script = "swagger-codegen-csharp.sh"
 
+    def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
+        """Generate models for JSON bodies."""
+        model_name = _get_model_name(invocation)
+        model_name_class = transform_case(model_name, Case.PASCAL)
+        import_code = None
+
+        eval_body = invocation.json_body
+
+        if isinstance(eval_body, list):
+            if not eval_body:
+                creation_code = f"new List<{model_name_class}>()"
+            else:
+                model_list = [
+                    (
+                        f"JsonConvert.DeserializeObject<{model_name_class}>("
+                        f'"""{json.dumps(body, separators=(",", ":"))}""")'
+                    )
+                    for body in eval_body
+                ]
+
+                creation_code = (
+                    f"new List<{model_name_class}>"
+                    + " { "
+                    + ", ".join(model_list)
+                    + " }"
+                )
+
+        elif isinstance(eval_body, dict):
+            creation_code = (
+                f"JsonConvert.DeserializeObject<{model_name_class}>("
+                f'"""{json.dumps(eval_body, separators=(",", ":"))}""")'
+            )
+
+        else:
+            raise NotImplementedError(
+                f"Unhandled body type {type(eval_body)}: {invocation.body!r}"
+            )
+
+        return ModelCode(
+            import_code=import_code,
+            creation_code=creation_code,
+        )
+
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
-        kwargs = ", ".join(json.dumps(v) for v in invocation.query_parameters.values())
+        def _generate_csharp_value(
+            value,
+            parameter_type: ParameterType,
+        ) -> str:
+            if parameter_type.schema_type == "array":
+                item_type = parameter_type.item_type
+                if item_type is None:
+                    raise ValueError("Array parameter has no item type")
+
+                values = ", ".join(json.dumps(item) for item in value)
+
+                return f"new List<string> {{ {values} }}"
+
+            return json.dumps(value)
+
+        query_parameters = invocation.query_parameters
+
+        kwargs = ""
+
+        if query_parameters:
+            kwargs = ", ".join(
+                f"{k}: {_generate_csharp_value(v, invocation.arg_types[k])}"
+                for k, v in query_parameters.items()
+            )
+
+        if invocation.send_body:
+            if invocation.json_body is not None:
+                if invocation.arg_types["requestBody"].schema_type != "object":
+                    model_code = self._generate_code_models(invocation)
+                    body_kwargs = model_code.creation_code
+                else:
+                    model_name = _get_model_name(invocation)
+                    model_name_class = transform_case(
+                        model_name,
+                        Case.PASCAL,
+                    )
+
+                    _body = json.dumps(invocation.json_body, separators=(",", ":"))
+                    body_kwargs = (
+                        f"JsonConvert.DeserializeObject<{model_name_class}>("
+                        f'"""{_body}""")'
+                    )
+
+            elif invocation.content_type == "application/octet-stream":
+                assert invocation.body is not None
+
+                cs_bytes = ", ".join(f"0x{b:02X}" for b in invocation.body)
+
+                body_kwargs = textwrap.dedent(f"""
+                    new FileParameter(
+                        new MemoryStream(
+                            new byte[] {{ {cs_bytes} }}
+                        ),
+                        "file.bin",
+                        "application/octet-stream"
+                    )
+                    """).strip()
+
+                body_kwargs = f"body: {body_kwargs}"
+
+            else:
+                body_kwargs = json.dumps(invocation.body)
+
+            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
+
+        api = (
+            get_config()
+            .tag_lookup(invocation.method.value, invocation.path)
+            .replace("-", "_")
+        )
+        api_class = transform_case(api, Case.PASCAL)
+
+        method_name = self._get_method_name(invocation)
+
         content = textwrap.dedent(f"""
-        #r "./lib/bin/Debug/net471/IO.Swagger.dll"
-        #r "./lib/bin/Debug/net471/RestSharp.dll"
+            #r "./lib/bin/Debug/net471/IO.Swagger.dll"
+            #r "./lib/bin/Debug/net471/Newtonsoft.Json.dll"
+            #r "./lib/bin/Debug/net471/RestSharp.dll"
+            #r "./lib/bin/Debug/net471/JsonSubTypes.dll"
 
-        using System;
-        using IO.Swagger.Api;
-        using IO.Swagger.Client;
+            using System;
+            using System.Collections.Generic;
+            using System.IO;
+            using System.Threading.Tasks;
 
-        var baseUrl = "{api_path}";
+            using Newtonsoft.Json;
 
-        var api = new DefaultApi(baseUrl);
+            using IO.Swagger;
+            using IO.Swagger.Api;
+            using IO.Swagger.Client;
+            using IO.Swagger.Model;
 
-        try
-        {{
-            var response = api.{self._get_method_name(invocation)}({kwargs});
+            var configuration = new Configuration
+            {{
+                BasePath = "{api_path}"
+            }};
 
-            Console.WriteLine("Response:");
-            Console.WriteLine(response);
-        }}
-        catch (ApiException ex)
-        {{
-            Console.WriteLine("API Error:");
-            Console.WriteLine(ex.Message);
-        }}
-        """).encode()
+            var api = new {api_class}Api(configuration);
+
+            try
+            {{
+                var response = await api.{method_name}Async({kwargs});
+
+                Console.WriteLine("Response:");
+                Console.WriteLine(response);
+            }}
+            catch (Exception ex)
+            {{
+                Console.WriteLine("Request failed:");
+                Console.WriteLine(ex);
+            }}
+            """).encode()
 
         return content
 
