@@ -5,6 +5,7 @@ spec/*.json
 local_testfiles
 logs/
 bug_scripts/
+reports/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
