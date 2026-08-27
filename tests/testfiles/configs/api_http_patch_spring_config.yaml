@@ -7,6 +7,8 @@ port-names:
 - AUTH_PORT
 - JACOCO_PORT
 nondeterministic_components:
-  - json_component: timestamp
-  - json_component: createdDateTime
-  - json_component: lastModifiedDateTime
+- json_component: timestamp
+- json_component: createdDateTime
+- json_component: lastModifiedDateTime
+jacoco-port: 6300
+jacoco-report: ./reports/coverage/api_http_patch_spring_config

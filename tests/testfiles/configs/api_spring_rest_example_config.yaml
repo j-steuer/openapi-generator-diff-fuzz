@@ -6,3 +6,5 @@ port-names:
 - HOST_PORT
 - AUTH_PORT
 - JACOCO_PORT
+jacoco-port: 6300
+jacoco-report: ./reports/coverage/api_spring_rest_example_config

@@ -1,23 +1,18 @@
-container-name: "api"
-compose-path: "/compose/docker-compose.yaml"
+container-name: api
+compose-path: /compose/docker-compose.yaml
 spec-path: tests/testfiles/openapi_test_fuzzing.json
-database-type: "H2"
-api-port-name: "HOST_PORT"
-port-names: ["HOST_PORT", "DB_PORT"]
+database-type: H2
+api-port-name: HOST_PORT
+port-names:
+- HOST_PORT
+- DB_PORT
 nondeterministic_components:
-  # Abstract the entire response body for all GET requests
-  - method: GET
-
-  # Abstract the entire response for a specific endpoint
-  - path: /login
-
-  # Abstract a JSON field
-  - method: POST
-    path: /login
-    json_component: access_token
-
-  # Abstract all bearer tokens in matching responses
-  - regex_component: 'Bearer\s+\S+'
-
-  # Abstract the "id" field in every response
-  - json_component: id
+- method: GET
+- path: /login
+- method: POST
+  path: /login
+  json_component: access_token
+- regex_component: Bearer\s+\S+
+- json_component: id
+jacoco-port: 6300
+jacoco-report: ./reports/coverage/api_config_ndt_components

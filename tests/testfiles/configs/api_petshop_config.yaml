@@ -7,7 +7,9 @@ port-names:
 - AUTH_PORT
 - JACOCO_PORT
 nondeterministic_components:
-  - regex_component: "ID: [a-f0-9]+"
-  - json_component: shipDate
-  - path: /user/login
-    regex_component: 'Logged in user session: [0-9]+'
+- regex_component: 'ID: [a-f0-9]+'
+- json_component: shipDate
+- path: /user/login
+  regex_component: 'Logged in user session: [0-9]+'
+jacoco-port: 6300
+jacoco-report: ./reports/coverage/api_petshop_config

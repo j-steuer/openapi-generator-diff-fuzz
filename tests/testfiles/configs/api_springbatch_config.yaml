@@ -7,5 +7,7 @@ port-names:
 - AUTH_PORT
 - JACOCO_PORT
 nondeterministic_components:
-  - json_component: timestamp
-  - json_component: _links
+- json_component: timestamp
+- json_component: _links
+jacoco-port: 6300
+jacoco-report: ./reports/coverage/api_springbatch_config

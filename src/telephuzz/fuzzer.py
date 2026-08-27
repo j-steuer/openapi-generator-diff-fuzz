@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import subprocess
 import tempfile
 from contextlib import ExitStack
 from datetime import datetime, timedelta
@@ -60,6 +61,9 @@ class TelePhuzz:
         self.timeout = timeout
 
         self.exit_stack = ExitStack()
+
+        self.jacoco_path = get_config().jacoco_path
+        self.jacoco_port = get_config().jacoco_port
 
     def _setup_request_generator(self) -> RequestGenerator:
         """Set up the request generator."""
@@ -155,6 +159,27 @@ class TelePhuzz:
 
         logger.info(f"Fuzzing loop finished, processed {num_requests} requests.")
 
+        # get jacoco coverage data if provided
+        if self.jacoco_path and self.jacoco_port:
+            os.makedirs(self.jacoco_path, exist_ok=True)
+
+            subprocess.run(
+                [
+                    "java",
+                    "-jar",
+                    "wfd/jacoco/jacococli.jar",
+                    "dump",
+                    "--address",
+                    "localhost",
+                    "--port",
+                    str(self.jacoco_port),
+                    "--destfile",
+                    str(Path(self.jacoco_path) / "jacoco.exec"),
+                ],
+                check=True,
+            )
+
+        # shut down API fuzzer
         if isinstance(self.request_generator, FuzzerBasedGenerator):
             self.exit_stack.close()
             compose_down(get_config().compose_path, project=SCHEMATHESIS_PROJECT)

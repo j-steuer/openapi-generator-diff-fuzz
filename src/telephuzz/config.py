@@ -39,6 +39,14 @@ class Config:
         self.api_port_name = api_config["api-port-name"]
         self.port_names = set(api_config["port-names"])
         self.port_names.add(self.api_port_name)
+        self.jacoco_path = api_config.get("jacoco-report")
+        self.jacoco_port = api_config.get("jacoco-port")
+
+        if (self.jacoco_port is None) ^ (self.jacoco_path is None):
+            raise ValueError(
+                "Either both or none of jacoco port "
+                "and jacoco path need to be provided."
+            )
 
         self.nondeterministic_components = [
             NondeterministicComponent(**item)

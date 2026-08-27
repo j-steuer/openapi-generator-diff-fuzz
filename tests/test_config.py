@@ -73,3 +73,12 @@ def test_tag_lookup() -> None:
     path = "/unknown"
     with pytest.raises(ValueError):
         config.tag_lookup(method, path)
+
+
+def test_jacoco() -> None:
+    """Test loading jacoco data."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    config = get_config()
+
+    assert config.jacoco_port == 6300
+    assert config.jacoco_path == "./reports/coverage/api_springbatch_config"

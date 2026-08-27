@@ -271,3 +271,16 @@ def test_send_petshop():
     with SessionManager("openapi-generator:python") as session_manager:
         results = session_manager.send(request)
         assert len(results) == 1
+
+
+def test_obtain_jacoco_coverage(tmp_path):
+    """Test that jacoco coverage is captured at the end of the fuzzing loop."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+
+    fuzzer = TelePhuzz("openapi-generator:python", tmp_path, timeout=2)
+    fuzzer.start_fuzzing_session()
+
+    # check that jacoco file was created
+    coverage_path = "./reports/coverage/api_petshop_config"
+    assert len(os.listdir(coverage_path)) == 1
+    assert os.listdir(coverage_path)[0] == "jacoco.exec"
