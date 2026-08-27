@@ -8,7 +8,6 @@ from pathlib import Path
 from pprint import pformat
 from typing import Any
 
-from telephuzz.config import get_config
 from telephuzz.evaluation.report import DiffReport
 from telephuzz.http_message import Request, path_only
 from telephuzz.invocation_data import InvocationData
@@ -23,9 +22,9 @@ logger = logging.getLogger(__name__)
 class DiffEvaluator:
     """Class for comparing components of the result and generating logs."""
 
-    def __init__(self):
+    def __init__(self, log_path: Path):
         """Initialize the DiffEvaluator."""
-        self.log_path = Path(get_config().log_path)
+        self.log_path = log_path
         # create log path if necessary
         os.makedirs(self.log_path, exist_ok=True)
 

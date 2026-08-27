@@ -31,7 +31,13 @@ SCHEMATHESIS_PROJECT = "schemathesis_project"
 class TelePhuzz:
     """The main fuzzer class."""
 
-    def __init__(self, request_generator: RequestGenerator | None = None) -> None:
+    def __init__(
+        self,
+        client: str,
+        log_path: str | Path,
+        timeout: int = 3600,
+        request_generator: RequestGenerator | None = None,
+    ) -> None:
         """Initialize a TelePhuzz instance.
 
         Args:
@@ -44,12 +50,14 @@ class TelePhuzz:
 
         """
         logging.info("Initializing fuzzing session.")
+        self.client = client
+
         self.processed_oas: Path | None = None
 
         self.request_generator = request_generator
-        self.evaluator = DiffEvaluator()
+        self.evaluator = DiffEvaluator(Path(log_path))
 
-        self.timeout = get_config().timeout
+        self.timeout = timeout
 
         self.exit_stack = ExitStack()
 
@@ -121,7 +129,7 @@ class TelePhuzz:
 
             num_requests = 1
 
-            with SessionManager() as session_manager:
+            with SessionManager(self.client) as session_manager:
                 # fuzz until no more request( chain)s available or timeout
                 logger.info("Beginning to fuzz clients.")
                 use_timeout = timeout is not None

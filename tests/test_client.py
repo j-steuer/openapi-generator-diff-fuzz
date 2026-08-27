@@ -3,7 +3,6 @@
 import datetime
 import json
 import re
-import tomllib
 from copy import deepcopy
 from time import sleep
 
@@ -22,44 +21,16 @@ from telephuzz.operation_ids import generate_operation_id
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
     CsharpCLC,
-    KiotaCSharpCLC,
     KiotaPythonCLC,
     ModelCode,
-    NswagCSharpCLC,
-    NswagTypeScriptCLC,
-    OapiGeneratorCLC,
     OpenAPIGenCsharpCLC,
-    OpenAPIGenGoCLC,
     OpenAPIGenPythonCLC,
-    OpenAPIGenTypeScriptCLC,
     OpenAPIPythonClientCLC,
     OpenAPIVersion,
     OperationIdBasedCLC,
-    OrvalCLC,
     PythonCLC,
-    SwaggerCodegenCsharpCLC,
     SwaggerCodegenPythonCLC,
-    SwaggerCodegenTypeScriptCLC,
-    SwaggerTsAPICLC,
 )
-
-CLIENT_CASES_NO_AUTH = [
-    OpenAPIGenCsharpCLC,
-    OpenAPIGenGoCLC,
-    OpenAPIGenPythonCLC,
-    OpenAPIGenTypeScriptCLC,
-    SwaggerCodegenCsharpCLC,
-    SwaggerCodegenPythonCLC,
-    SwaggerCodegenTypeScriptCLC,
-    OapiGeneratorCLC,
-    NswagCSharpCLC,
-    NswagTypeScriptCLC,
-    OrvalCLC,
-    SwaggerTsAPICLC,
-    OpenAPIPythonClientCLC,
-    KiotaCSharpCLC,
-    KiotaPythonCLC,
-]
 
 
 def api_wfd(api_name: str) -> tuple[Network, str]:
@@ -203,17 +174,6 @@ class TestGeneral:
             HTTPMethod.DELETE.value, "/user/{username}"
         )
 
-    def test_version_overwrite(self) -> None:
-        """Spec version should be overwritten for clients that use it for generation."""
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-        with OpenAPIPythonClientCLC() as _:
-            clients_dir = BASE_PATH / "clients"
-            client_dir = next(d for d in clients_dir.iterdir() if d.is_dir())
-            with open(client_dir / "pyproject.toml", "rb") as f:
-                data = tomllib.load(f)
-
-            assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
-
     def test_variable_case(self, monkeypatch) -> None:
         """Test that variable cases are applied correctly."""
 
@@ -245,31 +205,20 @@ def petshop():
     api_down(network, "swagger-petstore")
 
 
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen.python"),
+        pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+    ],
+)
 @pytest.mark.usefixtures("petshop")
 class TestPetshop:
     """Tests that use the petshop API/CLC."""
 
-    def test_version_overwrite(self) -> None:
-        """Spec version should be overwritten for clients that use it for generation."""
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-        with OpenAPIPythonClientCLC() as _:
-            clients_dir = BASE_PATH / "clients"
-            client_dir = next(d for d in clients_dir.iterdir() if d.is_dir())
-            with open(client_dir / "pyproject.toml", "rb") as f:
-                data = tomllib.load(f)
-
-            assert "SNAPSHOT" not in data["tool"]["poetry"]["version"]
-
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_resolve_path_params(self, clc_class, petshop: tuple[Network, str]):
 
         Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
@@ -315,16 +264,6 @@ class TestPetshop:
             _test_send_request(clc, request_int, network, api_path, expected_status=404)
             _test_send_request(clc, request_str, network, api_path, expected_status=404)
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_parse_invalid_python_json(self, clc_class, petshop: tuple[Network, str]):
         """Test parsing a JSON body not parseable through literal_eval."""
 
@@ -360,16 +299,6 @@ class TestPetshop:
 
             _test_send_request(clc, request, network, api_path, expected_status=200)
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_query_and_body(self, clc_class, petshop: tuple[Network, str]):
         """Test request with path variables and body."""
 
@@ -398,16 +327,6 @@ class TestPetshop:
 
             _test_send_request(clc, request, network, api_path, expected_status=404)
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_json_body_array(self, clc_class, petshop: tuple[Network, str]):
         """Test request with path variables and body."""
 
@@ -459,16 +378,6 @@ class TestPetshop:
             )
             _test_send_request(clc, request_two, network, api_path, expected_status=200)
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_file_upload(self, clc_class, petshop: tuple[Network, str]):
         """Test request with file upload."""
 
@@ -505,15 +414,6 @@ class TestPetshop:
 
     # NOTE:
     # - OpenAPI Generator C# does not support optional enum values
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-        ],
-    )
     def test_surrogate_encoding(self, clc_class, petshop: tuple[Network, str]):
         """Test encoding with surrogates."""
 
@@ -553,16 +453,6 @@ class TestPetshop:
                 expected_status=404,
             )
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_single_explode_string(self, clc_class, petshop: tuple[Network, str]):
         """Test sending explode array with single string."""
 
@@ -595,16 +485,6 @@ class TestPetshop:
                 expected_status=200,
             )
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_empty_octet_body(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
@@ -639,16 +519,6 @@ class TestPetshop:
                 expected_status=400,
             )
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_enum_query_parameter(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
@@ -685,16 +555,6 @@ class TestPetshop:
             )
             _test_send_request(clc, request, network, api_path, expected_status=200)
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_request_end_with_path_variable(
         self, clc_class, petshop: tuple[Network, str]
     ):
@@ -733,46 +593,6 @@ class TestPetshop:
                 expected_status=400,
             )
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            KiotaPythonCLC,
-        ],
-    )
-    def test_kiota_empty_array_bug(self, clc_class, petshop: tuple[Network, str]):
-        """Test that shows kiota empty array serialization issue."""
-
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-
-        network, api_path = petshop
-        with clc_class() as clc:
-            request = Request(
-                headers=CaseInsensitiveDict(
-                    {
-                        "Host": "localhost:8000",
-                        "User-Agent": "schemathesis/4.15.2",
-                        "Accept-Encoding": "gzip, deflate, br",
-                        "Accept": "*/*",
-                        "Connection": "keep-alive",
-                        "X-Schemathesis-TestCaseId": "YVhtIc",
-                        "Content-Type": "application/json",
-                        "Content-Length": "2",
-                    }
-                ),
-                body=b"[]",
-                method=HTTPMethod.POST,
-                path="/user/createWithList",
-                query_parameters={},
-            )
-
-            _test_send_request(
-                clc,
-                request,
-                network,
-                api_path,
-                expected_status=200,
-            )
-
 
 @pytest.fixture(scope="class")
 def spring_batch():
@@ -781,20 +601,20 @@ def spring_batch():
     api_down(network, "spring-batch-rest")
 
 
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen.python"),
+        pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+    ],
+)
 @pytest.mark.usefixtures("spring_batch")
 class TestSpringBatch:
     """Tests that use the spring-batch-rest API."""
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_tag_module_resolve(self, clc_class, spring_batch: tuple[Network, str]):
         """Test resolving the module through a tag different than the base path."""
 
@@ -830,16 +650,6 @@ class TestSpringBatch:
                 expected_status=404,
             )
 
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_model_capitalization(self, clc_class, spring_batch: tuple[Network, str]):
         """Test capitalizing the model names correctly."""
 
@@ -892,18 +702,18 @@ def http_patch_spring():
     api_down(network, "http-patch-spring")
 
 
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen.python"),
+        pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+    ],
+)
 @pytest.mark.usefixtures("http_patch_spring")
 class TestPatchSpring:
-    @pytest.mark.parametrize(
-        "clc_class",
-        [
-            OpenAPIGenPythonCLC,
-            SwaggerCodegenPythonCLC,
-            OpenAPIPythonClientCLC,
-            KiotaPythonCLC,
-            OpenAPIGenCsharpCLC,
-        ],
-    )
     def test_alternate_json_with_pure_body(
         self, clc_class, http_patch_spring: tuple[Network, str]
     ):

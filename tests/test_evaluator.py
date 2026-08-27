@@ -28,9 +28,9 @@ def mock_invocation_data(monkeypatch):
     return invocation_data
 
 
-def test_same_request_responses(mock_invocation_data):
+def test_same_request_responses(mock_invocation_data, tmp_path):
     """Test that DiffFuzzer returns an empty set if no diffs."""
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -48,9 +48,9 @@ def test_same_request_responses(mock_invocation_data):
     assert len(libs) == 0
 
 
-def test_same_diff_request(mock_invocation_data):
+def test_same_diff_request(mock_invocation_data, tmp_path):
     """Test that DiffFuzzer recognizes a diff in requests and returns the library."""
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -71,10 +71,10 @@ def test_same_diff_request(mock_invocation_data):
     assert "Lib2" in libs
 
 
-def test_logging(mock_invocation_data):
+def test_logging(mock_invocation_data, tmp_path):
     """Test that differences are logged."""
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
 
     request = Request(
         headers=CaseInsensitiveDict({"test_header": 123}),
@@ -94,7 +94,7 @@ def test_logging(mock_invocation_data):
     assert len(os.listdir(evaluator.log_path)) == 1
 
 
-def test_no_custom_header_diff(basic_request, mock_invocation_data, caplog):
+def test_no_custom_header_diff(basic_request, mock_invocation_data, caplog, tmp_path):
     """Custom x-headers should not factor in evaluation."""
     caplog.set_level("DEBUG")
     request1 = deepcopy(basic_request)
@@ -107,7 +107,7 @@ def test_no_custom_header_diff(basic_request, mock_invocation_data, caplog):
     del request3.headers["X-Test"]
     request3.headers["X-Test2"] = "Test2"
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result1 = RequestResult("lib1", request1)
     result2 = RequestResult("lib2", request2)
     result3 = RequestResult("lib3", request3)
@@ -116,7 +116,7 @@ def test_no_custom_header_diff(basic_request, mock_invocation_data, caplog):
     assert "Different headers" in caplog.text
 
 
-def test_no_header_request_comparison(basic_request, mock_invocation_data):
+def test_no_header_request_comparison(basic_request, mock_invocation_data, tmp_path):
     """Headers should generally not be evaluated for requests."""
     request1 = deepcopy(basic_request)
     request1.headers["TestHeader"] = "Tag1"
@@ -124,14 +124,14 @@ def test_no_header_request_comparison(basic_request, mock_invocation_data):
     request2 = deepcopy(basic_request)
     request2.headers["TestHeader"] = "Tag2"
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result1 = RequestResult("lib1", request1)
     result2 = RequestResult("lib2", request2)
     result3 = RequestResult("lib3", basic_request)
     assert not evaluator.eval({result1, result2, result3}, request1)
 
 
-def test_content_header_diff(basic_request, mock_invocation_data):
+def test_content_header_diff(basic_request, mock_invocation_data, tmp_path):
     """If content header in both expected and diff and different, log diff."""
     request1 = deepcopy(basic_request)
     request1.headers["Content-Type"] = "application/json"
@@ -143,7 +143,7 @@ def test_content_header_diff(basic_request, mock_invocation_data):
     request3 = deepcopy(basic_request)
     request3.headers["Content-Type"] = "application/xml"
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result1 = RequestResult("lib1", request1)
     result2 = RequestResult("lib2", request2)
     result3 = RequestResult("lib3", request1)
@@ -153,7 +153,7 @@ def test_content_header_diff(basic_request, mock_invocation_data):
     assert evaluator.eval({result1, result2, result3}, request1) == {"lib3"}
 
 
-def test_normalize_query(basic_request, mock_invocation_data):
+def test_normalize_query(basic_request, mock_invocation_data, tmp_path):
     """Order of query parameters should not matter for evaluation."""
     original_request = deepcopy(basic_request)
     original_request.path = "/greet?age=0&name="
@@ -161,13 +161,13 @@ def test_normalize_query(basic_request, mock_invocation_data):
     eval_request = deepcopy(basic_request)
     eval_request.path = "/greet?name=&age=0"
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
     assert not evaluator.eval({result}, original_request)
 
 
-def test_normalize_json_body():
+def test_normalize_json_body(tmp_path):
     """JSON bodies should be compared as such."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
@@ -193,13 +193,13 @@ def test_normalize_json_body():
     eval_request = deepcopy(original_request)
     eval_request.body = b'{"name": "", "age": 4800}'
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
     assert not evaluator.eval({result}, original_request)
 
 
-def test_json_value_diff():
+def test_json_value_diff(tmp_path):
     """Test detail when value of JSON element differs."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
@@ -225,7 +225,7 @@ def test_json_value_diff():
     eval_request = deepcopy(original_request)
     eval_request.body = b'{"name": "", "age": 4801}'
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
     with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
@@ -239,7 +239,7 @@ def test_json_value_diff():
         )
 
 
-def test_json_element_diff():
+def test_json_element_diff(tmp_path):
     """Test detail when element only exists in original."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
 
@@ -265,7 +265,7 @@ def test_json_element_diff():
     eval_request = deepcopy(original_request)
     eval_request.body = b'{"name": ""}'
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
     with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
@@ -277,7 +277,7 @@ def test_json_element_diff():
         assert "Element 'age' only exists in original body" in kwargs["detail"]
 
 
-def test_ignore_extra_params():
+def test_ignore_extra_params(tmp_path):
     """Test original request containing superfluous body elements."""
     Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
     original_request = Request(
@@ -317,16 +317,16 @@ def test_ignore_extra_params():
         query_parameters={},
     )
 
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
     assert not evaluator.eval({result}, original_request)
 
 
-def test_request_none_report(basic_request, mock_invocation_data):
+def test_request_none_report(basic_request, mock_invocation_data, tmp_path):
     """Report should show if request was not generated."""
     original_request = basic_request
-    evaluator = DiffEvaluator()
+    evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", None)
 
     assert evaluator.eval({result}, original_request) == set()
@@ -366,8 +366,7 @@ def test_semantically_equivalent_datetime(tmp_path, caplog):
         b'"complete":false}'
     )
 
-    evaluator = DiffEvaluator()
-    evaluator.log_path = tmp_path
+    evaluator = DiffEvaluator(tmp_path)
 
     result = RequestResult("lib1", request2)
     assert not evaluator.eval({result}, request1)
@@ -401,8 +400,7 @@ def test_capture_invocation_error(tmp_path, caplog):
 
     result = RequestResult("lib1", request2)
 
-    evaluator = DiffEvaluator()
-    evaluator.log_path = tmp_path
+    evaluator = DiffEvaluator(tmp_path)
     assert evaluator.eval({result}, request1) == {"lib1"}
 
     assert len(os.listdir(tmp_path)) == 1

@@ -18,11 +18,10 @@ class Config:
     """Class for reading the config."""
 
     API_CONFIG_PATH = BASE_PATH / "api_config.yaml"
-    CLIENT_CONFIG_PATH = BASE_PATH / "client_config.yaml"
 
     def __init__(self):
         """Parse config attributes."""
-        api_config, client_config = self._get_config()
+        api_config = self._get_config()
 
         assert isinstance(api_config, dict)
         self.api_container_name = api_config["container-name"]
@@ -46,28 +45,18 @@ class Config:
             for item in api_config.get("nondeterministic_components", [])
         ]
 
-        self.targets = client_config["targets"]
-
-        fuzzing_config = client_config["fuzzing"]
-        assert isinstance(fuzzing_config, dict)
-        self.log_path = fuzzing_config["log-path"]
-        self.timeout = fuzzing_config["timeout"]
-
         self.operation_lookup = build_operation_lookup(self.spec)
 
-    def _get_config(self) -> tuple[dict, dict]:
+    def _get_config(self) -> dict:
         """Obtain the config as a dict."""
-        if not self.CLIENT_CONFIG_PATH.exists():
-            raise ValueError("No client config provided.")
         if not self.API_CONFIG_PATH.exists():
             raise ValueError("No API config provided.")
 
         with open(self.API_CONFIG_PATH) as api_stream:
-            with open(self.CLIENT_CONFIG_PATH) as client_stream:
-                try:
-                    return yaml.safe_load(api_stream), yaml.safe_load(client_stream)
-                except yaml.YAMLError as e:
-                    raise ValueError(f"Invalid YAML in config: {e}") from e
+            try:
+                return yaml.safe_load(api_stream)
+            except yaml.YAMLError as e:
+                raise ValueError(f"Invalid YAML in config: {e}") from e
 
     def operation_id_lookup(self, method: str, path: str) -> str:
         """Get the operation ID for a given method and path."""

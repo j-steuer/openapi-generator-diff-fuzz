@@ -2,8 +2,6 @@
 
 import json
 import os
-import shutil
-import tempfile
 import textwrap
 from json import JSONDecodeError
 from pathlib import Path
@@ -23,14 +21,10 @@ from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.invocation_data import InvocationData
 from telephuzz.session.client_library import (
     ClientLibraryContainer,
-    KiotaPythonCLC,
     ModelCode,
-    OpenAPIGenPythonCLC,
-    OpenAPIPythonClientCLC,
     OpenAPIVersion,
     OperationIdBasedCLC,
     PythonCLC,
-    SwaggerCodegenPythonCLC,
 )
 from telephuzz.session.session import SessionManager
 
@@ -44,10 +38,9 @@ TEST_OAS = TESTFILES / "openapi_test_fuzzing.json"
 API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_loop_config.yaml"
 CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_config.yaml"
 
-CLIENT_FAULTY_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_faulty_config.yaml"
 
-LOG_PATH = Path("/tmp/logs/telephuzz")
-
+BASIC_CLIENT = "basicclient"
+BASIC_FAULTY_CLIENT = "basicfaultyclient"
 BASIC_CLIENT_REQUEST = Request(
     headers=CaseInsensitiveDict({"Test": ["test"]}),
     body=None,
@@ -80,13 +73,6 @@ def _init_and_send(clc: ClientLibraryContainer, api: str, auth: bool = False):
     clc.send(InvocationData(request), api)
     sleep(1)
     assert "Hello Alice, you are 30 years old!" in clc.container.logs().decode()
-
-
-@pytest.fixture(autouse=True, scope="module")
-def setup_loop():
-    """Clear log directory."""
-    if LOG_PATH.exists():
-        shutil.rmtree(LOG_PATH)
 
 
 class BasicClient(PythonCLC, OperationIdBasedCLC):
@@ -156,92 +142,13 @@ def test_faulty_client(api: tuple[Network, str]):
             _init_and_send(basic_client, api_path)
 
 
-def test_session_manager_setup(client_generator):
-    """Test setting up the session manager without db."""
-
-    Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
-
-    classes = client_generator(BasicClient)
-
-    with SessionManager() as session_manager:
-        assert session_manager.database_type is None
-
-        assert session_manager.mitmproxy.listen_port == 8080
-
-        assert classes[0].id in session_manager.sessions
-        assert classes[1].id in session_manager.sessions
-        assert classes[2].id in session_manager.sessions
-        for session in session_manager.sessions.values():
-            assert session.client.container is not None
-            session.client.container.reload()
-            assert session.client.container.status == "running"
-
-        assert len(session_manager.networks) == 3
-        for network in session_manager.networks:
-            network.reload()
-            assert len(network.containers) == 2
-            assert session_manager.mitmproxy.container in network.containers
-
-        assert "docker-compose-loop.yaml" in session_manager.api_docker_compose_path
-
-        # assert mitmproxy and target api is up by sending manual request
-        session1 = session_manager.sessions[classes[0].id]
-
-        api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
-        params = {"name": "Alice", "age": 30}
-        text = requests.get(
-            f"{api_url}/api{session1.id}:8000/greet",
-            params=params,
-        ).text
-        assert "OK" == text, f"Message was not routed correctly: {text}"
-
-        # try to send a request through the send method
-
-        request = Request(
-            headers=CaseInsensitiveDict(
-                {
-                    "Host": "localhost:8000",
-                    "User-Agent": "schemathesis/4.15.2",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept": "*/*",
-                    "Connection": "keep-alive",
-                    "X-Schemathesis-TestCaseId": "3ATnwX",
-                }
-            ),
-            body=b"",
-            method=HTTPMethod.GET,
-            path="/greet?age=0&name=",
-            query_parameters={"age": "0", "name": ""},
-        )
-
-        # attempt to send with single client
-        api_url = api_url.replace("localhost", "mitmproxy")
-        api_url += f"/api{session1.id}:8000"
-        client1 = session1.client
-        invocation = InvocationData(request)
-        client1.send(invocation, api_url)
-
-        # attempt to send with session manager
-        results = session_manager.send(request)
-        assert len(results) == 3
-
-
-def test_session_manager_faulty(client_generator):
+def test_session_manager_faulty():
     """Test setting up session manager with faulty client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
-    client_generator(BasicClient, amount=2)
-
-    with SessionManager() as session_manager:
-        assert len(session_manager.sessions) == 3
-        faulty_clients = [
-            s
-            for s in session_manager.sessions.values()
-            if isinstance(s.client, BasicFaultyClient)
-        ]
-        assert len(faulty_clients) == 1
+    with SessionManager(BASIC_FAULTY_CLIENT) as session_manager:
+        assert len(session_manager.sessions) == 1
+        assert BASIC_FAULTY_CLIENT in session_manager.sessions
 
         # try to send a request and check for faulty response
         request = Request(
@@ -265,14 +172,11 @@ def test_session_manager_faulty(client_generator):
         assert any("Faulty" in repr(r) for r in results), results
 
 
-def test_diff_eval(client_generator):
+def test_diff_eval(tmp_path):
     """Test capturing and evaluating a result."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    client_generator(BasicClient)
-
-    with SessionManager() as session_manager:
+    with SessionManager(BASIC_CLIENT) as session_manager:
         request = Request(
             headers=CaseInsensitiveDict(
                 {
@@ -292,22 +196,19 @@ def test_diff_eval(client_generator):
 
         # attempt to send with session manager
         results = session_manager.send(request)
-        assert len(results) == 3
+        assert len(results) == 1
 
-        evaluator = DiffEvaluator()
+        evaluator = DiffEvaluator(tmp_path)
         evaluator.eval(results, request)
 
-        assert len(os.listdir(LOG_PATH)) == 0
+        assert len(os.listdir(evaluator.log_path)) == 0
 
 
-def test_mitmproxy_result_dir(client_generator):
+def test_mitmproxy_result_dir():
     """Test obtaining a result from mitmproxy."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    client_generator(BasicClient)
-
-    with SessionManager() as session_manager:
+    with SessionManager(BASIC_CLIENT) as session_manager:
         api_url = f"http://localhost:{session_manager.mitmproxy.listen_port}"
         params = {"name": "Alice", "age": 30}
         assert (
@@ -325,40 +226,29 @@ def test_mitmproxy_result_dir(client_generator):
         Request.from_json(result_file)
 
 
-def test_loop_same_library(client_generator):
+def test_loop_same_library(tmp_path):
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_CONFIG_PATH
 
-    client_generator(BasicClient)
-
-    fuzzer = TelePhuzz()
+    fuzzer = TelePhuzz(BASIC_CLIENT, tmp_path, timeout=10)
     fuzzer.start_fuzzing_session()
 
-    assert len(os.listdir(LOG_PATH)) == 0
+    assert len(os.listdir(tmp_path)) == 0
 
 
-def test_loop_faulty_library(client_generator):
+def test_loop_faulty_library(tmp_path):
     """Test the fuzzing loop with two instances of the basic client."""
     Config.API_CONFIG_PATH = API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = CLIENT_FAULTY_CONFIG_PATH
 
-    client_generator(BasicClient, amount=2)
-
-    fuzzer = TelePhuzz()
+    fuzzer = TelePhuzz(BASIC_FAULTY_CLIENT, tmp_path, timeout=10)
     fuzzer.start_fuzzing_session()
 
-    assert len(os.listdir(LOG_PATH)) > 0
-    assert not any("basicclient" in f for f in os.listdir(LOG_PATH))
-    assert all("basicfaultyclient" in f for f in os.listdir(LOG_PATH))
+    assert len(os.listdir(tmp_path)) > 0
 
 
-def test_send_petshop(client_generator):
+def test_send_petshop():
 
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_petshop_config.yaml"
-
-    client_generator(OpenAPIGenPythonCLC)
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -378,43 +268,6 @@ def test_send_petshop(client_generator):
         query_parameters={},
     )
 
-    with SessionManager() as session_manager:
+    with SessionManager("openapi-generator:python") as session_manager:
         results = session_manager.send(request)
-        assert len(results) == 3
-
-
-@pytest.mark.parametrize(
-    "client_class",
-    [
-        OpenAPIGenPythonCLC,
-        SwaggerCodegenPythonCLC,
-        OpenAPIPythonClientCLC,
-        KiotaPythonCLC,
-    ],
-)
-def test_loop_petshop(client_class: type, client_generator):
-    """Tets the fuzzing loop with the petshop API and six identical clients."""
-
-    classes = client_generator(client_class)
-
-    with tempfile.NamedTemporaryFile("w+") as client_config:
-        template_config = TEST_CONFIG_BASE_PATH / "client_template_config.yaml"
-        with open(template_config, "r") as template:
-            template_data = template.read()
-
-        client_config.write(
-            template_data.format(
-                classes[0].id,  # type: ignore
-                classes[1].id,  # type: ignore
-                classes[2].id,  # type: ignore
-            )
-        )
-        client_config.seek(0)
-
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-        Config.CLIENT_CONFIG_PATH = Path(client_config.name)
-
-        fuzzer = TelePhuzz()
-        fuzzer.start_fuzzing_session()
-
-        assert len(os.listdir(LOG_PATH)) == 0
+        assert len(results) == 1

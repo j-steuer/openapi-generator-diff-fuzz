@@ -28,7 +28,6 @@ from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 TESTFILES_PATH = BASE_PATH / "tests" / "testfiles"
 TEST_CONFIG_BASE_PATH = TESTFILES_PATH / "configs"
 TEST_API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
-TEST_CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_config.yaml"
 
 disable_loggers = ["urllib3.connectionpool", "docker.utils.config"]
 
@@ -255,14 +254,13 @@ def setup():
     # clear logs
     shutil.rmtree("/tmp/logs/telephuzz", ignore_errors=True)
 
-    original = Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH
+    original = Config.API_CONFIG_PATH
     Config.API_CONFIG_PATH = TEST_API_CONFIG_PATH
-    Config.CLIENT_CONFIG_PATH = TEST_CLIENT_CONFIG_PATH
 
     # make config regenerate for each tes
     cfg._config = None
     yield
-    Config.API_CONFIG_PATH, Config.CLIENT_CONFIG_PATH = original
+    Config.API_CONFIG_PATH = original
 
 
 @pytest.fixture
@@ -317,7 +315,7 @@ def api():
         image="api_fixture",
         detach=True,
         ports={
-            "8000/tcp": 8000,
+            "8000/tcp": 8011,
         },
         name="api",
         remove=True,
@@ -327,7 +325,7 @@ def api():
     # wait for startup
     for _ in range(30):
         try:
-            r = requests.get("http://localhost:8000/openapi.json")
+            r = requests.get("http://localhost:8011/openapi.json")
             if r.status_code == 200:
                 break
         except requests.exceptions.ConnectionError:
@@ -336,8 +334,15 @@ def api():
 
     yield network, "http://api:8000"
 
-    container.kill()
-    network.remove()
+    try:
+        container.kill()
+    except Exception:
+        pass
+
+    try:
+        network.remove()
+    except Exception:
+        pass
 
 
 @pytest.fixture(scope="session")

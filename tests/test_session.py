@@ -16,7 +16,6 @@ from telephuzz.session.session import SessionManager
 def test_dot_path_variable():
     """Test correct translation of dot path variable."""
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
-    Config.CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_python_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(),
@@ -26,7 +25,7 @@ def test_dot_path_variable():
         query_parameters={},
     )
 
-    with SessionManager() as session_manager:
+    with SessionManager("openapi-generator:python") as session_manager:
         session_manager.send(request)
         results = session_manager.send(request)
 

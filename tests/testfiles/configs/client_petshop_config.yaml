@@ -1,9 +1,0 @@
-targets:
-  - id: openapigenpythonclc1
-  - id: openapigenpythonclc2
-  - id: openapigenpythonclc3
-    
-
-fuzzing:
-  log-path: "/tmp/logs/telephuzz"
-  timeout: 180

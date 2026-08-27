@@ -1,7 +1,0 @@
-targets:
-  - id: openapi-generator:python
-  - id: swagger-codegen:python
-
-fuzzing:
-  log-path: "/tmp/logs/telephuzz"
-  timeout: 3600

@@ -1,8 +1,0 @@
-targets:
-  - id: basicclient1
-  - id: basicclient2
-  - id: basicclient3
-
-fuzzing:
-  log-path: "/tmp/logs/telephuzz"
-  timeout: 10

@@ -36,13 +36,6 @@ def test_get_config():
     for c in assert_components:
         assert c in ndt_components
 
-    assert len(config.targets) == 2
-    assert {"id": "openapi-generator:python"} in config.targets
-    assert {"id": "swagger-codegen:python"} in config.targets
-
-    assert config.log_path == "/tmp/logs/telephuzz"
-    assert config.timeout == 3600
-
     cfg._config = None
 
 

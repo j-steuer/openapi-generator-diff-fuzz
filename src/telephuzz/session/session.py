@@ -93,19 +93,17 @@ class SessionManager:
 
     def __init__(
         self,
-        db_name: str = "db",
+        client: str,
     ):
         """Initialize the session manager."""
         config = get_config()
+        self.client = client
         self.api_docker_compose_path = config.compose_path
         self.api_name = config.api_container_name
 
-        self.targets = config.targets
+        self.targets = [client]
 
         self.sessions: dict[LibraryId, Session] = dict()
-
-        self.db_name = db_name
-        self.database_type = config.database_type
 
         self.stack = ExitStack()
         self.networks: list[Network] = []
@@ -130,7 +128,7 @@ class SessionManager:
         # start up client
         logger.info("Starting up client libraries")
         for target in self.targets:
-            library_id = target["id"]
+            library_id = target
             logger.info(f"Starting up {library_id}")
             lib_class: type = ClientLibraryContainer.from_id(library_id)
             client_container: ClientLibraryContainer = self.stack.enter_context(
