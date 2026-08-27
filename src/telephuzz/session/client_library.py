@@ -339,8 +339,6 @@ class PythonCLC(ClientLibraryContainer):
 
         self.container.put_archive("/tmp", tar_stream)
 
-        input("continue")
-
         return [
             "sh",
             "-c",
