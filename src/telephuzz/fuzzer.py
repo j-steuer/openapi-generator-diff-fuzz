@@ -163,21 +163,24 @@ class TelePhuzz:
         if self.jacoco_path and self.jacoco_port:
             os.makedirs(self.jacoco_path, exist_ok=True)
 
-            subprocess.run(
-                [
-                    "java",
-                    "-jar",
-                    "wfd/jacoco/jacococli.jar",
-                    "dump",
-                    "--address",
-                    "localhost",
-                    "--port",
-                    str(self.jacoco_port),
-                    "--destfile",
-                    str(Path(self.jacoco_path) / "jacoco.exec"),
-                ],
-                check=True,
-            )
+            try:
+                subprocess.run(
+                    [
+                        "java",
+                        "-jar",
+                        "wfd/jacoco/jacococli.jar",
+                        "dump",
+                        "--address",
+                        "localhost",
+                        "--port",
+                        str(self.jacoco_port),
+                        "--destfile",
+                        str(Path(self.jacoco_path) / "jacoco.exec"),
+                    ],
+                    check=True,
+                )
+            except Exception as e:
+                logger.warning(f"Could not extract jacoco coverage: {repr(e)}")
 
         # shut down API fuzzer
         if isinstance(self.request_generator, FuzzerBasedGenerator):
