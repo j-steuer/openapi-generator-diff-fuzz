@@ -1,4 +1,3 @@
 [submodule "wfd"]
 	path = wfd
-	url = https://github.com/WebFuzzing/Dataset
-	ignore = dirty
+	url = j-steuer/TelePhuzz_Dataset
