@@ -27,10 +27,12 @@ def reset_docker():
 
 
 @pytest.mark.parametrize("config", CONFIGS)
-def test_openapi_generator_python(config) -> None:
+def test_openapi_generator_python(config: Path) -> None:
     Config.API_CONFIG_PATH = config
 
+    report_suffix = config.name[: config.name.find(".yaml")]
     fuzzer = TelePhuzz(
-        "openapi-generator:python", REPORT_PATH / f"openapi-generator-python_{config}"
+        "openapi-generator:python",
+        REPORT_PATH / f"openapi-generator-python_{report_suffix}",
     )
     fuzzer.start_fuzzing_session()
