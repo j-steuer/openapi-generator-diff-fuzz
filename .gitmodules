@@ -1,3 +1,4 @@
 [submodule "wfd"]
 	path = wfd
 	url = https://github.com/WebFuzzing/Dataset
+	ignore = dirty
