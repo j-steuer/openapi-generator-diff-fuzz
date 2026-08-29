@@ -37,8 +37,9 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
     # set version to simple constant to avoid format issues if used by a generator
     info = spec.get("info")
     if info is not None:
-        if "version" in info:
-            info["version"] = DEFAULT_VERSION
+        if "title" not in info:
+            info["title"] = "Test Title"
+        info["version"] = DEFAULT_VERSION
 
     # set additional properties to false in JSON definitions
     components = spec.get("components")

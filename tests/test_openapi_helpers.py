@@ -182,7 +182,7 @@ def test_find_args():
 
 def test_find_args_body_case():
     """Body case should be preserved."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
     assert args["requestBody"] == ParameterType("JobConfig", None, False)
@@ -333,3 +333,12 @@ def test_build_operation_lookup():
     assert pet_lookup["operation_id"] == generate_operation_id("POST", "/pet")
     assert pet_lookup["tag"] == "pet"
     assert lookup[("get", "/pet/{petId}")]["path"] == "/pet/{petId}"
+
+
+def test_create_info():
+    """Create info if not provided."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_bibliothek_config.yaml"
+
+    config = get_config()
+    assert config.spec["info"]["title"] == "Test Title"
+    assert config.spec["info"]["version"] == "0.0.0"
