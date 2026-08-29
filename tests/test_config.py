@@ -41,7 +41,7 @@ def test_get_config():
 
 def test_operation_id_lookup() -> None:
     """Test the operation_id_lookup method."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
     config = get_config()
 
     # Test a known operation

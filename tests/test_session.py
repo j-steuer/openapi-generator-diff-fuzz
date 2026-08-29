@@ -15,7 +15,7 @@ from telephuzz.session.session import SessionManager
 )
 def test_dot_path_variable():
     """Test correct translation of dot path variable."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(),

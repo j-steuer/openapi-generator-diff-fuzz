@@ -15,7 +15,7 @@ from telephuzz.openapi_helpers import ParameterType
 def test_strip_path_variables():
     """Query parameters without path vars should not contain path vars"""
 
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -42,7 +42,7 @@ def test_strip_path_variables():
 
 def test_cast_strings_to_array():
     """String parameters should be cast to array if type is array."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
     request = Request(
         headers=CaseInsensitiveDict(
             {
@@ -67,7 +67,7 @@ def test_cast_strings_to_array():
 
 def test_infer_content_type():
     """Invocation should infer content type even if not provided."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
     request_with_ctype = Request(
         headers=CaseInsensitiveDict(
             {
@@ -112,7 +112,7 @@ def test_infer_content_type():
 
 def test_arg_types():
     """Test obtaining parameter and body types from invocation."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
     request = Request(
         headers=CaseInsensitiveDict(
             {
@@ -154,7 +154,7 @@ def test_arg_types():
 
 def test_parse_json_body():
     """Test parsing a JSON body."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
     body_request = Request(
         headers=CaseInsensitiveDict(
             {
@@ -193,36 +193,9 @@ def test_parse_json_body():
     assert invocation.json_body["id"] == 1
 
 
-def test_strip_unknown_body_properties():
-    """Test that unknown JSON body properties are removed based on schema."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config.yaml"
-
-    request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "TEST123",
-                "Content-Type": "application/json",
-                "Content-Length": "100",
-            }
-        ),
-        body=b'{"name": "Alice", "age": 30, "extra": "remove", "none": null}',
-        method=HTTPMethod.POST,
-        path="/user",
-        query_parameters={},
-    )
-
-    invocation = InvocationData(request)
-    assert invocation.json_body == {"name": "Alice", "age": 30}
-
-
 def test_parse_surrogate_encoding():
     """Test request that used to throw an encoding error due to surrogates."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -254,7 +227,7 @@ def test_parse_surrogate_encoding():
 
 def test_parse_array():
     """Array JSON should be parsable."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -309,7 +282,7 @@ def test_parse_array():
 
 def test_cast_query_parameter_integers():
     """Test casting integers"""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -340,7 +313,7 @@ def test_cast_query_parameter_integers():
 
 def test_no_sending_json_body_when_empty() -> None:
     """JSON body should not be sent if it is empty."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -365,7 +338,7 @@ def test_no_sending_json_body_when_empty() -> None:
 
 def test_send_non_json_body_when_empty() -> None:
     """Other bodies should be sent when empty."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -384,7 +357,7 @@ def test_send_non_json_body_when_empty() -> None:
 
 
 def test_invocation_does_not_modify_path_parameters() -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
 
     request = Request(
         headers=CaseInsensitiveDict(),
@@ -400,3 +373,21 @@ def test_invocation_does_not_modify_path_parameters() -> None:
 
     assert request == before
     assert request.query_parameters == {"petId": "0"}
+
+
+def test_invocation_does_not_trim_object_schema() -> None:
+    """Object JSN schema should not be trimmed and parsed correctly."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict({"content-type": "application/merge-patch+json"}),
+        body=b'{"test": "test"}',
+        method=HTTPMethod.PATCH,
+        path="/contacts/10984",
+        query_parameters={},
+    )
+
+    invocation = InvocationData(request)
+    assert invocation.body == request.body
+    assert request.body
+    assert invocation.json_body == json.loads(request.body)

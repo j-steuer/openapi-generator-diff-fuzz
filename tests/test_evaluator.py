@@ -335,7 +335,9 @@ def test_request_none_report(basic_request, mock_invocation_data, tmp_path):
 def test_semantically_equivalent_datetime(tmp_path, caplog):
     """Special message for only syntactically different date-time."""
     caplog.set_level(logging.DEBUG)
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
+    Config.API_CONFIG_PATH = Path(
+        "tests/testfiles/configs/api_swagger_petstore_config.yaml"
+    )
     request1 = Request(
         headers=CaseInsensitiveDict(
             {
@@ -384,7 +386,9 @@ def test_semantically_equivalent_datetime(tmp_path, caplog):
 
 def test_capture_invocation_error(tmp_path, caplog):
     """Errors thrown while creating result invocation should create report."""
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_petshop_config.yaml")
+    Config.API_CONFIG_PATH = Path(
+        "tests/testfiles/configs/api_swagger_petstore_config.yaml"
+    )
     caplog.set_level(logging.DEBUG)
 
     request1 = Request(

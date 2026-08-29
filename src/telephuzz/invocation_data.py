@@ -10,7 +10,6 @@ from telephuzz.openapi_helpers import (
     extract_path_variable_types,
     get_args,
     get_content_type,
-    get_request_body_properties,
     resolve_path,
 )
 from telephuzz.operation_ids import generate_operation_id
@@ -58,10 +57,6 @@ class InvocationData:
             assert request.body is not None, "JSON body not provided for JSON request"
             self.json_body = json.loads(request.body)
 
-            allowed_request_body_properties = get_request_body_properties(
-                get_config().spec_str, request.method, request.path
-            )
-
             bodies = (
                 list(self.json_body)
                 if isinstance(self.json_body, list)
@@ -78,11 +73,6 @@ class InvocationData:
                 # showing that one of the supported clients can not serialize it
 
                 stripped_json_body = dict(body)
-
-                if allowed_request_body_properties is not None:
-                    for key in list(stripped_json_body):
-                        if key not in allowed_request_body_properties:
-                            del stripped_json_body[key]
 
                 for key, value in body.items():
                     # strip nested arrays

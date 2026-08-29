@@ -221,7 +221,9 @@ class TestPetshop:
 
     def test_resolve_path_params(self, clc_class, petshop: tuple[Network, str]):
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -267,7 +269,9 @@ class TestPetshop:
     def test_parse_invalid_python_json(self, clc_class, petshop: tuple[Network, str]):
         """Test parsing a JSON body not parseable through literal_eval."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -302,7 +306,9 @@ class TestPetshop:
     def test_query_and_body(self, clc_class, petshop: tuple[Network, str]):
         """Test request with path variables and body."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -330,7 +336,9 @@ class TestPetshop:
     def test_json_body_array(self, clc_class, petshop: tuple[Network, str]):
         """Test request with path variables and body."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -381,7 +389,9 @@ class TestPetshop:
     def test_file_upload(self, clc_class, petshop: tuple[Network, str]):
         """Test request with file upload."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -417,7 +427,9 @@ class TestPetshop:
     def test_surrogate_encoding(self, clc_class, petshop: tuple[Network, str]):
         """Test encoding with surrogates."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -456,7 +468,9 @@ class TestPetshop:
     def test_single_explode_string(self, clc_class, petshop: tuple[Network, str]):
         """Test sending explode array with single string."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -488,7 +502,9 @@ class TestPetshop:
     def test_empty_octet_body(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -522,7 +538,9 @@ class TestPetshop:
     def test_enum_query_parameter(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
@@ -560,7 +578,9 @@ class TestPetshop:
     ):
         """Test sending a request whose path ends with a path variable."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+        )
 
         network, api_path = petshop
         with clc_class() as clc:
