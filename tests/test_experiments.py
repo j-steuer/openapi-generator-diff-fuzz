@@ -26,7 +26,11 @@ def reset_docker():
     yield
 
 
-@pytest.mark.parametrize("config", CONFIGS)
+@pytest.mark.parametrize(
+    "config",
+    CONFIGS,
+    ids=lambda config: config.stem,
+)
 def test_openapi_generator_python(config: Path) -> None:
     Config.API_CONFIG_PATH = config
 
