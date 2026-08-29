@@ -405,3 +405,40 @@ def test_capture_invocation_error(tmp_path, caplog):
 
     assert len(os.listdir(tmp_path)) == 1
     assert "Error while creating invocation for result" in caplog.text
+
+
+def test_exact_diff_not_determined(
+    basic_request, mock_invocation_data, tmp_path, caplog, monkeypatch
+):
+    """Should still raise report if exact diff was not determined."""
+    caplog.set_level(logging.DEBUG)
+
+    original_request = deepcopy(basic_request)
+    produced_request = deepcopy(basic_request)
+
+    # patch hash so difference is determined despite being identical
+    original_hash = Request.__hash__
+
+    def test_hash(self):
+        if self is original_request:
+            return 1
+        elif self is produced_request:
+            return 2
+        return original_hash(self)
+
+    original_eq = Request.__eq__
+
+    def test_eq(self, other):
+        if self is original_request or self is produced_request:
+            return False
+        return original_eq(self, other)
+
+    monkeypatch.setattr(Request, "__hash__", test_hash)
+    monkeypatch.setattr(Request, "__eq__", test_eq)
+
+    evaluator = DiffEvaluator(tmp_path)
+    result = RequestResult("lib1", produced_request)
+
+    assert evaluator.eval({result}, original_request) == {"lib1"}
+    assert len(os.listdir(tmp_path)) == 1
+    assert "Exact diff not determined" in caplog.text

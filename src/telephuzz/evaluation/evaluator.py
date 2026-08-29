@@ -194,10 +194,12 @@ class DiffEvaluator:
                                 only_syntactic_detail += "Different headers\n"
                         else:
                             logger.debug(
-                                f"Original {original_request} | produced {diff_request}"
+                                f"Exact diff not determined with "
+                                f"Original {original_request} | got {diff_request}"
                             )
-                            raise RuntimeError(
-                                "Diff in request detected, but exact diff not found."
+                            detail += (
+                                "Diff in request detected, "
+                                "but exact diff could not be determined."
                             )
 
                     if diff_method:
