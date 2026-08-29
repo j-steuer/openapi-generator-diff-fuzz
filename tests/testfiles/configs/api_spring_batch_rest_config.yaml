@@ -10,4 +10,4 @@ nondeterministic_components:
 - json_component: timestamp
 - json_component: _links
 jacoco-port: 6300
-jacoco-report: ./reports/coverage/api_springbatch_config
+jacoco-report: ./reports/coverage/api_spring_batch_rest_config

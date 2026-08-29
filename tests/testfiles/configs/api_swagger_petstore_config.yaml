@@ -12,4 +12,4 @@ nondeterministic_components:
 - path: /user/login
   regex_component: 'Logged in user session: [0-9]+'
 jacoco-port: 6300
-jacoco-report: ./reports/coverage/api_petshop_config
+jacoco-report: ./reports/coverage/api_swagger_petstore_config

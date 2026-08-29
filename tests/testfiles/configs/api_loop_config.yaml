@@ -1,8 +1,0 @@
-container-name: api
-compose-path: ./tests/testfiles/docker-compose-loop.yaml
-spec-path: ./tests/testfiles/openapi_test_fuzzing.json
-api-port-name: HOST_PORT
-port-names:
-- HOST_PORT
-jacoco-port: 6300
-jacoco-report: ./reports/coverage/api_loop_config

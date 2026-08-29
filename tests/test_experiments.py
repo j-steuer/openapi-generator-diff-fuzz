@@ -1,4 +1,5 @@
 import subprocess
+from pathlib import Path
 
 import pytest
 from conftest import BASE_PATH, TEST_CONFIG_BASE_PATH
@@ -12,6 +13,10 @@ JACOCO_EXEC_PATH = JACOCO_PATH / "jacoco.exec"
 
 REPORT_PATH = BASE_PATH / "reports"
 
+CONFIGS = []
+for filepath in Path(TEST_CONFIG_BASE_PATH).glob("**/*"):
+    CONFIGS.append(filepath.absolute())
+
 
 @pytest.fixture(autouse=True)
 def reset_docker():
@@ -21,22 +26,11 @@ def reset_docker():
     yield
 
 
-def test_python_petshop_openapi_generator(request) -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_petshop_config.yaml"
+@pytest.mark.parametrize("config", CONFIGS)
+def test_openapi_generator_python(config) -> None:
+    Config.API_CONFIG_PATH = config
 
-    fuzzer = TelePhuzz("openapi-generator:python", REPORT_PATH / request.node.name)
-    fuzzer.start_fuzzing_session()
-
-
-def test_python_springbatch_openapi_generator(request) -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
-
-    fuzzer = TelePhuzz("openapi-generator:python", REPORT_PATH / request.node.name)
-    fuzzer.start_fuzzing_session()
-
-
-def test_python_patchspring_openapi_generator(request) -> None:
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
-
-    fuzzer = TelePhuzz("openapi-generator:python", REPORT_PATH / request.node.name)
+    fuzzer = TelePhuzz(
+        "openapi-generator:python", REPORT_PATH / f"openapi-generator-python_{config}"
+    )
     fuzzer.start_fuzzing_session()
