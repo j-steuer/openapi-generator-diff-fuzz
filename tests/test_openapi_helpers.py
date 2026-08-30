@@ -443,3 +443,11 @@ def test_get_api_url_path_swagger():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
 
     assert get_api_url_path(get_config().spec) == "/v2"
+
+
+def test_get_args_schema():
+    """Test obtaining args where query parameter defines a schema."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_cwa_verification_config.yaml"
+
+    args = get_args(get_config().spec_str, HTTPMethod.POST, "/version/v1/tan/teletan")
+    assert args["Authorization"].schema_type == "AuthorizationToken"

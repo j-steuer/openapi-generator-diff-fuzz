@@ -305,6 +305,9 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
 
             if "enum" in schema:
                 schema_type = "enum"
+            elif "$ref" in schema:
+                ref = schema["$ref"]
+                schema_type = ref[ref.rfind("/") + 1 :]  # type: ignore
             else:
                 schema_type = schema["type"]
 
