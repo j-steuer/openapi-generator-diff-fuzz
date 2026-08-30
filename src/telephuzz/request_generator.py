@@ -116,6 +116,10 @@ class FuzzerBasedGenerator(OASRequestGenerator):
         return self
 
     def __exit__(self, exc_type, exc, tb):
+        if self.fuzzing_process.poll() is None:
+            os.killpg(self.fuzzing_process.pid, signal.SIGTERM)
+            self.fuzzing_process.wait()
+
         self.exit_stack.close()
 
     def pause(self):
