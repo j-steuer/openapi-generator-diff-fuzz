@@ -391,3 +391,23 @@ def test_invocation_does_not_trim_object_schema() -> None:
     assert invocation.body == request.body
     assert request.body
     assert invocation.json_body == json.loads(request.body)
+
+
+def test_string_body_process() -> None:
+    """Assert string JSON body."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict({"content-type": "application/json"}),
+        body=b'"\\u0004Q\\u00f4\\u0005o"',
+        method=HTTPMethod.POST,
+        path="/config/scoring.project",
+        query_parameters={},
+    )
+
+    assert request.body is not None
+    json.loads(request.body)
+
+    invocation = InvocationData(request)
+    assert invocation.json_body == json.loads(request.body)
+    assert invocation.json_body == "\x04Qô\x05o"
