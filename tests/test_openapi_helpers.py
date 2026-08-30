@@ -136,6 +136,43 @@ class TestPreprocessing:
         category_schema = schemas["Pet"]["properties"]["category"]
         assert category_schema["$ref"] == "#/components/schemas/Category"
 
+    def test_disable_additional_properties_swagger(self):
+        """Additional properties for Swagger 2.0 schemas should be disabled."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+
+        processed_spec = preprocess_oas(Path("wfd/openapi-swagger/languagetool.json"))
+
+        assert processed_spec is not None
+        assert processed_spec["swagger"] == "2.0"
+
+        response_schema = processed_spec["paths"]["/check"]["post"]["responses"]["200"][
+            "schema"
+        ]
+
+        # Top-level response object
+        assert response_schema["additionalProperties"] is False
+
+        # Nested objects
+        assert (
+            response_schema["properties"]["software"]["additionalProperties"] is False
+        )
+        assert (
+            response_schema["properties"]["language"]["additionalProperties"] is False
+        )
+
+        # Object inside an array
+        match_schema = response_schema["properties"]["matches"]["items"]
+        assert match_schema["additionalProperties"] is False
+
+        # Nested objects inside the array item
+        assert match_schema["properties"]["context"]["additionalProperties"] is False
+        assert match_schema["properties"]["rule"]["additionalProperties"] is False
+
+        # Deeply nested object
+        category_schema = match_schema["properties"]["rule"]["properties"]["category"]
+        assert category_schema["additionalProperties"] is False
+
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
     """Test for finding operation based on operationId."""
@@ -342,3 +379,67 @@ def test_create_info():
     config = get_config()
     assert config.spec["info"]["title"] == "Test Title"
     assert config.spec["info"]["version"] == "0.0.0"
+
+
+def test_get_args_swagger():
+    """Test obtaining args for a 2.0 spec."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+
+    args = get_args(get_config().spec_str, HTTPMethod.GET, "/projects")
+    assert args == {
+        "organizations": ParameterType(
+            schema_type="string", item_type=None, required=False
+        ),
+        "limit": ParameterType(schema_type="integer", item_type=None, required=False),
+        "offset": ParameterType(schema_type="integer", item_type=None, required=False),
+        "start_date": ParameterType(
+            schema_type="string", item_type=None, required=False
+        ),
+        "end_date": ParameterType(schema_type="string", item_type=None, required=False),
+        "sortBy": ParameterType(schema_type="string", item_type=None, required=False),
+        "q": ParameterType(schema_type="string", item_type=None, required=False),
+        "language": ParameterType(schema_type="string", item_type=None, required=False),
+    }
+
+    args = get_args(get_config().spec_str, HTTPMethod.POST, "/config/scoring.project")
+    assert (
+        args["requestBody"].schema_type == "string" and not args["requestBody"].required
+    )
+    assert "body" not in args
+
+
+def test_get_content_type_swagger():
+    """Test obtaining content types for a 2.0 spec."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+
+    assert (
+        get_content_type(get_config().spec_str, HTTPMethod.GET, "/config")
+        == "application/json"
+    )
+
+
+def test_extract_path_variable_types_swagger():
+    """Test extracting path variable types for  2.0 spec."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_rest_ncs_config.yaml"
+
+    assert extract_path_variable_types(get_config().spec_str, "/api/bessj/{n}/{x}") == {
+        "n": "integer",
+        "x": "number",
+    }
+
+
+def test_extract_path_variable_types_path():
+    """Test extracting path variables defined for the entire path."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_person_controller_config.yaml"
+
+    spec_str = get_config().spec_str.replace('"string"', '"integer"')
+    assert extract_path_variable_types(spec_str, "/api/persons/{ids}") == {
+        "ids": "integer"
+    }
+
+
+def test_get_api_url_path_swagger():
+    """Test obtaining url path for swagger."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+
+    assert get_api_url_path(get_config().spec) == "/v2"

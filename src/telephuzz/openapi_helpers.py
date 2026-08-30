@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
-from urllib.parse import ParseResult, unquote, urlparse
+from urllib.parse import unquote, urlparse
 
 import yaml  # type: ignore
 
@@ -34,14 +34,20 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
     assert isinstance(spec, dict), "OpenAPI spec was not loaded as a dict"
     spec = cast(dict[str, dict], spec)
 
-    # set version to simple constant to avoid format issues if used by a generator
+    # Set version to a simple constant to avoid format issues if used by a generator.
     info = spec.get("info")
-    if info is not None:
+    if isinstance(info, dict):
         if "title" not in info:
             info["title"] = "Test Title"
         info["version"] = DEFAULT_VERSION
 
-    # set additional properties to false in JSON definitions
+    # Close reusable schemas.
+    #
+    # OpenAPI 3.x:
+    #   components.schemas
+    #
+    # Swagger 2.0:
+    #   definitions
     components = spec.get("components")
     if isinstance(components, dict):
         schemas = components.get("schemas")
@@ -49,21 +55,42 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
             for schema in schemas.values():
                 _close_object_schemas(schema)
 
+    definitions = spec.get("definitions")
+    if isinstance(definitions, dict):
+        for schema in definitions.values():
+            _close_object_schemas(schema)
+
+    # Process operations.
     for path, methods in spec.get("paths", {}).items():
         assert isinstance(methods, dict), "Methods were not loaded as a dict"
         methods = cast(dict[str, dict], methods)
+
         for method, operation in methods.items():
             try:
                 HTTPMethod(method)
             except ValueError:
-                # ignore non-method keys like parameters
+                # Ignore non-method keys such as "parameters".
                 continue
 
+            # Swagger 2.0 response schemas.
+            responses = operation.get("responses")
+            if isinstance(responses, dict):
+                for response in responses.values():
+                    if not isinstance(response, dict):
+                        continue
+
+                    schema = response.get("schema")
+                    if isinstance(schema, dict):
+                        _close_object_schemas(schema)
+
+            # OpenAPI 3.x request body.
             request_body = operation.get("requestBody")
             if isinstance(request_body, dict):
                 content = request_body.get("content")
+
                 if isinstance(content, dict):
-                    # remove restricted media types if it does not leave content empty
+                    # Remove restricted media types if doing so does not
+                    # leave content empty.
                     if any(
                         media
                         for media in content
@@ -77,12 +104,22 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
                             f"Content of {path} has no supported media types."
                         )
 
+                    # Close OpenAPI 3 request-body schemas.
+                    for media_type in content.values():
+                        if not isinstance(media_type, dict):
+                            continue
+
+                        schema = media_type.get("schema")
+                        if isinstance(schema, dict):
+                            _close_object_schemas(schema)
+
             operation["operationId"] = generate_operation_id(method, path)
+
     if output_path:
         with open(output_path, "w") as f:
             if output_path.suffix == ".json":
                 json.dump(spec, f)
-            elif output_path.suffix == ".yaml":
+            elif output_path.suffix in {".yaml", ".yml"}:
                 yaml.safe_dump(spec, f)
 
     return spec
@@ -93,37 +130,38 @@ def _close_object_schemas(schema: object) -> None:
     if not isinstance(schema, dict):
         return
 
-    # If this schema explicitly represents an object, close it.
-    if schema.get("type") == "object":
+    # A schema is an object schema either when it explicitly declares
+    if schema.get("type") == "object" or isinstance(schema.get("properties"), dict):
         schema.setdefault("additionalProperties", False)
 
     # Recurse through nested schemas.
+    properties = schema.get("properties")
+    if isinstance(properties, dict):
+        for property_schema in properties.values():
+            _close_object_schemas(property_schema)
+
+    pattern_properties = schema.get("patternProperties")
+    if isinstance(pattern_properties, dict):
+        for property_schema in pattern_properties.values():
+            _close_object_schemas(property_schema)
+
     for key in (
-        "properties",
-        "patternProperties",
         "additionalProperties",
         "items",
-        "allOf",
-        "anyOf",
-        "oneOf",
         "not",
         "if",
         "then",
         "else",
-        "prefixItems",
     ):
         value = schema.get(key)
-
         if isinstance(value, dict):
-            if key == "properties":
-                for property_schema in value.values():
-                    _close_object_schemas(property_schema)
-            else:
-                _close_object_schemas(value)
+            _close_object_schemas(value)
 
-        elif isinstance(value, list):
-            for item in value:
-                _close_object_schemas(item)
+    for key in ("allOf", "anyOf", "oneOf", "prefixItems"):
+        value = schema.get(key)
+        if isinstance(value, list):
+            for subschema in value:
+                _close_object_schemas(subschema)
 
 
 def _find_all(spec: dict, element: str) -> list[Any]:
@@ -201,6 +239,7 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
 
     args: dict[str, ParameterType] = {}
 
+    # OpenAPI 3.x request body
     if "requestBody" in operation:
         content = operation["requestBody"]["content"]
         ref = set(_find_all(content, "$ref"))
@@ -219,8 +258,6 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
             schemas = _find_all(content, "schema")
             schema_types = {schema["type"] for schema in schemas}
 
-            # Preserve the existing behaviour of returning the set of
-            # schema types, but ParameterType expects a single type.
             if len(schema_types) != 1:
                 raise ValueError(
                     f"Multiple request body schema types found: {schema_types}"
@@ -242,9 +279,29 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
                 required=operation["requestBody"].get("required", False),
             )
 
+    # Parameters
     if "parameters" in operation:
         for parameter in operation["parameters"]:
-            schema = parameter["schema"]
+            # Swagger 2.0 body parameter
+            if parameter.get("in") == "body":
+                schema = parameter["schema"]
+
+                ref = schema.get("$ref")
+                if ref:
+                    schema_type = ref[ref.rfind("/") + 1 :]  # type: ignore
+                else:
+                    schema_type = schema.get("type")
+
+                args["requestBody"] = ParameterType(
+                    schema_type=schema_type,
+                    item_type=None,
+                    required=parameter.get("required", False),
+                )
+                continue
+
+            # OpenAPI 3.x parameter
+            # Swagger 2.0 non-body parameter
+            schema = parameter.get("schema", parameter)
 
             if "enum" in schema:
                 schema_type = "enum"
@@ -271,8 +328,19 @@ def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
     operation = _search_operation(spec, method, path)
 
     if "requestBody" not in operation:
+        # try Swagger 2.0
+        consumes = operation.get("consumes")
+        if consumes:
+            return consumes[0]
+
+        consumes = json.loads(spec).get("consumes")
+        if consumes:
+            return consumes[0]
+
+        # no request body found
         return None
 
+    # Swagger 3.x
     return list(operation["requestBody"]["content"].keys())[0]
 
 
@@ -315,46 +383,48 @@ def _resolve_schema(spec: dict, schema: dict) -> dict:
     return schema
 
 
-@cache
-def get_request_body_properties(
-    spec: str, method: HTTPMethod, path: str
-) -> set[str] | None:
-    """Return allowed top-level request body keys for the given operation."""
-    operation = _search_operation(spec, method, path)
-    if "requestBody" not in operation:
-        return None
+def _get_request_body_schema(operation: dict) -> dict | None:
+    """Return the request body schema for Swagger 2.0 or OpenAPI 3.x."""
 
-    content = operation["requestBody"]["content"]
-    if not content:
-        return None
+    # OpenAPI 3.x
+    request_body = operation.get("requestBody")
+    if isinstance(request_body, dict):
+        content = request_body.get("content", {})
+        if not content:
+            return None
 
-    schema = next(iter(content.values())).get("schema", {})
-    spec_dict = json.loads(spec)
-    resolved_schema = _resolve_schema(spec_dict, schema)
+        media_type = next(iter(content.values()))
+        if not isinstance(media_type, dict):
+            return None
 
-    if resolved_schema.get("type") == "array":
-        resolved_schema = _resolve_schema(spec_dict, resolved_schema.get("items", {}))
+        schema = media_type.get("schema")
+        return schema if isinstance(schema, dict) else None
 
-    if resolved_schema.get("type") == "object" or "properties" in resolved_schema:
-        return set(resolved_schema.get("properties", {}).keys())
+    # Swagger 2.0
+    for parameter in operation.get("parameters", []):
+        if parameter.get("in") == "body":
+            schema = parameter.get("schema")
+            return schema if isinstance(schema, dict) else None
 
     return None
 
 
 def get_api_url_path(spec: dict) -> str:
     """Obtain the base path of the API."""
-    assert isinstance(spec, dict)
-    if "servers" not in spec:
-        return ""
 
-    url = spec["servers"][0]["url"]
-    parsed_url = urlparse(url)
+    if "servers" in spec:
+        servers = spec.get("servers", [])
+        if servers:
+            url = servers[0].get("url", "")
+            parsed_url = urlparse(url)
+            return parsed_url.path or ""
 
-    assert isinstance(parsed_url, ParseResult)
-    path = parsed_url.path
+    # Swagger 2.0
+    base_path = spec.get("basePath", "")
+    if isinstance(base_path, str):
+        return base_path
 
-    assert isinstance(path, str)
-    return path
+    return ""
 
 
 @cache
@@ -375,7 +445,7 @@ def extract_paths(spec_json: str) -> tuple[set[str], set[str]]:
 
 @cache
 def extract_path_variable_types(spec_json: str, path: str) -> dict[str, str]:
-    """Given an OpenAPI spec and an operation id, get the type of all path variables."""
+    """Given an OpenAPI spec and path, get the type of all path variables."""
     spec: dict = json.loads(spec_json)
     paths: dict = spec.get("paths", {})
     path_item: dict = paths[path]
@@ -388,14 +458,13 @@ def extract_path_variable_types(spec_json: str, path: str) -> dict[str, str]:
 
         result: dict[str, str] = {}
 
-        # Operation-level parameters override path-level ones.
         params = path_level_params + operation.get("parameters", [])
 
         for param in params:
             if param.get("in") != "path":
                 continue
 
-            schema = param.get("schema", {})
+            schema = param.get("schema", param)
             result[param["name"]] = schema.get("type", "string")
 
         return result
