@@ -2,10 +2,10 @@
 
 import logging
 import os
+import shutil
 import signal
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 from abc import ABC, abstractmethod
@@ -17,6 +17,7 @@ from telephuzz.http_message import Request
 from telephuzz.session.mitm_proxy.mitm_proxy import MITMProxyContainer
 
 SCHEMATHESIS_CONFIG_PATH = BASE_PATH / "schemathesis.toml"
+RESPONSE_OUTPUT = "/tmp/schemathesis_mitmproxy"
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +78,14 @@ class FuzzerBasedGenerator(OASRequestGenerator):
 
         self.exit_stack = ExitStack()
 
-        self.tmpdir = self.exit_stack.enter_context(tempfile.TemporaryDirectory())
+        shutil.rmtree(RESPONSE_OUTPUT, ignore_errors=True)
+        os.makedirs(RESPONSE_OUTPUT, exist_ok=False)
+
         self.mitmproxy = self.exit_stack.enter_context(
             MITMProxyContainer(
-                response_output=self.tmpdir, listen_port=proxy_port, target=base_api_url
+                response_output=RESPONSE_OUTPUT,
+                listen_port=proxy_port,
+                target=base_api_url,
             )
         )
 
@@ -94,7 +99,7 @@ class FuzzerBasedGenerator(OASRequestGenerator):
         self.running = True
 
         attempts = 100
-        while len(os.listdir(self.tmpdir)) < 1:
+        while len(os.listdir(RESPONSE_OUTPUT)) < 1:
             time.sleep(0.1)
             attempts -= 1
             if not attempts:
@@ -140,8 +145,8 @@ class FuzzerBasedGenerator(OASRequestGenerator):
 
     def _collect_responses(self):
         """Collect latest responses."""
-        responses = os.listdir(self.tmpdir)
-        base_response_path = Path(self.tmpdir)
+        responses = os.listdir(RESPONSE_OUTPUT)
+        base_response_path = Path(RESPONSE_OUTPUT)
         for response in responses[: self.batch_size]:
             response_path = base_response_path / response
             request_obj = Request.from_json(response_path)
