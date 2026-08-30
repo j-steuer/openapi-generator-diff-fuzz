@@ -103,6 +103,8 @@ class InvocationData:
                 _params[parameter] = [value]
             if args[parameter].schema_type == "integer" and isinstance(value, str):
                 _params[parameter] = int(value)
+            if args[parameter].schema_type == "number" and isinstance(value, str):
+                _params[parameter] = float(value)
 
         return _params
 
