@@ -405,3 +405,19 @@ def test_string_body_process() -> None:
     invocation = InvocationData(request)
     assert invocation.json_body == json.loads(request.body)
     assert invocation.json_body == "\x04Qô\x05o"
+
+
+def test_not_process_non_model_array() -> None:
+    """Array JSON that does not use a model should not be modified."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_genome_nexus_config.yaml"
+
+    request = Request(
+        headers=CaseInsensitiveDict({"content-type": "application/json"}),
+        body=b'["", "y\\u0085"]',
+        method=HTTPMethod.POST,
+        path="/ensembl/canonical-gene/hgnc",
+        query_parameters={},
+    )
+
+    assert request.body is not None
+    assert InvocationData(request).json_body == json.loads(request.body)

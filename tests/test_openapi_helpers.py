@@ -480,3 +480,15 @@ def test_get_args_concrete_path():
     assert args["ids"] == ParameterType(
         schema_type="string", item_type=None, required=True, body=False
     )
+
+
+def test_get_args_array_item_type():
+    """Test obtaining array args item type in swagger 2.0."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_genome_nexus_config.yaml"
+
+    arg = get_args(
+        get_config().spec_str, HTTPMethod.POST, "/ensembl/canonical-gene/hgnc"
+    )["hugoSymbols"]
+
+    assert arg.schema_type == "array"
+    assert arg.item_type == "string"

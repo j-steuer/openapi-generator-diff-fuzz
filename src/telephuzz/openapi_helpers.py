@@ -315,13 +315,16 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
             else:
                 schema_type = schema.get("type")
 
-            # Swagger 2.0 body parameters have a name, which is the
-            # argument name expected by generated clients.
+            item_type = None
+            if schema_type == "array":
+                items = schema.get("items", {})
+                item_type = items.get("type")
+
             parameter_name = parameter["name"]
 
             args[parameter_name] = ParameterType(
                 schema_type=schema_type,
-                item_type=None,
+                item_type=item_type,
                 required=parameter.get("required", False),
                 body=True,
             )

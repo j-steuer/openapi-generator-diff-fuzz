@@ -15,6 +15,15 @@ from telephuzz.openapi_helpers import (
 )
 from telephuzz.operation_ids import generate_operation_id
 
+OPENAPI_NON_MODEL_TYPES = {
+    "string",
+    "integer",
+    "number",
+    "boolean",
+    "array",
+    "object",
+}
+
 
 class InvocationData:
     """Process general request information for client request code generation."""
@@ -58,7 +67,12 @@ class InvocationData:
             assert request.body is not None, "JSON body not provided for JSON request"
             self.json_body = json.loads(request.body)
 
-            if isinstance(self.json_body, (list, dict)):
+            body_parameter = self.body_parameter
+            assert body_parameter is not None
+            if body_parameter.schema_type not in OPENAPI_NON_MODEL_TYPES or (
+                body_parameter.schema_type == "array"
+                and body_parameter.item_type not in OPENAPI_NON_MODEL_TYPES
+            ):
                 bodies = (
                     list(self.json_body)
                     if isinstance(self.json_body, list)
