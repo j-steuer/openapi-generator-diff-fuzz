@@ -169,7 +169,7 @@ def test_normalize_query(basic_request, mock_invocation_data, tmp_path):
 
 def test_normalize_json_body(tmp_path):
     """JSON bodies should be compared as such."""
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+    Config.API_CONFIG_PATH = Path("tests/testfiles/api_config.yaml")
 
     original_request = Request(
         headers=CaseInsensitiveDict(
@@ -201,7 +201,7 @@ def test_normalize_json_body(tmp_path):
 
 def test_json_value_diff(tmp_path):
     """Test detail when value of JSON element differs."""
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+    Config.API_CONFIG_PATH = Path("tests/testfiles/api_config.yaml")
 
     original_request = Request(
         headers=CaseInsensitiveDict(
@@ -241,7 +241,7 @@ def test_json_value_diff(tmp_path):
 
 def test_json_element_diff(tmp_path):
     """Test detail when element only exists in original."""
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
+    Config.API_CONFIG_PATH = Path("tests/testfiles/api_config.yaml")
 
     original_request = Request(
         headers=CaseInsensitiveDict(
@@ -276,29 +276,6 @@ def test_json_element_diff(tmp_path):
 
         assert "Element 'age' only exists in original body" in kwargs["detail"]
 
-
-def test_ignore_extra_params(tmp_path):
-    """Test original request containing superfluous body elements."""
-    Config.API_CONFIG_PATH = Path("tests/testfiles/configs/api_config.yaml")
-    original_request = Request(
-        headers=CaseInsensitiveDict(
-            {
-                "Host": "localhost:8000",
-                "User-Agent": "schemathesis/4.15.2",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-                "X-Schemathesis-TestCaseId": "vsojI1",
-                "Content-Type": "application/json",
-                "Content-Length": "400",
-            }
-        ),
-        body=b'{"age": 19011, "name": "dan", "c": "gone"}',
-        method=HTTPMethod.POST,
-        path="/user",
-        query_parameters={},
-    )
-
     eval_request = Request(
         headers=CaseInsensitiveDict(
             {
@@ -320,7 +297,13 @@ def test_ignore_extra_params(tmp_path):
     evaluator = DiffEvaluator(tmp_path)
     result = RequestResult("lib1", eval_request)
 
-    assert not evaluator.eval({result}, original_request)
+    with patch("telephuzz.evaluation.evaluator.DiffReport") as mock_report:
+        assert evaluator.eval({result}, original_request) == {"lib1"}
+
+        mock_report.assert_called_once()
+        kwargs = mock_report.call_args.kwargs
+
+        assert "Unequal values for element 'age' in body" in kwargs["detail"]
 
 
 def test_request_none_report(basic_request, mock_invocation_data, tmp_path):
