@@ -96,6 +96,8 @@ class FuzzerBasedGenerator(OASRequestGenerator):
             start_new_session=True,  # for handling potential child processes
         )
 
+        logger.debug(f"Fuzzing process started at PID {self.fuzzing_process.pid}")
+
         self.running = True
 
         attempts = 100
