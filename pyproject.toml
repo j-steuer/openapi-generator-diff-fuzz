@@ -15,7 +15,8 @@ dependencies = [
     "docker==7.1.0",
     "mitmproxy==12.2.1",
     "requests==2.33.1",
-    "PyYAML==6.0.3"
+    "PyYAML==6.0.3",
+    "schemathesis==4.25.2"
 ]
 
 [project.optional-dependencies]
@@ -26,9 +27,6 @@ dev = [
     "types-docker==7.1.0.20260409",
     "pre-commit==4.5.1",
     "fastapi[standard]==0.136.1"
-]
-schemathesis = [
-    "schemathesis==4.15.2"
 ]
 
 [tool.setuptools]
