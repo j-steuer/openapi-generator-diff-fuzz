@@ -16,6 +16,7 @@ REPORT_PATH = BASE_PATH / "reports"
 CONFIGS = []
 for filepath in Path(TEST_CONFIG_BASE_PATH).glob("**/*"):
     CONFIGS.append(filepath.absolute())
+CONFIGS = sorted(CONFIGS)
 
 
 @pytest.fixture(autouse=True)
