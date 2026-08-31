@@ -135,19 +135,13 @@ def test_arg_types():
     invocation = InvocationData(request)
     assert invocation.arg_types == {
         "petId": ParameterType(
-            schema_type="integer",
-            item_type=None,
-            required=True,
+            schema_type="integer", item_type=None, required=True, body=False
         ),
         "additionalMetadata": ParameterType(
-            schema_type="string",
-            item_type=None,
-            required=False,
+            schema_type="string", item_type=None, required=False, body=False
         ),
         "requestBody": ParameterType(
-            schema_type="string",
-            item_type=None,
-            required=False,
+            schema_type="string", item_type=None, required=False, body=True
         ),
     }
 

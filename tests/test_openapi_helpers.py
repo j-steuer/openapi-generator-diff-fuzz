@@ -192,25 +192,25 @@ def test_find_args():
 
     # concrete path should resolve
     args = get_args(spec, HTTPMethod.POST, "/pet")
-    assert args == {"requestBody": ParameterType("Pet", None, True)}
+    assert args == {"requestBody": ParameterType("Pet", None, True, body=True)}
 
     # non-concrete path should resolve
     args = get_args(spec, HTTPMethod.PUT, "/user/123")
     assert args == {
-        "requestBody": ParameterType("User", None, False),
-        "username": ParameterType("string", None, True),
+        "requestBody": ParameterType("User", None, False, True),
+        "username": ParameterType("string", None, True, False),
     }
 
     # concrete path should not resolve to non-concrete path
     args = get_args(spec, HTTPMethod.GET, "/user/login")
     assert args == {
-        "username": ParameterType("string", None, False),
-        "password": ParameterType("string", None, False),
+        "username": ParameterType("string", None, False, False),
+        "password": ParameterType("string", None, False, False),
     }
 
     # args that are enum should return enum as type
     args = get_args(spec, HTTPMethod.GET, "/pet/findByStatus")
-    assert args == {"status": ParameterType("enum", None, False)}
+    assert args == {"status": ParameterType("enum", None, False, False)}
 
     # nonexistent path should raise error
     with pytest.raises(ValueError):
@@ -222,7 +222,7 @@ def test_find_args_body_case():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
-    assert args["requestBody"] == ParameterType("JobConfig", None, False)
+    assert args["requestBody"] == ParameterType("JobConfig", None, False, True)
 
 
 def test_find_args_no_refs():
@@ -230,7 +230,7 @@ def test_find_args_no_refs():
     Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.PATCH, "/contacts/{id}")
-    assert args["requestBody"] == ParameterType("object", None, True)
+    assert args["requestBody"] == ParameterType("object", None, True, True)
 
 
 def test_get_content_type():
@@ -388,22 +388,36 @@ def test_get_args_swagger():
     args = get_args(get_config().spec_str, HTTPMethod.GET, "/projects")
     assert args == {
         "organizations": ParameterType(
-            schema_type="string", item_type=None, required=False
+            schema_type="string", item_type=None, required=False, body=False
         ),
-        "limit": ParameterType(schema_type="integer", item_type=None, required=False),
-        "offset": ParameterType(schema_type="integer", item_type=None, required=False),
+        "limit": ParameterType(
+            schema_type="integer", item_type=None, required=False, body=False
+        ),
+        "offset": ParameterType(
+            schema_type="integer", item_type=None, required=False, body=False
+        ),
         "start_date": ParameterType(
-            schema_type="string", item_type=None, required=False
+            schema_type="string", item_type=None, required=False, body=False
         ),
-        "end_date": ParameterType(schema_type="string", item_type=None, required=False),
-        "sortBy": ParameterType(schema_type="string", item_type=None, required=False),
-        "q": ParameterType(schema_type="string", item_type=None, required=False),
-        "language": ParameterType(schema_type="string", item_type=None, required=False),
+        "end_date": ParameterType(
+            schema_type="string", item_type=None, required=False, body=False
+        ),
+        "sortBy": ParameterType(
+            schema_type="string", item_type=None, required=False, body=False
+        ),
+        "q": ParameterType(
+            schema_type="string", item_type=None, required=False, body=False
+        ),
+        "language": ParameterType(
+            schema_type="string", item_type=None, required=False, body=False
+        ),
     }
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/config/scoring.project")
     assert (
-        args["requestBody"].schema_type == "string" and not args["requestBody"].required
+        args["scoringProject"].schema_type == "string"
+        and not args["scoringProject"].required
+        and args["scoringProject"].body
     )
     assert "body" not in args
 
@@ -451,3 +465,18 @@ def test_get_args_schema():
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/version/v1/tan/teletan")
     assert args["Authorization"].schema_type == "AuthorizationToken"
+
+
+def test_get_args_concrete_path():
+    """Test obtaining path-level args from a concrete request path."""
+    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_person_controller_config.yaml"
+
+    args = get_args(
+        get_config().spec_str,
+        HTTPMethod.GET,
+        "/api/persons/0",
+    )
+
+    assert args["ids"] == ParameterType(
+        schema_type="string", item_type=None, required=True, body=False
+    )

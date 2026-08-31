@@ -638,7 +638,9 @@ class TestSpringBatch:
     def test_tag_module_resolve(self, clc_class, spring_batch: tuple[Network, str]):
         """Test resolving the module through a tag different than the base path."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
+        )
 
         # wait for spring-batch-rest-mitmproxy to be ready
         sleep(10)
@@ -673,7 +675,9 @@ class TestSpringBatch:
     def test_model_capitalization(self, clc_class, spring_batch: tuple[Network, str]):
         """Test capitalizing the model names correctly."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
+        )
 
         # wait for spring-batch-rest-mitmproxy to be ready
         sleep(10)
@@ -783,3 +787,37 @@ class TestPatchSpring:
                 api_path,
                 expected_status=404,
             )
+
+
+@pytest.fixture(scope="class")
+def genome_nexus():
+    network, api_name = api_wfd("genome-nexus")
+    yield network, api_name
+    api_down(network, "genome-nexus")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+    ],
+)
+@pytest.mark.usefixtures("genome_nexus")
+class TestGenomeNexus:
+    def test_body_name(self, clc_class):
+        """Client should apply body name in swagger 2.0."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_genome_nexus_config.yaml"
+
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=b"[]",
+                method=HTTPMethod.POST,
+                path="/annotation",
+                query_parameters={},
+            )
+
+            code = clc._get_code(InvocationData(request), "test")
+            assert b"variants=" in code
+            assert b"body=" not in code

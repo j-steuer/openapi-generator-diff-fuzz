@@ -222,6 +222,7 @@ class ParameterType:
     schema_type: str
     item_type: str | None
     required: bool
+    body: bool
 
 
 @cache
@@ -230,11 +231,15 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
 
     Spec must be passed as a string using json.dumps to enable caching.
 
+    Parameters defined on both the path item and the operation are included.
+    Operation-level parameters override path-level parameters with the same name.
+
     Each argument is represented by a ParameterType containing:
       - schema_type: the OpenAPI schema type (e.g. string, array, enum)
       - item_type: the item type for arrays, otherwise None
       - required: whether the argument is required
     """
+    spec_dict = json.loads(spec)
     operation = _search_operation(spec, method, path)
 
     args: dict[str, ParameterType] = {}
@@ -253,6 +258,7 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
                 schema_type=ref[ref.rfind("/") + 1 :],
                 item_type=None,
                 required=operation["requestBody"].get("required", False),
+                body=True,
             )
         else:
             schemas = _find_all(content, "schema")
@@ -277,50 +283,73 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
                 schema_type=schema_type,
                 item_type=item_type,
                 required=operation["requestBody"].get("required", False),
+                body=True,
             )
 
-    # Parameters
-    if "parameters" in operation:
-        for parameter in operation["parameters"]:
-            # Swagger 2.0 body parameter
-            if parameter.get("in") == "body":
-                schema = parameter["schema"]
+    # Parameters can be defined either on the path item or on the operation.
+    #
+    # For a concrete request such as:
+    #   /api/persons/0
+    #
+    # resolve_path() gives us the corresponding OpenAPI path:
+    #   /api/persons/{ids}
+    #
+    # Path-level parameters apply to all operations on that path, while
+    # operation-level parameters can override them.
+    resolved_path = resolve_path(path, spec)
+    path_item = spec_dict["paths"][resolved_path]
 
-                ref = schema.get("$ref")
-                if ref:
-                    schema_type = ref[ref.rfind("/") + 1 :]  # type: ignore
-                else:
-                    schema_type = schema.get("type")
+    path_level_params = path_item.get("parameters", [])
+    operation_level_params = operation.get("parameters", [])
 
-                args["requestBody"] = ParameterType(
-                    schema_type=schema_type,
-                    item_type=None,
-                    required=parameter.get("required", False),
-                )
-                continue
+    params = path_level_params + operation_level_params
 
-            # OpenAPI 3.x parameter
-            # Swagger 2.0 non-body parameter
-            schema = parameter.get("schema", parameter)
+    for parameter in params:
+        # Swagger 2.0 body parameter
+        if parameter.get("in") == "body":
+            schema = parameter["schema"]
 
-            if "enum" in schema:
-                schema_type = "enum"
-            elif "$ref" in schema:
-                ref = schema["$ref"]
+            ref = schema.get("$ref")
+            if ref:
                 schema_type = ref[ref.rfind("/") + 1 :]  # type: ignore
             else:
-                schema_type = schema["type"]
+                schema_type = schema.get("type")
 
-            item_type = None
-            if schema_type == "array":
-                items = schema.get("items", {})
-                item_type = items.get("type")
+            # Swagger 2.0 body parameters have a name, which is the
+            # argument name expected by generated clients.
+            parameter_name = parameter["name"]
 
-            args[parameter["name"]] = ParameterType(
+            args[parameter_name] = ParameterType(
                 schema_type=schema_type,
-                item_type=item_type,
+                item_type=None,
                 required=parameter.get("required", False),
+                body=True,
             )
+            continue
+
+        # OpenAPI 3.x parameter
+        # Swagger 2.0 non-body parameter
+        schema = parameter.get("schema", parameter)
+
+        if "enum" in schema:
+            schema_type = "enum"
+        elif "$ref" in schema:
+            ref = schema["$ref"]
+            schema_type = ref[ref.rfind("/") + 1 :]  # type: ignore
+        else:
+            schema_type = schema["type"]
+
+        item_type = None
+        if schema_type == "array":
+            items = schema.get("items", {})
+            item_type = items.get("type")
+
+        args[parameter["name"]] = ParameterType(
+            schema_type=schema_type,
+            item_type=item_type,
+            required=parameter.get("required", False),
+            body=False,
+        )
 
     return args
 

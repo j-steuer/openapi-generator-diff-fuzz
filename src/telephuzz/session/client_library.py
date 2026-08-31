@@ -36,6 +36,15 @@ LIB_PATH = "/app"
 
 logger = logging.getLogger(__name__)
 
+OPENAPI_NON_MODEL_TYPES = {
+    "string",
+    "integer",
+    "number",
+    "boolean",
+    "array",
+    "object",
+}
+
 
 class OpenAPIVersion(Enum):
     V_2 = "2.0.x"
@@ -549,7 +558,9 @@ def _get_model_name(invocation: InvocationData) -> str:
     """
     model_name: str | None = ""
     if invocation.json_body is not None:
-        model_name = invocation.arg_types["requestBody"].schema_type
+        body_parameter = invocation.body_parameter
+        assert body_parameter is not None
+        model_name = body_parameter.schema_type
     assert model_name is not None, (
         f"Obtaining args failed for {invocation.method} "
         f"{invocation.path} with body {invocation.body!r}"
@@ -601,16 +612,20 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"].schema_type != "object":
+                body_paramer = invocation.body_parameter
+                assert body_paramer is not None
+                if body_paramer.schema_type not in OPENAPI_NON_MODEL_TYPES:
                     model_code = self._generate_code_models(invocation)
                     model_name_str += cast(str, model_code.import_code)
                     body_kwargs = model_code.creation_code
                 else:
-                    body_kwargs = f"body={repr(invocation.json_body)}"
+                    body_kwargs = (
+                        f"{invocation.body_parameter_name}={repr(invocation.json_body)}"
+                    )
 
             else:
                 raw_body: bytes | None = invocation.body
-                body_kwargs = f"body={raw_body!r}"
+                body_kwargs = f"{invocation.body_parameter_name}={raw_body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -653,7 +668,9 @@ class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
     generator_script = "swagger-codegen-python.sh"
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
-        return ModelCode(None, f"body={invocation.json_body}")
+        return ModelCode(
+            None, f"{invocation.body_parameter_name}={invocation.json_body}"
+        )
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         query_parameters = invocation.query_parameters
@@ -667,7 +684,7 @@ class SwaggerCodegenPythonCLC(SwaggerCodegen, PythonCLC):
                 body_kwargs = self._generate_code_models(invocation).creation_code
             else:
                 raw_body: bytes | None = invocation.body
-                body_kwargs = f"body={raw_body!r}"
+                body_kwargs = f"{invocation.body_parameter_name}={raw_body!r}"
 
             kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
 
@@ -708,7 +725,9 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
 
-        if invocation.arg_types["requestBody"].schema_type != "object":
+        body_paramer = invocation.body_parameter
+        assert body_paramer is not None
+        if body_paramer.schema_type not in OPENAPI_NON_MODEL_TYPES:
             model_name = _get_model_name(invocation)
         else:
             model_name = f"{invocation.operation_id}_json_body"
@@ -722,10 +741,12 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
         json_body = invocation.json_body
         if isinstance(json_body, list):
             model_list = [f"{model_name_class}.from_dict({body})" for body in json_body]
-            creation_code = "body=[" + ", ".join(model_list) + "]"
+            creation_code = (
+                f"{invocation.body_parameter_name}=[" + ", ".join(model_list) + "]"
+            )
         elif isinstance(json_body, dict):
             from_json = f"{model_name_class}.from_dict({json_body})"
-            creation_code = f"body={from_json}"
+            creation_code = f"{invocation.body_parameter_name}={from_json}"
         else:
             raise NotImplementedError(
                 f"Unhandled body type {type(json_body)}: {invocation.body!r}"
@@ -788,10 +809,10 @@ class OpenAPIPythonClientCLC(OpenAPIPythonClient, PythonCLC):
             elif invocation.content_type == "application/octet-stream":
                 raw_body: bytes | None = invocation.body
                 bytes_io = f"BytesIO({raw_body!r})"
-                body_kwargs = f"body=File({bytes_io})"
+                body_kwargs = f"{invocation.body_parameter_name}=File({bytes_io})"
             else:
                 raw_body = invocation.body
-                body_kwargs = f"body={raw_body!r}"
+                body_kwargs = f"{invocation.body_parameter_name}={raw_body!r}"
 
             kwargs += f"{', ' if invocation.query_parameters else ''}{body_kwargs}"
 
@@ -853,9 +874,13 @@ class KiotaPythonCLC(Kiota, PythonCLC):
         json_body = invocation.json_body
         if isinstance(json_body, list):
             model_list = [_parse_model(body) for body in json_body]
-            creation_code = "body=[" + ", ".join(model_list) + "]"
+            creation_code = (
+                "{invocation.body_parameter_name}=[" + ", ".join(model_list) + "]"
+            )
         elif isinstance(json_body, dict):
-            creation_code = f"body={_parse_model(json_body)}"
+            creation_code = (
+                f"{invocation.body_parameter_name}={_parse_model(json_body)}"
+            )
         else:
             raise NotImplementedError(
                 f"Unhandled body type {type(json_body)}: {invocation.body!r}"
@@ -893,9 +918,13 @@ class KiotaPythonCLC(Kiota, PythonCLC):
             "/"
         )
 
-        json_object = invocation.json_body and invocation.arg_types[
-            "requestBody"
-        ].schema_type == {"object"}
+        body_parameter = invocation.body_parameter
+
+        json_object = (
+            invocation.json_body
+            and body_parameter is not None
+            and body_parameter.schema_type in OPENAPI_NON_MODEL_TYPES
+        )
 
         import_json_object = ""
         model_name_str = ""
@@ -908,7 +937,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                     body_kwargs = model_code.creation_code
                 else:
                     raw_body: bytes | None = invocation.body
-                    body_kwargs = f"body={raw_body!r}"
+                    body_kwargs = f"{invocation.body_parameter_name}={raw_body!r}"
             else:
                 base_path = [pc for pc in path_components if pc][0]
                 module_path_prefix = ".".join(
@@ -922,7 +951,10 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                 import_json_object = (
                     f"from my_kiota_client.{module_path} import {class_name}"
                 )
-                body_kwargs = f"body={class_name}({repr(invocation.json_body)})"
+                body_kwargs = (
+                    f"{invocation.body_parameter_name}="
+                    f"{class_name}({repr(invocation.json_body)})"
+                )
 
         query_parameters = invocation.query_parameters_without_path_vars
         if query_parameters:
@@ -1471,7 +1503,9 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"].schema_type != "object":
+                body_paramer = invocation.body_parameter
+                assert body_paramer is not None
+                if body_paramer.schema_type not in OPENAPI_NON_MODEL_TYPES:
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
@@ -1486,7 +1520,7 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                 "file.bin",
                 "application/octet-stream"
                 )""")
-                body_kwargs = f"body: {body_kwargs}"
+                body_kwargs = f"{invocation.body_parameter_name}: {body_kwargs}"
             else:
                 body_kwargs = f"{invocation.body!r}"
 
@@ -1677,7 +1711,9 @@ class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
 
         if invocation.send_body:
             if invocation.json_body is not None:
-                if invocation.arg_types["requestBody"].schema_type != "object":
+                body_paramer = invocation.body_parameter
+                assert body_paramer is not None
+                if body_paramer.schema_type not in OPENAPI_NON_MODEL_TYPES:
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
@@ -1708,7 +1744,7 @@ class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
                     )
                     """).strip()
 
-                body_kwargs = f"body: {body_kwargs}"
+                body_kwargs = f"{invocation.body_parameter_name}: {body_kwargs}"
 
             else:
                 body_kwargs = json.dumps(invocation.body)

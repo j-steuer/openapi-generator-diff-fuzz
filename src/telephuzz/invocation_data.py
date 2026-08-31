@@ -6,6 +6,7 @@ from typing import Any, cast
 from telephuzz.config import get_config
 from telephuzz.http_message import Request, path_only
 from telephuzz.openapi_helpers import (
+    ParameterType,
     extract_path_parameters,
     extract_path_variable_types,
     get_args,
@@ -42,7 +43,7 @@ class InvocationData:
                 get_config().spec_str, request.method, request.path
             )
 
-        self.send_body = "requestBody" in self.arg_types and (
+        self.send_body = self.body_parameter and (
             "json" not in cast(str, self.content_type) or self.body not in (None, b"")
         )
 
@@ -149,3 +150,19 @@ class InvocationData:
         """Resolve the concrete path."""
         path = path_only(path)
         return resolve_path(path, get_config().spec_str)
+
+    @property
+    def body_parameter(self) -> ParameterType | None:
+        """Return the request body parameter, if present."""
+        return next(
+            (parameter for parameter in self.arg_types.values() if parameter.body),
+            None,
+        )
+
+    @property
+    def body_parameter_name(self) -> str | None:
+        """Return the request body parameter name, if present."""
+        for name, parameter in self.arg_types.items():
+            if parameter.body:
+                return "body" if name == "requestBody" else name
+        return None
