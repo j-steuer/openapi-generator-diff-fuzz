@@ -429,3 +429,24 @@ def test_exact_diff_not_determined(
     assert evaluator.eval({result}, original_request) == {"lib1"}
     assert len(os.listdir(tmp_path)) == 1
     assert "Exact diff not determined" in caplog.text
+
+
+def test_diff_error_original_invocation(tmp_path, caplog) -> None:
+    """Evaluator should raise report when original request can not be processed."""
+    Config.API_CONFIG_PATH = Path(
+        "tests/testfiles/configs/api_swagger_petstore_config.yaml"
+    )
+    caplog.set_level(logging.DEBUG)
+
+    evaluator = DiffEvaluator(tmp_path)
+
+    original_request = Request(
+        CaseInsensitiveDict(), None, HTTPMethod.GET, "/invalid", {}
+    )
+
+    result = RequestResult("lib1", original_request)
+
+    # should not return lib as likely not culprit
+    assert not evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 1
+    assert " failed to process original request:" in caplog.text

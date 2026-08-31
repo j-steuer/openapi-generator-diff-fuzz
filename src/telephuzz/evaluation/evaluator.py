@@ -88,13 +88,34 @@ class DiffEvaluator:
                 "come from different libraries."
             )
 
+        try:
+            original_invocation = InvocationData(original_request)
+        except Exception as e:
+            detail = (
+                "Error while processing original request. "
+                "This is likely a bug in TelePhuzz, not in the client:"
+                f"{repr(e)}"
+            )
+            for library in library_id_list:
+                result = {r for r in results if r.library == library}.pop()
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    request_chain=[original_request],
+                    unique=False,
+                    produced_request=None,
+                    detail=detail,
+                )
+                report.to_log(self.log_path)
+                _e = repr(e)
+                logger.debug(f"{library} failed to process original request: {_e}")
+            return set()
+
         # compare requests
         request_groups: dict[Request | None, list[LibraryId]] = _get_groups("request")
         identical_requests = [r for r in request_groups.keys() if r == original_request]
         for request in identical_requests:
             del request_groups[request]
-
-        original_invocation = InvocationData(original_request)
 
         if None in request_groups:
             for library in request_groups[None]:
