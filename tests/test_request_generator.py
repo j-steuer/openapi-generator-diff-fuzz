@@ -91,6 +91,18 @@ def test_kill_process(api):
     assert process.poll() is not None
 
 
+def test_kill_process_stopped(api):
+    """Fuzzing process should also be killed while stopped."""
+    with SchemathesisGenerator(
+        OAS_PATH, "http://localhost:8011", max_time_seconds=5, batch_interval=1
+    ) as generator:
+        process = generator.fuzzing_process
+        generator.pause()
+        sleep(1)
+
+    assert process.poll() is not None
+
+
 def wait_until(predicate, timeout=2, interval=0.01):
     """Wait until predicate returns True or timeout expires."""
     deadline = time.monotonic() + timeout

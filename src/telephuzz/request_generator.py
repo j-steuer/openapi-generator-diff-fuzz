@@ -119,8 +119,15 @@ class FuzzerBasedGenerator(OASRequestGenerator):
 
     def __exit__(self, exc_type, exc, tb):
         if self.fuzzing_process.poll() is None:
-            os.killpg(self.fuzzing_process.pid, signal.SIGTERM)
-            self.fuzzing_process.wait()
+            try:
+                # The process may currently be SIGSTOP'd.
+                os.killpg(self.fuzzing_process.pid, signal.SIGCONT)
+                os.killpg(self.fuzzing_process.pid, signal.SIGTERM)
+                self.fuzzing_process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                logger.warning("Fuzzer did not terminate; killing process group.")
+                os.killpg(self.fuzzing_process.pid, signal.SIGKILL)
+                self.fuzzing_process.wait()
 
         self.exit_stack.close()
 
@@ -220,6 +227,7 @@ class SchemathesisGenerator(FuzzerBasedGenerator):
             "--continue-on-failure",
             "-m",
             "positive",
+            "--generation-unique-inputs",
         ]
         super().__init__(
             oas=oas,
