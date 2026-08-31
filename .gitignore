@@ -6,6 +6,7 @@ local_testfiles
 logs/
 bug_scripts/
 reports/
+.schemathesis
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
