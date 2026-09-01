@@ -879,6 +879,7 @@ def cwa_verification():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
     ],
 )
 @pytest.mark.usefixtures("cwa_verification")
