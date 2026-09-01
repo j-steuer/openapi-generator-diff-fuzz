@@ -22,7 +22,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     -v "$(pwd)":/local \
     -v "$PARENT_DIR":/output \
-    swaggerapi/swagger-codegen-cli-v3:3.0.80 \
+    swaggerapi/swagger-codegen-cli-v3.0.82 \
     generate \
     -i /local/spec/openapi.json \
     -l "$LANG" \
