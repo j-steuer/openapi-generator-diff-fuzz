@@ -81,6 +81,5 @@ def test_openapi_python_client(config: Path) -> None:
     fuzzer = TelePhuzz(
         "openapi-python-client:python",
         REPORT_PATH / f"openapi-python-client_{report_suffix}",
-        timeout=60,
     )
     fuzzer.start_fuzzing_session()
