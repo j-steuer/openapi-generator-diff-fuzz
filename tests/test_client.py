@@ -8,7 +8,7 @@ from time import sleep
 
 import docker
 import pytest
-from conftest import TEST_CONFIG_BASE_PATH
+from conftest import TEST_CONFIG_2_0_BASE_PATH, TEST_CONFIG_3_0_BASE_PATH
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
@@ -134,7 +134,9 @@ class TestGeneral:
     def test_unsupported_version(self):
         """Test that client raises error if version is not supported."""
         # version 2.0 schema
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_languagetool_config.yaml"
+        )
 
         # client does not support 2.0.x
         with pytest.raises(ValueError, match="is not supported by"):
@@ -222,7 +224,7 @@ class TestPetshop:
     def test_resolve_path_params(self, clc_class, petshop: tuple[Network, str]):
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -270,7 +272,7 @@ class TestPetshop:
         """Test parsing a JSON body not parseable through literal_eval."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -307,7 +309,7 @@ class TestPetshop:
         """Test request with path variables and body."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -337,7 +339,7 @@ class TestPetshop:
         """Test request with path variables and body."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -390,7 +392,7 @@ class TestPetshop:
         """Test request with file upload."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -428,7 +430,7 @@ class TestPetshop:
         """Test encoding with surrogates."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -469,7 +471,7 @@ class TestPetshop:
         """Test sending explode array with single string."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -503,7 +505,7 @@ class TestPetshop:
         """Test sending octet-stream with empty body."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -539,7 +541,7 @@ class TestPetshop:
         """Test sending octet-stream with empty body."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -579,7 +581,7 @@ class TestPetshop:
         """Test sending a request whose path ends with a path variable."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
 
         network, api_path = petshop
@@ -639,7 +641,7 @@ class TestSpringBatch:
         """Test resolving the module through a tag different than the base path."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
         )
 
         # wait for spring-batch-rest-mitmproxy to be ready
@@ -676,7 +678,7 @@ class TestSpringBatch:
         """Test capitalizing the model names correctly."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
         )
 
         # wait for spring-batch-rest-mitmproxy to be ready
@@ -744,7 +746,7 @@ class TestPatchSpring:
         """Test sending with alternate JSON type."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_http_patch_spring_config.yaml"
         )
 
         sleep(5)
@@ -807,7 +809,9 @@ class TestGenomeNexus:
     def test_body_name(self, clc_class):
         """Client should apply body name in swagger 2.0."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_genome_nexus_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_genome_nexus_config.yaml"
+        )
 
         with clc_class() as clc:
             request = Request(
@@ -841,7 +845,7 @@ class TestCatwatch:
     def test_dot_case(self, clc_class, catwatch: tuple[Network, str]):
         """Test sending a request with a dot variable."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+        Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_catwatch_config.yaml"
 
         sleep(10)
 
@@ -883,7 +887,7 @@ class TestCwaVerification:
         """Test sending a request with a dash variable."""
 
         Config.API_CONFIG_PATH = (
-            TEST_CONFIG_BASE_PATH / "api_cwa_verification_config.yaml"
+            TEST_CONFIG_3_0_BASE_PATH / "api_cwa_verification_config.yaml"
         )
 
         sleep(15)

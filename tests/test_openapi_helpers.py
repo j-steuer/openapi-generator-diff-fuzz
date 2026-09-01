@@ -7,7 +7,7 @@ from typing import cast
 
 import pytest
 import yaml  # type: ignore
-from conftest import TEST_CONFIG_BASE_PATH
+from conftest import TEST_CONFIG_2_0_BASE_PATH, TEST_CONFIG_3_0_BASE_PATH
 
 from telephuzz.config import Config, get_config
 from telephuzz.http_message import HTTPMethod
@@ -139,7 +139,9 @@ class TestPreprocessing:
     def test_disable_additional_properties_swagger(self):
         """Additional properties for Swagger 2.0 schemas should be disabled."""
 
-        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_languagetool_config.yaml"
+        )
 
         processed_spec = preprocess_oas(Path("wfd/openapi-swagger/languagetool.json"))
 
@@ -219,7 +221,9 @@ def test_find_args():
 
 def test_find_args_body_case():
     """Body case should be preserved."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_spring_batch_rest_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
+    )
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/jobExecutions")
     assert args["requestBody"] == ParameterType("JobConfig", None, False, True)
@@ -227,7 +231,9 @@ def test_find_args_body_case():
 
 def test_find_args_no_refs():
     """Test getting all args without refs."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_http_patch_spring_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_http_patch_spring_config.yaml"
+    )
 
     args = get_args(get_config().spec_str, HTTPMethod.PATCH, "/contacts/{id}")
     assert args["requestBody"] == ParameterType("object", None, True, True)
@@ -291,7 +297,7 @@ def test_resolve_with_path_parameters():
     with open("tests/testfiles/processed_petshop.json", "r") as f:
         spec = json.dumps(json.load(f))
 
-    path = "/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%B6"
+    path = "/pet/findByTags?tags=%C2%80%F0%A8%95%B3%F1%88%AC%93%C3%Bö"
     assert resolve_path(path, spec) == "/pet/findByTags"
 
 
@@ -374,7 +380,7 @@ def test_build_operation_lookup():
 
 def test_create_info():
     """Create info if not provided."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_bibliothek_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_3_0_BASE_PATH / "api_bibliothek_config.yaml"
 
     config = get_config()
     assert config.spec["info"]["title"] == "Test Title"
@@ -383,7 +389,7 @@ def test_create_info():
 
 def test_get_args_swagger():
     """Test obtaining args for a 2.0 spec."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_catwatch_config.yaml"
 
     args = get_args(get_config().spec_str, HTTPMethod.GET, "/projects")
     assert args == {
@@ -424,7 +430,7 @@ def test_get_args_swagger():
 
 def test_get_content_type_swagger():
     """Test obtaining content types for a 2.0 spec."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_catwatch_config.yaml"
 
     assert (
         get_content_type(get_config().spec_str, HTTPMethod.GET, "/config")
@@ -434,7 +440,7 @@ def test_get_content_type_swagger():
 
 def test_extract_path_variable_types_swagger():
     """Test extracting path variable types for  2.0 spec."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_rest_ncs_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_rest_ncs_config.yaml"
 
     assert extract_path_variable_types(get_config().spec_str, "/api/bessj/{n}/{x}") == {
         "n": "integer",
@@ -444,7 +450,9 @@ def test_extract_path_variable_types_swagger():
 
 def test_extract_path_variable_types_path():
     """Test extracting path variables defined for the entire path."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_person_controller_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_person_controller_config.yaml"
+    )
 
     spec_str = get_config().spec_str.replace('"string"', '"integer"')
     assert extract_path_variable_types(spec_str, "/api/persons/{ids}") == {
@@ -454,14 +462,16 @@ def test_extract_path_variable_types_path():
 
 def test_get_api_url_path_swagger():
     """Test obtaining url path for swagger."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_languagetool_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_languagetool_config.yaml"
 
     assert get_api_url_path(get_config().spec) == "/v2"
 
 
 def test_get_args_schema():
     """Test obtaining args where query parameter defines a schema."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_cwa_verification_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_cwa_verification_config.yaml"
+    )
 
     args = get_args(get_config().spec_str, HTTPMethod.POST, "/version/v1/tan/teletan")
     assert args["Authorization"].schema_type == "AuthorizationToken"
@@ -469,7 +479,9 @@ def test_get_args_schema():
 
 def test_get_args_concrete_path():
     """Test obtaining path-level args from a concrete request path."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_person_controller_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_person_controller_config.yaml"
+    )
 
     args = get_args(
         get_config().spec_str,
@@ -484,7 +496,7 @@ def test_get_args_concrete_path():
 
 def test_get_args_array_item_type():
     """Test obtaining array args item type in swagger 2.0."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_genome_nexus_config.yaml"
+    Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_genome_nexus_config.yaml"
 
     arg = get_args(
         get_config().spec_str, HTTPMethod.POST, "/ensembl/canonical-gene/hgnc"

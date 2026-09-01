@@ -1,7 +1,7 @@
 """Tests for config helper methods."""
 
 import pytest
-from conftest import TEST_CONFIG_BASE_PATH
+from conftest import TEST_CONFIG_3_0_BASE_PATH
 
 import telephuzz.config as cfg
 from telephuzz.config import Config, get_config
@@ -12,7 +12,9 @@ from telephuzz.operation_ids import generate_operation_id
 
 def test_get_config():
     """Test obtaining the config and reading."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_config_ndt_components.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_config_ndt_components.yaml"
+    )
     config = get_config()
 
     assert config.api_container_name == "api"
@@ -41,7 +43,9 @@ def test_get_config():
 
 def test_operation_id_lookup() -> None:
     """Test the operation_id_lookup method."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_petstore_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
+    )
     config = get_config()
 
     # Test a known operation
@@ -59,7 +63,9 @@ def test_operation_id_lookup() -> None:
 
 def test_tag_lookup() -> None:
     """Test the tag_lookup method."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
+    )
     config = get_config()
 
     # Test a known tag
@@ -77,8 +83,10 @@ def test_tag_lookup() -> None:
 
 def test_jacoco() -> None:
     """Test loading jacoco data."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_springbatch_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
+    )
     config = get_config()
 
     assert config.jacoco_port == 6300
-    assert config.jacoco_path == "./reports/coverage/api_springbatch_config"
+    assert config.jacoco_path == "./reports/coverage/api_spring_batch_rest_config"

@@ -27,6 +27,8 @@ from telephuzz.session.api import APIContainer, APIWithDatabaseContainer
 
 TESTFILES_PATH = BASE_PATH / "tests" / "testfiles"
 TEST_CONFIG_BASE_PATH = TESTFILES_PATH / "configs"
+TEST_CONFIG_2_0_BASE_PATH = TEST_CONFIG_BASE_PATH / "2.0"
+TEST_CONFIG_3_0_BASE_PATH = TEST_CONFIG_BASE_PATH / "3.0.x"
 TEST_API_CONFIG_PATH = TESTFILES_PATH / "api_config.yaml"
 
 disable_loggers = ["urllib3.connectionpool", "docker.utils.config"]

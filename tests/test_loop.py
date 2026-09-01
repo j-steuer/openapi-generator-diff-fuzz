@@ -10,7 +10,7 @@ from time import sleep
 import docker
 import pytest
 import requests
-from conftest import TEST_CONFIG_BASE_PATH
+from conftest import TEST_CONFIG_3_0_BASE_PATH
 from docker.models.networks import Network
 from requests.models import CaseInsensitiveDict
 
@@ -35,8 +35,8 @@ CLIENT_PATH = TESTFILES / "test_clients"
 BASIC_CLIENT_PATH = CLIENT_PATH / "basic_client"
 TEST_OAS = TESTFILES / "openapi_test_fuzzing.json"
 
-API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_loop_config.yaml"
-CLIENT_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "client_loop_config.yaml"
+API_CONFIG_PATH = TEST_CONFIG_3_0_BASE_PATH / "api_loop_config.yaml"
+CLIENT_CONFIG_PATH = TEST_CONFIG_3_0_BASE_PATH / "client_loop_config.yaml"
 
 
 BASIC_CLIENT = "basicclient"
@@ -248,7 +248,9 @@ def test_loop_faulty_library(tmp_path):
 
 def test_send_petshop():
 
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_pestore_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
+    )
 
     request = Request(
         headers=CaseInsensitiveDict(
@@ -275,12 +277,14 @@ def test_send_petshop():
 
 def test_obtain_jacoco_coverage(tmp_path):
     """Test that jacoco coverage is captured at the end of the fuzzing loop."""
-    Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_swagger_pestore_config.yaml"
+    Config.API_CONFIG_PATH = (
+        TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
+    )
 
     fuzzer = TelePhuzz("openapi-generator:python", tmp_path, timeout=2)
     fuzzer.start_fuzzing_session()
 
     # check that jacoco file was created
-    coverage_path = "./reports/coverage/api_swagger_pestore_config"
+    coverage_path = "./reports/coverage/api_swagger_petstore_config"
     assert len(os.listdir(coverage_path)) == 1
     assert os.listdir(coverage_path)[0] == "jacoco.exec"
