@@ -172,10 +172,10 @@ class SessionManager:
             # process into invocation data to do it once per request
             try:
                 invocation = InvocationData(request)
-            except Exception:
+            except Exception as e:
                 logger.error(
                     "Error occured while transforming original "
-                    "request to invocation: {e}"
+                    f"request to invocation: {repr(e)}"
                 )
 
             try:
@@ -186,7 +186,8 @@ class SessionManager:
                 results.add(result)
             except Exception as e:
                 logger.error(
-                    f"Fuzzer error occured while sending request {repr(request)}: {e}"
+                    f"Fuzzer error occured while sending request {repr(request)}: "
+                    f"{repr(e)}"
                 )
 
         return results
