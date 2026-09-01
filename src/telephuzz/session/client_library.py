@@ -635,10 +635,9 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
             auth = ""
 
         # TODO move replace to transforming invocation
-        api = (
-            get_config()
-            .tag_lookup(invocation.method.value, invocation.path)
-            .replace("-", "_")
+        api = transform_case(
+            get_config().tag_lookup(invocation.method.value, invocation.path),
+            Case.SNAKE,
         )
         api_class = transform_case(api, Case.PASCAL)
 

@@ -108,3 +108,10 @@ def test_suffix_is_lowercase_alpha() -> None:
     regex = r"[a-z]+"
 
     assert re.fullmatch(regex, operation_id.split("_")[-1])
+
+
+def test_special_characters_case() -> None:
+    """Test transforming case with special characters."""
+    assert transform_case("health.json", Case.SNAKE) == "health_json"
+    assert transform_case("cwa-fake", Case.SNAKE) == "cwa_fake"
+    assert transform_case("Contributions Count", Case.SNAKE) == "contributions_count"

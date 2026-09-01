@@ -3,7 +3,6 @@
 import hashlib
 import re
 from enum import Enum
-from typing import cast
 
 
 class Case(Enum):
@@ -71,50 +70,58 @@ def generate_operation_id(method: str, path: str) -> str:
 
 def transform_case(string: str, case: Case) -> str:
     """Transform the string into the provided case format."""
+
     snake_regex = r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$"
-    camel_regex = r"^[a-z]+([A-Z][a-z0-9]*)*$"
+    camel_regex = r"^[a-z][a-z0-9]*([A-Z][a-z0-9]*)*$"
     pascal_regex = r"^[A-Z][a-z0-9]*([A-Z][a-z0-9]*)*$"
 
-    if re.fullmatch(snake_regex, string):
+    # Special characters can represent word boundaries.
+    snake_string = re.sub(r"[^a-zA-Z0-9]", "_", string)
+    compact_string = re.sub(r"[^a-zA-Z0-9]", "", string)
+
+    if re.fullmatch(snake_regex, snake_string):
         current_case = Case.SNAKE
-    elif re.fullmatch(camel_regex, string):
+        string = snake_string
+    elif re.fullmatch(camel_regex, compact_string):
         current_case = Case.CAMEL
-    elif re.fullmatch(pascal_regex, string):
+        string = compact_string
+    elif re.fullmatch(pascal_regex, compact_string):
         current_case = Case.PASCAL
+        string = compact_string
     else:
-        raise ValueError(f"Case of {string} should be in snake, camel or pascal case.")
+        raise ValueError(
+            f"Case of {string!r} should be in snake, camel or pascal case."
+        )
 
     if case == current_case:
         return string
 
     match case:
         case Case.SNAKE:
-            parts = list(filter(None, re.split(r"(?=[A-Z])", string)))
-            return "_".join([cast(str, s).lower() for s in parts])
+            if current_case == Case.SNAKE:
+                return string
+
+            # camel/pascal -> snake
+            parts = re.findall(r"[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])", string)
+            return "_".join(part.lower() for part in parts)
+
         case Case.CAMEL:
             if current_case == Case.SNAKE:
                 parts = string.split("_")
-                if len(parts) > 1:
-                    parts = [parts[0]] + [part.capitalize() for part in parts[1:]]
-                camel_operation_id = "".join(parts)
-                assert re.fullmatch(camel_regex, camel_operation_id), (
-                    f"Error while transforming to camel: {camel_operation_id}"
+                return parts[0] + "".join(
+                    part.capitalize() for part in parts[1:] if part
                 )
-                return camel_operation_id
-            else:
-                return string[0].swapcase() + string[1:]
+
+            # pascal -> camel
+            return string[0].lower() + string[1:]
 
         case Case.PASCAL:
             if current_case == Case.SNAKE:
                 parts = string.split("_")
-                parts = [part.capitalize() for part in parts]
-                pascal_operation_id = "".join(parts)
-                assert re.fullmatch(pascal_regex, pascal_operation_id), (
-                    f"Error while transforming to pascal: {pascal_operation_id}"
-                )
-                return pascal_operation_id
-            else:
-                return string[0].swapcase() + string[1:]
+                return "".join(part.capitalize() for part in parts if part)
+
+            # camel -> pascal
+            return string[0].upper() + string[1:]
 
         case _:
             raise ValueError("Invalid case.")

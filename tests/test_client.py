@@ -209,7 +209,7 @@ def petshop():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
-        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen.python"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen-python"),
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
@@ -821,3 +821,87 @@ class TestGenomeNexus:
             code = clc._get_code(InvocationData(request), "test")
             assert b"variants=" in code
             assert b"body=" not in code
+
+
+@pytest.fixture(scope="class")
+def catwatch():
+    network, api_name = api_wfd("catwatch")
+    yield network, api_name
+    api_down(network, "catwatch")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+    ],
+)
+@pytest.mark.usefixtures("catwatch")
+class TestCatwatch:
+    def test_dot_case(self, clc_class, catwatch: tuple[Network, str]):
+        """Test sending a request with a dot variable."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_BASE_PATH / "api_catwatch_config.yaml"
+
+        sleep(10)
+
+        network, api_path = catwatch
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.GET,
+                path="/health.json",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def cwa_verification():
+    network, api_name = api_wfd("cwa-verification")
+    yield network, api_name
+    api_down(network, "cwa-verification")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+    ],
+)
+@pytest.mark.usefixtures("cwa_verification")
+class TestCwaVerification:
+    def test_dash_case(self, clc_class, cwa_verification: tuple[Network, str]):
+        """Test sending a request with a dash variable."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_BASE_PATH / "api_cwa_verification_config.yaml"
+        )
+
+        sleep(15)
+
+        network, api_path = cwa_verification
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=b'{"registrationToken": "00000000-0000-4000-8000-000000000000"}',
+                method=HTTPMethod.POST,
+                path="/version/v1/tan",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=302,
+            )
