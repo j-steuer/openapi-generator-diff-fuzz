@@ -424,10 +424,11 @@ class TestPetshop:
                 expected_status=404,
             )
 
-    # NOTE:
-    # - OpenAPI Generator C# does not support optional enum values
     def test_surrogate_encoding(self, clc_class, petshop: tuple[Network, str]):
         """Test encoding with surrogates."""
+
+        if clc_class is OpenAPIGenCsharpCLC:
+            pytest.xfail("OpenAPI Generator C# does not support optional enum values")
 
         Config.API_CONFIG_PATH = (
             TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
