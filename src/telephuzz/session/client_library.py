@@ -542,7 +542,7 @@ class OpenAPIPythonClient(OperationIdBasedCLC):
 
 
 class Kiota:
-    supported_versions = {OpenAPIVersion.V_3_0}
+    supported_versions = {OpenAPIVersion.V_2, OpenAPIVersion.V_3_0}
 
 
 # --- Concrete Python Client Classes ---
