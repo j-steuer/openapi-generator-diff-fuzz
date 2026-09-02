@@ -1508,7 +1508,12 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                     model_code = self._generate_code_models(invocation)
                     body_kwargs = model_code.creation_code
                 else:
-                    body_kwargs = f"new {repr(invocation.json_body)}"
+                    _json_body = json.dumps(invocation.json_body, separators=(",", ":"))
+                    body_kwargs = (
+                        f"JsonSerializer.Deserialize<JsonElement>("
+                        f'"""{_json_body}""", '
+                        f"jsonOptions)"
+                    )
 
             elif invocation.content_type == "application/octet-stream":
                 assert invocation.body is not None

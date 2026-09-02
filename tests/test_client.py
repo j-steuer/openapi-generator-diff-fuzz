@@ -802,6 +802,7 @@ def genome_nexus():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("genome_nexus")
@@ -838,6 +839,7 @@ def catwatch():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("catwatch")
@@ -880,6 +882,7 @@ def cwa_verification():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("cwa_verification")
