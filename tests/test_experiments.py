@@ -71,6 +71,38 @@ def test_openapi_generator_python_3_0(config: Path) -> None:
 
 @pytest.mark.parametrize(
     "config",
+    CONFIGS_2_0,
+    ids=lambda config: config.stem,
+)
+def test_openapi_generator_csharp_2_0(config: Path) -> None:
+    Config.API_CONFIG_PATH = config
+
+    report_suffix = config.name[: config.name.find(".yaml")]
+    fuzzer = TelePhuzz(
+        "openapi-generator:csharp",
+        REPORT_PATH / f"openapi-generator-csharp_{report_suffix}",
+    )
+    fuzzer.start_fuzzing_session()
+
+
+@pytest.mark.parametrize(
+    "config",
+    CONFIGS_3_0,
+    ids=lambda config: config.stem,
+)
+def test_openapi_generator_chsarp_3_0(config: Path) -> None:
+    Config.API_CONFIG_PATH = config
+
+    report_suffix = config.name[: config.name.find(".yaml")]
+    fuzzer = TelePhuzz(
+        "openapi-generator:csharp",
+        REPORT_PATH / f"openapi-generator-csharp_{report_suffix}",
+    )
+    fuzzer.start_fuzzing_session()
+
+
+@pytest.mark.parametrize(
+    "config",
     CONFIGS_3_0,
     ids=lambda config: config.stem,
 )
