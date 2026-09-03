@@ -803,7 +803,8 @@ def genome_nexus():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
-        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
     ],
 )
 @pytest.mark.usefixtures("genome_nexus")
@@ -840,7 +841,8 @@ def catwatch():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
-        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
     ],
 )
 @pytest.mark.usefixtures("catwatch")
@@ -883,7 +885,8 @@ def cwa_verification():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
-        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-csharp"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
     ],
 )
 @pytest.mark.usefixtures("cwa_verification")
@@ -913,4 +916,47 @@ class TestCwaVerification:
                 network,
                 api_path,
                 expected_status=302,
+            )
+
+
+@pytest.fixture(scope="class")
+def person_controller():
+    network, api_name = api_wfd("person-controller")
+    yield network, api_name
+    api_down(network, "person-controller")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("person_controller")
+class TestPersonController:
+    def test_p(self, clc_class, person_controller: tuple[Network, str]):
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_3_0_BASE_PATH / "api_person_controller_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = person_controller
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=b"[{}, {}]",
+                method=HTTPMethod.POST,
+                path="/api/persons",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
             )

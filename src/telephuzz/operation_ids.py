@@ -68,8 +68,15 @@ def generate_operation_id(method: str, path: str) -> str:
     return f"{method.lower()}_{path_part}_{suffix}"
 
 
-def transform_case(string: str, case: Case) -> str:
-    """Transform the string into the provided case format."""
+def transform_case(string: str, case: Case, divide_uppercase=False) -> str:
+    """Transform the string into the provided case format.
+
+    divide_uppercase decides whether a sequence of uppercase letters
+    are treated as a single word or as individual words. For instance,
+    testWORD becomes test_word with divide_uppercase=False
+    (used by OpenAPI Generator) and test_w_o_r_d with divide_uppercase=True
+    (used by Kiota).
+    """
 
     snake_regex = r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$"
     camel_regex = r"^[a-z][a-z0-9]*([A-Z][a-z0-9]*)*$"
@@ -101,8 +108,20 @@ def transform_case(string: str, case: Case) -> str:
             if current_case == Case.SNAKE:
                 return string
 
-            # camel/pascal -> snake
-            parts = re.findall(r"[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])", string)
+            if divide_uppercase:
+                # Keep an uppercase letter together with following lowercase
+                # characters, but split consecutive uppercase letters.
+                parts = re.findall(
+                    r"[A-Z][a-z0-9]+|[A-Z](?![a-z0-9])|[a-z0-9]+",
+                    string,
+                )
+            else:
+                # camel/pascal -> snake
+                parts = re.findall(
+                    r"[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])",
+                    string,
+                )
+
             return "_".join(part.lower() for part in parts)
 
         case Case.CAMEL:

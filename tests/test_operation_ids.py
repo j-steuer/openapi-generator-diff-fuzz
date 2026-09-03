@@ -115,3 +115,28 @@ def test_special_characters_case() -> None:
     assert transform_case("health.json", Case.SNAKE) == "health_json"
     assert transform_case("cwa-fake", Case.SNAKE) == "cwa_fake"
     assert transform_case("Contributions Count", Case.SNAKE) == "contributions_count"
+
+
+def test_divide_uppercase_sequences() -> None:
+    """Test two modes of dividing uppercase sequences."""
+    assert transform_case("testWORD", Case.SNAKE) == "test_word"
+    assert (
+        transform_case("testWORD", Case.SNAKE, divide_uppercase=True) == "test_w_o_r_d"
+    )
+
+    assert transform_case("TestWORD", Case.SNAKE) == "test_word"
+    assert (
+        transform_case("TestWORD", Case.SNAKE, divide_uppercase=True) == "test_w_o_r_d"
+    )
+
+    assert transform_case("testWord", Case.SNAKE) == "test_word"
+    assert transform_case("testWord", Case.SNAKE, divide_uppercase=True) == "test_word"
+
+    assert transform_case("TestWord", Case.SNAKE) == "test_word"
+    assert transform_case("TestWord", Case.SNAKE, divide_uppercase=True) == "test_word"
+
+    assert transform_case("testWORDValue", Case.SNAKE) == "test_word_value"
+    assert (
+        transform_case("testWORDValue", Case.SNAKE, divide_uppercase=True)
+        == "test_w_o_r_d_value"
+    )
