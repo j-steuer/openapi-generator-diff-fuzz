@@ -935,7 +935,9 @@ def person_controller():
 )
 @pytest.mark.usefixtures("person_controller")
 class TestPersonController:
-    def test_p(self, clc_class, person_controller: tuple[Network, str]):
+    def test_resolve_schema_name_with_uppercase_sequence(
+        self, clc_class, person_controller: tuple[Network, str]
+    ):
 
         Config.API_CONFIG_PATH = (
             TEST_CONFIG_3_0_BASE_PATH / "api_person_controller_config.yaml"
