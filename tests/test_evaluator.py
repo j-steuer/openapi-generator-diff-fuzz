@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests.models import CaseInsensitiveDict
 
-from telephuzz.config import Config
+from telephuzz.config import Config, get_config
 from telephuzz.evaluation.evaluator import DiffEvaluator
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.request_result import RequestResult
@@ -315,9 +315,8 @@ def test_request_none_report(basic_request, mock_invocation_data, tmp_path):
     assert evaluator.eval({result}, original_request) == set()
 
 
-def test_semantically_equivalent_datetime(tmp_path, caplog):
+def test_semantically_equivalent_datetime(tmp_path):
     """Special message for only syntactically different date-time."""
-    caplog.set_level(logging.DEBUG)
     Config.API_CONFIG_PATH = Path(
         "tests/testfiles/configs/3.0.x/api_swagger_petstore_config.yaml"
     )
@@ -364,8 +363,6 @@ def test_semantically_equivalent_datetime(tmp_path, caplog):
     assert evaluator.eval({result}, request1) == {"lib1"}
     assert len(os.listdir(tmp_path)) == 1
 
-    assert "Syntactically different but semantically equivalent date" in caplog.text
-
 
 def test_capture_invocation_error(tmp_path, caplog):
     """Errors thrown while creating result invocation should create report."""
@@ -394,43 +391,6 @@ def test_capture_invocation_error(tmp_path, caplog):
     assert "Error while creating invocation for result" in caplog.text
 
 
-def test_exact_diff_not_determined(
-    basic_request, mock_invocation_data, tmp_path, caplog, monkeypatch
-):
-    """Should still raise report if exact diff was not determined."""
-    caplog.set_level(logging.DEBUG)
-
-    original_request = deepcopy(basic_request)
-    produced_request = deepcopy(basic_request)
-
-    # patch hash so difference is determined despite being identical
-    original_hash = Request.__hash__
-
-    def test_hash(self):
-        if self is original_request:
-            return 1
-        elif self is produced_request:
-            return 2
-        return original_hash(self)
-
-    original_eq = Request.__eq__
-
-    def test_eq(self, other):
-        if self is original_request or self is produced_request:
-            return False
-        return original_eq(self, other)
-
-    monkeypatch.setattr(Request, "__hash__", test_hash)
-    monkeypatch.setattr(Request, "__eq__", test_eq)
-
-    evaluator = DiffEvaluator(tmp_path)
-    result = RequestResult("lib1", produced_request)
-
-    assert evaluator.eval({result}, original_request) == {"lib1"}
-    assert len(os.listdir(tmp_path)) == 1
-    assert "Exact diff not determined" in caplog.text
-
-
 def test_diff_error_original_invocation(tmp_path, caplog) -> None:
     """Evaluator should raise report when original request can not be processed."""
     Config.API_CONFIG_PATH = Path(
@@ -450,3 +410,66 @@ def test_diff_error_original_invocation(tmp_path, caplog) -> None:
     assert not evaluator.eval({result}, original_request)
     assert len(os.listdir(tmp_path)) == 1
     assert " failed to process original request:" in caplog.text
+
+
+def test_diff_body_recursive(tmp_path, monkeypatch) -> None:
+    """Body components should be semantically compared recursively."""
+    spec = {
+        "openapi": "3.0.0",
+        "info": {
+            "title": "Test API",
+            "version": "1.0.0",
+        },
+        "paths": {
+            "/test": {
+                "post": {
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "createdAt": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+
+    monkeypatch.setattr(get_config(), "spec", spec)
+
+    original_request = Request(
+        CaseInsensitiveDict({"content-type": "application/json"}),
+        b'{"users":[{"createdAt":"7794-10-02T21:08:03+00:00"}]}',
+        HTTPMethod.POST,
+        "/test",
+        {},
+    )
+    produced_request = Request(
+        CaseInsensitiveDict({"content-type": "application/json"}),
+        b'{"users":[{"createdAt":"7794-10-02T21:08:03Z"}]}',
+        HTTPMethod.POST,
+        "/test",
+        {},
+    )
+
+    evaluator = DiffEvaluator(tmp_path)
+    result = RequestResult("lib1", produced_request)
+
+    assert not evaluator.eval({result}, original_request)

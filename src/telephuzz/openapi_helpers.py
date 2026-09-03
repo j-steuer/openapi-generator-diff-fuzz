@@ -130,11 +130,9 @@ def _close_object_schemas(schema: object) -> None:
     if not isinstance(schema, dict):
         return
 
-    # A schema is an object schema either when it explicitly declares
     if schema.get("type") == "object" or isinstance(schema.get("properties"), dict):
         schema.setdefault("additionalProperties", False)
 
-    # Recurse through nested schemas.
     properties = schema.get("properties")
     if isinstance(properties, dict):
         for property_schema in properties.values():
@@ -176,7 +174,6 @@ def _close_request_body_schema(schema: object) -> None:
     ):
         schema.setdefault("additionalProperties", False)
 
-    # Recurse through nested schemas.
     properties = schema.get("properties")
     if isinstance(properties, dict):
         for property_schema in properties.values():
@@ -221,6 +218,7 @@ def _find_all(spec: dict, element: str) -> list[Any]:
 
 
 def get_version(spec: dict) -> str:
+    """Get the OpenAPI/Swagger version."""
     try:
         return spec.get("openapi") or spec["swagger"]
     except KeyError as e:
@@ -230,18 +228,18 @@ def get_version(spec: dict) -> str:
 
 
 def find_operation(spec: dict, operation_id: str) -> dict | None:
-    """Find operation with operation id."""
-
+    """Find an operation by operation ID."""
     if isinstance(spec, dict):
         for v in spec.values():
             if not isinstance(v, dict):
                 continue
-            if "operationId" in v and v["operationId"] == operation_id:
+
+            if v.get("operationId") == operation_id:
                 return v
-            else:
-                rec_search = find_operation(v, operation_id)
-                if rec_search is not None:
-                    return rec_search
+
+            rec_search = find_operation(v, operation_id)
+            if rec_search is not None:
+                return rec_search
 
     return None
 
@@ -272,14 +270,6 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
     """Obtain the argument types for the given operation.
 
     Spec must be passed as a string using json.dumps to enable caching.
-
-    Parameters defined on both the path item and the operation are included.
-    Operation-level parameters override path-level parameters with the same name.
-
-    Each argument is represented by a ParameterType containing:
-      - schema_type: the OpenAPI schema type (e.g. string, array, enum)
-      - item_type: the item type for arrays, otherwise None
-      - required: whether the argument is required
     """
     spec_dict = json.loads(spec)
     operation = _search_operation(spec, method, path)
@@ -328,16 +318,6 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
                 body=True,
             )
 
-    # Parameters can be defined either on the path item or on the operation.
-    #
-    # For a concrete request such as:
-    #   /api/persons/0
-    #
-    # resolve_path() gives us the corresponding OpenAPI path:
-    #   /api/persons/{ids}
-    #
-    # Path-level parameters apply to all operations on that path, while
-    # operation-level parameters can override them.
     resolved_path = resolve_path(path, spec)
     path_item = spec_dict["paths"][resolved_path]
 
@@ -372,8 +352,6 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
             )
             continue
 
-        # OpenAPI 3.x parameter
-        # Swagger 2.0 non-body parameter
         schema = parameter.get("schema", parameter)
 
         if "enum" in schema:
@@ -401,11 +379,10 @@ def get_args(spec: str, method: HTTPMethod, path: str) -> dict[str, ParameterTyp
 
 @cache
 def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
-    """Get content tpy eof operation if available"""
+    """Get the content type of an operation if available."""
     operation = _search_operation(spec, method, path)
 
     if "requestBody" not in operation:
-        # try Swagger 2.0
         consumes = operation.get("consumes")
         if consumes:
             return consumes[0]
@@ -414,60 +391,113 @@ def get_content_type(spec: str, method: HTTPMethod, path: str) -> str | None:
         if consumes:
             return consumes[0]
 
-        # no request body found
         return None
 
-    # Swagger 3.x
     return list(operation["requestBody"]["content"].keys())[0]
 
 
-def _resolve_ref(spec: dict, ref: str) -> dict:
-    """Resolve a local JSON reference within the spec."""
+def resolve_ref(spec: dict, ref: str) -> dict:
+    """Resolve a local JSON reference within an OpenAPI spec.
+
+    Only local references are supported. Any external reference is rejected.
+
+    Examples:
+        #/components/schemas/User
+        #/components/requestBodies/CreateUser
+        #/definitions/User
+    """
     if not isinstance(ref, str) or not ref.startswith("#/"):
         raise ValueError(f"Unsupported ref: {ref}")
 
     current: Any = spec
+
     for path_part in ref[2:].split("/"):
+        path_part = unquote(path_part)
         path_part = path_part.replace("~1", "/").replace("~0", "~")
+
+        if not isinstance(current, dict) or path_part not in current:
+            raise KeyError(f"Could not resolve ref {ref!r} at {path_part!r}")
+
         current = current[path_part]
-    assert isinstance(current, dict)
+
+    if not isinstance(current, dict):
+        raise ValueError(f"Ref {ref!r} does not resolve to an object.")
+
     return current
 
 
-def _resolve_schema(spec: dict, schema: dict) -> dict:
-    """Resolve schema objects, including refs and composed schemas."""
+def resolve_schema(spec: dict, schema: dict) -> dict:
+    """Resolve a schema, including local refs and composed schemas.
+
+    Local JSON references are recursively resolved.
+
+    ``allOf``, ``oneOf`` and ``anyOf`` schemas are represented as a combined
+    object schema containing the properties discovered in their branches.
+    """
     if not isinstance(schema, dict):
         return {}
 
     if "$ref" in schema:
-        return _resolve_schema(spec, _resolve_ref(spec, schema["$ref"]))
+        resolved = resolve_schema(spec, resolve_ref(spec, schema["$ref"]))
+
+        # OpenAPI 3.1 permits siblings alongside $ref. Preserve them.
+        siblings = {key: value for key, value in schema.items() if key != "$ref"}
+
+        if siblings:
+            merged = dict(resolved)
+            merged.update(siblings)
+            return resolve_schema(spec, merged)
+
+        return resolved
 
     if "allOf" in schema:
         properties: dict[str, Any] = {}
+
         for subschema in schema["allOf"]:
-            resolved = _resolve_schema(spec, subschema)
+            resolved = resolve_schema(spec, subschema)
             properties.update(resolved.get("properties", {}))
-        return {"type": "object", "properties": properties}
+
+        result = {
+            "type": "object",
+            "properties": properties,
+        }
+
+        if "required" in schema:
+            result["required"] = schema["required"]
+
+        return result
 
     if "oneOf" in schema or "anyOf" in schema:
         options = schema.get("oneOf") or schema.get("anyOf") or []
         properties = {}
+
         for subschema in options:
-            resolved = _resolve_schema(spec, subschema)
+            resolved = resolve_schema(spec, subschema)
             properties.update(resolved.get("properties", {}))
-        return {"type": "object", "properties": properties}
+
+        return {
+            "type": "object",
+            "properties": properties,
+        }
 
     return schema
 
 
-def _get_request_body_schema(operation: dict) -> dict | None:
-    """Return the request body schema for Swagger 2.0 or OpenAPI 3.x."""
+def get_request_body_schema(spec: dict, operation: dict) -> dict | None:
+    """Return the request body schema for Swagger 2.0 or OpenAPI 3.x.
 
+    Request body references are resolved here so callers do not need to
+    distinguish between inline and referenced request bodies.
+    """
     # OpenAPI 3.x
     request_body = operation.get("requestBody")
+
     if isinstance(request_body, dict):
+        if "$ref" in request_body:
+            request_body = resolve_ref(spec, request_body["$ref"])
+
         content = request_body.get("content", {})
-        if not content:
+        if not isinstance(content, dict) or not content:
             return None
 
         media_type = next(iter(content.values()))
@@ -479,16 +509,20 @@ def _get_request_body_schema(operation: dict) -> dict | None:
 
     # Swagger 2.0
     for parameter in operation.get("parameters", []):
-        if parameter.get("in") == "body":
-            schema = parameter.get("schema")
-            return schema if isinstance(schema, dict) else None
+        if not isinstance(parameter, dict):
+            continue
+
+        if parameter.get("in") != "body":
+            continue
+
+        schema = parameter.get("schema")
+        return schema if isinstance(schema, dict) else None
 
     return None
 
 
 def get_api_url_path(spec: dict) -> str:
     """Obtain the base path of the API."""
-
     if "servers" in spec:
         servers = spec.get("servers", [])
         if servers:
@@ -496,7 +530,6 @@ def get_api_url_path(spec: dict) -> str:
             parsed_url = urlparse(url)
             return parsed_url.path or ""
 
-    # Swagger 2.0
     base_path = spec.get("basePath", "")
     if isinstance(base_path, str):
         return base_path
@@ -506,6 +539,7 @@ def get_api_url_path(spec: dict) -> str:
 
 @cache
 def extract_paths(spec_json: str) -> tuple[set[str], set[str]]:
+    """Extract concrete and parameterized paths."""
     spec: dict = json.loads(spec_json)
 
     concrete = set()
@@ -550,27 +584,23 @@ def extract_path_variable_types(spec_json: str, path: str) -> dict[str, str]:
 
 
 def resolve_path(path: str, spec_json: str) -> str:
-    """
-    Resolve an incoming API path to:
-    1. Exact match in concrete paths, or
-    2. Best match among non-concrete paths, or
-    3. Raise error if no match
-    """
+    """Resolve an incoming API path to an OpenAPI path template.
 
+    The concrete path is preferred. Otherwise the best matching parameterized
+    path is returned.
+    """
     path = _path_without_query(path)
 
     concrete_paths, non_concrete_paths = extract_paths(spec_json)
 
-    # 1. Exact match
     if path in concrete_paths:
         return path
 
     path_parts = _split(path)
 
     best_match = None
-    best_score = (-1, float("inf"))  # (static_matches, wildcard_count)
+    best_score = (-1, float("inf"))
 
-    # 2. Match against templates
     for template in non_concrete_paths:
         tpl_parts = _split(template)
 
@@ -585,6 +615,7 @@ def resolve_path(path: str, spec_json: str) -> str:
             if _is_param(t_seg):
                 wildcard_count += 1
                 continue
+
             if p_seg == t_seg:
                 static_matches += 1
             else:
@@ -593,6 +624,7 @@ def resolve_path(path: str, spec_json: str) -> str:
 
         if matches:
             score = (static_matches, -wildcard_count)
+
             if score > best_score:
                 best_score = score
                 best_match = template
@@ -604,29 +636,29 @@ def resolve_path(path: str, spec_json: str) -> str:
 
 
 def _is_param(segment: str) -> bool:
+    """Return whether a path segment is a parameter."""
     return segment.startswith("{") and segment.endswith("}")
 
 
 def _split(path: str) -> list[str]:
+    """Split a path into non-empty segments."""
     return [p for p in path.strip("/").split("/") if p]
 
 
 def _path_without_query(path: str) -> str:
-    """Strip the query parameters from a path"""
+    """Strip query parameters from a path."""
     if "?" in path:
         return path[: path.find("?")]
+
     return path
 
 
 def resolve_request_id(method: HTTPMethod, path: str, spec_str: str) -> str:
-    operation_id = generate_operation_id(method.value, path)
-
+    """Resolve the operation ID for a request."""
     path_only = _path_without_query(path)
+    resolved_path = resolve_path(path_only, spec_str)
 
-    path = resolve_path(path_only, spec_str)
-
-    operation_id = generate_operation_id(method.value, path)
-    return operation_id
+    return generate_operation_id(method.value, resolved_path)
 
 
 def extract_path_parameters(template: str, path: str) -> dict[str, Any]:
@@ -674,6 +706,7 @@ def build_operation_lookup(spec: dict) -> dict[tuple[str, str], dict[str, Any]]:
 
             tags = operation.get("tags")
             tag: str | None = None
+
             if isinstance(tags, list) and tags:
                 tag = tags[0]
             elif isinstance(tags, str):

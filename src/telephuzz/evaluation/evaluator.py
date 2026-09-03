@@ -3,11 +3,13 @@
 import itertools
 import logging
 import os
-from datetime import datetime
+from copy import deepcopy
 from pathlib import Path
 from pprint import pformat
 from typing import Any
 
+from telephuzz.config import get_config
+from telephuzz.evaluation.normalize import OpenAPINormalizer
 from telephuzz.evaluation.report import DiffReport
 from telephuzz.http_message import Request, path_only
 from telephuzz.invocation_data import InvocationData
@@ -37,6 +39,24 @@ class DiffEvaluator:
         logger.info(f"Error with request {original_request}")
         logger.info(detail)
 
+    @staticmethod
+    def _normalize_request(
+        request: Request,
+        normalizer: OpenAPINormalizer,
+    ) -> Request:
+        """Return a normalized request suitable for comparison."""
+        normalized = normalizer.normalize(request)
+
+        # Normalize host-prefixed paths for comparison without mutating
+        # either the original request or the normalizer's result.
+        if normalized.path.startswith("/localhost:") or normalized.path.startswith(
+            "/host.docker.internal:"
+        ):
+            normalized = deepcopy(normalized)
+            normalized.path = normalized.path[normalized.path.find("/", 1) :]
+
+        return normalized
+
     def eval(
         self,
         results: set[RequestResult],
@@ -54,22 +74,41 @@ class DiffEvaluator:
             A set of library ids where the corresponding library caused an error.
 
         """
+        normalizer = OpenAPINormalizer(get_config().spec)
+
+        # Keep these separate from the originals. Normalized requests are only
+        # used for grouping/comparison; original requests are used in reports
+        # and error messages.
+        normalized_original_request = self._normalize_request(
+            original_request,
+            normalizer,
+        )
+
+        normalized_requests: dict[LibraryId, Request | None] = {
+            result.library: (
+                None
+                if result.request is None
+                else self._normalize_request(result.request, normalizer)
+            )
+            for result in results
+        }
+
+        original_requests: dict[LibraryId, Request | None] = {
+            result.library: result.request for result in results
+        }
 
         def _get_groups(attr: str) -> dict[Any, list[LibraryId]]:
             """Sort a component of the results based on library."""
             groups: dict[Any, list[LibraryId]] = dict()
+
             for result in results:
                 if not hasattr(result, attr):
                     raise ValueError(f"Results do not have attribute {attr}")
 
                 component = getattr(result, attr)
 
-                # normalize request paths
                 if isinstance(component, Request):
-                    if component.path.startswith(
-                        "/localhost:"
-                    ) or component.path.startswith("/host.docker.internal:"):
-                        component.path = component.path[component.path.find("/", 1) :]
+                    component = normalized_requests[result.library]
 
                 if component not in groups:
                     groups[component] = [result.library]
@@ -93,7 +132,7 @@ class DiffEvaluator:
             )
 
         try:
-            original_invocation = InvocationData(original_request)
+            original_invocation = InvocationData(normalized_original_request)
         except Exception as e:
             detail = (
                 "Error while processing original request. "
@@ -118,9 +157,14 @@ class DiffEvaluator:
                 )
             return set()
 
-        # compare requests
+        # Compare normalized requests.
         request_groups: dict[Request | None, list[LibraryId]] = _get_groups("request")
-        identical_requests = [r for r in request_groups.keys() if r == original_request]
+
+        identical_requests = [
+            request
+            for request in request_groups.keys()
+            if request == normalized_original_request
+        ]
         for request in identical_requests:
             del request_groups[request]
 
@@ -132,40 +176,54 @@ class DiffEvaluator:
                     self._get_error_id(result),
                     request_chain=[original_request],
                     unique=len(request_groups[None]) > 1,
-                    produced_request=None,
+                    produced_request=original_requests[library],
                     detail="Error while building request",
                 )
                 diff_reports[library].append(report)
                 self._log_error(
-                    original_request, f"{library} failed to generate request"
+                    original_request,
+                    f"{library} failed to generate request: "
+                    f"{original_requests[library]}",
                 )
             del request_groups[None]
 
-        if original_request not in request_groups or len(request_groups) > 1:
-            if original_request in request_groups:
-                del request_groups[original_request]
+        if normalized_original_request not in request_groups or len(request_groups) > 1:
+            if normalized_original_request in request_groups:
+                del request_groups[normalized_original_request]
 
-            for diff_request, libraries in request_groups.items():
-                assert diff_request is not None
+            for normalized_diff_request, libraries in request_groups.items():
+                assert normalized_diff_request is not None
+
+                # The original, unnormalized request for each library is kept
+                # for logging and reporting.
+                library = libraries[0]
+                diff_request = original_requests[library]
+
+                if diff_request is None:
+                    continue
+
                 try:
-                    diff_invocation = InvocationData(diff_request)
+                    diff_invocation = InvocationData(normalized_diff_request)
                 except Exception as e:
                     self._log_error(
                         original_request,
-                        f"Error while creating invocation for result: {repr(e)}",
+                        f"Error while creating invocation for result: {repr(e)}\n"
+                        f"Produced request: {diff_request}",
                     )
                     detail = (
-                        f"Unexpected error occured while processing response. "
-                        f"This might have occured due to a bug in the client library:"
+                        "Unexpected error occured while processing response. "
+                        "This might have occured due to a bug in the client library:"
                         f"{repr(e)}"
                     )
                     for library in libraries:
                         result = {r for r in results if r.library == library}.pop()
+                        produced_request = original_requests[library]
+
                         report = DiffReport(
                             library_id=library,
                             error_id=self._get_error_id(result),
                             request_chain=[original_request],
-                            produced_request=diff_request,
+                            produced_request=produced_request,
                             unique=len(libraries) > 1,
                             detail=detail,
                         )
@@ -174,30 +232,42 @@ class DiffEvaluator:
                         diff_reports[library].append(report)
                     break
 
-                diff_method = original_request.method != diff_request.method
-                diff_path = path_only(original_request.path) != path_only(
-                    diff_request.path
+                diff_method = (
+                    normalized_original_request.method != normalized_diff_request.method
+                )
+                diff_path = path_only(normalized_original_request.path) != path_only(
+                    normalized_diff_request.path
                 )
                 diff_parameters = (
-                    original_request.query_parameters != diff_request.query_parameters
+                    normalized_original_request.query_parameters
+                    != normalized_diff_request.query_parameters
                 )
 
                 original_json = None
                 diff_json = None
+
                 if original_invocation.json_body is None:
-                    diff_body = original_request.body != diff_request.body
+                    diff_body = (
+                        normalized_original_request.body != normalized_diff_request.body
+                    )
                 else:
                     original_json = original_invocation.json_body
                     diff_json = diff_invocation.json_body
                     diff_body = original_json != diff_json
 
-                diff_headers = original_request.headers != diff_request.headers
+                diff_headers = (
+                    normalized_original_request.headers
+                    != normalized_diff_request.headers
+                )
 
                 unique = len(libraries) == 1
                 detail = "---\nDiff in request found\n---\n"
                 only_syntactic_detail = ""
 
                 for library in libraries:
+                    produced_request = original_requests[library]
+                    assert produced_request is not None
+
                     if not any(
                         [
                             diff_method,
@@ -211,7 +281,7 @@ class DiffEvaluator:
                             original_content = original_request.headers.get(
                                 content_type
                             )
-                            diff_content = diff_request.headers.get(content_type)
+                            diff_content = produced_request.headers.get(content_type)
                             if not (
                                 original_content is None
                                 or diff_content is None
@@ -227,7 +297,8 @@ class DiffEvaluator:
                             self._log_error(
                                 original_request,
                                 f"Exact diff not determined with "
-                                f"Original {original_request} | got {diff_request}",
+                                f"Original {original_request} | "
+                                f"got {produced_request}",
                             )
                             detail += (
                                 "Diff in request detected, "
@@ -237,17 +308,20 @@ class DiffEvaluator:
                     if diff_method:
                         detail += (
                             f"- Method {original_request.method} expected, "
-                            f"but got {diff_request.method}.\n"
+                            f"but got {produced_request.method}.\n"
                         )
+
                     if diff_path:
                         detail += (
                             f"- Path {original_request.path} expected, "
-                            f"but got {diff_request.path}.\n"
+                            f"but got {produced_request.path}.\n"
                         )
+
                     if diff_parameters:
                         detail += (
                             f"- Parameters {original_request.query_parameters} "
-                            f"expected, but got {diff_request.query_parameters}.\n"
+                            f"expected, but got "
+                            f"{produced_request.query_parameters}.\n"
                         )
 
                     if diff_body:
@@ -257,7 +331,8 @@ class DiffEvaluator:
                         ):
                             detail += (
                                 f"- Body '{pformat(original_request.body)}' "
-                                f"expected, but got '{pformat(diff_request.body)}.'\n"
+                                f"expected, but got "
+                                f"'{pformat(produced_request.body)}'.\n"
                             )
                         else:
                             for element in [
@@ -266,49 +341,30 @@ class DiffEvaluator:
                                 detail += (
                                     f"Element '{element}' only exists in original body."
                                 )
+
                             for element in [
                                 k for k in diff_json.keys() if k not in original_json
                             ]:
                                 detail += (
                                     f"Element '{element}' only exists in produced body."
                                 )
+
                             for element in [
                                 k
                                 for k in original_json.keys()
                                 if k in diff_json and original_json[k] != diff_json[k]
                             ]:
-                                # special error message for semantically equivalent
-                                # date-time values
-                                try:
-                                    original_time = datetime.fromisoformat(
-                                        original_json[element]
-                                    )
-                                    diff_time = datetime.fromisoformat(
-                                        diff_json[element]
-                                    )
-                                    semantically_equivalent_time = (
-                                        original_time == diff_time
-                                    )
-                                except Exception:
-                                    semantically_equivalent_time = False
-
-                                if not semantically_equivalent_time:
-                                    detail += (
-                                        f"Unequal values for element '{element}' in "
-                                        f"body: {original_json[element]} != "
-                                        f"{diff_json[element]}"
-                                    )
-                                else:
-                                    osdetail = (
-                                        "Syntactically different but "
-                                        "semantically equivalent date(-time)\n"
-                                    )
-                                    only_syntactic_detail += osdetail
+                                detail += (
+                                    f"Unequal values for element '{element}' in "
+                                    f"body: {original_json[element]} != "
+                                    f"{diff_json[element]}"
+                                )
 
                     if detail == "---\nDiff in request found\n---\n":
-                        # empty detail means semantically
+                        # Empty detail means semantically equivalent.
                         if not only_syntactic_detail:
                             raise RuntimeError("Diff detected, but none found")
+
                         logger.debug(
                             f"Only syntactic diff detected: {only_syntactic_detail}"
                         )
@@ -316,7 +372,8 @@ class DiffEvaluator:
 
                     self._log_error(
                         original_request,
-                        f"{library} produced diff in response: {detail}",
+                        f"{library} produced diff in response: {detail}\n"
+                        f"Produced request: {produced_request}",
                     )
 
                     result = {r for r in results if r.library == library}.pop()
@@ -325,7 +382,7 @@ class DiffEvaluator:
                         library_id=library,
                         error_id=self._get_error_id(result),
                         request_chain=[original_request],
-                        produced_request=diff_request,
+                        produced_request=produced_request,
                         unique=unique,
                         detail=detail,
                     )
