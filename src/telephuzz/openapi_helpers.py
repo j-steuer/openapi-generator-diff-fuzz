@@ -125,15 +125,22 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
     return spec
 
 
-def _close_object_schemas(schema: object) -> None:
-    """Disallow additional properties in object schemas."""
+def _close_object_schemas(
+    schema: object,
+    *,
+    is_additional_properties_value: bool = False,
+) -> None:
+    """Disallow additional properties in structured object schemas."""
     if not isinstance(schema, dict):
         return
 
-    if schema.get("type") == "object" or isinstance(schema.get("properties"), dict):
+    properties = schema.get("properties")
+
+    if not is_additional_properties_value and (
+        schema.get("type") == "object" or isinstance(properties, dict)
+    ):
         schema.setdefault("additionalProperties", False)
 
-    properties = schema.get("properties")
     if isinstance(properties, dict):
         for property_schema in properties.values():
             _close_object_schemas(property_schema)
@@ -143,8 +150,14 @@ def _close_object_schemas(schema: object) -> None:
         for property_schema in pattern_properties.values():
             _close_object_schemas(property_schema)
 
+    additional_properties = schema.get("additionalProperties")
+    if isinstance(additional_properties, dict):
+        _close_object_schemas(
+            additional_properties,
+            is_additional_properties_value=True,
+        )
+
     for key in (
-        "additionalProperties",
         "items",
         "not",
         "if",

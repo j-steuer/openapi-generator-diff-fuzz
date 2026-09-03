@@ -193,6 +193,24 @@ class TestPreprocessing:
             ]["application/merge-patch+json"]["schema"]
         ).get("additionalProperties", True)
 
+    def test_existing_additional_properties_pure_object(self):
+        """Additional properties should not be inserted within existing."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
+        )
+
+        processed_spec = preprocess_oas(
+            Path("wfd/openapi-swagger/spring-batch-rest.json")
+        )
+
+        assert processed_spec is not None
+        assert "additionalProperties" not in dict(
+            processed_spec["components"]["schemas"]["JobConfig"]["properties"][
+                "properties"
+            ]["additionalProperties"]
+        )
+
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
     """Test for finding operation based on operationId."""
