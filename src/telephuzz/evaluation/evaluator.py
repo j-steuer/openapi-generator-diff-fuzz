@@ -182,8 +182,7 @@ class DiffEvaluator:
                 diff_reports[library].append(report)
                 self._log_error(
                     original_request,
-                    f"{library} failed to generate request: "
-                    f"{original_requests[library]}",
+                    f"{library} failed to generate request: {original_request}",
                 )
             del request_groups[None]
 
