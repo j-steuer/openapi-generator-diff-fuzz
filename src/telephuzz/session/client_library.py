@@ -864,7 +864,9 @@ class KiotaPythonCLC(Kiota, PythonCLC):
             return from_json
 
         model_name = _get_model_name(invocation)
-        model_name_module = transform_case(model_name, Case.SNAKE)
+        model_name_module = transform_case(
+            model_name, Case.SNAKE, divide_uppercase=True
+        )
         model_name_class = transform_case(model_name, Case.PASCAL)
         import_code = (
             f"from my_kiota_client.models.{model_name_module} import {model_name_class}"
