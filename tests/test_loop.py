@@ -123,6 +123,7 @@ class BasicFaultyClient(BasicClient):
 
 def test_basic_client(api: tuple[Network, str]):
     """Test that basic client works."""
+
     network, api_path = api
     with BasicClient() as basic_client:
         assert basic_client.container is not None
@@ -228,7 +229,7 @@ def test_mitmproxy_result_dir():
 
 def test_loop_same_library(tmp_path):
     """Test the fuzzing loop with two instances of the basic client."""
-    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.API_CONFIG_PATH = TESTFILES / "api_loop.yaml"
 
     fuzzer = TelePhuzz(BASIC_CLIENT, tmp_path, timeout=10)
     fuzzer.start_fuzzing_session()
@@ -238,7 +239,7 @@ def test_loop_same_library(tmp_path):
 
 def test_loop_faulty_library(tmp_path):
     """Test the fuzzing loop with two instances of the basic client."""
-    Config.API_CONFIG_PATH = API_CONFIG_PATH
+    Config.API_CONFIG_PATH = TESTFILES / "api_loop.yaml"
 
     fuzzer = TelePhuzz(BASIC_FAULTY_CLIENT, tmp_path, timeout=10)
     fuzzer.start_fuzzing_session()
