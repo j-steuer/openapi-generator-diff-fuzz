@@ -874,7 +874,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
         if isinstance(json_body, list):
             model_list = [_parse_model(body) for body in json_body]
             creation_code = (
-                "{invocation.body_parameter_name}=[" + ", ".join(model_list) + "]"
+                f"{invocation.body_parameter_name}=[" + ", ".join(model_list) + "]"
             )
         elif isinstance(json_body, dict):
             creation_code = (
