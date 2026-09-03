@@ -175,6 +175,24 @@ class TestPreprocessing:
         category_schema = match_schema["properties"]["rule"]["properties"]["category"]
         assert category_schema["additionalProperties"] is False
 
+    def test_additional_properties_objects(self):
+        """Additional properties should not be set to false for pure objects."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_3_0_BASE_PATH / "api_http_patch_spring_config.yaml"
+        )
+
+        processed_spec = preprocess_oas(
+            Path("wfd/openapi-swagger/http-patch-spring.json")
+        )
+
+        assert processed_spec is not None
+        assert dict(
+            processed_spec["paths"]["/contacts/{id}"]["patch"]["requestBody"][
+                "content"
+            ]["application/merge-patch+json"]["schema"]
+        ).get("additionalProperties", True)
+
 
 def test_find_operation(basic_oas_json: _TemporaryFileWrapper):
     """Test for finding operation based on operationId."""

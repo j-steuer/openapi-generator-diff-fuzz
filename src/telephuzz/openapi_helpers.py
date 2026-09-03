@@ -111,7 +111,7 @@ def preprocess_oas(oas: Path, output_path: Path | None = None) -> dict | None:
 
                         schema = media_type.get("schema")
                         if isinstance(schema, dict):
-                            _close_object_schemas(schema)
+                            _close_request_body_schema(schema)
 
             operation["operationId"] = generate_operation_id(method, path)
 
@@ -162,6 +162,48 @@ def _close_object_schemas(schema: object) -> None:
         if isinstance(value, list):
             for subschema in value:
                 _close_object_schemas(subschema)
+
+
+def _close_request_body_schema(schema: object) -> None:
+    """Close request-body object schemas only when they define properties."""
+    if not isinstance(schema, dict):
+        return
+
+    if (
+        schema.get("type") == "object"
+        and isinstance(schema.get("properties"), dict)
+        and schema["properties"]
+    ):
+        schema.setdefault("additionalProperties", False)
+
+    # Recurse through nested schemas.
+    properties = schema.get("properties")
+    if isinstance(properties, dict):
+        for property_schema in properties.values():
+            _close_request_body_schema(property_schema)
+
+    pattern_properties = schema.get("patternProperties")
+    if isinstance(pattern_properties, dict):
+        for property_schema in pattern_properties.values():
+            _close_request_body_schema(property_schema)
+
+    for key in (
+        "additionalProperties",
+        "items",
+        "not",
+        "if",
+        "then",
+        "else",
+    ):
+        value = schema.get(key)
+        if isinstance(value, dict):
+            _close_request_body_schema(value)
+
+    for key in ("allOf", "anyOf", "oneOf", "prefixItems"):
+        value = schema.get(key)
+        if isinstance(value, list):
+            for subschema in value:
+                _close_request_body_schema(subschema)
 
 
 def _find_all(spec: dict, element: str) -> list[Any]:
