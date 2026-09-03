@@ -115,3 +115,33 @@ def test_openapi_python_client(config: Path) -> None:
         REPORT_PATH / f"openapi-python-client_{report_suffix}",
     )
     fuzzer.start_fuzzing_session()
+
+
+@pytest.mark.parametrize(
+    "config",
+    CONFIGS_2_0,
+    ids=lambda config: config.stem,
+)
+def test_kiota_python_2_0(config: Path) -> None:
+    Config.API_CONFIG_PATH = config
+
+    report_suffix = config.name[: config.name.find(".yaml")]
+    fuzzer = TelePhuzz(
+        "kiota:python", REPORT_PATH / f"kiota-python_{report_suffix}", timeout=60
+    )
+    fuzzer.start_fuzzing_session()
+
+
+@pytest.mark.parametrize(
+    "config",
+    CONFIGS_3_0,
+    ids=lambda config: config.stem,
+)
+def test_kiota_python_3_0(config: Path) -> None:
+    Config.API_CONFIG_PATH = config
+
+    report_suffix = config.name[: config.name.find(".yaml")]
+    fuzzer = TelePhuzz(
+        "kiota:python", REPORT_PATH / f"kiota-python_{report_suffix}", timeout=60
+    )
+    fuzzer.start_fuzzing_session()
