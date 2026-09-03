@@ -33,6 +33,10 @@ class DiffEvaluator:
         # TODO include db state
         return f"Error_{hash((hash(result.library), hash(result.request)))}"
 
+    def _log_error(self, original_request: Request, detail: str):
+        logger.info(f"Error with request {original_request}")
+        logger.info(detail)
+
     def eval(
         self,
         results: set[RequestResult],
@@ -108,7 +112,10 @@ class DiffEvaluator:
                 )
                 report.to_log(self.log_path)
                 _e = repr(e)
-                logger.debug(f"{library} failed to process original request: {_e}")
+                self._log_error(
+                    original_request,
+                    f"{library} failed to process original request: {_e}",
+                )
             return set()
 
         # compare requests
@@ -129,7 +136,9 @@ class DiffEvaluator:
                     detail="Error while building request",
                 )
                 diff_reports[library].append(report)
-                logger.debug(f"{library} failed to generate request")
+                self._log_error(
+                    original_request, f"{library} failed to generate request"
+                )
             del request_groups[None]
 
         if original_request not in request_groups or len(request_groups) > 1:
@@ -141,8 +150,9 @@ class DiffEvaluator:
                 try:
                     diff_invocation = InvocationData(diff_request)
                 except Exception as e:
-                    logger.debug(
-                        f"Error while creating invocation for result: {repr(e)}"
+                    self._log_error(
+                        original_request,
+                        f"Error while creating invocation for result: {repr(e)}",
                     )
                     detail = (
                         f"Unexpected error occured while processing response. "
@@ -214,9 +224,10 @@ class DiffEvaluator:
                             else:
                                 only_syntactic_detail += "Different headers\n"
                         else:
-                            logger.debug(
+                            self._log_error(
+                                original_request,
                                 f"Exact diff not determined with "
-                                f"Original {original_request} | got {diff_request}"
+                                f"Original {original_request} | got {diff_request}",
                             )
                             detail += (
                                 "Diff in request detected, "
@@ -303,7 +314,10 @@ class DiffEvaluator:
                         )
                         continue
 
-                    logger.debug(f"{library} produced diff in response: {detail}")
+                    self._log_error(
+                        original_request,
+                        f"{library} produced diff in response: {detail}",
+                    )
 
                     result = {r for r in results if r.library == library}.pop()
 
