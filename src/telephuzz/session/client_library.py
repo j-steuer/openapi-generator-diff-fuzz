@@ -875,13 +875,9 @@ class KiotaPythonCLC(Kiota, PythonCLC):
         json_body = invocation.json_body
         if isinstance(json_body, list):
             model_list = [_parse_model(body) for body in json_body]
-            creation_code = (
-                f"{invocation.body_parameter_name}=[" + ", ".join(model_list) + "]"
-            )
+            creation_code = "body=[" + ", ".join(model_list) + "]"
         elif isinstance(json_body, dict):
-            creation_code = (
-                f"{invocation.body_parameter_name}={_parse_model(json_body)}"
-            )
+            creation_code = f"body={_parse_model(json_body)}"
         else:
             raise NotImplementedError(
                 f"Unhandled body type {type(json_body)}: {invocation.body!r}"
@@ -938,7 +934,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                     body_kwargs = model_code.creation_code
                 else:
                     raw_body: bytes | None = invocation.body
-                    body_kwargs = f"{invocation.body_parameter_name}={raw_body!r}"
+                    body_kwargs = f"body={raw_body!r}"
             else:
                 base_path = [pc for pc in path_components if pc][0]
                 module_path_prefix = ".".join(
@@ -952,10 +948,7 @@ class KiotaPythonCLC(Kiota, PythonCLC):
                 import_json_object = (
                     f"from my_kiota_client.{module_path} import {class_name}"
                 )
-                body_kwargs = (
-                    f"{invocation.body_parameter_name}="
-                    f"{class_name}({repr(invocation.json_body)})"
-                )
+                body_kwargs = f"body={class_name}({repr(invocation.json_body)})"
 
         query_parameters = invocation.query_parameters_without_path_vars
         if query_parameters:

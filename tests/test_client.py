@@ -804,7 +804,6 @@ def genome_nexus():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
-        pytest.param(KiotaPythonCLC, id="kiota-python"),
     ],
 )
 @pytest.mark.usefixtures("genome_nexus")
@@ -952,6 +951,49 @@ class TestPersonController:
                 body=b"[{}, {}]",
                 method=HTTPMethod.POST,
                 path="/api/persons",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def user_management():
+    network, api_name = api_wfd("user-management")
+    yield network, api_name
+    api_down(network, "user-management")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("user_management")
+class TestUserManagement:
+    def test_p(self, clc_class, user_management: tuple[Network, str]):
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_user_management_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = user_management
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=b"{}",
+                method=HTTPMethod.POST,
+                path="/login",
                 query_parameters={},
             )
 
