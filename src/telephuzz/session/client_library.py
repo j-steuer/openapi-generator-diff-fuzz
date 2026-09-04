@@ -532,6 +532,84 @@ class OpenAPIGen(OperationIdBasedCLC):
         OpenAPIVersion.V_3_1,
     }
 
+    reserved_keywords = [
+        "all_params",
+        "and",
+        "as",
+        "assert",
+        "async",
+        "auth_settings",
+        "await",
+        "base64",
+        "body_params",
+        "break",
+        "class",
+        "continue",
+        "date",
+        "def",
+        "del",
+        "elif",
+        "else",
+        "except",
+        "exec",
+        "false",
+        "field",
+        "finally",
+        "float",
+        "for",
+        "form_params",
+        "from",
+        "from_dict",
+        "from_json",
+        "global",
+        "header_params",
+        "if",
+        "import",
+        "in",
+        "is",
+        "json",
+        "lambda",
+        "local_var_files",
+        "model_computed_fields",
+        "model_config",
+        "model_construct",
+        "model_copy",
+        "model_dump",
+        "model_dump_json",
+        "model_extra",
+        "model_fields",
+        "model_fields_set",
+        "model_json_schema",
+        "model_parametrized_name",
+        "model_post_init",
+        "model_rebuild",
+        "model_validate",
+        "model_validate_json",
+        "model_validate_strings",
+        "none",
+        "nonlocal",
+        "not",
+        "or",
+        "pass",
+        "path_params",
+        "print",
+        "property",
+        "query_params",
+        "raise",
+        "resource_path",
+        "return",
+        "schema",
+        "self",
+        "to_dict",
+        "to_json",
+        "to_str",
+        "true",
+        "try",
+        "while",
+        "with",
+        "yield",
+    ]
+
 
 class SwaggerCodegen(OperationIdBasedCLC):
     supported_versions = {OpenAPIVersion.V_3_0}
@@ -604,7 +682,10 @@ class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
 
     def _get_code(self, invocation: InvocationData, api_path: str) -> bytes:
         model_name_str = ""
-        query_parameters = invocation.query_parameters
+        query_parameters = {
+            k if k not in self.reserved_keywords else f"var_{k}": v
+            for k, v in invocation.query_parameters.items()
+        }
 
         kwargs = ""
         if query_parameters:
