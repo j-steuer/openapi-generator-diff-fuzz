@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import unquote
 
 from telephuzz.http_message import Request
 from telephuzz.openapi_helpers import (
@@ -35,6 +36,8 @@ class OpenAPINormalizer:
         """Return a normalized copy of a request."""
         normalized = deepcopy(request)
 
+        normalized.path = self._normalize_path(normalized.path)
+
         if normalized.body is None:
             return normalized
 
@@ -60,6 +63,10 @@ class OpenAPINormalizer:
         ).encode()
 
         return normalized
+
+    def _normalize_path(self, path: str) -> str:
+        """Normalize the path."""
+        return unquote(path)
 
     def _get_operation(self, request: Request) -> dict:
         """Find the OpenAPI operation for a request."""
