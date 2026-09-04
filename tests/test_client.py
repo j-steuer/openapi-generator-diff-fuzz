@@ -979,7 +979,7 @@ def user_management():
 )
 @pytest.mark.usefixtures("user_management")
 class TestUserManagement:
-    def test_p(self, clc_class, user_management: tuple[Network, str]):
+    def test_uppercase_sequence(self, clc_class, user_management: tuple[Network, str]):
 
         Config.API_CONFIG_PATH = (
             TEST_CONFIG_2_0_BASE_PATH / "api_user_management_config.yaml"
@@ -995,6 +995,267 @@ class TestUserManagement:
                 method=HTTPMethod.POST,
                 path="/login",
                 query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def gestaohospital():
+    network, api_name = api_wfd("gestaohospital")
+    yield network, api_name
+    api_down(network, "gestaohospital")
+
+
+# TODO fix
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("gestaohospital")
+class TestGestaohospital:
+    def test_schema_body_name(self, clc_class, gestaohospital: tuple[Network, str]):
+        """Parameter name should be used over schema name."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_gestaohospital_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = gestaohospital
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=(
+                    b'{"latitude": "\\u001f\\u0081\\u0002\\uda9f\\ude84\\u007fl'
+                    b"\\udb11\\ude2b\\u00e2\\ud8d6\\udef3\\u00a3AE'\\u000b\\u00baI"
+                    b"\\u0011\\ud906\\ude11*\\u00b9\\u00e1Vu\\u00de\\udbc6\\udcb5"
+                    b"\\u00e8\\u00de<^y\\u0099\\u001e\\u00e9\\u00df\\u0010\\u0003"
+                    b'\\uda88\\udd74\\u0083", "id": "$", "address": "`\\u00a7",'
+                    b' "name": "\\u00d3", "availableBeds": -426}'
+                ),
+                method=HTTPMethod.POST,
+                path="/v1/hospitais/",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def rest_news():
+    network, api_name = api_wfd("rest-news")
+    yield network, api_name
+    api_down(network, "rest-news")
+
+
+# TODO fix
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("rest_news")
+class TestRestNews:
+    def test_in_body(self, clc_class, rest_news: tuple[Network, str]):
+        """Client should properly detect "in": "body"."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_rest_news_config.yaml"
+
+        sleep(10)
+
+        network, api_path = rest_news
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.PUT,
+                path="/news/13042/text",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def rest_scs():
+    network, api_name = api_wfd("rest-scs")
+    yield network, api_name
+    api_down(network, "rest-scs")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("rest_scs")
+# TODO fix
+class TestRestScs:
+    def test_single_char_sequences(self, clc_class, rest_scs: tuple[Network, str]):
+        """Test sending to an endpoint with single char sequences in operation id."""
+
+        Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_rest_scs_config.yaml"
+
+        sleep(10)
+
+        network, api_path = rest_scs
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.GET,
+                path="/api/notypevar/1895/%C3%96L%0A",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def session_service():
+    network, api_name = api_wfd("session-service")
+    yield network, api_name
+    api_down(network, "session-service")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("session_service")
+# TODO fix
+class TestSessionService:
+    def test_field(self, clc_class, session_service: tuple[Network, str]):
+        """Field parameter name is sanitized for some clients."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_session_service_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = session_service
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.GET,
+                path=(
+                    "/api/sessions/k%C2%A8%C3%8C%C2%B2%C2%B7%C2%BB/"
+                    "virtual_study/query?value=&field=.exe"
+                ),
+                query_parameters={"value": "", "field": ".exe"},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
+
+@pytest.fixture(scope="class")
+def youtube_mock():
+    network, api_name = api_wfd("youtube-mock")
+    yield network, api_name
+    api_down(network, "youtube-mock")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+    ],
+)
+@pytest.mark.usefixtures("youtube_mock")
+# TODO fix
+class TestYoutubeMock:
+    def test_boolean(self, clc_class, youtube_mock: tuple[Network, str]):
+        """Test field with boolean."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_2_0_BASE_PATH / "api_youtube_mock_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = youtube_mock
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.GET,
+                path=(
+                    "/search?relatedToVideoId=%3F%C3%A1%C2%8Bc%0A%7B%C2%A5%"
+                    "C2%AE%C2%BC%F0%A2%82%AA%C3%AFi&forMine=false&type=%C2%93%"
+                    "C2%A3%F1%BC%B2%98%C3%B2e%C3%A2u%C3%A9%23%1Ed%C2%BE%C3%A8%"
+                    "C2%AC%C2%A7%C2%8A%14%C3%94%F1%BB%A1%BF%C2%95%05%C3%8A%F1%8B"
+                    "%9E%B7s%F0%A3%B1%BE%C2%AFv%7B%C3%B5S0%C2%90%F1%80%9E%88%164v"
+                    "%F3%9B%AA%83%C2%A4%C3%93%C3%93%C3%93%F1%A1%9A%A4_i%C2%B0%F0%B5"
+                    "%B8%85%F1%BF%AB%9F%F1%8A%A9%83f%C3%B4%C2%A2&videoEmbeddable="
+                    "any&videoLicense=youtube&videoDuration=long&part=snippet&topicId"
+                    "=%1B%C3%BC%1D%07%F1%87%A5%B8i%F3%8D%AE%88%C3%A9&videoDefinition="
+                    "high&location=%E4%B3%A2%60%C3%BB%F1%AF%B3%95-%15MQ%26&video"
+                    "Caption=any&onBehalfOfContentOwner=&videoSyndicated=any"
+                ),
+                query_parameters={
+                    "relatedToVideoId": "?á\x8bc\n{¥®¼𢂪ïi",
+                    "forMine": "false",
+                    "type": (
+                        "\x93£\U0007cc98òeâué#\x1ed¾è¬§\x8a\x14Ô\U0007b87f\x95\x05Ê"
+                        "\U0004b7b7s𣱾¯v{õS0\x90\U00040788\x164v\U000dba83¤ÓÓÓ"
+                        "\U000616a4_i°\U00035e05\U0007fadf\U0004aa43fô¢"
+                    ),
+                    "videoEmbeddable": "any",
+                    "videoLicense": "youtube",
+                    "videoDuration": "long",
+                    "part": "snippet",
+                    "topicId": "\x1bü\x1d\x07\U00047978i\U000cdb88é",
+                    "videoDefinition": "high",
+                    "location": "䳢`û\U0006fcd5-\x15MQ&",
+                    "videoCaption": "any",
+                    "onBehalfOfContentOwner": "",
+                    "videoSyndicated": "any",
+                },
             )
 
             _test_send_request(
