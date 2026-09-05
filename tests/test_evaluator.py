@@ -473,3 +473,54 @@ def test_diff_body_recursive(tmp_path, monkeypatch) -> None:
     result = RequestResult("lib1", produced_request)
 
     assert not evaluator.eval({result}, original_request)
+
+
+def test_normalization(tmp_path) -> None:
+    """Evaluate body with syntactic differences that should be normalized."""
+
+    Config.API_CONFIG_PATH = Path(
+        "tests/testfiles/configs/3.0.x/api_person_controller_config.yaml"
+    )
+
+    original_request = Request(
+        headers=CaseInsensitiveDict({"content-type": "application/json"}),
+        body=(
+            b'[{"cars": [{}, {"maxSpeedKmH": -1.5, "brand": "\\ud8ee\\udee3'
+            b"\\u00f4v#\\u0013\\uda1d\\uddef\\u00d6\\u00eaW\\udbd6\\udc9ac"
+            b'\\u00ee\\ud885\\udda6\\u00e3", "model": "\\u00a1\\u0086\\u00a4'
+            b'\\udafb\\uddfdM\\ud920\\udce7"}, {}, {}, {"brand": "\\\\\\u00d5'
+            b'\\u00ac6UP\\u00b3\\u0017\\udad9\\udd41\\u00c9D)", "model": '
+            b'"__main__", "maxSpeedKmH": -5.129953775299067e+79}, {}, '
+            b'{"maxSpeedKmH": -1.411536109960118e-72}, {"maxSpeedKmH": -1.9}, '
+            b'{"maxSpeedKmH": -4.0008694030484584e+16, "brand": "F\\u00e5U", "model": '
+            b'"\\u00b2\\u008b\\udbd2\\udd259\\u001f\\u00b4#n\\u0099?\\u00a4\\u0013?'
+            b'\\u00c4\\u00c9\\udb1e\\ude12"}, '
+            b'{"model": "\\u00b1\\udb6e\\udc2c\\uda55'
+            b'\\udcd2\\u00b4\\u00a3{Q", "brand": "\\u00f0"}, '
+            b'{"maxSpeedKmH": -7.433036297770311e-98}], "age": -742, "lastName":'
+            b' "\\ud920\\udda6\\udbf1\\udd8a\\ud834\\udc18\\u00a3:", "createdAt": '
+            b'"0082-04-24T14:10:27.252874-21:36", "address": {}, "firstName": '
+            b'"\\u00f3", "insurance": true, "id": "\\u00e4P"}, {"cars": '
+            b'[{"brand": "", "maxSpeedKmH": 0.0, "model": ""}], '
+            b'"createdAt": "2000-01-01T00:00:00Z", "firstName": "", "id": ""}, {}]'
+        ),
+        method=HTTPMethod.PUT,
+        path="/api/persons",
+        query_parameters={},
+    )
+
+    produced_request = Request(
+        headers=CaseInsensitiveDict({"content-type": "application/json"}),
+        body=(
+            b'[{"id":"\xc3\xa4P","firstName":"\xc3\xb3","lastName":"\xf1\x98\x86\xa6\xf4\x8c\x96\x8a\xf0\x9d\x80\x98\xc2\xa3:","age":-742,"address":{},"createdAt":"0082-04-24T14:10:27.252874-21:36","insurance":true,"cars":[{},{"brand":"\xf1\x8b\xab\xa3\xc3\xb4v#\\u0013\xf2\x97\x97\xaf\xc3\x96\xc3\xaaW\xf4\x85\xa2\x9ac\xc3\xae\xf0\xb1\x96\xa6\xc3\xa3","model":"\xc2\xa1\xc2\x86\xc2\xa4\xf3\x8e\xb7\xbdM\xf1\x98\x83\xa7","maxSpeedKmH":-1.5},{},{},{"brand":"\\\\\xc3\x95\xc2\xac6UP\xc2\xb3\\u0017\xf3\x86\x95\x81\xc3\x89D)","model":"__main__","maxSpeedKmH":-5.129953775299067e+79},{},{"maxSpeedKmH":-1.411536109960118e-72},{"maxSpeedKmH":-1.9},{"brand":"F\xc3\xa5U","model":"\xc2\xb2\xc2\x8b\xf4\x84\xa4\xa59\\u001f\xc2\xb4#n\xc2\x99?\xc2\xa4\\u0013?\xc3\x84\xc3\x89\xf3\x97\xa8\x92","maxSpeedKmH":-4.0008694030484584e+16},{"brand":"\xc3\xb0","model":"\xc2\xb1\xf3\xab\xa0\xac\xf2\xa5\x93\x92\xc2\xb4\xc2\xa3{Q"},{"maxSpeedKmH":-7.433036297770311e-98}]},{"id":"","firstName":"","createdAt":"2000-01-01T00:00:00+00:00","cars":[{"brand":"","model":"","maxSpeedKmH":0.0}]},{}]'
+        ),
+        method=HTTPMethod.PUT,
+        path="/api/persons",
+        query_parameters={},
+    )
+
+    evaluator = DiffEvaluator(tmp_path)
+    result = RequestResult("lib1", produced_request)
+
+    assert not evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 0
