@@ -1121,6 +1121,12 @@ class TestRestScs:
     def test_single_char_sequences(self, clc_class, rest_scs: tuple[Network, str]):
         """Test sending to an endpoint with single char sequences in operation id."""
 
+        if clc_class is OpenAPIGenPythonCLC:
+            pytest.xfail(
+                "OpenAPI Generator concatenates such sequences, "
+                "which may result in collisions"
+            )
+
         Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_rest_scs_config.yaml"
 
         sleep(10)
@@ -1159,7 +1165,6 @@ def session_service():
     ],
 )
 @pytest.mark.usefixtures("session_service")
-# TODO fix
 class TestSessionService:
     def test_field(self, clc_class, session_service: tuple[Network, str]):
         """Field parameter name is sanitized for some clients."""
