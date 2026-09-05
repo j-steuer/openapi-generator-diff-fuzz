@@ -391,6 +391,9 @@ class TestPetshop:
     def test_file_upload(self, clc_class, petshop: tuple[Network, str]):
         """Test request with file upload."""
 
+        if clc_class is SwaggerCodegenPythonCLC:
+            pytest.xfail("Swagger Codegen does not support bytes for octet-stream")
+
         Config.API_CONFIG_PATH = (
             TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
         )
@@ -504,6 +507,9 @@ class TestPetshop:
 
     def test_empty_octet_body(self, clc_class, petshop: tuple[Network, str]):
         """Test sending octet-stream with empty body."""
+
+        if clc_class is SwaggerCodegenPythonCLC:
+            pytest.xfail("Swagger Codegen does not support bytes for octet-stream")
 
         Config.API_CONFIG_PATH = (
             TEST_CONFIG_3_0_BASE_PATH / "api_swagger_petstore_config.yaml"
@@ -885,6 +891,7 @@ def cwa_verification():
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen-python"),
     ],
 )
 @pytest.mark.usefixtures("cwa_verification")
@@ -930,6 +937,7 @@ def person_controller():
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen-python"),
     ],
 )
 @pytest.mark.usefixtures("person_controller")
