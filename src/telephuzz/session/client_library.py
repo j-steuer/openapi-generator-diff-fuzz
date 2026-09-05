@@ -532,6 +532,48 @@ class OpenAPIGen(OperationIdBasedCLC):
         OpenAPIVersion.V_3_1,
     }
 
+
+class SwaggerCodegen(OperationIdBasedCLC):
+    supported_versions = {OpenAPIVersion.V_3_0}
+
+
+class OpenAPIPythonClient(OperationIdBasedCLC):
+    supported_versions = {OpenAPIVersion.V_3_0, OpenAPIVersion.V_3_1}
+
+
+class Kiota:
+    supported_versions = {OpenAPIVersion.V_2, OpenAPIVersion.V_3_0}
+
+
+# --- Concrete Python Client Classes ---
+
+
+def _get_model_name(invocation: InvocationData) -> str:
+    """Obtain the name of a model.
+
+    For instance, in the petshop API for OpenAPI Generator Python,
+    refs usually result in objects: User, Pet, etc.
+    This method resolves the names of these objects based on the
+    queried endpoint and the OpenAPI spec.
+    """
+    model_name: str | None = ""
+    if invocation.json_body is not None:
+        body_parameter = invocation.body_parameter
+        assert body_parameter is not None
+        model_name = body_parameter.schema_type
+    assert model_name is not None, (
+        f"Obtaining args failed for {invocation.method} "
+        f"{invocation.path} with body {invocation.body!r}"
+    )
+    return model_name
+
+
+class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
+    """Concrete client library for OpenAPI Generator Python."""
+
+    id = "openapi-generator:python"
+    generator_script = "openapi-generator-python.sh"
+
     reserved_keywords = [
         "all_params",
         "and",
@@ -609,48 +651,6 @@ class OpenAPIGen(OperationIdBasedCLC):
         "with",
         "yield",
     ]
-
-
-class SwaggerCodegen(OperationIdBasedCLC):
-    supported_versions = {OpenAPIVersion.V_3_0}
-
-
-class OpenAPIPythonClient(OperationIdBasedCLC):
-    supported_versions = {OpenAPIVersion.V_3_0, OpenAPIVersion.V_3_1}
-
-
-class Kiota:
-    supported_versions = {OpenAPIVersion.V_2, OpenAPIVersion.V_3_0}
-
-
-# --- Concrete Python Client Classes ---
-
-
-def _get_model_name(invocation: InvocationData) -> str:
-    """Obtain the name of a model.
-
-    For instance, in the petshop API for OpenAPI Generator Python,
-    refs usually result in objects: User, Pet, etc.
-    This method resolves the names of these objects based on the
-    queried endpoint and the OpenAPI spec.
-    """
-    model_name: str | None = ""
-    if invocation.json_body is not None:
-        body_parameter = invocation.body_parameter
-        assert body_parameter is not None
-        model_name = body_parameter.schema_type
-    assert model_name is not None, (
-        f"Obtaining args failed for {invocation.method} "
-        f"{invocation.path} with body {invocation.body!r}"
-    )
-    return model_name
-
-
-class OpenAPIGenPythonCLC(OpenAPIGen, PythonCLC):
-    """Concrete client library for OpenAPI Generator Python."""
-
-    id = "openapi-generator:python"
-    generator_script = "openapi-generator-python.sh"
 
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         """Generate models for JSON bodies."""
@@ -1519,6 +1519,108 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
     id = "openapi-generator:csharp"
     generator_script = "openapi-generator-csharp.sh"
 
+    reserved_keywords = [
+        "Client",
+        "Configuration",
+        "Environment",
+        "OperatingSystem",
+        "TimeZone",
+        "Version",
+        "abstract",
+        "as",
+        "base",
+        "bool",
+        "break",
+        "byte",
+        "case",
+        "catch",
+        "char",
+        "checked",
+        "class",
+        "client",
+        "const",
+        "continue",
+        "decimal",
+        "default",
+        "delegate",
+        "do",
+        "double",
+        "else",
+        "enum",
+        "event",
+        "explicit",
+        "extern",
+        "false",
+        "finally",
+        "fixed",
+        "float",
+        "for",
+        "foreach",
+        "goto",
+        "if",
+        "implicit",
+        "in",
+        "int",
+        "interface",
+        "internal",
+        "is",
+        "localVarFileParams",
+        "localVarFormParams",
+        "localVarHeaderParams",
+        "localVarHttpContentType",
+        "localVarHttpContentTypes",
+        "localVarHttpHeaderAccept",
+        "localVarHttpHeaderAccepts",
+        "localVarPath",
+        "localVarPathParams",
+        "localVarPostBody",
+        "localVarQueryParams",
+        "localVarResponse",
+        "localVarStatusCode",
+        "lock",
+        "long",
+        "namespace",
+        "new",
+        "null",
+        "object",
+        "operator",
+        "out",
+        "override",
+        "parameter",
+        "params",
+        "private",
+        "protected",
+        "public",
+        "readonly",
+        "ref",
+        "return",
+        "sbyte",
+        "sealed",
+        "short",
+        "sizeof",
+        "stackalloc",
+        "static",
+        "string",
+        "struct",
+        "switch",
+        "system",
+        "this",
+        "throw",
+        "true",
+        "try",
+        "typeof",
+        "uint",
+        "ulong",
+        "unchecked",
+        "unsafe",
+        "ushort",
+        "using",
+        "virtual",
+        "void",
+        "volatile",
+        "while",
+    ]
+
     def _generate_code_models(self, invocation: InvocationData) -> ModelCode:
         """Generate models for JSON bodies."""
         model_name = _get_model_name(invocation)
@@ -1565,9 +1667,14 @@ class OpenAPIGenCsharpCLC(OpenAPIGen, CsharpCLC):
                 values = ", ".join(json.dumps(item) for item in value)
 
                 return f"new List<String> {{ {values} }}"
+            if parameter_type.schema_type == "boolean":
+                return "true" if value else "false"
             return json.dumps(value)
 
-        query_parameters = invocation.query_parameters
+        query_parameters = {
+            k if k not in self.reserved_keywords else f"var{k[:1].upper() + k[1:]}": v
+            for k, v in invocation.query_parameters.items()
+        }
 
         kwargs = ""
         if query_parameters:

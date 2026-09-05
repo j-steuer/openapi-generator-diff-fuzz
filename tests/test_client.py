@@ -803,7 +803,6 @@ def genome_nexus():
     "clc_class",
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
-        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("genome_nexus")
@@ -930,6 +929,7 @@ def person_controller():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("person_controller")
@@ -975,6 +975,7 @@ def user_management():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("user_management")
@@ -1019,6 +1020,7 @@ def gestaohospital():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("gestaohospital")
@@ -1071,6 +1073,7 @@ def rest_news():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("rest_news")
@@ -1102,55 +1105,6 @@ class TestRestNews:
 
 
 @pytest.fixture(scope="class")
-def rest_scs():
-    network, api_name = api_wfd("rest-scs")
-    yield network, api_name
-    api_down(network, "rest-scs")
-
-
-@pytest.mark.parametrize(
-    "clc_class",
-    [
-        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
-        pytest.param(KiotaPythonCLC, id="kiota-python"),
-    ],
-)
-@pytest.mark.usefixtures("rest_scs")
-# TODO fix
-class TestRestScs:
-    def test_single_char_sequences(self, clc_class, rest_scs: tuple[Network, str]):
-        """Test sending to an endpoint with single char sequences in operation id."""
-
-        if clc_class is OpenAPIGenPythonCLC:
-            pytest.xfail(
-                "OpenAPI Generator concatenates such sequences, "
-                "which may result in collisions"
-            )
-
-        Config.API_CONFIG_PATH = TEST_CONFIG_2_0_BASE_PATH / "api_rest_scs_config.yaml"
-
-        sleep(10)
-
-        network, api_path = rest_scs
-        with clc_class() as clc:
-            request = Request(
-                headers=CaseInsensitiveDict(),
-                body=b"",
-                method=HTTPMethod.GET,
-                path="/api/notypevar/1895/%C3%96L%0A",
-                query_parameters={},
-            )
-
-            _test_send_request(
-                clc,
-                request,
-                network,
-                api_path,
-                expected_status=404,
-            )
-
-
-@pytest.fixture(scope="class")
 def session_service():
     network, api_name = api_wfd("session-service")
     yield network, api_name
@@ -1162,6 +1116,7 @@ def session_service():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("session_service")
@@ -1209,6 +1164,7 @@ def youtube_mock():
     [
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("youtube_mock")
