@@ -123,3 +123,36 @@ def test_normalize_path():
     )
 
     assert normalizer.normalize(request1) == normalizer.normalize(request2)
+
+
+def test_normalize_body_order():
+    """Order of body elements should be normalized."""
+    spec = _spec(
+        {
+            "type": "object",
+            "properties": {
+                "created_at": {"type": "string", "format": "date-time"},
+                "updated_at": {"type": "string", "format": "date-time"},
+            },
+        }
+    )
+    normalizer = OpenAPINormalizer(spec)
+
+    request1 = _request(
+        {
+            "profile": {
+                "created_at": "2026-09-03T20:30:00Z",
+                "updated_at": "2026-09-03T21:30:00Z",
+            }
+        }
+    )
+    request2 = _request(
+        {
+            "profile": {
+                "updated_at": "2026-09-03T21:30:00Z",
+                "created_at": "2026-09-03T20:30:00Z",
+            }
+        }
+    )
+
+    assert normalizer.normalize(request1).body == normalizer.normalize(request2).body

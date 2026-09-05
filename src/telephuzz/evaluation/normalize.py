@@ -57,9 +57,7 @@ class OpenAPINormalizer:
         normalized_body = self._normalize_value(body, schema)
 
         normalized.body = json.dumps(
-            normalized_body,
-            separators=(",", ":"),
-            ensure_ascii=False,
+            normalized_body, separators=(",", ":"), ensure_ascii=False, sort_keys=True
         ).encode()
 
         return normalized
