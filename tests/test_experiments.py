@@ -141,3 +141,19 @@ def test_kiota_python_3_0(config: Path) -> None:
     report_suffix = config.name[: config.name.find(".yaml")]
     fuzzer = TelePhuzz("kiota:python", REPORT_PATH / f"kiota-python_{report_suffix}")
     fuzzer.start_fuzzing_session()
+
+
+@pytest.mark.parametrize(
+    "config",
+    CONFIGS_3_0,
+    ids=lambda config: config.stem,
+)
+def test_swagger_codegen_python_3_0(config: Path) -> None:
+    Config.API_CONFIG_PATH = config
+
+    report_suffix = config.name[: config.name.find(".yaml")]
+    fuzzer = TelePhuzz(
+        "swagger-codegen:python",
+        REPORT_PATH / f"swagger-codegen-python_{report_suffix}",
+    )
+    fuzzer.start_fuzzing_session()
