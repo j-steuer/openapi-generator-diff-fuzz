@@ -74,24 +74,76 @@ class DiffEvaluator:
             A set of library ids where the corresponding library caused an error.
 
         """
+        library_id_list = [r.library for r in results]
+        if len(library_id_list) != len(set(library_id_list)):
+            raise ValueError(
+                "Requests results passed to evaluation should all "
+                "come from different libraries."
+            )
         normalizer = OpenAPINormalizer(get_config().spec)
 
         # Keep these separate from the originals. Normalized requests are only
         # used for grouping/comparison; original requests are used in reports
         # and error messages.
-        normalized_original_request = self._normalize_request(
-            original_request,
-            normalizer,
-        )
-
-        normalized_requests: dict[LibraryId, Request | None] = {
-            result.library: (
-                None
-                if result.request is None
-                else self._normalize_request(result.request, normalizer)
+        try:
+            normalized_original_request = self._normalize_request(
+                original_request,
+                normalizer,
             )
-            for result in results
-        }
+        except Exception as e:
+            detail = (
+                "Error while normalizing original request. "
+                "This is likely a bug in TelePhuzz, not in the client:"
+                f"{repr(e)}"
+            )
+            for library in library_id_list:
+                result = {r for r in results if r.library == library}.pop()
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    request_chain=[original_request],
+                    unique=False,
+                    produced_request=None,
+                    detail=detail,
+                )
+                report.to_log(self.log_path)
+                _e = repr(e)
+                self._log_error(
+                    original_request,
+                    f"{library} failed to normalize original request: {_e}",
+                )
+            return set()
+
+        try:
+            normalized_requests: dict[LibraryId, Request | None] = {
+                result.library: (
+                    None
+                    if result.request is None
+                    else self._normalize_request(result.request, normalizer)
+                )
+                for result in results
+            }
+        except Exception as e:
+            # TODO for individual requests
+            detail = f"Error while normalizing produced request: {repr(e)}"
+            _lib = library_id_list[0]
+            for library in library_id_list:
+                result = {r for r in results if r.library == library}.pop()
+                report = DiffReport(
+                    library,
+                    self._get_error_id(result),
+                    request_chain=[original_request],
+                    unique=False,
+                    produced_request=None,
+                    detail=detail,
+                )
+                report.to_log(self.log_path)
+                _e = repr(e)
+                self._log_error(
+                    original_request,
+                    f"{library} failed to normalize client request: {_e}",
+                )
+            return {_lib}
 
         original_requests: dict[LibraryId, Request | None] = {
             result.library: result.request for result in results
@@ -123,13 +175,6 @@ class DiffEvaluator:
         }
 
         logger.debug(f"Evaluating results for request: {repr(original_request)}")
-
-        library_id_list = [r.library for r in results]
-        if len(library_id_list) != len(set(library_id_list)):
-            raise ValueError(
-                "Requests results passed to evaluation should all "
-                "come from different libraries."
-            )
 
         try:
             original_invocation = InvocationData(normalized_original_request)

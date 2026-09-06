@@ -11,6 +11,7 @@ from requests.models import CaseInsensitiveDict
 
 from telephuzz.config import Config, get_config
 from telephuzz.evaluation.evaluator import DiffEvaluator
+from telephuzz.evaluation.normalize import OpenAPINormalizer
 from telephuzz.http_message import HTTPMethod, Request
 from telephuzz.request_result import RequestResult
 
@@ -524,3 +525,44 @@ def test_normalization(tmp_path) -> None:
 
     assert not evaluator.eval({result}, original_request)
     assert len(os.listdir(tmp_path)) == 0
+
+
+def test_catch_normalization_error(tmp_path, monkeypatch, caplog) -> None:
+    """Processing errors during normalization should be catched."""
+    caplog.set_level(logging.INFO)
+
+    Config.API_CONFIG_PATH = Path(
+        "tests/testfiles/configs/3.0.x/api_swagger_petstore_config.yaml"
+    )
+
+    def raise_normalize(self, request):
+        if request.body == b"raise":
+            raise RuntimeError("normalize failed")
+        return request
+
+    monkeypatch.setattr(OpenAPINormalizer, "normalize", raise_normalize)
+
+    original_request = Request(
+        headers=CaseInsensitiveDict(),
+        body=b"raise",
+        method=HTTPMethod.GET,
+        path="/user/.",
+        query_parameters=dict(),
+    )
+
+    evaluator = DiffEvaluator(tmp_path)
+    result = RequestResult("lib1", original_request)
+
+    assert not evaluator.eval({result}, original_request)
+    assert len(os.listdir(tmp_path)) == 1
+    assert "failed to normalize original request" in caplog.text
+
+    produced_request = deepcopy(original_request)
+    produced_request.path = "/user/"
+    original_request.body = b""
+
+    result = RequestResult("lib1", produced_request)
+
+    assert evaluator.eval({result}, original_request) == {"lib1"}
+    assert len(os.listdir(tmp_path)) == 2
+    assert "failed to normalize client request" in caplog.text
