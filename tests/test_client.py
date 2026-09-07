@@ -1252,7 +1252,7 @@ def restcountries():
     ],
 )
 @pytest.mark.usefixtures("restcountries")
-# TODO fix
+# TODO fix kiota
 class TestRestcountries:
     def test_path_resolve_issue(self, clc_class, restcountries: tuple[Network, str]):
         Config.API_CONFIG_PATH = (
