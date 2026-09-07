@@ -727,6 +727,34 @@ class TestSpringBatch:
                 expected_status=404,
             )
 
+    def test_empty_string_key_value(self, clc_class, spring_batch: tuple[Network, str]):
+        """Test payload with empty string key."""
+
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_3_0_BASE_PATH / "api_spring_batch_rest_config.yaml"
+        )
+
+        # wait for spring-batch-rest-mitmproxy to be ready
+        sleep(10)
+
+        network, api_path = spring_batch
+        with clc_class() as clc:
+            request = request = Request(
+                headers=CaseInsensitiveDict({"content-type": "application/json"}),
+                body=b'{"properties":{"":{}}}',
+                method=HTTPMethod.POST,
+                path="/jobExecutions",
+                query_parameters={},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
+
 
 @pytest.fixture(scope="class")
 def http_patch_spring():
