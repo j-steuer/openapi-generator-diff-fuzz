@@ -1234,3 +1234,47 @@ class TestYoutubeMock:
                 api_path,
                 expected_status=404,
             )
+
+
+@pytest.fixture(scope="class")
+def restcountries():
+    network, api_name = api_wfd("restcountries")
+    yield network, api_name
+    api_down(network, "restcountries")
+
+
+@pytest.mark.parametrize(
+    "clc_class",
+    [
+        pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
+        pytest.param(KiotaPythonCLC, id="kiota-python"),
+        pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+    ],
+)
+@pytest.mark.usefixtures("restcountries")
+# TODO fix
+class TestRestcountries:
+    def test_path_resolve_issue(self, clc_class, restcountries: tuple[Network, str]):
+        Config.API_CONFIG_PATH = (
+            TEST_CONFIG_3_0_BASE_PATH / "api_restcountries_config.yaml"
+        )
+
+        sleep(10)
+
+        network, api_path = restcountries
+        with clc_class() as clc:
+            request = Request(
+                headers=CaseInsensitiveDict(),
+                body=b"",
+                method=HTTPMethod.GET,
+                path="/v2/alpha/%C2%AE%C2%A9%3A%C2%86%C3%B6%C3%8D%F3%9F%8C%91%F0%9A%8A%BA%C2%9B?fields=",
+                query_parameters={"fields": ""},
+            )
+
+            _test_send_request(
+                clc,
+                request,
+                network,
+                api_path,
+                expected_status=404,
+            )
