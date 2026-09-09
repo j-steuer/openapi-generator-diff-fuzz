@@ -1,0 +1,14 @@
+Error report Error_-1101669713900297801
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"id": "g\\uab4a", "active": false, "entryDate": "0465-09-26T08:13:23.566534+07:50", "name": "\\u0085>\\u00e5\\uda36\\udc20\\u0011ks^\\u00cd\\u009b\\ud8ae\\udcdc\\\\{9", "birthDate": "9701-12-16T16:10:45.0Z", "location": {"id": "\\u00df\\u0010\\u009f\\udbf0\\uded3\\u00e7\\u00fb\\u00f0\'\\u008c-", "name": "\\u00a4\\ud8b0\\uddd8"}, "exitDate": "2192-08-16T04:02:33.994-20:44", "gender": "\\u0088\\u007f\\u0081\\u0018\\u008e\\u00f9\'\\"1", "cpf": "\\u00a9\\u00b3\\u0084"}', method=<HTTPMethod.POST: 'POST'>, path="/v1/hospitais/MultiMatch(values=%5B'2',%20'3'%5D)/pacientes/checkin", query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"active": false, "birthDate": "9701-12-16T16:10:45+00:00", "cpf": "\\u00a9\\u00b3\\u0084", "entryDate": "0465-09-26T08:13:23.566534+07:50", "exitDate": "2192-08-16T04:02:33.994000-20:44", "gender": "\\u0088\\u007f\\u0081\\u0018\\u008e\\u00f9\'\\"1", "id": "g\\uab4a", "location": {"id": "\\u00df\\u0010\\u009f\\udbf0\\uded3\\u00e7\\u00fb\\u00f0\'\\u008c-", "name": "\\u00a4\\ud8b0\\uddd8"}, "name": "\\u0085>\\u00e5\\uda36\\udc20\\u0011ks^\\u00cd\\u009b\\ud8ae\\udcdc\\\\{9"}', method=<HTTPMethod.POST: 'POST'>, path='/v1/hospitais/MultiMatch%28values%3D%5B%272%27%2C%20%273%27%5D%29/pacientes/checkin', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /v1/hospitais/MultiMatch(values=%5B'2',%20'3'%5D)/pacientes/checkin expected, but got /v1/hospitais/MultiMatch%28values%3D%5B%272%27%2C%20%273%27%5D%29/pacientes/checkin.

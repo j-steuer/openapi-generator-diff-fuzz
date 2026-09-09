@@ -1,0 +1,18 @@
+Error report Error_-4808110065138629858
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"insurance": false, "cars": [{"maxSpeedKmH": -1.401298464324817e-45, "brand": ""}], "createdAt": "0411-05-28T01:17:35.639254Z", "address": {"street": "\\u00fc\\ud99c\\udfe0", "city": "", "postcode": "\\u001e%"}, "id": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"id":"","address":{"street":"\xc3\xbc\xf1\xb7\x8f\xa0","postcode":"\\u001e%","city":""},"createdAt":"0411-05-28T01:17:35.639254+00:00","insurance":false,"cars":[{"brand":"","maxSpeedKmH":-1.401298464324817e-45}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"insurance": false, "cars": [{"maxSpeedKmH": -1.401298464324817e-45, "'
+ b'brand": ""}], "createdAt": "0411-05-28T01:17:35.639254Z", "address": {"stree'
+ b't": "\\u00fc\\ud99c\\udfe0", "city": "", "postcode": "\\u001e%"}, "id": ""}]')' expected, but got '(b'[{},{"id":"","address":{"street":"\xc3\xbc\xf1\xb7\x8f\xa0","postcode":"\\u'
+ b'001e%","city":""},"createdAt":"0411-05-28T01:17:35.639254+00:00","insurance"'
+ b':false,"cars":[{"brand":"","maxSpeedKmH":-1.401298464324817e-45}]}]').'

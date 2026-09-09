@@ -1,0 +1,14 @@
+Error report Error_2272071146369549825
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"properties": {"\\u00ae\\u00da\\u00bf\\u00be": {"\\ud840\\udeb4": {"\\ud961\\udd10\\u0096": []}, "1": [], "": false}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"properties": {"\\u00ae\\u00da\\u00bf\\u00be": {"\\ud840\\udeb4": {"\\ud961\\udd10\\u0096": []}, "1": []}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'®Ú¿¾': {'𠊴': {'\U00068510\x96': []}, '1': [], '': False}} != {'®Ú¿¾': {'𠊴': {'\U00068510\x96': []}, '1': []}}

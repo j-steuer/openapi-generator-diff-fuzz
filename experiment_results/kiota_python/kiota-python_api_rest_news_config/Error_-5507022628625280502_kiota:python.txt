@@ -1,0 +1,14 @@
+Error report Error_-5507022628625280502
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"country": "", "creationTime": "0539-05-24T06:51:31.28103+20:30", "newsId": ".exe", "authorId": "\\u00e1"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"authorId": "\\u00e1", "country": "", "creationTime": "0539-05-24T06:51:31.281030+20:30", "newsId": ".exe"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'creationTime' in body: 0539-05-24T06:51:31.28103+20:30 != 0539-05-24T06:51:31.281030+20:30

@@ -1,0 +1,26 @@
+Error report Error_957897241279492960
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {}, "age": -29848157, "lastName": "4;H\\u001b\\u00c7\\u00c7", "cars": [{}, {"maxSpeedKmH": -34360760181.71922, "model": "9Y\\u00f7/\\u000f"}, {}, {"brand": "\\u0015\\u00a1Y\\ud8dc\\udd05L\\u00b8\\u0080\\u0012"}, {}, {}, {"brand": "\\u0015\\ud853\\udcc8", "maxSpeedKmH": 0.99999, "model": "\\u00ad"}], "insurance": false}, {"age": 7718, "firstName": "", "createdAt": "0002-01-17T00:27:00.0Z", "address": {"street": "", "number": 2776176, "city": ""}, "insurance": false, "id": "Lf\\u0005\\t", "lastName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName":"4;H\\u001b\xc3\x87\xc3\x87","age":-29848157,"address":{},"insurance":false,"cars":[{},{"model":"9Y\xc3\xb7/\\u000f","maxSpeedKmH":-34360760181.71922},{},{"brand":"\\u0015\xc2\xa1Y\xf1\x87\x84\x85L\xc2\xb8\xc2\x80\\u0012"},{},{},{"brand":"\\u0015\xf0\xa4\xb3\x88","model":"\xc2\xad","maxSpeedKmH":0.99999}]},{"id":"Lf\\u0005\\t","firstName":"","lastName":"","age":7718,"address":{"number":2776176,"street":"","city":""},"createdAt":"0002-01-17T00:27:00+00:00","insurance":false}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {}, "age": -29848157, "lastName": "4;H\\u001b\\u00c7\\u00c7", '
+ b'"cars": [{}, {"maxSpeedKmH": -34360760181.71922, "model": "9Y\\u00f7/\\u00'
+ b'0f"}, {}, {"brand": "\\u0015\\u00a1Y\\ud8dc\\udd05L\\u00b8\\u0080\\u0012"},'
+ b' {}, {}, {"brand": "\\u0015\\ud853\\udcc8", "maxSpeedKmH": 0.99999, "model"'
+ b': "\\u00ad"}], "insurance": false}, {"age": 7718, "firstName": "", "creat'
+ b'edAt": "0002-01-17T00:27:00.0Z", "address": {"street": "", "number": 2776176'
+ b', "city": ""}, "insurance": false, "id": "Lf\\u0005\\t", "lastName": ""}]')' expected, but got '(b'[{"lastName":"4;H\\u001b\xc3\x87\xc3\x87","age":-29848157,"address":{},"i'
+ b'nsurance":false,"cars":[{},{"model":"9Y\xc3\xb7/\\u000f","maxSpeedKmH":-343'
+ b'60760181.71922},{},{"brand":"\\u0015\xc2\xa1Y\xf1\x87\x84\x85L\xc2'
+ b'\xb8\xc2\x80\\u0012"},{},{},{"brand":"\\u0015\xf0\xa4\xb3\x88","model":'
+ b'"\xc2\xad","maxSpeedKmH":0.99999}]},{"id":"Lf\\u0005\\t","firstName":"","las'
+ b'tName":"","age":7718,"address":{"number":2776176,"street":"","city":""},"cre'
+ b'atedAt":"0002-01-17T00:27:00+00:00","insurance":false}]').'

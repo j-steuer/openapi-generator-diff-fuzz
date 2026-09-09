@@ -1,0 +1,18 @@
+Error report Error_4760835858546936454
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName": "\\u000b\\ud968\\ude53A\\u00e7\\u0007\\u00c1", "createdAt": "0156-11-20T16:18:04-06:14"}, {"createdAt": "2000-01-01T00:00:00Z", "lastName": ""}, {}, {}, {}, {}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName":"\\u000b\xf1\xaa\x89\x93A\xc3\xa7\\u0007\xc3\x81","createdAt":"0156-11-20T16:18:04-06:14"},{"lastName":"","createdAt":"2000-01-01T00:00:00+00:00"},{},{},{},{},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"lastName": "\\u000b\\ud968\\ude53A\\u00e7\\u0007\\u00c1", "createdAt": '
+ b'"0156-11-20T16:18:04-06:14"}, {"createdAt": "2000-01-01T00:00:00Z", "lastNam'
+ b'e": ""}, {}, {}, {}, {}, {}, {}]')' expected, but got '(b'[{"lastName":"\\u000b\xf1\xaa\x89\x93A\xc3\xa7\\u0007\xc3\x81","createdAt"'
+ b':"0156-11-20T16:18:04-06:14"},{"lastName":"","createdAt":"2000-01-01T00:00:0'
+ b'0+00:00"},{},{},{},{},{},{}]').'

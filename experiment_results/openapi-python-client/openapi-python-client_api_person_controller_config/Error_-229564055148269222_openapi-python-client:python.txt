@@ -1,0 +1,37 @@
+Error report Error_-229564055148269222
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"age": -2147483648, "firstName": "\\udad9\\udc18\\uda93\\udc8f\\u0080\\u000bW\\u0015(\\u0081\\ud8ad\\udc05\\u00be\\u001d\\u00a2T\\u00c9", "address": {"country": "\\u008b"}, "cars": [], "insurance": false, "lastName": "/\\u0088\\u00dae\\u0094\\ud9b9\\udd69Rl\\u009a\\ud943\\udea1\\u00a4\\u00e2<R}\\n", "createdAt": "4852-10-23T14:17:14Z", "id": "\\u00a7n\\u0018\\udb25\\udf27[\\u00ec\\u0000.\\u009d"}, {"age": -11501, "insurance": true, "cars": [{}, {"model": "\\uda7e\\uddb8uZz\\ud901\\udeb7\\u00924=\\r", "brand": "#\\udaaa\\udc95\\ud897\\ude3a\\u00f7!\\u0004R", "maxSpeedKmH": -1.3998951580707564e-286}, {"model": "\\u00e9\\u00a0T\\ud8ad\\udf2d", "maxSpeedKmH": 5e-324}]}, {"createdAt": "3282-08-23T17:39:19Z", "address": {"postcode": "__main__", "number": -5771, "street": "", "city": "\\u00d3_\\u008c\\u00bc\\u0094n\\u001a\\u00e2\\udbfe\\udef2d\\u00b6\\u00997\\ud81b\\uddde\\u00d4"}}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xc2\xa7n\\u0018\xf3\x99\x9c\xa7[\xc3\xac\\u0000.\xc2\x9d","firstName":"\xf3\x86\x90\x98\xf2\xb4\xb2\x8f\xc2\x80\\u000bW\\u0015(\xc2\x81\xf0\xbb\x90\x85\xc2\xbe\\u001d\xc2\xa2T\xc3\x89","lastName":"/\xc2\x88\xc3\x9ae\xc2\x94\xf1\xbe\x95\xa9Rl\xc2\x9a\xf1\xa0\xba\xa1\xc2\xa4\xc3\xa2<R}\\n","age":-2147483648,"address":{"country":"\xc2\x8b"},"createdAt":"4852-10-23T14:17:14+00:00","insurance":false,"cars":[]},{"age":-11501,"insurance":true,"cars":[{},{"brand":"#\xf2\xba\xa2\x95\xf0\xb5\xb8\xba\xc3\xb7!\\u0004R","model":"\xf2\xaf\xa6\xb8uZz\xf1\x90\x9a\xb7\xc2\x924=\\r","maxSpeedKmH":-1.3998951580707564e-286},{"model":"\xc3\xa9\xc2\xa0T\xf0\xbb\x9c\xad","maxSpeedKmH":5e-324}]},{"address":{"number":-5771,"street":"","postcode":"__main__","city":"\xc3\x93_\xc2\x8c\xc2\xbc\xc2\x94n\\u001a\xc3\xa2\xf4\x8f\xab\xb2d\xc2\xb6\xc2\x997\xf0\x96\xb7\x9e\xc3\x94"},"createdAt":"3282-08-23T17:39:19+00:00"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"age": -2147483648, "firstName": "\\udad9\\udc18\\uda93\\udc8f\\u0080\\u'
+ b'000bW\\u0015(\\u0081\\ud8ad\\udc05\\u00be\\u001d\\u00a2T\\u00c9", "address":'
+ b' {"country": "\\u008b"}, "cars": [], "insurance": false, "lastName": "/\\u'
+ b'0088\\u00dae\\u0094\\ud9b9\\udd69Rl\\u009a\\ud943\\udea1\\u00a4\\u00e2<R}'
+ b'\\n", "createdAt": "4852-10-23T14:17:14Z", "id": "\\u00a7n\\u0018\\udb25'
+ b'\\udf27[\\u00ec\\u0000.\\u009d"}, {"age": -11501, "insurance": true, "cars":'
+ b' [{}, {"model": "\\uda7e\\uddb8uZz\\ud901\\udeb7\\u00924=\\r", "brand": "#'
+ b'\\udaaa\\udc95\\ud897\\ude3a\\u00f7!\\u0004R", "maxSpeedKmH": -1.399895158'
+ b'0707564e-286}, {"model": "\\u00e9\\u00a0T\\ud8ad\\udf2d", "maxSpeedKmH": 5e-'
+ b'324}]}, {"createdAt": "3282-08-23T17:39:19Z", "address": {"postcode": "__mai'
+ b'n__", "number": -5771, "street": "", "city": "\\u00d3_\\u008c\\u00bc\\u0094n'
+ b'\\u001a\\u00e2\\udbfe\\udef2d\\u00b6\\u00997\\ud81b\\uddde\\u00d4"}}]')' expected, but got '(b'[{"id":"\xc2\xa7n\\u0018\xf3\x99\x9c\xa7[\xc3\xac\\u0000.\xc2\x9d","firstNam'
+ b'e":"\xf3\x86\x90\x98\xf2\xb4\xb2\x8f\xc2\x80\\u000bW\\u0015(\xc2\x81\xf0\xbb'
+ b'\x90\x85\xc2\xbe\\u001d\xc2\xa2T\xc3\x89","lastName":"/\xc2\x88\xc3\x9ae\xc2'
+ b'\x94\xf1\xbe\x95\xa9Rl\xc2\x9a\xf1\xa0\xba\xa1\xc2\xa4\xc3\xa2<R}\\n","age'
+ b'":-2147483648,"address":{"country":"\xc2\x8b"},"createdAt":"4852-10-23T14:'
+ b'17:14+00:00","insurance":false,"cars":[]},{"age":-11501,"insurance":true,"ca'
+ b'rs":[{},{"brand":"#\xf2\xba\xa2\x95\xf0\xb5\xb8\xba\xc3\xb7!\\u0004R","mode'
+ b'l":"\xf2\xaf\xa6\xb8uZz\xf1\x90\x9a\xb7\xc2\x924=\\r","maxSpeedKmH":-1.3998'
+ b'951580707564e-286},{"model":"\xc3\xa9\xc2\xa0T\xf0\xbb\x9c\xad","maxSpeedKmH'
+ b'":5e-324}]},{"address":{"number":-5771,"street":"","postcode":"__main__","ci'
+ b'ty":"\xc3\x93_\xc2\x8c\xc2\xbc\xc2\x94n\\u001a\xc3\xa2\xf4\x8f\xab\xb2d'
+ b'\xc2\xb6\xc2\x997\xf0\x96\xb7\x9e\xc3\x94"},"createdAt":"3282-08-23T17:39:'
+ b'19+00:00"}]').'

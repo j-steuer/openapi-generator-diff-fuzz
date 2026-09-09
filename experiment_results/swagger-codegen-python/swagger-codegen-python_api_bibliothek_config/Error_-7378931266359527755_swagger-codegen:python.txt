@@ -1,0 +1,11 @@
+Error report Error_-7378931266359527755
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v2/projects/paper/versions/%3FV%F3%B6%B1%90%F2%AE%9C%B0%C2%BF%C2%8D%F2%9A%87%AD%01%F1%92%8E%8Dd%F1%9D%9A%AB8346SNAPSHOT%C3%84%0Ag%F2%AF%BC%8F/builds/362879', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was not unique and occured in other clients.
+Error while processing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /v2/projects/paper/versions/')

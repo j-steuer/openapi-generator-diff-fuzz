@@ -1,0 +1,14 @@
+Error report Error_6355864475002935533
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=yO%F3%94%AF%B0%13%26%13%C2%91b&exitCode=%2Bg%F3%BE%BB%9B%C2%BA%F1%87%AC%92%C3%92O%F1%B8%8A%8F%3Di%C3%88%28%C2%B8M%C2%B6%C2%9BD', query_parameters={'jobName': 'yO\U000d4bf0\x13&\x13\x91b', 'exitCode': '+g\U000feedbº\U00047b12ÒO\U0007828f=iÈ(¸M¶\x9bD'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=yO%F3%94%AF%B0%13%26%13%C2%91b&exitCode=%2Bg%F3%BE%BB%9B%C2%BA%F1%87%AC%92%C3%92O%F1%B8%8A%8F%3Di%C3%88%28%C2%B8M%C2%B6%C2%9BD&limitPerJob=3', query_parameters={'jobName': 'yO\U000d4bf0\x13&\x13\x91b', 'exitCode': '+g\U000feedbº\U00047b12ÒO\U0007828f=iÈ(¸M¶\x9bD', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'jobName': 'yO\U000d4bf0\x13&\x13\x91b', 'exitCode': '+g\U000feedbº\U00047b12ÒO\U0007828f=iÈ(¸M¶\x9bD'} expected, but got {'jobName': 'yO\U000d4bf0\x13&\x13\x91b', 'exitCode': '+g\U000feedbº\U00047b12ÒO\U0007828f=iÈ(¸M¶\x9bD', 'limitPerJob': '3'}.

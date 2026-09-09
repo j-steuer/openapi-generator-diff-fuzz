@@ -1,0 +1,14 @@
+Error report Error_-2424400005704915544
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json;charset=UTF-8'}, body=b'{"country": "X\\u0083]\\u00ca", "authorId": "\\u0002\\u0096\\u00b8\\ud971\\udc0e\\u009f\\udbec\\udd9c\\udb35\\uddcf\\u0097.\\u00dcZ\\u0098\\u00cc\\udb29\\udffb\\u00ed\\u008f\\ud816\\udd0e\\u00dc", "text": "F\\u00ef\\uda52\\udc88m", "newsId": "\\u00ae\\u0002\\u0014", "id": "", "creationTime": "0363-10-23T22:16:18+04:39"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"authorId": "\\u0002\\u0096\\u00b8\\ud971\\udc0e\\u009f\\udbec\\udd9c\\udb35\\uddcf\\u0097.\\u00dcZ\\u0098\\u00cc\\udb29\\udffb\\u00ed\\u008f\\ud816\\udd0e\\u00dc", "country": "X\\u0083]\\u00ca", "creationTime": "0363-10-23T22:16:18+04:39", "id": "", "newsId": "\\u00ae\\u0002\\u0014", "text": "F\\u00ef\\uda52\\udc88m"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'creationTime' in body: 0363-10-23T17:37:18+00:00 != 0363-10-23T22:16:18+04:39

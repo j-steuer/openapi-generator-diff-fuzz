@@ -1,0 +1,14 @@
+Error report Error_-7295780465777747107
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=%C2%9Fi%C3%9A%C3%A6%F3%A3%82%9F%10%C2%95%C2%A3%25%1Cm%C3%B4&jobName=%7B%C2%A9', query_parameters={'exitCode': '\x9fiÚæ\U000e309f\x10\x95£%\x1cmô', 'jobName': '{©'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%7B%C2%A9&exitCode=%C2%9Fi%C3%9A%C3%A6%F3%A3%82%9F%10%C2%95%C2%A3%25%1Cm%C3%B4&limitPerJob=3', query_parameters={'jobName': '{©', 'exitCode': '\x9fiÚæ\U000e309f\x10\x95£%\x1cmô', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'exitCode': '\x9fiÚæ\U000e309f\x10\x95£%\x1cmô', 'jobName': '{©'} expected, but got {'jobName': '{©', 'exitCode': '\x9fiÚæ\U000e309f\x10\x95£%\x1cmô', 'limitPerJob': '3'}.

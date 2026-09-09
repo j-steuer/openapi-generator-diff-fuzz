@@ -1,0 +1,11 @@
+Error report Error_5671703838992893606
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan/teletan', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was not unique and occured in other clients.
+Error while building request

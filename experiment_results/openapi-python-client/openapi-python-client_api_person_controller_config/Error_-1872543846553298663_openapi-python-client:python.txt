@@ -1,0 +1,17 @@
+Error report Error_-1872543846553298663
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"age": 7445, "insurance": false}, {"address": {}, "age": 0, "cars": [], "createdAt": "1584-01-01T04:01:04Z", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"age":7445,"insurance":false},{"id":"","lastName":"","age":0,"address":{},"createdAt":"1584-01-01T04:01:04+00:00","insurance":false,"cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"age": 7445, "insurance": false}, {"address": {}, "age": 0, "cars": [], "c'
+ b'reatedAt": "1584-01-01T04:01:04Z", "id": "", "insurance": false, "lastName":'
+ b' ""}]')' expected, but got '(b'[{"age":7445,"insurance":false},{"id":"","lastName":"","age":0,"address":{},'
+ b'"createdAt":"1584-01-01T04:01:04+00:00","insurance":false,"cars":[]}]').'

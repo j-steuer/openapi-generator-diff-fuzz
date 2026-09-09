@@ -1,0 +1,18 @@
+Error report Error_5393906881053632678
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "2370-08-28T14:55:54.4771Z", "id": "?&\\u00e01\\u00e8\\u00e3", "insurance": true, "cars": [{}, {"brand": "", "model": "\\u0099"}, {"brand": "4771"}, {}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"?&\xc3\xa01\xc3\xa8\xc3\xa3","createdAt":"2370-08-28T14:55:54.477100+00:00","insurance":true,"cars":[{},{"brand":"","model":"\xc2\x99"},{"brand":"4771"},{}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "2370-08-28T14:55:54.4771Z", "id": "?&\\u00e01\\u00e8\\u00e3'
+ b'", "insurance": true, "cars": [{}, {"brand": "", "model": "\\u0099"}, {"b'
+ b'rand": "4771"}, {}]}]')' expected, but got '(b'[{"id":"?&\xc3\xa01\xc3\xa8\xc3\xa3","createdAt":"2370-08-28T14:55:54.4771'
+ b'00+00:00","insurance":true,"cars":[{},{"brand":"","model":"\xc2\x99"},{"br'
+ b'and":"4771"},{}]}]').'

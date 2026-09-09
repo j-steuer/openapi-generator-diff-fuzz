@@ -1,0 +1,27 @@
+Error report Error_3656669861807647899
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "2920-11-01T09:19:08.062222Z", "firstName": "\\u008bX\\u009cS\\uda83\\udc3d\\udbe6\\udc19a\\u0094\\u0080\\u00e8\\u009fj", "insurance": false, "age": 1400999336, "address": {}, "id": "\\ud88f\\udc33\\u0099<I"}, {"cars": [{"maxSpeedKmH": 8.038607604450551e+285, "model": ";<", "brand": "\\ud8d1\\udd44)"}, {}, {"brand": "\\u00ceb", "maxSpeedKmH": 9.672009024158533e-272, "model": "w"}], "id": "\\ud83f\\udd5a\\u0001\\u00ba.B\\udae9\\udf9c\\u00c2\\"\\u00c0\\u0017\\u00de\\u0085\\u00e7", "insurance": false}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf0\xb3\xb0\xb3\xc2\x99<I","firstName":"\xc2\x8bX\xc2\x9cS\xf2\xb0\xb0\xbd\xf4\x89\xa0\x99a\xc2\x94\xc2\x80\xc3\xa8\xc2\x9fj","age":1400999336,"address":{},"createdAt":"2920-11-01T09:19:08.062222+00:00","insurance":false},{"id":"\xf0\x9f\xb5\x9a\\u0001\xc2\xba.B\xf3\x8a\x9e\x9c\xc3\x82\\"\xc3\x80\\u0017\xc3\x9e\xc2\x85\xc3\xa7","insurance":false,"cars":[{"brand":"\xf1\x84\x95\x84)","model":";<","maxSpeedKmH":8.038607604450551e+285},{},{"brand":"\xc3\x8eb","model":"w","maxSpeedKmH":9.672009024158533e-272}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "2920-11-01T09:19:08.062222Z", "firstName": "\\u008bX\\u009'
+ b'cS\\uda83\\udc3d\\udbe6\\udc19a\\u0094\\u0080\\u00e8\\u009fj", "insurance": '
+ b'false, "age": 1400999336, "address": {}, "id": "\\ud88f\\udc33\\u0099<I"}, '
+ b'{"cars": [{"maxSpeedKmH": 8.038607604450551e+285, "model": ";<", "brand"'
+ b': "\\ud8d1\\udd44)"}, {}, {"brand": "\\u00ceb", "maxSpeedKmH": 9.6720090241'
+ b'58533e-272, "model": "w"}], "id": "\\ud83f\\udd5a\\u0001\\u00ba.B\\udae9\\'
+ b'udf9c\\u00c2\\"\\u00c0\\u0017\\u00de\\u0085\\u00e7", "insurance": false}]')' expected, but got '(b'[{"id":"\xf0\xb3\xb0\xb3\xc2\x99<I","firstName":"\xc2\x8bX\xc2\x9c'
+ b'S\xf2\xb0\xb0\xbd\xf4\x89\xa0\x99a\xc2\x94\xc2\x80\xc3\xa8\xc2\x9fj","age":1'
+ b'400999336,"address":{},"createdAt":"2920-11-01T09:19:08.062222+00:00","insur'
+ b'ance":false},{"id":"\xf0\x9f\xb5\x9a\\u0001\xc2\xba.B\xf3\x8a'
+ b'\x9e\x9c\xc3\x82\\"\xc3\x80\\u0017\xc3\x9e\xc2\x85\xc3\xa7","insurance":fa'
+ b'lse,"cars":[{"brand":"\xf1\x84\x95\x84)","model":";<","maxSpeedKmH":8.038607'
+ b'604450551e+285},{},{"brand":"\xc3\x8eb","model":"w","maxSpeedKmH":9.672009'
+ b'024158533e-272}]}]').'

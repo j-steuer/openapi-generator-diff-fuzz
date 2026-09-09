@@ -1,0 +1,61 @@
+Error report Error_-7250579730345327300
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id": "\\ud86f\\ude95\\u00bb\\u00c0\\u00d0\\u00a5"}, {}, {"cars": [{}], "age": -50312569, "id": "\\uda27\\udf83\\u00fa\\u34e59\\u009e\\u00a2\\ud804\\uddcf\\ud9c5\\udcf2\\"U\\u001d", "firstName": "", "createdAt": "0661-02-26T14:17:44.9001Z", "insurance": true, "address": {}, "lastName": "v|\\u00fe\\u0018\\u00d4\\u008c|\\u00f2>2\\u00d1\\uda44\\ude0e"}, {"createdAt": "0146-04-08T10:19:26.36106Z", "insurance": false, "age": -12773, "firstName": "5[\\u00ff\\ud8cc\\udd4c", "id": "", "address": {"number": 12168, "street": "\\u0084\\u00c1m9\\ud9e3\\ude84\\u00a6", "postcode": "P"}, "lastName": "\\udad8\\ude91\\u00a6\\ud932\\udc67\\u00fa", "cars": [{"model": "\\u0081\\udb00\\ude02\\u00af\\u00ee\\u00d02\\u0093A\\u00be\\u00d7", "maxSpeedKmH": -6.151936366494342e+16, "brand": "\\u0006,b"}, {}]}, {"age": 3010, "cars": [{"model": "\\ud836\\ude7a", "brand": "g\\"\\u00d2", "maxSpeedKmH": -3.718897222603836e+46}, {"maxSpeedKmH": 1.2829773139886469e-08}, {"maxSpeedKmH": -5.777622683172501e+16, "brand": "o^\\u00a6\\u0017t\\udaa2\\udfd4\\udaea\\udf33\\uda07\\udfa9", "model": ""}, {"model": "\\u00c3\\ud912\\udea9", "maxSpeedKmH": 9491970425934292.0}, {}, {}, {}, {}], "insurance": false, "firstName": "\\u001f\\u008b\\u00d0/\\udbfa\\udfc6\\ud8b5\\udcfe", "address": {}, "createdAt": "0593-04-23T13:34:42-03:27", "id": "\\u00ca>", "lastName": "\\u00c4\\u0016\\u0082a\\u00ba\\ud965\\udd82H\\u0004"}, {"age": 15140874, "lastName": "", "address": {}}, {"address": {"postcode": "\\u00b7^\\u00cd\\u00a9\\u008f\\u00ae\\u00c9:\\u00a9\\u0006\\ud8f9\\udc0a\\u008d\\u00f9", "country": "\\u00cd\\ud82d\\udda6", "street": "\\u001e\\ua32dN\\udb47\\udca0\\uda14\\udfdc\\u0096\\u00a1", "number": 117, "city": ""}, "lastName": "", "firstName": "\\udb26\\ude9f\\u00f5\\ud9b3\\udeb5\\uda40\\ude7f"}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf0\xab\xba\x95\xc2\xbb\xc3\x80\xc3\x90\xc2\xa5"},{},{"id":"\xf2\x99\xbe\x83\xc3\xba\xe3\x93\xa59\xc2\x9e\xc2\xa2\xf0\x91\x87\x8f\xf2\x81\x93\xb2\\"U\\u001d","firstName":"","lastName":"v|\xc3\xbe\\u0018\xc3\x94\xc2\x8c|\xc3\xb2>2\xc3\x91\xf2\xa1\x88\x8e","age":-50312569,"address":{},"createdAt":"0661-02-26T14:17:44.900100+00:00","insurance":true,"cars":[{}]},{"id":"","firstName":"5[\xc3\xbf\xf1\x83\x85\x8c","lastName":"\xf3\x86\x8a\x91\xc2\xa6\xf1\x9c\xa1\xa7\xc3\xba","age":-12773,"address":{"number":12168,"street":"\xc2\x84\xc3\x81m9\xf2\x88\xba\x84\xc2\xa6","postcode":"P"},"createdAt":"0146-04-08T10:19:26.361060+00:00","insurance":false,"cars":[{"brand":"\\u0006,b","model":"\xc2\x81\xf3\x90\x88\x82\xc2\xaf\xc3\xae\xc3\x902\xc2\x93A\xc2\xbe\xc3\x97","maxSpeedKmH":-6.151936366494342e+16},{}]},{"id":"\xc3\x8a>","firstName":"\\u001f\xc2\x8b\xc3\x90/\xf4\x8e\xaf\x86\xf0\xbd\x93\xbe","lastName":"\xc3\x84\\u0016\xc2\x82a\xc2\xba\xf1\xa9\x96\x82H\\u0004","age":3010,"address":{},"createdAt":"0593-04-23T13:34:42-03:27","insurance":false,"cars":[{"brand":"g\\"\xc3\x92","model":"\xf0\x9d\xa9\xba","maxSpeedKmH":-3.718897222603836e+46},{"maxSpeedKmH":1.2829773139886469e-08},{"brand":"o^\xc2\xa6\\u0017t\xf2\xb8\xaf\x94\xf3\x8a\xac\xb3\xf2\x91\xbe\xa9","model":"","maxSpeedKmH":-5.777622683172501e+16},{"model":"\xc3\x83\xf1\x94\xaa\xa9","maxSpeedKmH":9491970425934292.0},{},{},{},{}]},{"lastName":"","age":15140874,"address":{}},{"firstName":"\xf3\x99\xaa\x9f\xc3\xb5\xf1\xbc\xba\xb5\xf2\xa0\x89\xbf","lastName":"","address":{"number":117,"street":"\\u001e\xea\x8c\xadN\xf3\xa1\xb2\xa0\xf2\x95\x8f\x9c\xc2\x96\xc2\xa1","postcode":"\xc2\xb7^\xc3\x8d\xc2\xa9\xc2\x8f\xc2\xae\xc3\x89:\xc2\xa9\\u0006\xf1\x8e\x90\x8a\xc2\x8d\xc3\xb9","city":"","country":"\xc3\x8d\xf0\x9b\x96\xa6"}},{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"id": "\\ud86f\\ude95\\u00bb\\u00c0\\u00d0\\u00a5"}, {}, {"cars": [{}], '
+ b'"age": -50312569, "id": "\\uda27\\udf83\\u00fa\\u34e59\\u009e\\u00a2\\ud804'
+ b'\\uddcf\\ud9c5\\udcf2\\"U\\u001d", "firstName": "", "createdAt": "0661-02'
+ b'-26T14:17:44.9001Z", "insurance": true, "address": {}, "lastName": "v|\\u'
+ b'00fe\\u0018\\u00d4\\u008c|\\u00f2>2\\u00d1\\uda44\\ude0e"}, {"createdAt": "'
+ b'0146-04-08T10:19:26.36106Z", "insurance": false, "age": -12773, "firstName":'
+ b' "5[\\u00ff\\ud8cc\\udd4c", "id": "", "address": {"number": 12168, "street"'
+ b': "\\u0084\\u00c1m9\\ud9e3\\ude84\\u00a6", "postcode": "P"}, "lastName": '
+ b'"\\udad8\\ude91\\u00a6\\ud932\\udc67\\u00fa", "cars": [{"model": "\\u0081\\u'
+ b'db00\\ude02\\u00af\\u00ee\\u00d02\\u0093A\\u00be\\u00d7", "maxSpeedKmH": -6'
+ b'.151936366494342e+16, "brand": "\\u0006,b"}, {}]}, {"age": 3010, "cars": '
+ b'[{"model": "\\ud836\\ude7a", "brand": "g\\"\\u00d2", "maxSpeedKmH": -3.71889'
+ b'7222603836e+46}, {"maxSpeedKmH": 1.2829773139886469e-08}, {"maxSpeedKmH": -5'
+ b'.777622683172501e+16, "brand": "o^\\u00a6\\u0017t\\udaa2\\udfd4\\udaea\\ud'
+ b'f33\\uda07\\udfa9", "model": ""}, {"model": "\\u00c3\\ud912\\udea9", "max'
+ b'SpeedKmH": 9491970425934292.0}, {}, {}, {}, {}], "insurance": false, "firstN'
+ b'ame": "\\u001f\\u008b\\u00d0/\\udbfa\\udfc6\\ud8b5\\udcfe", "address": {}, '
+ b'"createdAt": "0593-04-23T13:34:42-03:27", "id": "\\u00ca>", "lastName": "'
+ b'\\u00c4\\u0016\\u0082a\\u00ba\\ud965\\udd82H\\u0004"}, {"age": 15140874, "l'
+ b'astName": "", "address": {}}, {"address": {"postcode": "\\u00b7^\\u00cd\\u0'
+ b'0a9\\u008f\\u00ae\\u00c9:\\u00a9\\u0006\\ud8f9\\udc0a\\u008d\\u00f9", "co'
+ b'untry": "\\u00cd\\ud82d\\udda6", "street": "\\u001e\\ua32dN\\udb47\\udca0\\u'
+ b'da14\\udfdc\\u0096\\u00a1", "number": 117, "city": ""}, "lastName": "", "fi'
+ b'rstName": "\\udb26\\ude9f\\u00f5\\ud9b3\\udeb5\\uda40\\ude7f"}, {}]')' expected, but got '(b'[{"id":"\xf0\xab\xba\x95\xc2\xbb\xc3\x80\xc3\x90\xc2\xa5"},{},{"id":'
+ b'"\xf2\x99\xbe\x83\xc3\xba\xe3\x93\xa59\xc2\x9e\xc2\xa2\xf0\x91\x87\x8f\xf2'
+ b'\x81\x93\xb2\\"U\\u001d","firstName":"","lastName":"v|\xc3\xbe\\u0018\xc3'
+ b'\x94\xc2\x8c|\xc3\xb2>2\xc3\x91\xf2\xa1\x88\x8e","age":-50312569,"address'
+ b'":{},"createdAt":"0661-02-26T14:17:44.900100+00:00","insurance":true,"cars":'
+ b'[{}]},{"id":"","firstName":"5[\xc3\xbf\xf1\x83\x85\x8c","lastName":"\xf3\x86'
+ b'\x8a\x91\xc2\xa6\xf1\x9c\xa1\xa7\xc3\xba","age":-12773,"address":{"number"'
+ b':12168,"street":"\xc2\x84\xc3\x81m9\xf2\x88\xba\x84\xc2\xa6","postcode":"P'
+ b'"},"createdAt":"0146-04-08T10:19:26.361060+00:00","insurance":false,"cars":['
+ b'{"brand":"\\u0006,b","model":"\xc2\x81\xf3\x90\x88\x82\xc2\xaf\xc3\xae\xc3'
+ b'\x902\xc2\x93A\xc2\xbe\xc3\x97","maxSpeedKmH":-6.151936366494342e+16},{}]'
+ b'},{"id":"\xc3\x8a>","firstName":"\\u001f\xc2\x8b\xc3\x90/\xf4\x8e'
+ b'\xaf\x86\xf0\xbd\x93\xbe","lastName":"\xc3\x84\\u0016\xc2\x82a\xc2'
+ b'\xba\xf1\xa9\x96\x82H\\u0004","age":3010,"address":{},"createdAt":"0593-04-2'
+ b'3T13:34:42-03:27","insurance":false,"cars":[{"brand":"g\\"\xc3\x92","model"'
+ b':"\xf0\x9d\xa9\xba","maxSpeedKmH":-3.718897222603836e+46},{"maxSpeedKmH":1.2'
+ b'829773139886469e-08},{"brand":"o^\xc2\xa6\\u0017t\xf2\xb8\xaf\x94\xf3\x8a'
+ b'\xac\xb3\xf2\x91\xbe\xa9","model":"","maxSpeedKmH":-5.777622683172501e+16}'
+ b',{"model":"\xc3\x83\xf1\x94\xaa\xa9","maxSpeedKmH":9491970425934292.0},{},'
+ b'{},{},{}]},{"lastName":"","age":15140874,"address":{}},{"firstName":'
+ b'"\xf3\x99\xaa\x9f\xc3\xb5\xf1\xbc\xba\xb5\xf2\xa0\x89\xbf","lastName":"","'
+ b'address":{"number":117,"street":"\\u001e\xea\x8c\xadN\xf3\xa1\xb2\xa0\xf2'
+ b'\x95\x8f\x9c\xc2\x96\xc2\xa1","postcode":"\xc2\xb7^\xc3\x8d\xc2\xa9'
+ b'\xc2\x8f\xc2\xae\xc3\x89:\xc2\xa9\\u0006\xf1\x8e\x90\x8a\xc2\x8d\xc3\xb9"'
+ b',"city":"","country":"\xc3\x8d\xf0\x9b\x96\xa6"}},{}]').'

@@ -1,0 +1,14 @@
+Error report Error_4543621544438219130
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/bessj/414/2.8351041815733093e+37', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/bessj/414/2.8351041815733093e%2B37', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/bessj/414/2.8351041815733093e+37 expected, but got /api/bessj/414/2.8351041815733093e%2B37.

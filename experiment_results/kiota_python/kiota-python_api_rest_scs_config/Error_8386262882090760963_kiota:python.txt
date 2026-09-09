@@ -1,0 +1,14 @@
+Error report Error_8386262882090760963
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/.exe/-1.963465427701302e+205/-1.6212980532991504e+16', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/.exe/-1.963465427701302e%2B205/-1.6212980532991504e%2B16', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/calc/.exe/-1.963465427701302e+205/-1.6212980532991504e+16 expected, but got /api/calc/.exe/-1.963465427701302e%2B205/-1.6212980532991504e%2B16.

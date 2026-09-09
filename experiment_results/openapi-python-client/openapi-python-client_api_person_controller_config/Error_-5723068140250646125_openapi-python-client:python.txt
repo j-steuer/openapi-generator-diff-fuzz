@@ -1,0 +1,27 @@
+Error report Error_-5723068140250646125
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "0269-01-11T12:36:13.54Z", "firstName": "9\\udb12\\udc2c\\u00b7\\ud95a\\udffe\\u00a8", "insurance": true}, {}, {}, {"age": 121655, "id": "\\ud89a\\ude08\\udab0\\udc61\\u00e9\\udbb1\\udd5f\\udbb7\\udfce\\u00e6\\u00ea", "firstName": "j\\u00b2\\u00dcO-\\u00f8\\ud8e6\\udd3aX14\\u00a2\\u00cd\\u00a6\\u00d2*\\uda2c\\udcc4\\udaa4\\ude62", "createdAt": "6874-05-17T14:54:29.486809-08:49", "insurance": false, "cars": []}, {"id": "O\\u00ac\\udb44\\udc0c\\u0096\\u00aaTK\\u00b6"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName":"9\xf3\x94\xa0\xac\xc2\xb7\xf1\xa6\xaf\xbe\xc2\xa8","createdAt":"0269-01-11T12:36:13.540000+00:00","insurance":true},{},{},{"id":"\xf0\xb6\xa8\x88\xf2\xbc\x81\xa1\xc3\xa9\xf3\xbc\x95\x9f\xf3\xbd\xbf\x8e\xc3\xa6\xc3\xaa","firstName":"j\xc2\xb2\xc3\x9cO-\xc3\xb8\xf1\x89\xa4\xbaX14\xc2\xa2\xc3\x8d\xc2\xa6\xc3\x92*\xf2\x9b\x83\x84\xf2\xb9\x89\xa2","age":121655,"createdAt":"6874-05-17T14:54:29.486809-08:49","insurance":false,"cars":[]},{"id":"O\xc2\xac\xf3\xa1\x80\x8c\xc2\x96\xc2\xaaTK\xc2\xb6"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "0269-01-11T12:36:13.54Z", "firstName": "9\\udb12\\udc2c\\u0'
+ b'0b7\\ud95a\\udffe\\u00a8", "insurance": true}, {}, {}, {"age": 121655, "id"'
+ b': "\\ud89a\\ude08\\udab0\\udc61\\u00e9\\udbb1\\udd5f\\udbb7\\udfce\\u00e6\\'
+ b'u00ea", "firstName": "j\\u00b2\\u00dcO-\\u00f8\\ud8e6\\udd3aX14\\u00a2\\u00'
+ b'cd\\u00a6\\u00d2*\\uda2c\\udcc4\\udaa4\\ude62", "createdAt": "6874-05-17T1'
+ b'4:54:29.486809-08:49", "insurance": false, "cars": []}, {"id": "O\\u00ac\\'
+ b'udb44\\udc0c\\u0096\\u00aaTK\\u00b6"}]')' expected, but got '(b'[{"firstName":"9\xf3\x94\xa0\xac\xc2\xb7\xf1\xa6\xaf\xbe\xc2\xa8","createdAt'
+ b'":"0269-01-11T12:36:13.540000+00:00","insurance":true},{},{},{"id":"'
+ b'\xf0\xb6\xa8\x88\xf2\xbc\x81\xa1\xc3\xa9\xf3\xbc\x95\x9f\xf3\xbd'
+ b'\xbf\x8e\xc3\xa6\xc3\xaa","firstName":"j\xc2\xb2\xc3\x9cO-\xc3\xb8\xf1\x89'
+ b'\xa4\xbaX14\xc2\xa2\xc3\x8d\xc2\xa6\xc3\x92*\xf2\x9b\x83\x84\xf2\xb9'
+ b'\x89\xa2","age":121655,"createdAt":"6874-05-17T14:54:29.486809-08:49","ins'
+ b'urance":false,"cars":[]},{"id":"O\xc2\xac\xf3\xa1\x80\x8c\xc2\x96\xc2\xaaT'
+ b'K\xc2\xb6"}]').'

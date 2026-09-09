@@ -1,0 +1,20 @@
+Error report Error_-4886752573259133856
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"id": "\\u00e5", "address": {"number": -194277, "street": ""}, "age": 11048, "createdAt": "2733-12-16T15:48:12Z", "firstName": "", "insurance": false, "cars": [{"brand": "\\u009ee\\ud891\\udd2e", "maxSpeedKmH": -2.225073858507e-311, "model": ""}], "lastName": "\\udb99\\udc17\\u00ffq\\u00f6o"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"id":"\xc3\xa5","firstName":"","lastName":"\xf3\xb6\x90\x97\xc3\xbfq\xc3\xb6o","age":11048,"address":{"number":-194277,"street":""},"createdAt":"2733-12-16T15:48:12+00:00","insurance":false,"cars":[{"brand":"\xc2\x9ee\xf0\xb4\x94\xae","model":"","maxSpeedKmH":-2.225073858507e-311}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"id": "\\u00e5", "address": {"number": -194277, "street": ""}, "age'
+ b'": 11048, "createdAt": "2733-12-16T15:48:12Z", "firstName": "", "insurance":'
+ b' false, "cars": [{"brand": "\\u009ee\\ud891\\udd2e", "maxSpeedKmH": -2.2250'
+ b'73858507e-311, "model": ""}], "lastName": "\\udb99\\udc17\\u00ffq\\u00f6o"}]')' expected, but got '(b'[{},{"id":"\xc3\xa5","firstName":"","lastName":"\xf3\xb6\x90\x97\xc3\xbf'
+ b'q\xc3\xb6o","age":11048,"address":{"number":-194277,"street":""},"createdA'
+ b't":"2733-12-16T15:48:12+00:00","insurance":false,"cars":[{"brand":"\xc2'
+ b'\x9ee\xf0\xb4\x94\xae","model":"","maxSpeedKmH":-2.225073858507e-311}]}]').'

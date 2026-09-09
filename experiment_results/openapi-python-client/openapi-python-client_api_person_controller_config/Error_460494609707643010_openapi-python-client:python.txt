@@ -1,0 +1,23 @@
+Error report Error_460494609707643010
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"postcode": "\\udb82\\udd78", "street": "", "city": "\\udb2f\\uddfe\\u00b0\\u00ca\\ud8a5\\uddb7\\u00aa$\\ud913\\udef3\\u9d52\\ud8aa\\ude86K\\udbff\\udd18"}, "age": 138089}, {"firstName": "", "age": 0, "createdAt": "2000-01-01T00:00:00Z", "address": {"city": "", "postcode": "", "number": 0, "country": "", "street": ""}, "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"age":138089,"address":{"street":"","postcode":"\xf3\xb0\xa5\xb8","city":"\xf3\x9b\xb7\xbe\xc2\xb0\xc3\x8a\xf0\xb9\x96\xb7\xc2\xaa$\xf1\x94\xbb\xb3\xe9\xb5\x92\xf0\xba\xaa\x86K\xf4\x8f\xb4\x98"}},{"firstName":"","lastName":"","age":0,"address":{"number":0,"street":"","postcode":"","city":"","country":""},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"postcode": "\\udb82\\udd78", "street": "", "city": "\\udb2f\\'
+ b'uddfe\\u00b0\\u00ca\\ud8a5\\uddb7\\u00aa$\\ud913\\udef3\\u9d52\\ud8aa\\ude'
+ b'86K\\udbff\\udd18"}, "age": 138089}, {"firstName": "", "age": 0, "createdA'
+ b't": "2000-01-01T00:00:00Z", "address": {"city": "", "postcode": "", "number"'
+ b': 0, "country": "", "street": ""}, "insurance": false, "lastName": ""}]')' expected, but got '(b'[{"age":138089,"address":{"street":"","postcode":"\xf3\xb0\xa5\xb8","city":"'
+ b'\xf3\x9b\xb7\xbe\xc2\xb0\xc3\x8a\xf0\xb9\x96\xb7\xc2\xaa$\xf1'
+ b'\x94\xbb\xb3\xe9\xb5\x92\xf0\xba\xaa\x86K\xf4\x8f\xb4\x98"}},{"firstName":'
+ b'"","lastName":"","age":0,"address":{"number":0,"street":"","postcode":"","ci'
+ b'ty":"","country":""},"createdAt":"2000-01-01T00:00:00+00:00","insurance":fal'
+ b'se}]').'

@@ -1,0 +1,33 @@
+Error report Error_-1837663056046698481
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [{"brand": "CY"}, {"model": "\\u009f\\u00d8\\u00c3\\u001e\\u00d4As", "maxSpeedKmH": -5.940335698908602e+23}, {"model": "\\u00cd", "brand": "j\\u00d0\\ud8ee\\udcc3", "maxSpeedKmH": 4547247870282189.0}, {}, {"brand": "\\uda7a\\udcb2\\u009d"}], "age": -6, "id": "\\udbf8\\udc8f\\u00d2\\u001b\\u00bc*\\u001d!>", "lastName": "\\ud9f0\\udfdb<\\u00e7", "insurance": true, "firstName": "\\u0017", "createdAt": "3762-12-01T00:00:25.592281-08:10"}, {"insurance": false, "address": {"number": -571}, "lastName": "", "age": -64500, "firstName": "U\\n\\ud8f2\\udd71\\u00d55\\u0010\\u0086\\u00baB\\u0006", "id": "", "createdAt": "0030-11-01T00:00:00Z", "cars": [{"maxSpeedKmH": 1.3195570737732334e+16}, {"brand": "CY", "maxSpeedKmH": 0.0, "model": ""}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf4\x8e\x82\x8f\xc3\x92\\u001b\xc2\xbc*\\u001d!>","firstName":"\\u0017","lastName":"\xf2\x8c\x8f\x9b<\xc3\xa7","age":-6,"createdAt":"3762-12-01T00:00:25.592281-08:10","insurance":true,"cars":[{"brand":"CY"},{"model":"\xc2\x9f\xc3\x98\xc3\x83\\u001e\xc3\x94As","maxSpeedKmH":-5.940335698908602e+23},{"brand":"j\xc3\x90\xf1\x8b\xa3\x83","model":"\xc3\x8d","maxSpeedKmH":4547247870282189.0},{},{"brand":"\xf2\xae\xa2\xb2\xc2\x9d"}]},{"id":"","firstName":"U\\n\xf1\x8c\xa5\xb1\xc3\x955\\u0010\xc2\x86\xc2\xbaB\\u0006","lastName":"","age":-64500,"address":{"number":-571},"createdAt":"0030-11-01T00:00:00+00:00","insurance":false,"cars":[{"maxSpeedKmH":1.3195570737732334e+16},{"brand":"CY","model":"","maxSpeedKmH":0.0}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [{"brand": "CY"}, {"model": "\\u009f\\u00d8\\u00c3\\u001e\\u00d'
+ b'4As", "maxSpeedKmH": -5.940335698908602e+23}, {"model": "\\u00cd", "brand'
+ b'": "j\\u00d0\\ud8ee\\udcc3", "maxSpeedKmH": 4547247870282189.0}, {}, {"bran'
+ b'd": "\\uda7a\\udcb2\\u009d"}], "age": -6, "id": "\\udbf8\\udc8f\\u00d2\\u00'
+ b'1b\\u00bc*\\u001d!>", "lastName": "\\ud9f0\\udfdb<\\u00e7", "insurance": '
+ b'true, "firstName": "\\u0017", "createdAt": "3762-12-01T00:00:25.592281-08'
+ b':10"}, {"insurance": false, "address": {"number": -571}, "lastName": "", "ag'
+ b'e": -64500, "firstName": "U\\n\\ud8f2\\udd71\\u00d55\\u0010\\u0086\\u00baB\\'
+ b'u0006", "id": "", "createdAt": "0030-11-01T00:00:00Z", "cars": [{"maxSpeedKm'
+ b'H": 1.3195570737732334e+16}, {"brand": "CY", "maxSpeedKmH": 0.0, "model": ""'
+ b'}]}]')' expected, but got '(b'[{"id":"\xf4\x8e\x82\x8f\xc3\x92\\u001b\xc2\xbc*\\u001d!>","firstName":"\\u'
+ b'0017","lastName":"\xf2\x8c\x8f\x9b<\xc3\xa7","age":-6,"createdAt":"3762-12'
+ b'-01T00:00:25.592281-08:10","insurance":true,"cars":[{"brand":"CY"},{"model":'
+ b'"\xc2\x9f\xc3\x98\xc3\x83\\u001e\xc3\x94As","maxSpeedKmH":-5.940335698908'
+ b'602e+23},{"brand":"j\xc3\x90\xf1\x8b\xa3\x83","model":"\xc3\x8d","maxSpeedKm'
+ b'H":4547247870282189.0},{},{"brand":"\xf2\xae\xa2\xb2\xc2\x9d"}]},{"id":"",'
+ b'"firstName":"U\\n\xf1\x8c\xa5\xb1\xc3\x955\\u0010\xc2\x86\xc2\xbaB\\u0006'
+ b'","lastName":"","age":-64500,"address":{"number":-571},"createdAt":"0030-11-'
+ b'01T00:00:00+00:00","insurance":false,"cars":[{"maxSpeedKmH":1.31955707377323'
+ b'34e+16},{"brand":"CY","model":"","maxSpeedKmH":0.0}]}]').'

@@ -1,0 +1,14 @@
+Error report Error_-2322169207167643000
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=%C3%AF%00%29%F3%82%80%A2%C3%8D%11%C3%9A%C2%A7&jobName=%F1%8B%BD%84%12%C3%9D3%C2%82%F1%8D%84%85X%C3%92%40%F2%B9%A0%AA', query_parameters={'exitCode': 'ï\x00)\U000c2022Í\x11Ú§', 'jobName': '\U0004bf44\x12Ý3\x82\U0004d105XÒ@\U000b982a'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%F1%8B%BD%84%12%C3%9D3%C2%82%F1%8D%84%85X%C3%92%40%F2%B9%A0%AA&exitCode=%C3%AF%00%29%F3%82%80%A2%C3%8D%11%C3%9A%C2%A7&limitPerJob=3', query_parameters={'jobName': '\U0004bf44\x12Ý3\x82\U0004d105XÒ@\U000b982a', 'exitCode': 'ï\x00)\U000c2022Í\x11Ú§', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'exitCode': 'ï\x00)\U000c2022Í\x11Ú§', 'jobName': '\U0004bf44\x12Ý3\x82\U0004d105XÒ@\U000b982a'} expected, but got {'jobName': '\U0004bf44\x12Ý3\x82\U0004d105XÒ@\U000b982a', 'exitCode': 'ï\x00)\U000c2022Í\x11Ú§', 'limitPerJob': '3'}.

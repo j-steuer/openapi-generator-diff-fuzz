@@ -1,0 +1,20 @@
+Error report Error_3024959960002261459
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"createdAt": "0717-03-16T14:39:46Z", "id": "F:\\u00ef\\u00f2", "age": -497}, {"insurance": false, "lastName": "", "address": {}, "age": -2147483648, "firstName": "", "id": "", "cars": [{"maxSpeedKmH": -3.240997581670878e+121}], "createdAt": "0781-02-21T05:40:10+00:00"}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"id":"F:\xc3\xaf\xc3\xb2","age":-497,"createdAt":"0717-03-16T14:39:46+00:00"},{"id":"","firstName":"","lastName":"","age":-2147483648,"address":{},"createdAt":"0781-02-21T05:40:10+00:00","insurance":false,"cars":[{"maxSpeedKmH":-3.240997581670878e+121}]},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"createdAt": "0717-03-16T14:39:46Z", "id": "F:\\u00ef\\u00f2", "age"'
+ b': -497}, {"insurance": false, "lastName": "", "address": {}, "age": -2147483'
+ b'648, "firstName": "", "id": "", "cars": [{"maxSpeedKmH": -3.240997581670878e'
+ b'+121}], "createdAt": "0781-02-21T05:40:10+00:00"}, {}, {}]')' expected, but got '(b'[{},{"id":"F:\xc3\xaf\xc3\xb2","age":-497,"createdAt":"0717-03-16T14:39:46+0'
+ b'0:00"},{"id":"","firstName":"","lastName":"","age":-2147483648,"address":{},'
+ b'"createdAt":"0781-02-21T05:40:10+00:00","insurance":false,"cars":[{"maxSpeed'
+ b'KmH":-3.240997581670878e+121}]},{},{}]').'

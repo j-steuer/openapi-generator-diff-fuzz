@@ -1,0 +1,11 @@
+Error report Error_4988228084088069051
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v2/projects/xsw/version_group/%3F4627656486-%08%C3%BAE%0D%F1%BC%A5%9E%C2%88', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was not unique and occured in other clients.
+Error while processing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /v2/projects/xsw/version_group/')

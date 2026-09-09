@@ -1,0 +1,14 @@
+Error report Error_3749979766813435830
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.DELETE: 'DELETE'>, path="/api/persons/MultiMatch(values=%5B'6a976e6962959c6febb4aaa7',%20'6a976e6962959c6febb4aaa9'%5D)", query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.DELETE: 'DELETE'>, path='/api/persons/MultiMatch%28values%3D%5B%276a976e6962959c6febb4aaa7%27%2C%20%276a976e6962959c6febb4aaa9%27%5D%29', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/persons/MultiMatch(values=%5B'6a976e6962959c6febb4aaa7',%20'6a976e6962959c6febb4aaa9'%5D) expected, but got /api/persons/MultiMatch%28values%3D%5B%276a976e6962959c6febb4aaa7%27%2C%20%276a976e6962959c6febb4aaa9%27%5D%29.

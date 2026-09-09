@@ -1,0 +1,21 @@
+Error report Error_-4401889524165592431
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "1265-04-18T12:13:19.954574-11:19", "id": "d\\u009c"}, {"createdAt": "0708-01-01T00:00:01Z", "id": "\\ud816\\udda0\\u0083{(\\u00d2D\\u11f6\\udb77\\ude2ez\\u0092\\ud9b8\\udf90/=W\\u008fH%\\u00cc\\u00d7:\\u00b0\\ud9ca\\udf11\\ud87a\\udc4c\\u00b7\\u00ee\\u00c1"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"d\xc2\x9c","createdAt":"1265-04-18T12:13:19.954574-11:19"},{"id":"\xf0\x95\xa6\xa0\xc2\x83{(\xc3\x92D\xe1\x87\xb6\xf3\xad\xb8\xaez\xc2\x92\xf1\xbe\x8e\x90/=W\xc2\x8fH%\xc3\x8c\xc3\x97:\xc2\xb0\xf2\x82\xac\x91\xf0\xae\xa1\x8c\xc2\xb7\xc3\xae\xc3\x81","createdAt":"0708-01-01T00:00:01+00:00"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "1265-04-18T12:13:19.954574-11:19", "id": "d\\u009c"}, {"c'
+ b'reatedAt": "0708-01-01T00:00:01Z", "id": "\\ud816\\udda0\\u0083{(\\u00d2'
+ b'D\\u11f6\\udb77\\ude2ez\\u0092\\ud9b8\\udf90/=W\\u008fH%\\u00cc\\u00d7:\\u'
+ b'00b0\\ud9ca\\udf11\\ud87a\\udc4c\\u00b7\\u00ee\\u00c1"}]')' expected, but got '(b'[{"id":"d\xc2\x9c","createdAt":"1265-04-18T12:13:19.954574-11:19"},{"id":"'
+ b'\xf0\x95\xa6\xa0\xc2\x83{(\xc3\x92D\xe1\x87\xb6\xf3\xad\xb8\xaez\xc2'
+ b'\x92\xf1\xbe\x8e\x90/=W\xc2\x8fH%\xc3\x8c\xc3\x97:\xc2\xb0\xf2'
+ b'\x82\xac\x91\xf0\xae\xa1\x8c\xc2\xb7\xc3\xae\xc3\x81","createdAt":"0708-01-'
+ b'01T00:00:01+00:00"}]').'

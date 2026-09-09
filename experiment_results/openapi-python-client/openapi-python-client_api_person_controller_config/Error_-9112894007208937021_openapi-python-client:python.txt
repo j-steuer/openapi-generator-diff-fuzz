@@ -1,0 +1,34 @@
+Error report Error_-9112894007208937021
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "0475-01-19T19:26:46.75Z", "address": {"city": "\\uda26\\udf82", "number": 2147483647}, "lastName": "\\udbaa\\ude90", "firstName": "\\u00de\\udbb8\\udce3\\u0088\\u00d1\\u001c\\udadc\\udeee\\u0082\\u00ed\\u001aV\\u00cc\\udbe5\\udc01\\u00e6+|\\f\\u00a7\\u0097\\u001cD\\u0000", "age": 19663, "id": "\\ud8dc\\uddee:\\ud928\\udc66\\u001eX\\u0004", "cars": [], "insurance": true}, {"id": "\\u00f6", "insurance": true, "address": {"postcode": "", "country": "\\u0083D\\uda2f\\ude17\\u00ce\\u00f7", "city": "\\u00f5\\u00cf\\u00a3^\\u0013C1\\u00ad\\u00b0;\\u00a9T`{\\u00a2\\udbb2\\udfb5\\b"}, "lastName": "\\udb96\\udd1e\\u00b7\\ud8b4\\udf4ad\\ud8d8\\udd96o", "createdAt": "6489-01-21T08:07:19.75-19:06"}, {}, {"address": {}, "cars": []}, {}, {}, {}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf1\x87\x87\xae:\xf1\x9a\x81\xa6\\u001eX\\u0004","firstName":"\xc3\x9e\xf3\xbe\x83\xa3\xc2\x88\xc3\x91\\u001c\xf3\x87\x8b\xae\xc2\x82\xc3\xad\\u001aV\xc3\x8c\xf4\x89\x90\x81\xc3\xa6+|\\f\xc2\xa7\xc2\x97\\u001cD\\u0000","lastName":"\xf3\xba\xaa\x90","age":19663,"address":{"number":2147483647,"city":"\xf2\x99\xae\x82"},"createdAt":"0475-01-19T19:26:46.750000+00:00","insurance":true,"cars":[]},{"id":"\xc3\xb6","lastName":"\xf3\xb5\xa4\x9e\xc2\xb7\xf0\xbd\x8d\x8ad\xf1\x86\x86\x96o","address":{"postcode":"","city":"\xc3\xb5\xc3\x8f\xc2\xa3^\\u0013C1\xc2\xad\xc2\xb0;\xc2\xa9T`{\xc2\xa2\xf3\xbc\xae\xb5\\b","country":"\xc2\x83D\xf2\x9b\xb8\x97\xc3\x8e\xc3\xb7"},"createdAt":"6489-01-21T08:07:19.750000-19:06","insurance":true},{},{"address":{},"cars":[]},{},{},{},{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "0475-01-19T19:26:46.75Z", "address": {"city": "\\uda26\\ud'
+ b'f82", "number": 2147483647}, "lastName": "\\udbaa\\ude90", "firstName": "\\'
+ b'u00de\\udbb8\\udce3\\u0088\\u00d1\\u001c\\udadc\\udeee\\u0082\\u00ed\\u001'
+ b'aV\\u00cc\\udbe5\\udc01\\u00e6+|\\f\\u00a7\\u0097\\u001cD\\u0000", "age":'
+ b' 19663, "id": "\\ud8dc\\uddee:\\ud928\\udc66\\u001eX\\u0004", "cars": [], '
+ b'"insurance": true}, {"id": "\\u00f6", "insurance": true, "address": {"pos'
+ b'tcode": "", "country": "\\u0083D\\uda2f\\ude17\\u00ce\\u00f7", "city": "\\'
+ b'u00f5\\u00cf\\u00a3^\\u0013C1\\u00ad\\u00b0;\\u00a9T`{\\u00a2\\udbb2\\udf'
+ b'b5\\b"}, "lastName": "\\udb96\\udd1e\\u00b7\\ud8b4\\udf4ad\\ud8d8\\udd96o", '
+ b'"createdAt": "6489-01-21T08:07:19.75-19:06"}, {}, {"address": {}, "cars": []'
+ b'}, {}, {}, {}, {}]')' expected, but got '(b'[{"id":"\xf1\x87\x87\xae:\xf1\x9a\x81\xa6\\u001eX\\u0004","firstName":'
+ b'"\xc3\x9e\xf3\xbe\x83\xa3\xc2\x88\xc3\x91\\u001c\xf3\x87\x8b\xae\xc2\x82\xc3'
+ b'\xad\\u001aV\xc3\x8c\xf4\x89\x90\x81\xc3\xa6+|\\f\xc2\xa7\xc2\x97\\u001cD\\'
+ b'u0000","lastName":"\xf3\xba\xaa\x90","age":19663,"address":{"number":2147483'
+ b'647,"city":"\xf2\x99\xae\x82"},"createdAt":"0475-01-19T19:26:46.750000+00:00'
+ b'","insurance":true,"cars":[]},{"id":"\xc3\xb6","lastName":"\xf3\xb5\xa4'
+ b'\x9e\xc2\xb7\xf0\xbd\x8d\x8ad\xf1\x86\x86\x96o","address":{"postcode":"",'
+ b'"city":"\xc3\xb5\xc3\x8f\xc2\xa3^\\u0013C1\xc2\xad\xc2\xb0;\xc2\xa9T`'
+ b'{\xc2\xa2\xf3\xbc\xae\xb5\\b","country":"\xc2\x83D\xf2\x9b\xb8'
+ b'\x97\xc3\x8e\xc3\xb7"},"createdAt":"6489-01-21T08:07:19.750000-19:06","insu'
+ b'rance":true},{},{"address":{},"cars":[]},{},{},{},{}]').'

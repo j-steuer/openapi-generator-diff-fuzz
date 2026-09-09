@@ -1,0 +1,14 @@
+Error report Error_-6724969508998971237
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json-patch+json'}, body=b'{"NUL": {".exe": "KT\\u00ee\\u00c9\\ud93c\\udc04", "\\u00fb.\\u00f2\\u00d9\\u00fbD\\u0089\\u00c8g\\udaaf\\udf63\\udb29\\ude3b\\u00f9j\\u00afE": 6.31846044458214e+16, "\\u00e0": "\\ud963\\udcfe\\ud976\\udf41"}, "\\uda42\\udcf3d\\ud915\\uddd2\\u00a7V0\\udaed\\udc5b\\u00fd\\uda6c\\uddf4\\ud9cb\\udd5d\\ud9fe\\ude42\\u00f9": ["", -1089012647, null]}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/3', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/merge-patch+json'}, body=b'{"NUL": {".exe": "KT\\u00ee\\u00c9\\ud93c\\udc04", "\\u00fb.\\u00f2\\u00d9\\u00fbD\\u0089\\u00c8g\\udaaf\\udf63\\udb29\\ude3b\\u00f9j\\u00afE": 6.31846044458214e+16, "\\u00e0": "\\ud963\\udcfe\\ud976\\udf41"}, "\\uda42\\udcf3d\\ud915\\uddd2\\u00a7V0\\udaed\\udc5b\\u00fd\\uda6c\\uddf4\\ud9cb\\udd5d\\ud9fe\\ude42\\u00f9": ["", -1089012647, null]}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/3', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/json-patch+json expected, got application/merge-patch+json

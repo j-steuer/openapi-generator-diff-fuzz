@@ -1,0 +1,14 @@
+Error report Error_6265315913628322463
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{}', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b'[]'' expected, but got 'b'{}''.

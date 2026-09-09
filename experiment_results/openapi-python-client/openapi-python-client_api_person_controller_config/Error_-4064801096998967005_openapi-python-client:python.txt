@@ -1,0 +1,30 @@
+Error report Error_-4064801096998967005
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName": "\\ud8a5\\udff1\\u00df\\u00eb\\u00d1@\\u00fab\\u00aa\\u00bea\\u001b\\u0001\\uda1b\\udfd9(\\u00f2e\\u00f2,M\\u00a0mh", "address": {"city": "\\uda1b\\udf33\\u00f8\\u00aeN\\u00c9\\u00a2\\b", "postcode": "9\\u00fa\\u00f12\\u0095_\\u0087\\u00e2", "number": -1521872, "country": "\\u00a2\\u0086", "street": "P\\udad1\\udfbf\\u00a2\\u009f\\u00d0/\\ud8b7\\ude676W\\ud9f9\\udd92\\u00aexX#"}, "firstName": "O", "createdAt": "0200-03-21T18:49:15Z", "insurance": false, "cars": [{"maxSpeedKmH": -3.052289230382525e-82, "brand": "\\b\\u00e0"}, {"brand": "\\u00c0a"}], "age": 2147483646, "id": "\\udb25\\udfe5\\u00c9"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf3\x99\x9f\xa5\xc3\x89","firstName":"O","lastName":"\xf0\xb9\x9f\xb1\xc3\x9f\xc3\xab\xc3\x91@\xc3\xbab\xc2\xaa\xc2\xbea\\u001b\\u0001\xf2\x96\xbf\x99(\xc3\xb2e\xc3\xb2,M\xc2\xa0mh","age":2147483646,"address":{"number":-1521872,"street":"P\xf3\x84\x9e\xbf\xc2\xa2\xc2\x9f\xc3\x90/\xf0\xbd\xb9\xa76W\xf2\x8e\x96\x92\xc2\xaexX#","postcode":"9\xc3\xba\xc3\xb12\xc2\x95_\xc2\x87\xc3\xa2","city":"\xf2\x96\xbc\xb3\xc3\xb8\xc2\xaeN\xc3\x89\xc2\xa2\\b","country":"\xc2\xa2\xc2\x86"},"createdAt":"0200-03-21T18:49:15+00:00","insurance":false,"cars":[{"brand":"\\b\xc3\xa0","maxSpeedKmH":-3.052289230382525e-82},{"brand":"\xc3\x80a"}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"lastName": "\\ud8a5\\udff1\\u00df\\u00eb\\u00d1@\\u00fab\\u00aa\\u00b'
+ b'ea\\u001b\\u0001\\uda1b\\udfd9(\\u00f2e\\u00f2,M\\u00a0mh", "address": {"ci'
+ b'ty": "\\uda1b\\udf33\\u00f8\\u00aeN\\u00c9\\u00a2\\b", "postcode": "9\\u00fa'
+ b'\\u00f12\\u0095_\\u0087\\u00e2", "number": -1521872, "country": "\\u00a2\\'
+ b'u0086", "street": "P\\udad1\\udfbf\\u00a2\\u009f\\u00d0/\\ud8b7\\ude676W\\ud'
+ b'9f9\\udd92\\u00aexX#"}, "firstName": "O", "createdAt": "0200-03-21T18:49:1'
+ b'5Z", "insurance": false, "cars": [{"maxSpeedKmH": -3.052289230382525e-82, "b'
+ b'rand": "\\b\\u00e0"}, {"brand": "\\u00c0a"}], "age": 2147483646, "id": "\\ud'
+ b'b25\\udfe5\\u00c9"}]')' expected, but got '(b'[{"id":"\xf3\x99\x9f\xa5\xc3\x89","firstName":"O","lastName":"'
+ b'\xf0\xb9\x9f\xb1\xc3\x9f\xc3\xab\xc3\x91@\xc3\xbab\xc2\xaa\xc2\xbea\\u001'
+ b'b\\u0001\xf2\x96\xbf\x99(\xc3\xb2e\xc3\xb2,M\xc2\xa0mh","age":2147483646,"a'
+ b'ddress":{"number":-1521872,"street":"P\xf3\x84\x9e\xbf\xc2\xa2'
+ b'\xc2\x9f\xc3\x90/\xf0\xbd\xb9\xa76W\xf2\x8e\x96\x92\xc2\xaexX#","postcode"'
+ b':"9\xc3\xba\xc3\xb12\xc2\x95_\xc2\x87\xc3\xa2","city":"\xf2\x96\xbc'
+ b'\xb3\xc3\xb8\xc2\xaeN\xc3\x89\xc2\xa2\\b","country":"\xc2\xa2\xc2\x86"},"cre'
+ b'atedAt":"0200-03-21T18:49:15+00:00","insurance":false,"cars":[{"brand":"'
+ b'\\b\xc3\xa0","maxSpeedKmH":-3.052289230382525e-82},{"brand":"\xc3\x80a"}]}]').'

@@ -1,0 +1,18 @@
+Error report Error_-5088961848319145155
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"address": {}}, {"address": {"street": "\\u00b2\\u00ba\\u00ff=\\u00c0", "country": "\\u00d0", "city": ")"}, "cars": [{}], "createdAt": "2000-01-01T00:01:00Z", "firstName": "", "insurance": false, "lastName": ""}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"address":{}},{"firstName":"","lastName":"","address":{"street":"\xc2\xb2\xc2\xba\xc3\xbf=\xc3\x80","city":")","country":"\xc3\x90"},"createdAt":"2000-01-01T00:01:00+00:00","insurance":false,"cars":[{}]},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"address": {}}, {"address": {"street": "\\u00b2\\u00ba\\u00ff=\\u00c0"'
+ b', "country": "\\u00d0", "city": ")"}, "cars": [{}], "createdAt": "2000-01'
+ b'-01T00:01:00Z", "firstName": "", "insurance": false, "lastName": ""}, {}]')' expected, but got '(b'[{},{"address":{}},{"firstName":"","lastName":"","address":{"street"'
+ b':"\xc2\xb2\xc2\xba\xc3\xbf=\xc3\x80","city":")","country":"\xc3\x90"},"cre'
+ b'atedAt":"2000-01-01T00:01:00+00:00","insurance":false,"cars":[{}]},{}]').'

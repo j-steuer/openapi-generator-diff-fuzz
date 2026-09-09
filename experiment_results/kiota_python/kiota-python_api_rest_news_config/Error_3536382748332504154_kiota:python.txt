@@ -1,0 +1,14 @@
+Error report Error_3536382748332504154
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json;charset=UTF-8'}, body=b'{"country": "", "id": "\\u00b5\\u00eb\\u00a6=e\\"\\u00c6\\u00de\\ud88b\\uddca", "creationTime": "0033-09-12T21:15:06Z"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"country": "", "creationTime": "0033-09-12T21:15:06+00:00", "id": "\\u00b5\\u00eb\\u00a6=e\\"\\u00c6\\u00de\\ud88b\\uddca"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/json;charset=UTF-8 expected, got application/vnd.tsdes.news+json;charset=UTF-8;version=2

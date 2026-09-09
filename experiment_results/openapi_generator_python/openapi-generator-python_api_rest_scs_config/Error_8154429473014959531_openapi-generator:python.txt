@@ -1,0 +1,14 @@
+Error report Error_8154429473014959531
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%C2%98%C3%86%F0%BC%9B%A4%C3%86%26N/-7.992063198137283e+277/2.000652439463045e+16', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%C2%98%C3%86%F0%BC%9B%A4%C3%86%26N/-7.992063198137283e%2B277/2.000652439463045e%2B16', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/calc/%C2%98%C3%86%F0%BC%9B%A4%C3%86%26N/-7.992063198137283e+277/2.000652439463045e+16 expected, but got /api/calc/%C2%98%C3%86%F0%BC%9B%A4%C3%86%26N/-7.992063198137283e%2B277/2.000652439463045e%2B16.

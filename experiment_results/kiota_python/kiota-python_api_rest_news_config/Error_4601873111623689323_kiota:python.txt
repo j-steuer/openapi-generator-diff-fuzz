@@ -1,0 +1,14 @@
+Error report Error_4601873111623689323
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"text": "7\\ud8fa\\udd68?", "country": "\\u00b0\\u00e3\\u0018", "authorId": "\\u00cd\\u00ab\\u00ba\\u00c6\\u00f0\\ufa51", "creationTime": "0803-10-13T21:44:31.204-22:52", "id": "\\ud9f9\\udc2a", "newsId": "\\ud844\\udd79\\u00cd$\\uda44\\udf1a"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/vnd.tsdes.news+json;charset=UTF-8;version=2'}, body=b'{"authorId": "\\u00cd\\u00ab\\u00ba\\u00c6\\u00f0\\ufa51", "country": "\\u00b0\\u00e3\\u0018", "creationTime": "0803-10-13T21:44:31.204000-22:52", "id": "\\ud9f9\\udc2a", "newsId": "\\ud844\\udd79\\u00cd$\\uda44\\udf1a", "text": "7\\ud8fa\\udd68?"}', method=<HTTPMethod.POST: 'POST'>, path='/news', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'creationTime' in body: 0803-10-13T21:44:31.204-22:52 != 0803-10-13T21:44:31.204000-22:52

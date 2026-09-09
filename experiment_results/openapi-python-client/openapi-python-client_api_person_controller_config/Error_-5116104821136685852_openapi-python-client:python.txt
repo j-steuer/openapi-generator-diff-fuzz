@@ -1,0 +1,26 @@
+Error report Error_-5116104821136685852
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [], "id": "\\u00bf", "lastName": "\\u00a2", "createdAt": "0593-10-09T11:47:20Z", "age": -5191, "address": {"city": "\\u0087_mhK\\u00c6\\udb08\\ude89\\uda67\\udcc9\\u00a2\\u009d\\udbed\\udccb\\u00d26\\udb33\\udde5\\u00d5\\ud96b\\udd00\\ud962\\udc08q\\ueedd", "postcode": ""}, "firstName": "", "insurance": false}, {"id": "\\u0000", "insurance": false, "address": {"postcode": "\\u00f3", "city": "", "number": -26833, "street": "\\u0088\\u000b\\u00c3\\udb2b\\udcb8E"}}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xc2\xbf","firstName":"","lastName":"\xc2\xa2","age":-5191,"address":{"postcode":"","city":"\xc2\x87_mhK\xc3\x86\xf3\x92\x8a\x89\xf2\xa9\xb3\x89\xc2\xa2\xc2\x9d\xf4\x8b\x93\x8b\xc3\x926\xf3\x9c\xb7\xa5\xc3\x95\xf1\xaa\xb4\x80\xf1\xa8\xa0\x88q\xee\xbb\x9d"},"createdAt":"0593-10-09T11:47:20+00:00","insurance":false,"cars":[]},{"id":"\\u0000","address":{"number":-26833,"street":"\xc2\x88\\u000b\xc3\x83\xf3\x9a\xb2\xb8E","postcode":"\xc3\xb3","city":""},"insurance":false}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [], "id": "\\u00bf", "lastName": "\\u00a2", "createdAt": "0593-1'
+ b'0-09T11:47:20Z", "age": -5191, "address": {"city": "\\u0087_mhK\\u00c6\\udb'
+ b'08\\ude89\\uda67\\udcc9\\u00a2\\u009d\\udbed\\udccb\\u00d26\\udb33\\udde5\\'
+ b'u00d5\\ud96b\\udd00\\ud962\\udc08q\\ueedd", "postcode": ""}, "firstName":'
+ b' "", "insurance": false}, {"id": "\\u0000", "insurance": false, "address"'
+ b': {"postcode": "\\u00f3", "city": "", "number": -26833, "street": "\\u0088'
+ b'\\u000b\\u00c3\\udb2b\\udcb8E"}}]')' expected, but got '(b'[{"id":"\xc2\xbf","firstName":"","lastName":"\xc2\xa2","age":-5191,"address"'
+ b':{"postcode":"","city":"\xc2\x87_mhK\xc3\x86\xf3\x92\x8a\x89\xf2\xa9\xb3\x89'
+ b'\xc2\xa2\xc2\x9d\xf4\x8b\x93\x8b\xc3\x926\xf3\x9c\xb7\xa5\xc3'
+ b'\x95\xf1\xaa\xb4\x80\xf1\xa8\xa0\x88q\xee\xbb\x9d"},"createdAt":"0593-10-09T'
+ b'11:47:20+00:00","insurance":false,"cars":[]},{"id":"\\u0000","address":{"'
+ b'number":-26833,"street":"\xc2\x88\\u000b\xc3\x83\xf3\x9a\xb2\xb8E","postc'
+ b'ode":"\xc3\xb3","city":""},"insurance":false}]').'

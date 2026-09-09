@@ -1,0 +1,26 @@
+Error report Error_6884499809533526423
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "0214-07-18T02:47:23Z"}, {"id": "Z", "lastName": "", "createdAt": "0423-12-25T02:47:23Z", "insurance": true, "age": 61590, "address": {}, "firstName": "", "cars": []}, {"id": "\\udab4\\uddaa", "cars": [{"model": "", "brand": "", "maxSpeedKmH": 1.1217185078340862e+231}], "lastName": ".exe", "createdAt": "0078-11-26T02:47:23Z", "insurance": false}, {"lastName": "\\u00aa6\\uda49\\udfde\\uda4c\\udee5^\\ud8cc\\udf12K\\r\\u00c9\\u0005\\ud9ef\\udd74R\\u008fg", "insurance": true, "address": {}, "age": -9660}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt":"0214-07-18T02:47:23+00:00"},{"id":"Z","firstName":"","lastName":"","age":61590,"address":{},"createdAt":"0423-12-25T02:47:23+00:00","insurance":true,"cars":[]},{"id":"\xf2\xbd\x86\xaa","lastName":".exe","createdAt":"0078-11-26T02:47:23+00:00","insurance":false,"cars":[{"brand":"","model":"","maxSpeedKmH":1.1217185078340862e+231}]},{"lastName":"\xc2\xaa6\xf2\xa2\x9f\x9e\xf2\xa3\x8b\xa5^\xf1\x83\x8c\x92K\\r\xc3\x89\\u0005\xf2\x8b\xb5\xb4R\xc2\x8fg","age":-9660,"address":{},"insurance":true}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "0214-07-18T02:47:23Z"}, {"id": "Z", "lastName": "", "created'
+ b'At": "0423-12-25T02:47:23Z", "insurance": true, "age": 61590, "address": {},'
+ b' "firstName": "", "cars": []}, {"id": "\\udab4\\uddaa", "cars": [{"model":'
+ b' "", "brand": "", "maxSpeedKmH": 1.1217185078340862e+231}], "lastName": ".ex'
+ b'e", "createdAt": "0078-11-26T02:47:23Z", "insurance": false}, {"lastName": "'
+ b'\\u00aa6\\uda49\\udfde\\uda4c\\udee5^\\ud8cc\\udf12K\\r\\u00c9\\u0005\\ud9e'
+ b'f\\udd74R\\u008fg", "insurance": true, "address": {}, "age": -9660}]')' expected, but got '(b'[{"createdAt":"0214-07-18T02:47:23+00:00"},{"id":"Z","firstName":"","lastNam'
+ b'e":"","age":61590,"address":{},"createdAt":"0423-12-25T02:47:23+00:00","insu'
+ b'rance":true,"cars":[]},{"id":"\xf2\xbd\x86\xaa","lastName":".exe","createdAt'
+ b'":"0078-11-26T02:47:23+00:00","insurance":false,"cars":[{"brand":"","model":'
+ b'"","maxSpeedKmH":1.1217185078340862e+231}]},{"lastName":"\xc2\xaa6'
+ b'\xf2\xa2\x9f\x9e\xf2\xa3\x8b\xa5^\xf1\x83\x8c\x92K\\r\xc3\x89\\u0005'
+ b'\xf2\x8b\xb5\xb4R\xc2\x8fg","age":-9660,"address":{},"insurance":true}]').'

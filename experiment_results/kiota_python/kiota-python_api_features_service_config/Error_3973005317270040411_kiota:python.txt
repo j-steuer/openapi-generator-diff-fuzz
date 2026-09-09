@@ -1,0 +1,14 @@
+Error report Error_3973005317270040411
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path="/products/MultiMatch(values=%5B'ELEARNING_SITE',%20'h%5CU000db07c%5CU0001ae9c;',%20'%C2%BD'%5D)", query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/products/MultiMatch%28values%3D%5B%27ELEARNING_SITE%27%2C%20%27h%5CU000db07c%5CU0001ae9c%3B%27%2C%20%27%C2%BD%27%5D%29', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /products/MultiMatch(values=%5B'ELEARNING_SITE',%20'h%5CU000db07c%5CU0001ae9c;',%20'%C2%BD'%5D) expected, but got /products/MultiMatch%28values%3D%5B%27ELEARNING_SITE%27%2C%20%27h%5CU000db07c%5CU0001ae9c%3B%27%2C%20%27%C2%BD%27%5D%29.

@@ -1,0 +1,14 @@
+Error report Error_3917875303527157518
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"entryDate": "6839-06-27T16:18:04+13:11", "active": true, "location": {"position": {"y": -1.401298464324817e-45, "x": -1.9236282158407644e+16, "type": "~", "coordinates": [2.636778840588451e+16, -9.762977923076167e+300, -2.2250738585072014e-308, -1247883499267273.0, -5.925514882388281e+16]}, "location": {"type": "", "y": -1.470621282232915e+174, "coordinates": [5799227584571332.0, -2911045877586143.0, 6.292916581784255e+302, -1.0057979870431384e+19], "x": -4.206030682690885e+16}}}', method=<HTTPMethod.POST: 'POST'>, path="/v1/hospitais/MultiMatch(values=%5B'1',%20'2',%20'3'%5D)/pacientes/checkin", query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"active": true, "entryDate": "6839-06-27T16:18:04+13:11", "location": {"location": {"coordinates": [5799227584571332.0, -2911045877586143.0, 6.292916581784255e+302, -1.0057979870431384e+19], "type": "", "x": -4.206030682690885e+16, "y": -1.470621282232915e+174}, "position": {"coordinates": [2.636778840588451e+16, -9.762977923076167e+300, -2.2250738585072014e-308, -1247883499267273.0, -5.925514882388281e+16], "type": "~", "x": -1.9236282158407644e+16, "y": -1.401298464324817e-45}}}', method=<HTTPMethod.POST: 'POST'>, path='/v1/hospitais/MultiMatch%28values%3D%5B%271%27%2C%20%272%27%2C%20%273%27%5D%29/pacientes/checkin', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /v1/hospitais/MultiMatch(values=%5B'1',%20'2',%20'3'%5D)/pacientes/checkin expected, but got /v1/hospitais/MultiMatch%28values%3D%5B%271%27%2C%20%272%27%2C%20%273%27%5D%29/pacientes/checkin.

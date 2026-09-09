@@ -1,0 +1,14 @@
+Error report Error_4432672307885385413
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "1265-04-18T12:13:19.954574Z", "id": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","createdAt":"1265-04-18T12:13:19.954574+00:00"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b'[{"createdAt": "1265-04-18T12:13:19.954574Z", "id": ""}]'' expected, but got 'b'[{"id":"","createdAt":"1265-04-18T12:13:19.954574+00:00"}]'.'

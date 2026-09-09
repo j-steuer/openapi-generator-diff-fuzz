@@ -1,0 +1,31 @@
+Error report Error_4865194931856642518
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"insurance": false, "address": {}}, {"age": 86704, "firstName": "\\ud9a7\\udec9j\\u00b9", "insurance": true, "lastName": "\\u00f1\\u00b5"}, {"id": "\\u00ab\\ud94c\\udd28\\u0015\\u00fa\\u001c\\u0017\\u000f\\u0004y\\uda6f\\udf7e\\ud8f4\\udfd2\\ud984\\udc25\\ud5c3", "age": -197860233, "createdAt": "0239-01-30T12:55:24.137760Z", "insurance": true, "address": {"country": "{7\\u00f4\\u00d6\\u00ad\\u009b&Xl_a", "city": "\\ud933\\udf92", "postcode": "\\ud824\\udd90\\udbaf\\udf15\\ud97a\\uddfao\\ud937\\udcb6\\u009c\\u00a2\\u00e0", "number": 238}}, {"createdAt": "0003-05-08T12:55:24.137760-05:20", "age": -4916, "insurance": true, "address": {}}, {"age": 2813}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address":{},"insurance":false},{"firstName":"\xf1\xb9\xbb\x89j\xc2\xb9","lastName":"\xc3\xb1\xc2\xb5","age":86704,"insurance":true},{"id":"\xc2\xab\xf1\xa3\x84\xa8\\u0015\xc3\xba\\u001c\\u0017\\u000f\\u0004y\xf2\xab\xbd\xbe\xf1\x8d\x8f\x92\xf1\xb1\x80\xa5\xed\x97\x83","age":-197860233,"address":{"number":238,"postcode":"\xf0\x99\x86\x90\xf3\xbb\xbc\x95\xf1\xae\xa7\xbao\xf1\x9d\xb2\xb6\xc2\x9c\xc2\xa2\xc3\xa0","city":"\xf1\x9c\xbe\x92","country":"{7\xc3\xb4\xc3\x96\xc2\xad\xc2\x9b&Xl_a"},"createdAt":"0239-01-30T12:55:24.137760+00:00","insurance":true},{"age":-4916,"address":{},"createdAt":"0003-05-08T12:55:24.137760-05:20","insurance":true},{"age":2813}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"insurance": false, "address": {}}, {"age": 86704, "firstName": "\\ud9a'
+ b'7\\udec9j\\u00b9", "insurance": true, "lastName": "\\u00f1\\u00b5"}, {"id": '
+ b'"\\u00ab\\ud94c\\udd28\\u0015\\u00fa\\u001c\\u0017\\u000f\\u0004y\\uda6f\\u'
+ b'df7e\\ud8f4\\udfd2\\ud984\\udc25\\ud5c3", "age": -197860233, "createdAt":'
+ b' "0239-01-30T12:55:24.137760Z", "insurance": true, "address": {"country": "{'
+ b'7\\u00f4\\u00d6\\u00ad\\u009b&Xl_a", "city": "\\ud933\\udf92", "postcode":'
+ b' "\\ud824\\udd90\\udbaf\\udf15\\ud97a\\uddfao\\ud937\\udcb6\\u009c\\u00a2\\'
+ b'u00e0", "number": 238}}, {"createdAt": "0003-05-08T12:55:24.137760-05:20", "'
+ b'age": -4916, "insurance": true, "address": {}}, {"age": 2813}]')' expected, but got '(b'[{"address":{},"insurance":false},{"firstName":"\xf1\xb9\xbb\x89j\xc2\xb9"'
+ b',"lastName":"\xc3\xb1\xc2\xb5","age":86704,"insurance":true},{"id":"'
+ b'\xc2\xab\xf1\xa3\x84\xa8\\u0015\xc3\xba\\u001c\\u0017\\u000f\\u0004y\xf2'
+ b'\xab\xbd\xbe\xf1\x8d\x8f\x92\xf1\xb1\x80\xa5\xed\x97\x83","age":-197860233'
+ b',"address":{"number":238,"postcode":"\xf0\x99\x86\x90\xf3\xbb\xbc'
+ b'\x95\xf1\xae\xa7\xbao\xf1\x9d\xb2\xb6\xc2\x9c\xc2\xa2\xc3\xa0","city"'
+ b':"\xf1\x9c\xbe\x92","country":"{7\xc3\xb4\xc3\x96\xc2\xad\xc2\x9b&Xl_a"},"cr'
+ b'eatedAt":"0239-01-30T12:55:24.137760+00:00","insurance":true},{"age":-4916,"'
+ b'address":{},"createdAt":"0003-05-08T12:55:24.137760-05:20","insurance":true}'
+ b',{"age":2813}]').'

@@ -1,0 +1,22 @@
+Error report Error_-4702942376220381252
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"city": ""}, "id": "", "cars": [{"maxSpeedKmH": -6.751835627160678e+16}, {"model": "6", "maxSpeedKmH": 1.289474564360019e+16, "brand": "\\ud94e\\udf85\\u00e2\\u00b4\\u008d\\fE\\u0002\\u000bL\\u00a3]\\u00aa"}], "createdAt": "2000-01-01T00:04:00Z", "firstName": "", "age": 0, "insurance": false, "lastName": ""}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"","lastName":"","age":0,"address":{"city":""},"createdAt":"2000-01-01T00:04:00+00:00","insurance":false,"cars":[{"maxSpeedKmH":-6.751835627160678e+16},{"brand":"\xf1\xa3\xae\x85\xc3\xa2\xc2\xb4\xc2\x8d\\fE\\u0002\\u000bL\xc2\xa3]\xc2\xaa","model":"6","maxSpeedKmH":1.289474564360019e+16}]},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"city": ""}, "id": "", "cars": [{"maxSpeedKmH": -6.75183562716'
+ b'0678e+16}, {"model": "6", "maxSpeedKmH": 1.289474564360019e+16, "brand":'
+ b' "\\ud94e\\udf85\\u00e2\\u00b4\\u008d\\fE\\u0002\\u000bL\\u00a3]\\u00aa"}]'
+ b', "createdAt": "2000-01-01T00:04:00Z", "firstName": "", "age": 0, "insurance'
+ b'": false, "lastName": ""}, {}, {}]')' expected, but got '(b'[{"id":"","firstName":"","lastName":"","age":0,"address":{"city":""},"create'
+ b'dAt":"2000-01-01T00:04:00+00:00","insurance":false,"cars":[{"maxSpeedKmH":-6'
+ b'.751835627160678e+16},{"brand":"\xf1\xa3\xae\x85\xc3\xa2\xc2\xb4\xc2\x8d\\f'
+ b'E\\u0002\\u000bL\xc2\xa3]\xc2\xaa","model":"6","maxSpeedKmH":1.28947456436'
+ b'0019e+16}]},{},{}]').'

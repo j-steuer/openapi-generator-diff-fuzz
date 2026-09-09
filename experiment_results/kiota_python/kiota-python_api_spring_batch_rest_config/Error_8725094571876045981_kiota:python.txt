@@ -1,0 +1,14 @@
+Error report Error_8725094571876045981
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": " ", "asynchronous": true, "properties": {"\\ud83a\\udcef": {"\\u00a4\\u00c3m\\u00cb\\u00dag\\u00f3~\\udb4d\\udf2e`g": {"": ".exe", "%\\u0010\\r": false, "\\u000f1\\u00d1\\u00af\\uda47\\udec6\\u0097\\u00f7w\\u009b": -1.5450444508768508e+16}, "\\ud988\\udc14": {"\\u001cp\\u00d0": null, "": null}, "\\b\\u00b1\\udaa2\\udda8\\u008f}": {}}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": " ", "properties": {"\\ud83a\\udcef": {"\\u00a4\\u00c3m\\u00cb\\u00dag\\u00f3~\\udb4d\\udf2e`g": {"%\\u0010\\r": false, "\\u000f1\\u00d1\\u00af\\uda47\\udec6\\u0097\\u00f7w\\u009b": -1.5450444508768508e+16}, "\\ud988\\udc14": {"\\u001cp\\u00d0": null}, "\\b\\u00b1\\udaa2\\udda8\\u008f}": {}}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'\U0001e8ef': {'¤ÃmËÚgó~\U000e372e`g': {'': '.exe', '%\x10\r': False, '\x0f1Ñ¯\U000a1ec6\x97÷w\x9b': -1.5450444508768508e+16}, '\U00072014': {'\x1cpÐ': None, '': None}, '\x08±\U000b89a8\x8f}': {}}} != {'\U0001e8ef': {'¤ÃmËÚgó~\U000e372e`g': {'%\x10\r': False, '\x0f1Ñ¯\U000a1ec6\x97÷w\x9b': -1.5450444508768508e+16}, '\U00072014': {'\x1cpÐ': None}, '\x08±\U000b89a8\x8f}': {}}}

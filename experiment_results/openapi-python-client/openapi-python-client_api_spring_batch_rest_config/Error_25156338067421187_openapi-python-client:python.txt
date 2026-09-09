@@ -1,0 +1,14 @@
+Error report Error_25156338067421187
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=&jobName=7', query_parameters={'exitCode': '', 'jobName': '7'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=7&exitCode=&limitPerJob=3', query_parameters={'jobName': '7', 'exitCode': '', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'exitCode': '', 'jobName': '7'} expected, but got {'jobName': '7', 'exitCode': '', 'limitPerJob': '3'}.

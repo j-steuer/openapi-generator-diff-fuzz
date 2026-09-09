@@ -1,0 +1,14 @@
+Error report Error_-4540255365867484550
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%C3%96gt', query_parameters={'jobName': 'Ögt'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%C3%96gt&limitPerJob=3', query_parameters={'jobName': 'Ögt', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'jobName': 'Ögt'} expected, but got {'jobName': 'Ögt', 'limitPerJob': '3'}.

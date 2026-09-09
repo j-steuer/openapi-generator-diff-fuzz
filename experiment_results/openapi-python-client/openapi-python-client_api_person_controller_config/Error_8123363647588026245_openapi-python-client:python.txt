@@ -1,0 +1,16 @@
+Error report Error_8123363647588026245
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"insurance": false, "age": 0, "createdAt": "2000-02-01T00:00:07Z", "id": "", "address": {"postcode": ""}, "lastName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","lastName":"","age":0,"address":{"postcode":""},"createdAt":"2000-02-01T00:00:07+00:00","insurance":false}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"insurance": false, "age": 0, "createdAt": "2000-02-01T00:00:07Z", "id": "'
+ b'", "address": {"postcode": ""}, "lastName": ""}]')' expected, but got '(b'[{"id":"","lastName":"","age":0,"address":{"postcode":""},"createdAt":"2000-'
+ b'02-01T00:00:07+00:00","insurance":false}]').'

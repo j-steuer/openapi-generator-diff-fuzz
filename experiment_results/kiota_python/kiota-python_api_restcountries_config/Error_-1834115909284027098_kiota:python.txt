@@ -1,0 +1,11 @@
+Error report Error_-1834115909284027098
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v2/alpha/%C2%AE%C2%A9%3A%C2%86%C3%B6%C3%8D%F3%9F%8C%91%F0%9A%8A%BA%C2%9B?fields=', query_parameters={'fields': ''})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library kiota:python:
+Error was not unique and occured in other clients.
+Error while building request

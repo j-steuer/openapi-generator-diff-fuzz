@@ -1,0 +1,14 @@
+Error report Error_7635098741734037366
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/gammq/3.490286426465754e-229/-1.853097531296079e+263', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/gammq/3.490286426465754e-229/-1.853097531296079e%2B263', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/gammq/3.490286426465754e-229/-1.853097531296079e+263 expected, but got /api/gammq/3.490286426465754e-229/-1.853097531296079e%2B263.

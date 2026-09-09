@@ -1,0 +1,14 @@
+Error report Error_3038242801545853291
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=%F1%B6%82%99%C2%A3', query_parameters={'exitCode': '\U00076099£'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=%F1%B6%82%99%C2%A3&limitPerJob=3', query_parameters={'exitCode': '\U00076099£', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'exitCode': '\U00076099£'} expected, but got {'exitCode': '\U00076099£', 'limitPerJob': '3'}.

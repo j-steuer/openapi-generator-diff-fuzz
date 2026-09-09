@@ -1,0 +1,26 @@
+Error report Error_4254301788435432633
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"number": 205, "street": "\\u00b8", "city": "\\u0099", "postcode": "", "country": "\\u00dd"}, "age": -53, "cars": [{"maxSpeedKmH": 0.3333333333333333}, {"model": "\\uda7f\\udc87N\\ud902\\udf3f\\udba4\\ude6f\\u00e4"}, {}, {}, {"maxSpeedKmH": 2.415434847481157e+214}, {"brand": "", "maxSpeedKmH": -9.002389170189072e+257, "model": "Z\\ud96a\\udfe3"}, {}, {}], "createdAt": "2000-01-02T02:00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"","lastName":"","age":-53,"address":{"number":205,"street":"\xc2\xb8","postcode":"","city":"\xc2\x99","country":"\xc3\x9d"},"createdAt":"2000-01-02T02:00:00+00:00","insurance":false,"cars":[{"maxSpeedKmH":0.3333333333333333},{"model":"\xf2\xaf\xb2\x87N\xf1\x90\xac\xbf\xf3\xb9\x89\xaf\xc3\xa4"},{},{},{"maxSpeedKmH":2.415434847481157e+214},{"brand":"","model":"Z\xf1\xaa\xaf\xa3","maxSpeedKmH":-9.002389170189072e+257},{},{}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"number": 205, "street": "\\u00b8", "city": "\\u0099", "post'
+ b'code": "", "country": "\\u00dd"}, "age": -53, "cars": [{"maxSpeedKmH": 0.'
+ b'3333333333333333}, {"model": "\\uda7f\\udc87N\\ud902\\udf3f\\udba4\\ude6f\\'
+ b'u00e4"}, {}, {}, {"maxSpeedKmH": 2.415434847481157e+214}, {"brand": "", "max'
+ b'SpeedKmH": -9.002389170189072e+257, "model": "Z\\ud96a\\udfe3"}, {}, {}], '
+ b'"createdAt": "2000-01-02T02:00:00Z", "firstName": "", "id": "", "insurance":'
+ b' false, "lastName": ""}]')' expected, but got '(b'[{"id":"","firstName":"","lastName":"","age":-53,"address":{"number":205,"st'
+ b'reet":"\xc2\xb8","postcode":"","city":"\xc2\x99","country":"\xc3\x9d"},"cr'
+ b'eatedAt":"2000-01-02T02:00:00+00:00","insurance":false,"cars":[{"maxSpeedKmH'
+ b'":0.3333333333333333},{"model":"\xf2\xaf\xb2\x87N\xf1\x90\xac'
+ b'\xbf\xf3\xb9\x89\xaf\xc3\xa4"},{},{},{"maxSpeedKmH":2.415434847481157e+21'
+ b'4},{"brand":"","model":"Z\xf1\xaa\xaf\xa3","maxSpeedKmH":-9.002389170189072e'
+ b'+257},{},{}]}]').'

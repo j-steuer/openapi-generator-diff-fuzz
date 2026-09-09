@@ -1,0 +1,14 @@
+Error report Error_4114381071581486910
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%F2%AB%83%8D/-16039754756.464045/-4.391030254746424e+16', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%F2%AB%83%8D/-16039754756.464045/-4.391030254746424e%2B16', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/calc/%F2%AB%83%8D/-16039754756.464045/-4.391030254746424e+16 expected, but got /api/calc/%F2%AB%83%8D/-16039754756.464045/-4.391030254746424e%2B16.

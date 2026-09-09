@@ -1,0 +1,14 @@
+Error report Error_5393388119630873744
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u00c1\\u0016\\u00ec", "properties": {"N\\u00cd\\u00bdOR\\udb10\\udec1%\\u00fb8\\udaf2\\udce6r\\u008d\\ud81a\\ude30g\\u008c\\u00acg\\u00df\\u00e6": {"\\u0012\\ud944\\udcd7": [], "\\ud8c1\\ude84\\u009f\\u0085\\u0080\\u008c\\u009e\\f\\u00c8\\u00a2": [null], "\\u00cb": 0.0}, "": {}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u00c1\\u0016\\u00ec", "properties": {}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'NÍ½OR\U000d42c1%û8\U000cc8e6r\x8d𖨰g\x8c¬gßæ': {'\x12\U000610d7': [], '\U00040684\x9f\x85\x80\x8c\x9e\x0cÈ¢': [None], 'Ë': 0.0}, '': {}} != {}

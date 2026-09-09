@@ -1,0 +1,11 @@
+Error report Error_-3909345847471865747
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/notypevar/1895/%C3%96L%0A', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:python:
+Error was not unique and occured in other clients.
+Error while building request

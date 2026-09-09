@@ -1,0 +1,22 @@
+Error report Error_8401395163775635414
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"lastName": "\\\\n\\u000f\\ud921\\udc98\\ud8ce\\udc02\\u00ef~\\ud9d5\\udf6c\\ud9f8\\udd5d", "age": 877658033, "insurance": false, "createdAt": "0022-06-21T17:28:37.9961Z"}, {"address": {"country": "", "number": 0, "postcode": "", "street": ""}, "age": 0, "cars": [], "createdAt": "2000-01-02T01:00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"lastName":"\\\\n\\u000f\xf1\x98\x92\x98\xf1\x83\xa0\x82\xc3\xaf~\xf2\x85\x9d\xac\xf2\x8e\x85\x9d","age":877658033,"createdAt":"0022-06-21T17:28:37.996100+00:00","insurance":false},{"id":"","firstName":"","lastName":"","age":0,"address":{"number":0,"street":"","postcode":"","country":""},"createdAt":"2000-01-02T01:00:00+00:00","insurance":false,"cars":[]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"lastName": "\\\\n\\u000f\\ud921\\udc98\\ud8ce\\udc02\\u00ef~\\ud9d'
+ b'5\\udf6c\\ud9f8\\udd5d", "age": 877658033, "insurance": false, "createdAt":'
+ b' "0022-06-21T17:28:37.9961Z"}, {"address": {"country": "", "number": 0, "pos'
+ b'tcode": "", "street": ""}, "age": 0, "cars": [], "createdAt": "2000-01-02T01'
+ b':00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]')' expected, but got '(b'[{},{"lastName":"\\\\n\\u000f\xf1\x98\x92\x98\xf1\x83\xa0\x82\xc3\xaf'
+ b'~\xf2\x85\x9d\xac\xf2\x8e\x85\x9d","age":877658033,"createdAt":"0022-06-21T1'
+ b'7:28:37.996100+00:00","insurance":false},{"id":"","firstName":"","lastName":'
+ b'"","age":0,"address":{"number":0,"street":"","postcode":"","country":""},"cr'
+ b'eatedAt":"2000-01-02T01:00:00+00:00","insurance":false,"cars":[]}]').'

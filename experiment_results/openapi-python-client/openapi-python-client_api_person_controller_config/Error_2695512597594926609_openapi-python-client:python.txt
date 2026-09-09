@@ -1,0 +1,24 @@
+Error report Error_2695512597594926609
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"city": "j3)\\u00b7\\udbe2\\udca1\\u00ady\\u0097\\u0082\\u00f3\\u00ff", "country": "\\u00d2\\uda2f\\uddc8\\ud8d0\\ude9e\\u00c3<\\u0086Z\\u000b\\u00ee\\u0097", "street": "", "number": 226, "postcode": "\\u00a6r"}}, {"address": {}, "age": -547, "cars": [{}, {}, {}, {}], "createdAt": "2000-01-01T00:00:00.0Z", "lastName": "\\ud95b\\udc95\\u00bb\\u00f8\\u00f2Yu\\u00fa\\u00cc["}, {}, {"cars": [], "age": 0, "address": {}}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address":{"number":226,"street":"","postcode":"\xc2\xa6r","city":"j3)\xc2\xb7\xf4\x88\xa2\xa1\xc2\xady\xc2\x97\xc2\x82\xc3\xb3\xc3\xbf","country":"\xc3\x92\xf2\x9b\xb7\x88\xf1\x84\x8a\x9e\xc3\x83<\xc2\x86Z\\u000b\xc3\xae\xc2\x97"}},{"lastName":"\xf1\xa6\xb2\x95\xc2\xbb\xc3\xb8\xc3\xb2Yu\xc3\xba\xc3\x8c[","age":-547,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","cars":[{},{},{},{}]},{},{"age":0,"address":{},"cars":[]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"city": "j3)\\u00b7\\udbe2\\udca1\\u00ady\\u0097\\u0082\\u00f'
+ b'3\\u00ff", "country": "\\u00d2\\uda2f\\uddc8\\ud8d0\\ude9e\\u00c3<\\u008'
+ b'6Z\\u000b\\u00ee\\u0097", "street": "", "number": 226, "postcode": "\\u00a6r'
+ b'"}}, {"address": {}, "age": -547, "cars": [{}, {}, {}, {}], "createdAt": "20'
+ b'00-01-01T00:00:00.0Z", "lastName": "\\ud95b\\udc95\\u00bb\\u00f8\\u00f2Yu'
+ b'\\u00fa\\u00cc["}, {}, {"cars": [], "age": 0, "address": {}}]')' expected, but got '(b'[{"address":{"number":226,"street":"","postcode":"\xc2\xa6r","city":"j'
+ b'3)\xc2\xb7\xf4\x88\xa2\xa1\xc2\xady\xc2\x97\xc2\x82\xc3\xb3\xc3\xbf","countr'
+ b'y":"\xc3\x92\xf2\x9b\xb7\x88\xf1\x84\x8a\x9e\xc3\x83<\xc2\x86Z\\u00'
+ b'0b\xc3\xae\xc2\x97"}},{"lastName":"\xf1\xa6\xb2\x95\xc2\xbb\xc3\xb8\xc3'
+ b'\xb2Yu\xc3\xba\xc3\x8c[","age":-547,"address":{},"createdAt":"2000-01-01T00'
+ b':00:00+00:00","cars":[{},{},{},{}]},{},{"age":0,"address":{},"cars":[]}]').'

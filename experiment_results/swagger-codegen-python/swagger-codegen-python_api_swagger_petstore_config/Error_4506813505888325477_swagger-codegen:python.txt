@@ -1,0 +1,14 @@
+Error report Error_4506813505888325477
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.PUT: 'PUT'>, path='/user/%06%F3%98%B2%8B%F4%89%8E%99%C3%9D%C3%AC%C3%A3%F2%A8%96%B9%C2%BC%F2%86%84%B1N%F3%A1%8D%B0%C2%99', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{}', method=<HTTPMethod.PUT: 'PUT'>, path='/user/%06%F3%98%B2%8B%F4%89%8E%99%C3%9D%C3%AC%C3%A3%F2%A8%96%B9%C2%BC%F2%86%84%B1N%F3%A1%8D%B0%C2%99', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b''' expected, but got 'b'{}''.

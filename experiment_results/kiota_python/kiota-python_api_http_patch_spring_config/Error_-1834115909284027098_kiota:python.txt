@@ -1,0 +1,11 @@
+Error report Error_-1834115909284027098
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/merge-patch+json'}, body=b'{"\\u00f2\\u00c5@&": [[null, 569, null]], "\\u00c5\\udbe4\\uddfd\\u00d4\\u00aez\\u008eA\\ud824\\uddd8\\u0004\\u0087\\u00eb": {}, "then": ["{", -4.609780755826259e+16], "\\ud9c8\\udf4f\\u00e1\\u00a8\\uda5c\\udd18]\\ud96a\\udd8e\\u00a5\\u0098\\u00c2\\uda80\\uddd1": [], "\\ud9d6\\udf63\\u00b8\\u00b6\\u00a7}\\u00e6\\u0098": {"\\u0083\\uff09\\u32be\\u0005": {}}}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/3', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library kiota:python:
+Error was not unique and occured in other clients.
+Error while building request

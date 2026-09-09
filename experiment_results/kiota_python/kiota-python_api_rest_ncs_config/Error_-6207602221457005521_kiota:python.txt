@@ -1,0 +1,14 @@
+Error report Error_-6207602221457005521
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/fisher/442649/2147483646/-2.2715731670247144e+94', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/fisher/442649/2147483646/-2.2715731670247144e%2B94', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/fisher/442649/2147483646/-2.2715731670247144e+94 expected, but got /api/fisher/442649/2147483646/-2.2715731670247144e%2B94.

@@ -1,0 +1,14 @@
+Error report Error_930222173946968770
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.POST: 'POST'>, path='/pet/248468620265?name=G%C3%98&status=%C2%B1A', query_parameters={'name': 'GØ', 'status': '±A'})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{}', method=<HTTPMethod.POST: 'POST'>, path='/pet/248468620265?name=G%C3%98&status=%C2%B1A', query_parameters={'name': 'GØ', 'status': '±A'})
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b''' expected, but got 'b'{}''.

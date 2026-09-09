@@ -1,0 +1,11 @@
+Error report Error_-9031631022611183366
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/x-www-form-urlencoded'}, body=b'sourceFeature=%C3%BA%C2%90H%00V%C2%ADI%C2%A2&excludedFeature=%C3%90%C2%AF%7C', method=<HTTPMethod.POST: 'POST'>, path='/products/%F0%BE%97%9D%27/constraints/excludes', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library kiota:python:
+Error was not unique and occured in other clients.
+Error while building request

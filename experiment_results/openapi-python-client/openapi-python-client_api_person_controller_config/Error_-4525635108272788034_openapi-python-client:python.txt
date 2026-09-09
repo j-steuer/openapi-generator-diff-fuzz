@@ -1,0 +1,24 @@
+Error report Error_-4525635108272788034
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName": "q\\u00d1\\ud90f\\udde7", "age": 479001600}, {"id": "", "insurance": true, "firstName": "\\u00d7\\u3667y\\u00ca\\u000eo\\ud8ae\\udd4c\\u0094\\u008d[\\udb7c\\udecc\\u000f", "createdAt": "3814-10-28T12:59:18Z", "age": -16948883, "address": {"number": -595, "city": "\\u0096\\u00aa", "country": "\\uda04\\udc30\\u00e6", "postcode": "pS`\\r_", "street": "b\\u001d\\u0082b\\u00fb"}, "lastName": "__main__", "cars": [{}, {}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName":"q\xc3\x91\xf1\x93\xb7\xa7","age":479001600},{"id":"","firstName":"\xc3\x97\xe3\x99\xa7y\xc3\x8a\\u000eo\xf0\xbb\xa5\x8c\xc2\x94\xc2\x8d[\xf3\xaf\x8b\x8c\\u000f","lastName":"__main__","age":-16948883,"address":{"number":-595,"street":"b\\u001d\xc2\x82b\xc3\xbb","postcode":"pS`\\r_","city":"\xc2\x96\xc2\xaa","country":"\xf2\x91\x80\xb0\xc3\xa6"},"createdAt":"3814-10-28T12:59:18+00:00","insurance":true,"cars":[{},{}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"lastName": "q\\u00d1\\ud90f\\udde7", "age": 479001600}, {"id": "", "insu'
+ b'rance": true, "firstName": "\\u00d7\\u3667y\\u00ca\\u000eo\\ud8ae\\udd4c\\u'
+ b'0094\\u008d[\\udb7c\\udecc\\u000f", "createdAt": "3814-10-28T12:59:18Z", "ag'
+ b'e": -16948883, "address": {"number": -595, "city": "\\u0096\\u00aa", "coun'
+ b'try": "\\uda04\\udc30\\u00e6", "postcode": "pS`\\r_", "street": "b\\u001d'
+ b'\\u0082b\\u00fb"}, "lastName": "__main__", "cars": [{}, {}]}]')' expected, but got '(b'[{"lastName":"q\xc3\x91\xf1\x93\xb7\xa7","age":479001600},{"id":"","firstN'
+ b'ame":"\xc3\x97\xe3\x99\xa7y\xc3\x8a\\u000eo\xf0\xbb\xa5\x8c\xc2\x94\xc2'
+ b'\x8d[\xf3\xaf\x8b\x8c\\u000f","lastName":"__main__","age":-16948883,"address'
+ b'":{"number":-595,"street":"b\\u001d\xc2\x82b\xc3\xbb","postcode":"pS`\\r_"'
+ b',"city":"\xc2\x96\xc2\xaa","country":"\xf2\x91\x80\xb0\xc3\xa6"},"createdA'
+ b't":"3814-10-28T12:59:18+00:00","insurance":true,"cars":[{},{}]}]').'

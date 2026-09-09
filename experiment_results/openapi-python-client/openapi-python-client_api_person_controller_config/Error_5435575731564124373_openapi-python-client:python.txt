@@ -1,0 +1,24 @@
+Error report Error_5435575731564124373
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName": "\\udbdb\\ude9d\\u00aa\\u00cc\\u001d\\ud94f\\udc35\\u00f5\\u9a22\\u00cf", "insurance": false, "lastName": "\\ud876\\udc25\\u0013\\u00f2\\u00ae\\ud9aa\\ude41\\u00c8\\u0016"}, {"insurance": false, "cars": [{"model": "\\ud9ab\\udfea"}, {}]}, {"address": {"number": 0}, "cars": [], "age": 0, "createdAt": "2000-01-01T00:00:00.0Z", "id": "", "insurance": false}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName":"\xf4\x86\xba\x9d\xc2\xaa\xc3\x8c\\u001d\xf1\xa3\xb0\xb5\xc3\xb5\xe9\xa8\xa2\xc3\x8f","lastName":"\xf0\xad\xa0\xa5\\u0013\xc3\xb2\xc2\xae\xf1\xba\xa9\x81\xc3\x88\\u0016","insurance":false},{"insurance":false,"cars":[{"model":"\xf1\xba\xbf\xaa"},{}]},{"id":"","age":0,"address":{"number":0},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false,"cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"firstName": "\\udbdb\\ude9d\\u00aa\\u00cc\\u001d\\ud94f\\udc35\\u00f5'
+ b'\\u9a22\\u00cf", "insurance": false, "lastName": "\\ud876\\udc25\\u0013\\u'
+ b'00f2\\u00ae\\ud9aa\\ude41\\u00c8\\u0016"}, {"insurance": false, "cars": ['
+ b'{"model": "\\ud9ab\\udfea"}, {}]}, {"address": {"number": 0}, "cars": [], '
+ b'"age": 0, "createdAt": "2000-01-01T00:00:00.0Z", "id": "", "insurance": fals'
+ b'e}]')' expected, but got '(b'[{"firstName":"\xf4\x86\xba\x9d\xc2\xaa\xc3\x8c\\u001d\xf1\xa3\xb0'
+ b'\xb5\xc3\xb5\xe9\xa8\xa2\xc3\x8f","lastName":"\xf0\xad\xa0\xa5\\u0013'
+ b'\xc3\xb2\xc2\xae\xf1\xba\xa9\x81\xc3\x88\\u0016","insurance":false},{"insur'
+ b'ance":false,"cars":[{"model":"\xf1\xba\xbf\xaa"},{}]},{"id":"","age":0,"addr'
+ b'ess":{"number":0},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false,'
+ b'"cars":[]}]').'

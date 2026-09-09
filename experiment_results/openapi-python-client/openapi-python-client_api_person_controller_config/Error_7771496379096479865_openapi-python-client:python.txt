@@ -1,0 +1,34 @@
+Error report Error_7771496379096479865
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id": "#\\u00a2\\u00ba\\""}, {"address": {"city": "\\uda22\\udedc", "country": "\\uda7f\\udd1a\\u00821\\u00f2\\ud951\\uddad\\ud860\\udccf\\u00a5\\u00a3\\u00a7\\ud8df\\udd82`A\\u00bb\\udad8\\udc65\\ud96b\\ude24", "street": "\\uda70\\udf7e\\u0013\\u00f7\\u00a5\\u00be%W\\ud946\\udf01\\u00d7"}, "age": -80369, "cars": [{}, {}, {}, {"maxSpeedKmH": -1.5, "model": "", "brand": "}\\udbed\\udfc3\\u009d\\u00d5\\u00ed\\u0087\\u00ba\\u00f8\\u00d1\\u0012?\\u0018+=S\\u000f\\u00ac\\u0007\\u00a5\\uda64\\udd42\\ud865\\ude8d]"}, {"brand": "", "maxSpeedKmH": -8.430123132394065e-218}, {}, {"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:01Z", "firstName": "", "id": "", "insurance": false, "lastName": "\\uda22\\udedc"}, {}, {"age": 0, "address": {}, "cars": []}, {}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"#\xc2\xa2\xc2\xba\\""},{"id":"","firstName":"","lastName":"\xf2\x98\xab\x9c","age":-80369,"address":{"street":"\xf2\xac\x8d\xbe\\u0013\xc3\xb7\xc2\xa5\xc2\xbe%W\xf1\xa1\xac\x81\xc3\x97","city":"\xf2\x98\xab\x9c","country":"\xf2\xaf\xb4\x9a\xc2\x821\xc3\xb2\xf1\xa4\x96\xad\xf0\xa8\x83\x8f\xc2\xa5\xc2\xa3\xc2\xa7\xf1\x87\xb6\x82`A\xc2\xbb\xf3\x86\x81\xa5\xf1\xaa\xb8\xa4"},"createdAt":"2000-01-01T00:00:01+00:00","insurance":false,"cars":[{},{},{},{"brand":"}\xf4\x8b\x9f\x83\xc2\x9d\xc3\x95\xc3\xad\xc2\x87\xc2\xba\xc3\xb8\xc3\x91\\u0012?\\u0018+=S\\u000f\xc2\xac\\u0007\xc2\xa5\xf2\xa9\x85\x82\xf0\xa9\x9a\x8d]","model":"","maxSpeedKmH":-1.5},{"brand":"","maxSpeedKmH":-8.430123132394065e-218},{},{"brand":"","model":"","maxSpeedKmH":0.0}]},{},{"age":0,"address":{},"cars":[]},{},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"id": "#\\u00a2\\u00ba\\""}, {"address": {"city": "\\uda22\\udedc", "co'
+ b'untry": "\\uda7f\\udd1a\\u00821\\u00f2\\ud951\\uddad\\ud860\\udccf\\u00a5'
+ b'\\u00a3\\u00a7\\ud8df\\udd82`A\\u00bb\\udad8\\udc65\\ud96b\\ude24", "stre'
+ b'et": "\\uda70\\udf7e\\u0013\\u00f7\\u00a5\\u00be%W\\ud946\\udf01\\u00d7"}'
+ b', "age": -80369, "cars": [{}, {}, {}, {"maxSpeedKmH": -1.5, "model": "", "br'
+ b'and": "}\\udbed\\udfc3\\u009d\\u00d5\\u00ed\\u0087\\u00ba\\u00f8\\u00d1\\u'
+ b'0012?\\u0018+=S\\u000f\\u00ac\\u0007\\u00a5\\uda64\\udd42\\ud865\\ude8d]"'
+ b'}, {"brand": "", "maxSpeedKmH": -8.430123132394065e-218}, {}, {"brand": "", '
+ b'"maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:01Z", "fir'
+ b'stName": "", "id": "", "insurance": false, "lastName": "\\uda22\\udedc"}, '
+ b'{}, {"age": 0, "address": {}, "cars": []}, {}, {}, {}]')' expected, but got '(b'[{"id":"#\xc2\xa2\xc2\xba\\""},{"id":"","firstName":"","lastName":"\xf2\x98'
+ b'\xab\x9c","age":-80369,"address":{"street":"\xf2\xac\x8d\xbe\\u0013'
+ b'\xc3\xb7\xc2\xa5\xc2\xbe%W\xf1\xa1\xac\x81\xc3\x97","city":"\xf2\x98\xab\x9c'
+ b'","country":"\xf2\xaf\xb4\x9a\xc2\x821\xc3\xb2\xf1\xa4\x96\xad\xf0\xa8'
+ b'\x83\x8f\xc2\xa5\xc2\xa3\xc2\xa7\xf1\x87\xb6\x82`A\xc2\xbb\xf3\x86\x81\xa5'
+ b'\xf1\xaa\xb8\xa4"},"createdAt":"2000-01-01T00:00:01+00:00","insurance":false'
+ b',"cars":[{},{},{},{"brand":"}\xf4\x8b\x9f\x83\xc2\x9d\xc3\x95\xc3\xad\xc2'
+ b'\x87\xc2\xba\xc3\xb8\xc3\x91\\u0012?\\u0018+=S\\u000f\xc2\xac\\u000'
+ b'7\xc2\xa5\xf2\xa9\x85\x82\xf0\xa9\x9a\x8d]","model":"","maxSpeedKmH":-1.5}'
+ b',{"brand":"","maxSpeedKmH":-8.430123132394065e-218},{},{"brand":"","model":"'
+ b'","maxSpeedKmH":0.0}]},{},{"age":0,"address":{},"cars":[]},{},{},{}]').'

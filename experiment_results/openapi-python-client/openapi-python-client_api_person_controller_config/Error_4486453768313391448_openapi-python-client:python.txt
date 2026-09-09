@@ -1,0 +1,25 @@
+Error report Error_4486453768313391448
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"insurance": false, "id": "\\ud920\\udc55\\u00c2\\u0013\\u0002l\\udb89\\ude41\\udb98\\udfeclsA\\ud815\\udcd0\\ud811\\ude1e\\u008c\\u00d9\\u00df07V\\u00f0\\u00cf\\u00d8\\u00b7\\u008d\\u00f8\\ud974\\uddf5\\u00eb.\\u008a\\u0003\\u00ac\\u00c5d\\u00d6\\u00c1\\ud970\\udf12\\u0015\\udb20\\udc14t", "firstName": "\\u00989^\\u00f8"}, {"insurance": false, "age": 71519, "firstName": "", "id": "", "createdAt": "2000-02-01T16:00:00Z"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf1\x98\x81\x95\xc3\x82\\u0013\\u0002l\xf3\xb2\x99\x81\xf3\xb6\x8f\xaclsA\xf0\x95\x93\x90\xf0\x94\x98\x9e\xc2\x8c\xc3\x99\xc3\x9f07V\xc3\xb0\xc3\x8f\xc3\x98\xc2\xb7\xc2\x8d\xc3\xb8\xf1\xad\x87\xb5\xc3\xab.\xc2\x8a\\u0003\xc2\xac\xc3\x85d\xc3\x96\xc3\x81\xf1\xac\x8c\x92\\u0015\xf3\x98\x80\x94t","firstName":"\xc2\x989^\xc3\xb8","insurance":false},{"id":"","firstName":"","age":71519,"createdAt":"2000-02-01T16:00:00+00:00","insurance":false}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"insurance": false, "id": "\\ud920\\udc55\\u00c2\\u0013\\u0002l\\udb89\\u'
+ b'de41\\udb98\\udfeclsA\\ud815\\udcd0\\ud811\\ude1e\\u008c\\u00d9\\u00df07V'
+ b'\\u00f0\\u00cf\\u00d8\\u00b7\\u008d\\u00f8\\ud974\\uddf5\\u00eb.\\u008a\\u0'
+ b'003\\u00ac\\u00c5d\\u00d6\\u00c1\\ud970\\udf12\\u0015\\udb20\\udc14t", "f'
+ b'irstName": "\\u00989^\\u00f8"}, {"insurance": false, "age": 71519, "firstN'
+ b'ame": "", "id": "", "createdAt": "2000-02-01T16:00:00Z"}]')' expected, but got '(b'[{"id":"\xf1\x98\x81\x95\xc3\x82\\u0013\\u0002l\xf3\xb2\x99\x81\xf3'
+ b'\xb6\x8f\xaclsA\xf0\x95\x93\x90\xf0\x94\x98\x9e\xc2\x8c\xc3\x99\xc3\x9f'
+ b'07V\xc3\xb0\xc3\x8f\xc3\x98\xc2\xb7\xc2\x8d\xc3\xb8\xf1\xad\x87\xb5\xc3'
+ b'\xab.\xc2\x8a\\u0003\xc2\xac\xc3\x85d\xc3\x96\xc3\x81\xf1\xac\x8c\x92\\u001'
+ b'5\xf3\x98\x80\x94t","firstName":"\xc2\x989^\xc3\xb8","insurance":false},{"id'
+ b'":"","firstName":"","age":71519,"createdAt":"2000-02-01T16:00:00+00:00","ins'
+ b'urance":false}]').'

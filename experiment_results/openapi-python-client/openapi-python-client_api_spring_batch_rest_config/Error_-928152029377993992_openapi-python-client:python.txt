@@ -1,0 +1,14 @@
+Error report Error_-928152029377993992
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=-script.pyw', query_parameters={'jobName': '-script.pyw'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=-script.pyw&limitPerJob=3', query_parameters={'jobName': '-script.pyw', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'jobName': '-script.pyw'} expected, but got {'jobName': '-script.pyw', 'limitPerJob': '3'}.

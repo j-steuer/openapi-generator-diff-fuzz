@@ -1,0 +1,11 @@
+Error report Error_-3909345847471865747
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"password": "__main__", "username": "#\\u001e\\u00de\\u00b5 \\u00c6\\u009c"}', method=<HTTPMethod.POST: 'POST'>, path='/login', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:python:
+Error was not unique and occured in other clients.
+Error while building request

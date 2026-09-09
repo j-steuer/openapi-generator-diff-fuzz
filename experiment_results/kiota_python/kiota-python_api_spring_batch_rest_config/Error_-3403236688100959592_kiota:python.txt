@@ -1,0 +1,14 @@
+Error report Error_-3403236688100959592
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "name": "\\u00be\\u00fb\\u00ba\\u0015\\u00ba\\ud84b\\udfff\\u001a~\\udbf2\\ude0a\\u009c\\u00b0\\u00a7z\\u0086\\u00d0\\u00eb\\u0080e\\uda6e\\udf9b)\\u00db\\u00a2u", "properties": {"__main__": {"__main__": null}, "": {}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "name": "\\u00be\\u00fb\\u00ba\\u0015\\u00ba\\ud84b\\udfff\\u001a~\\udbf2\\ude0a\\u009c\\u00b0\\u00a7z\\u0086\\u00d0\\u00eb\\u0080e\\uda6e\\udf9b)\\u00db\\u00a2u", "properties": {}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'__main__': {'__main__': None}, '': {}} != {}

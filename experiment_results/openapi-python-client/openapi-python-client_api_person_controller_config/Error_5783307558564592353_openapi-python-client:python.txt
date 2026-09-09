@@ -1,0 +1,38 @@
+Error report Error_5783307558564592353
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [], "firstName": "", "createdAt": "1589-06-02T01:01:44.073413Z", "id": ".exe", "insurance": true, "address": {"country": "\\u00af\\u00e4\\u00ed\\ud8ec\\udca6", "street": "\\u00b4j\\u00d6^\\ud81a\\udd81\\u0015\\u0099\\udb6e\\udcef\\u00bfg\\u00f7\\u00f8", "number": -1152}, "lastName": "\\ud934\\udf9eF\\u00bd\\ud958\\uddbc\\u007f\\u0090w\\u009a\\u00e6^\\uda1f\\udc28\\uda47\\udf42W\\u00f5\\uda21\\udd2bm", "age": 2010}, {"insurance": true, "createdAt": "1336-03-14T14:36:48Z", "address": {"street": "", "number": 853, "country": "\\u00a8", "postcode": "\\u00ee\\u000f3t", "city": "\\u00c9\\u00fc\\u00e5h"}, "id": "\\ud956\\ude00I \\u0013", "cars": [{"maxSpeedKmH": 8.151323196259918e+144}, {"brand": "\\u00e2"}, {}, {}, {}, {"model": "\\u00db\\u0096\\u00d8\\u00c5s\\u008f", "maxSpeedKmH": 0.0}, {}, {}], "firstName": "\\u001f\\u00dd", "lastName": "\\u00e2m\\udbec\\uddd1", "age": 17210}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":".exe","firstName":"","lastName":"\xf1\x9d\x8e\x9eF\xc2\xbd\xf1\xa6\x86\xbc\x7f\xc2\x90w\xc2\x9a\xc3\xa6^\xf2\x97\xb0\xa8\xf2\xa1\xbd\x82W\xc3\xb5\xf2\x98\x94\xabm","age":2010,"address":{"number":-1152,"street":"\xc2\xb4j\xc3\x96^\xf0\x96\xa6\x81\\u0015\xc2\x99\xf3\xab\xa3\xaf\xc2\xbfg\xc3\xb7\xc3\xb8","country":"\xc2\xaf\xc3\xa4\xc3\xad\xf1\x8b\x82\xa6"},"createdAt":"1589-06-02T01:01:44.073413+00:00","insurance":true,"cars":[]},{"id":"\xf1\xa5\xa8\x80I \\u0013","firstName":"\\u001f\xc3\x9d","lastName":"\xc3\xa2m\xf4\x8b\x87\x91","age":17210,"address":{"number":853,"street":"","postcode":"\xc3\xae\\u000f3t","city":"\xc3\x89\xc3\xbc\xc3\xa5h","country":"\xc2\xa8"},"createdAt":"1336-03-14T14:36:48+00:00","insurance":true,"cars":[{"maxSpeedKmH":8.151323196259918e+144},{"brand":"\xc3\xa2"},{},{},{},{"model":"\xc3\x9b\xc2\x96\xc3\x98\xc3\x85s\xc2\x8f","maxSpeedKmH":0.0},{},{}]},{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [], "firstName": "", "createdAt": "1589-06-02T01:01:44.073413Z", "'
+ b'id": ".exe", "insurance": true, "address": {"country": "\\u00af\\u00e4\\u00'
+ b'ed\\ud8ec\\udca6", "street": "\\u00b4j\\u00d6^\\ud81a\\udd81\\u0015\\u00'
+ b'99\\udb6e\\udcef\\u00bfg\\u00f7\\u00f8", "number": -1152}, "lastName": "\\'
+ b'ud934\\udf9eF\\u00bd\\ud958\\uddbc\\u007f\\u0090w\\u009a\\u00e6^\\uda1f\\u'
+ b'dc28\\uda47\\udf42W\\u00f5\\uda21\\udd2bm", "age": 2010}, {"insurance": t'
+ b'rue, "createdAt": "1336-03-14T14:36:48Z", "address": {"street": "", "number"'
+ b': 853, "country": "\\u00a8", "postcode": "\\u00ee\\u000f3t", "city": "\\u00c'
+ b'9\\u00fc\\u00e5h"}, "id": "\\ud956\\ude00I \\u0013", "cars": [{"maxSpeedK'
+ b'mH": 8.151323196259918e+144}, {"brand": "\\u00e2"}, {}, {}, {}, {"model":'
+ b' "\\u00db\\u0096\\u00d8\\u00c5s\\u008f", "maxSpeedKmH": 0.0}, {}, {}], "f'
+ b'irstName": "\\u001f\\u00dd", "lastName": "\\u00e2m\\udbec\\uddd1", "age":'
+ b' 17210}, {}]')' expected, but got '(b'[{"id":".exe","firstName":"","lastName":"\xf1\x9d\x8e\x9eF\xc2\xbd'
+ b'\xf1\xa6\x86\xbc\x7f\xc2\x90w\xc2\x9a\xc3\xa6^\xf2\x97\xb0\xa8\xf2\xa1\xbd'
+ b'\x82W\xc3\xb5\xf2\x98\x94\xabm","age":2010,"address":{"number":-1152,"str'
+ b'eet":"\xc2\xb4j\xc3\x96^\xf0\x96\xa6\x81\\u0015\xc2\x99\xf3\xab\xa3\xaf'
+ b'\xc2\xbfg\xc3\xb7\xc3\xb8","country":"\xc2\xaf\xc3\xa4\xc3\xad\xf1\x8b'
+ b'\x82\xa6"},"createdAt":"1589-06-02T01:01:44.073413+00:00","insurance":true'
+ b',"cars":[]},{"id":"\xf1\xa5\xa8\x80I \\u0013","firstName":"\\u001f\xc3\x9d",'
+ b'"lastName":"\xc3\xa2m\xf4\x8b\x87\x91","age":17210,"address":{"number":853'
+ b',"street":"","postcode":"\xc3\xae\\u000f3t","city":"\xc3\x89\xc3'
+ b'\xbc\xc3\xa5h","country":"\xc2\xa8"},"createdAt":"1336-03-14T14:36:48+00:00'
+ b'","insurance":true,"cars":[{"maxSpeedKmH":8.151323196259918e+144},{"brand":"'
+ b'\xc3\xa2"},{},{},{},{"model":"\xc3\x9b\xc2\x96\xc3\x98\xc3\x85s\xc2\x8f","ma'
+ b'xSpeedKmH":0.0},{},{}]},{}]').'

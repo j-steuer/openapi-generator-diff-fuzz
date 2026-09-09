@@ -1,0 +1,37 @@
+Error report Error_-1420063383217838797
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [{"brand": "CY"}, {"model": "\\u009f\\u00d8\\u00c3\\u001e\\u00d4As", "maxSpeedKmH": -5.940335698908602e+23}, {"model": "\\u00cd", "brand": "j\\u00d0\\ud8ee\\udcc3", "maxSpeedKmH": 4547247870282189.0}, {}, {"brand": "\\uda7a\\udcb2\\u009d"}], "age": -6, "id": "\\udbf8\\udc8f\\u00d2\\u001b\\u00bc*\\u001d!>", "lastName": "\\ud9f0\\udfdb<\\u00e7", "insurance": false, "firstName": "\\u0017", "createdAt": "3762-12-01T00:00:25.592281-08:10"}, {"insurance": false, "lastName": "U\\n\\ud8f2\\udd71\\u00d55\\u0010\\u0086\\u00baB\\u0006", "createdAt": "4234-06-21T09:30:10.4896Z", "address": {"number": -571}, "cars": [{"maxSpeedKmH": 1.3195570737732334e+16}, {"brand": "", "maxSpeedKmH": -5.001376671588474e+16, "model": "\\u0091H"}], "age": -64500, "firstName": "\\u00f5\\u00f6\\u00ea\\u00af\\u00e7RA", "id": "H\\u00b0\\u00e9\\b\\u00b7\\u0000\\ud8cb\\uddde!r\\u00885\\udb26\\udfc4"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xf4\x8e\x82\x8f\xc3\x92\\u001b\xc2\xbc*\\u001d!>","firstName":"\\u0017","lastName":"\xf2\x8c\x8f\x9b<\xc3\xa7","age":-6,"createdAt":"3762-12-01T00:00:25.592281-08:10","insurance":false,"cars":[{"brand":"CY"},{"model":"\xc2\x9f\xc3\x98\xc3\x83\\u001e\xc3\x94As","maxSpeedKmH":-5.940335698908602e+23},{"brand":"j\xc3\x90\xf1\x8b\xa3\x83","model":"\xc3\x8d","maxSpeedKmH":4547247870282189.0},{},{"brand":"\xf2\xae\xa2\xb2\xc2\x9d"}]},{"id":"H\xc2\xb0\xc3\xa9\\b\xc2\xb7\\u0000\xf1\x82\xb7\x9e!r\xc2\x885\xf3\x99\xaf\x84","firstName":"\xc3\xb5\xc3\xb6\xc3\xaa\xc2\xaf\xc3\xa7RA","lastName":"U\\n\xf1\x8c\xa5\xb1\xc3\x955\\u0010\xc2\x86\xc2\xbaB\\u0006","age":-64500,"address":{"number":-571},"createdAt":"4234-06-21T09:30:10.489600+00:00","insurance":false,"cars":[{"maxSpeedKmH":1.3195570737732334e+16},{"brand":"","model":"\xc2\x91H","maxSpeedKmH":-5.001376671588474e+16}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [{"brand": "CY"}, {"model": "\\u009f\\u00d8\\u00c3\\u001e\\u00d'
+ b'4As", "maxSpeedKmH": -5.940335698908602e+23}, {"model": "\\u00cd", "brand'
+ b'": "j\\u00d0\\ud8ee\\udcc3", "maxSpeedKmH": 4547247870282189.0}, {}, {"bran'
+ b'd": "\\uda7a\\udcb2\\u009d"}], "age": -6, "id": "\\udbf8\\udc8f\\u00d2\\u00'
+ b'1b\\u00bc*\\u001d!>", "lastName": "\\ud9f0\\udfdb<\\u00e7", "insurance": '
+ b'false, "firstName": "\\u0017", "createdAt": "3762-12-01T00:00:25.592281-0'
+ b'8:10"}, {"insurance": false, "lastName": "U\\n\\ud8f2\\udd71\\u00d55\\u00'
+ b'10\\u0086\\u00baB\\u0006", "createdAt": "4234-06-21T09:30:10.4896Z", "addre'
+ b'ss": {"number": -571}, "cars": [{"maxSpeedKmH": 1.3195570737732334e+16}, {"b'
+ b'rand": "", "maxSpeedKmH": -5.001376671588474e+16, "model": "\\u0091H"}], '
+ b'"age": -64500, "firstName": "\\u00f5\\u00f6\\u00ea\\u00af\\u00e7RA", "id"'
+ b': "H\\u00b0\\u00e9\\b\\u00b7\\u0000\\ud8cb\\uddde!r\\u00885\\udb26\\udfc4"'
+ b'}]')' expected, but got '(b'[{"id":"\xf4\x8e\x82\x8f\xc3\x92\\u001b\xc2\xbc*\\u001d!>","firstName":"\\u'
+ b'0017","lastName":"\xf2\x8c\x8f\x9b<\xc3\xa7","age":-6,"createdAt":"3762-12'
+ b'-01T00:00:25.592281-08:10","insurance":false,"cars":[{"brand":"CY"},{"model"'
+ b':"\xc2\x9f\xc3\x98\xc3\x83\\u001e\xc3\x94As","maxSpeedKmH":-5.94033569890'
+ b'8602e+23},{"brand":"j\xc3\x90\xf1\x8b\xa3\x83","model":"\xc3\x8d","maxSpeedK'
+ b'mH":4547247870282189.0},{},{"brand":"\xf2\xae\xa2\xb2\xc2\x9d"}]},{"id":"H'
+ b'\xc2\xb0\xc3\xa9\\b\xc2\xb7\\u0000\xf1\x82\xb7\x9e!r\xc2\x885\xf3'
+ b'\x99\xaf\x84","firstName":"\xc3\xb5\xc3\xb6\xc3\xaa\xc2\xaf\xc3\xa7RA","las'
+ b'tName":"U\\n\xf1\x8c\xa5\xb1\xc3\x955\\u0010\xc2\x86\xc2\xbaB\\u0006","ag'
+ b'e":-64500,"address":{"number":-571},"createdAt":"4234-06-21T09:30:10.489600+'
+ b'00:00","insurance":false,"cars":[{"maxSpeedKmH":1.3195570737732334e+16},{"br'
+ b'and":"","model":"\xc2\x91H","maxSpeedKmH":-5.001376671588474e+16}]}]').'

@@ -1,0 +1,11 @@
+Error report Error_-1834115909284027098
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library kiota:python:
+Error was not unique and occured in other clients.
+Error while building request

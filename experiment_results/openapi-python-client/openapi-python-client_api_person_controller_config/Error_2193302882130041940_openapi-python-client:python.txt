@@ -1,0 +1,19 @@
+Error report Error_2193302882130041940
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {}, "age": 6395, "cars": [{"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:00Z", "firstName": "", "id": "", "insurance": true, "lastName": ""}, {}, {"cars": [], "age": 0, "address": {}}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"","lastName":"","age":6395,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","insurance":true,"cars":[{"brand":"","model":"","maxSpeedKmH":0.0}]},{},{"age":0,"address":{},"cars":[]},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {}, "age": 6395, "cars": [{"brand": "", "maxSpeedKmH": 0.0, "mo'
+ b'del": ""}], "createdAt": "2000-01-01T00:00:00Z", "firstName": "", "id": "", '
+ b'"insurance": true, "lastName": ""}, {}, {"cars": [], "age": 0, "address": {}'
+ b'}, {}, {}]')' expected, but got '(b'[{"id":"","firstName":"","lastName":"","age":6395,"address":{},"createdAt":"'
+ b'2000-01-01T00:00:00+00:00","insurance":true,"cars":[{"brand":"","model":"","'
+ b'maxSpeedKmH":0.0}]},{},{"age":0,"address":{},"cars":[]},{},{}]').'

@@ -1,0 +1,14 @@
+Error report Error_-1271805116043242508
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/expint/99999/-4.1092505974951846e+139', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/expint/99999/-4.1092505974951846e%2B139', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/expint/99999/-4.1092505974951846e+139 expected, but got /api/expint/99999/-4.1092505974951846e%2B139.

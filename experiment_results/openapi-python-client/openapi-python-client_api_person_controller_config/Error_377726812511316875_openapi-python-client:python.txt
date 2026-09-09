@@ -1,0 +1,18 @@
+Error report Error_377726812511316875
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"country": "\\u009e"}, "age": -87, "cars": [{}, {}, {}, {}], "createdAt": "2000-01-01T01:00:00.0Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"","lastName":"","age":-87,"address":{"country":"\xc2\x9e"},"createdAt":"2000-01-01T01:00:00+00:00","insurance":false,"cars":[{},{},{},{}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"country": "\\u009e"}, "age": -87, "cars": [{}, {}, {}, {}]'
+ b', "createdAt": "2000-01-01T01:00:00.0Z", "firstName": "", "id": "", "insuran'
+ b'ce": false, "lastName": ""}]')' expected, but got '(b'[{"id":"","firstName":"","lastName":"","age":-87,"address":{"country":"\xc2'
+ b'\x9e"},"createdAt":"2000-01-01T01:00:00+00:00","insurance":false,"cars":[{}'
+ b',{},{},{}]}]').'

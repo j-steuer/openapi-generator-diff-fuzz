@@ -1,0 +1,16 @@
+Error report Error_6284521152844602423
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id": "513", "cars": [{"brand": "\\ud8a8\\udf6e3"}], "insurance": false, "age": -4554, "createdAt": "0106-07-12T16:03:41.513+17:00"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"513","age":-4554,"createdAt":"0106-07-12T16:03:41.513000+17:00","insurance":false,"cars":[{"brand":"\xf0\xba\x8d\xae3"}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"id": "513", "cars": [{"brand": "\\ud8a8\\udf6e3"}], "insurance": false,'
+ b' "age": -4554, "createdAt": "0106-07-12T16:03:41.513+17:00"}]')' expected, but got '(b'[{"id":"513","age":-4554,"createdAt":"0106-07-12T16:03:41.513000+17:00","ins'
+ b'urance":false,"cars":[{"brand":"\xf0\xba\x8d\xae3"}]}]').'

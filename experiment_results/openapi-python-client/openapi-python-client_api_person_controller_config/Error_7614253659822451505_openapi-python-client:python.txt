@@ -1,0 +1,28 @@
+Error report Error_7614253659822451505
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName": "j\\ud879\\ude98\\u00ce-8\\ud9d8\\udd82\\u00ff\\udae3\\udf35\\udbe3\\udc2f\\ud87c\\uddf7", "insurance": false, "createdAt": "0319-12-08T06:53:47+07:06", "address": {"country": "\\u009e"}, "lastName": "", "cars": [{}, {"brand": " \\u00bb1:"}], "age": -87, "id": "(\\uda28\\ude72"}, {"insurance": true, "firstName": "", "createdAt": "1059-02-26T19:22:11Z"}, {"id": "", "cars": [{"brand": "\\u0095B\\u00ad\\u00b7\\u00aa\\u0097\\ud900\\udc8b\\ud827\\udfb3\\uda55\\udf18", "maxSpeedKmH": -3.3351614714227708e+16}, {}, {"brand": "\\ud8d1\\udded"}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"(\xf2\x9a\x89\xb2","firstName":"j\xf0\xae\x9a\x98\xc3\x8e-8\xf2\x86\x86\x82\xc3\xbf\xf3\x88\xbc\xb5\xf4\x88\xb0\xaf\xf0\xaf\x87\xb7","lastName":"","age":-87,"address":{"country":"\xc2\x9e"},"createdAt":"0319-12-08T06:53:47+07:06","insurance":false,"cars":[{},{"brand":" \xc2\xbb1:"}]},{"firstName":"","createdAt":"1059-02-26T19:22:11+00:00","insurance":true},{"id":"","cars":[{"brand":"\xc2\x95B\xc2\xad\xc2\xb7\xc2\xaa\xc2\x97\xf1\x90\x82\x8b\xf0\x99\xbe\xb3\xf2\xa5\x9c\x98","maxSpeedKmH":-3.3351614714227708e+16},{},{"brand":"\xf1\x84\x97\xad"}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"firstName": "j\\ud879\\ude98\\u00ce-8\\ud9d8\\udd82\\u00ff\\udae3\\ud'
+ b'f35\\udbe3\\udc2f\\ud87c\\uddf7", "insurance": false, "createdAt": "0319-12-'
+ b'08T06:53:47+07:06", "address": {"country": "\\u009e"}, "lastName": "", "c'
+ b'ars": [{}, {"brand": " \\u00bb1:"}], "age": -87, "id": "(\\uda28\\ude72"}, '
+ b'{"insurance": true, "firstName": "", "createdAt": "1059-02-26T19:22:11Z"}, {'
+ b'"id": "", "cars": [{"brand": "\\u0095B\\u00ad\\u00b7\\u00aa\\u0097\\ud900\\'
+ b'udc8b\\ud827\\udfb3\\uda55\\udf18", "maxSpeedKmH": -3.3351614714227708e+16},'
+ b' {}, {"brand": "\\ud8d1\\udded"}]}]')' expected, but got '(b'[{"id":"(\xf2\x9a\x89\xb2","firstName":"j\xf0\xae\x9a\x98\xc3\x8e-'
+ b'8\xf2\x86\x86\x82\xc3\xbf\xf3\x88\xbc\xb5\xf4\x88\xb0\xaf\xf0\xaf\x87\xb7"'
+ b',"lastName":"","age":-87,"address":{"country":"\xc2\x9e"},"createdAt":"031'
+ b'9-12-08T06:53:47+07:06","insurance":false,"cars":[{},{"brand":" \xc2\xbb1:'
+ b'"}]},{"firstName":"","createdAt":"1059-02-26T19:22:11+00:00","insurance":tru'
+ b'e},{"id":"","cars":[{"brand":"\xc2\x95B\xc2\xad\xc2\xb7\xc2\xaa\xc2'
+ b'\x97\xf1\x90\x82\x8b\xf0\x99\xbe\xb3\xf2\xa5\x9c\x98","maxSpeedKmH":-3.3351'
+ b'614714227708e+16},{},{"brand":"\xf1\x84\x97\xad"}]}]').'

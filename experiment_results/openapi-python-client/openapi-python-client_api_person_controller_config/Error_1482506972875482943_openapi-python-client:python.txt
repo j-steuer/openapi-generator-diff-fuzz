@@ -1,0 +1,26 @@
+Error report Error_1482506972875482943
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"insurance": false, "lastName": "\\u00c4", "cars": [{}], "address": {"country": "1/0", "city": "\\u001b\\udb88\\udf8e", "postcode": "q=\\u000b", "street": "\\u00bbBD\\udba0\\udcb0\\u00f0t\\u0084}\\u001b\\u00c3"}, "firstName": "Q\\u00fa\\udbb4\\udc1b\\ud8ad\\udd95\\ua3f6\\ud9a4\\udc5f\\u00d4\\u00dd\\u00c5\\\\"}, {}, {"address": {}, "age": 0, "cars": [], "createdAt": "2000-01-01T01:02:00Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName":"Q\xc3\xba\xf3\xbd\x80\x9b\xf0\xbb\x96\x95\xea\x8f\xb6\xf1\xb9\x81\x9f\xc3\x94\xc3\x9d\xc3\x85\\\\","lastName":"\xc3\x84","address":{"street":"\xc2\xbbBD\xf3\xb8\x82\xb0\xc3\xb0t\xc2\x84}\\u001b\xc3\x83","postcode":"q=\\u000b","city":"\\u001b\xf3\xb2\x8e\x8e","country":"1/0"},"insurance":false,"cars":[{}]},{},{"id":"","firstName":"","lastName":"","age":0,"address":{},"createdAt":"2000-01-01T01:02:00+00:00","insurance":false,"cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"insurance": false, "lastName": "\\u00c4", "cars": [{}], "address": {"c'
+ b'ountry": "1/0", "city": "\\u001b\\udb88\\udf8e", "postcode": "q=\\u000b", "s'
+ b'treet": "\\u00bbBD\\udba0\\udcb0\\u00f0t\\u0084}\\u001b\\u00c3"}, "firstNam'
+ b'e": "Q\\u00fa\\udbb4\\udc1b\\ud8ad\\udd95\\ua3f6\\ud9a4\\udc5f\\u00d4\\u00'
+ b'dd\\u00c5\\\\"}, {}, {"address": {}, "age": 0, "cars": [], "createdAt": "20'
+ b'00-01-01T01:02:00Z", "firstName": "", "id": "", "insurance": false, "lastNam'
+ b'e": ""}]')' expected, but got '(b'[{"firstName":"Q\xc3\xba\xf3\xbd\x80\x9b\xf0\xbb\x96\x95\xea\x8f'
+ b'\xb6\xf1\xb9\x81\x9f\xc3\x94\xc3\x9d\xc3\x85\\\\","lastName":"\xc3\x84","'
+ b'address":{"street":"\xc2\xbbBD\xf3\xb8\x82\xb0\xc3\xb0t\xc2\x84}\\u001b'
+ b'\xc3\x83","postcode":"q=\\u000b","city":"\\u001b\xf3\xb2\x8e\x8e","country":'
+ b'"1/0"},"insurance":false,"cars":[{}]},{},{"id":"","firstName":"","lastName":'
+ b'"","age":0,"address":{},"createdAt":"2000-01-01T01:02:00+00:00","insurance":'
+ b'false,"cars":[]}]').'

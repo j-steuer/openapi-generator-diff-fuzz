@@ -1,0 +1,11 @@
+Error report Error_-3909345847471865747
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"latitude": "\\u001f\\u0081\\u0002\\uda9f\\ude84\\u007fl\\udb11\\ude2b\\u00e2\\ud8d6\\udef3\\u00a3AE\'\\u000b\\u00baI\\u0011\\ud906\\ude11*\\u00b9\\u00e1Vu\\u00de\\udbc6\\udcb5\\u00e8\\u00de<^y\\u0099\\u001e\\u00e9\\u00df\\u0010\\u0003\\uda88\\udd74\\u0083", "id": "$", "address": "`\\u00a7", "name": "\\u00d3", "availableBeds": -426}', method=<HTTPMethod.POST: 'POST'>, path='/v1/hospitais/', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:python:
+Error was not unique and occured in other clients.
+Error while building request

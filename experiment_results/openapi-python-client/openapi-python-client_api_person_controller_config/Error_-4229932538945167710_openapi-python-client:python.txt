@@ -1,0 +1,25 @@
+Error report Error_-4229932538945167710
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"age": -15141, "address": {"number": -29772447, "city": "", "postcode": "\\u00fdo\\u008f\\udb50\\udcf1\\u00bf"}, "createdAt": "2093-07-06T14:17:08.661-17:14", "insurance": false, "cars": [], "lastName": "\\u00c0\\u00f1@\\u00cf\\udb41\\ude92\\u0002\\u00e8\\u00ec\\u00ab\\u00d0\\u00c6\\uda88\\udfee\\u00a5\\u00da\\u00da\\udb71\\udd6a\\udbcf\\ude13(\\u00b2\\ud8fd\\udc39\\ud920\\udded\\u00f1"}, {}, {}, {}, {}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName":"\xc3\x80\xc3\xb1@\xc3\x8f\xf3\xa0\x9a\x92\\u0002\xc3\xa8\xc3\xac\xc2\xab\xc3\x90\xc3\x86\xf2\xb2\x8f\xae\xc2\xa5\xc3\x9a\xc3\x9a\xf3\xac\x95\xaa\xf4\x83\xb8\x93(\xc2\xb2\xf1\x8f\x90\xb9\xf1\x98\x87\xad\xc3\xb1","age":-15141,"address":{"number":-29772447,"postcode":"\xc3\xbdo\xc2\x8f\xf3\xa4\x83\xb1\xc2\xbf","city":""},"createdAt":"2093-07-06T14:17:08.661000-17:14","insurance":false,"cars":[]},{},{},{},{},{},{}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"age": -15141, "address": {"number": -29772447, "city": "", "postcode"'
+ b': "\\u00fdo\\u008f\\udb50\\udcf1\\u00bf"}, "createdAt": "2093-07-06T14:17'
+ b':08.661-17:14", "insurance": false, "cars": [], "lastName": "\\u00c0\\u00f'
+ b'1@\\u00cf\\udb41\\ude92\\u0002\\u00e8\\u00ec\\u00ab\\u00d0\\u00c6\\uda88\\u'
+ b'dfee\\u00a5\\u00da\\u00da\\udb71\\udd6a\\udbcf\\ude13(\\u00b2\\ud8fd\\udc3'
+ b'9\\ud920\\udded\\u00f1"}, {}, {}, {}, {}, {}, {}]')' expected, but got '(b'[{"lastName":"\xc3\x80\xc3\xb1@\xc3\x8f\xf3\xa0\x9a\x92\\u0002\xc3'
+ b'\xa8\xc3\xac\xc2\xab\xc3\x90\xc3\x86\xf2\xb2\x8f\xae\xc2\xa5\xc3'
+ b'\x9a\xc3\x9a\xf3\xac\x95\xaa\xf4\x83\xb8\x93(\xc2\xb2\xf1\x8f'
+ b'\x90\xb9\xf1\x98\x87\xad\xc3\xb1","age":-15141,"address":{"number":-29772447'
+ b',"postcode":"\xc3\xbdo\xc2\x8f\xf3\xa4\x83\xb1\xc2\xbf","city":""},"create'
+ b'dAt":"2093-07-06T14:17:08.661000-17:14","insurance":false,"cars":[]},{},{},{'
+ b'},{},{},{}]').'

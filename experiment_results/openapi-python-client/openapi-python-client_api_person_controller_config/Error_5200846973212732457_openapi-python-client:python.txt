@@ -1,0 +1,37 @@
+Error report Error_5200846973212732457
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [{"brand": "\\u0082R\\u0097\\u0081"}, {"maxSpeedKmH": 6.964005426591822e+16}, {"model": "\\u00a2"}, {"brand": "", "maxSpeedKmH": 3.954994581569867e+16}, {}, {"maxSpeedKmH": 3.0147995758504154e+192}, {"model": "\\ud8ab\\ude47\\udafd\\udc46\\u00125o\\ud98e\\udd09\\udaae\\udd4e\\u009b*\\u009e"}, {}, {"maxSpeedKmH": 2.220446049250313e-16}, {"model": "A"}], "address": {"country": "", "city": "\\u0007\\u00e9\\u00b8"}, "lastName": "*\\u00eb", "age": 33554431, "insurance": true, "id": "\\u00a1\\u00c8\\u00e0\\uda71\\uddfd\\u00bf;)", "createdAt": "4404-12-10T06:01:25Z", "firstName": "I \\u00b5j\\u00b8\\u00c8\\udb05\\udf3f\\u0097"}, {"address": {"number": 16350573}, "id": "\\u00e3\\u00be\\u0080.\\udb65\\udcf5\\u00c7\\u00f7\\ud9f8\\udd2f"}, {"age": 0, "address": {}, "cars": [], "createdAt": "0180-01-01T00:04:04Z", "firstName": "", "id": "", "insurance": true, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"\xc2\xa1\xc3\x88\xc3\xa0\xf2\xac\x97\xbd\xc2\xbf;)","firstName":"I \xc2\xb5j\xc2\xb8\xc3\x88\xf3\x91\x9c\xbf\xc2\x97","lastName":"*\xc3\xab","age":33554431,"address":{"city":"\\u0007\xc3\xa9\xc2\xb8","country":""},"createdAt":"4404-12-10T06:01:25+00:00","insurance":true,"cars":[{"brand":"\xc2\x82R\xc2\x97\xc2\x81"},{"maxSpeedKmH":6.964005426591822e+16},{"model":"\xc2\xa2"},{"brand":"","maxSpeedKmH":3.954994581569867e+16},{},{"maxSpeedKmH":3.0147995758504154e+192},{"model":"\xf0\xba\xb9\x87\xf3\x8f\x91\x86\\u00125o\xf1\xb3\xa4\x89\xf2\xbb\xa5\x8e\xc2\x9b*\xc2\x9e"},{},{"maxSpeedKmH":2.220446049250313e-16},{"model":"A"}]},{"id":"\xc3\xa3\xc2\xbe\xc2\x80.\xf3\xa9\x93\xb5\xc3\x87\xc3\xb7\xf2\x8e\x84\xaf","address":{"number":16350573}},{"id":"","firstName":"","lastName":"","age":0,"address":{},"createdAt":"0180-01-01T00:04:04+00:00","insurance":true,"cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [{"brand": "\\u0082R\\u0097\\u0081"}, {"maxSpeedKmH": 6.964005426'
+ b'591822e+16}, {"model": "\\u00a2"}, {"brand": "", "maxSpeedKmH": 3.9549945'
+ b'81569867e+16}, {}, {"maxSpeedKmH": 3.0147995758504154e+192}, {"model": "'
+ b'\\ud8ab\\ude47\\udafd\\udc46\\u00125o\\ud98e\\udd09\\udaae\\udd4e\\u009b*\\'
+ b'u009e"}, {}, {"maxSpeedKmH": 2.220446049250313e-16}, {"model": "A"}], "addre'
+ b'ss": {"country": "", "city": "\\u0007\\u00e9\\u00b8"}, "lastName": "*\\u00eb'
+ b'", "age": 33554431, "insurance": true, "id": "\\u00a1\\u00c8\\u00e0\\uda'
+ b'71\\uddfd\\u00bf;)", "createdAt": "4404-12-10T06:01:25Z", "firstName": "I '
+ b'\\u00b5j\\u00b8\\u00c8\\udb05\\udf3f\\u0097"}, {"address": {"number": 1635'
+ b'0573}, "id": "\\u00e3\\u00be\\u0080.\\udb65\\udcf5\\u00c7\\u00f7\\ud9f8\\'
+ b'udd2f"}, {"age": 0, "address": {}, "cars": [], "createdAt": "0180-01-01T00:0'
+ b'4:04Z", "firstName": "", "id": "", "insurance": true, "lastName": ""}]')' expected, but got '(b'[{"id":"\xc2\xa1\xc3\x88\xc3\xa0\xf2\xac\x97\xbd\xc2\xbf;)","firstName":'
+ b'"I \xc2\xb5j\xc2\xb8\xc3\x88\xf3\x91\x9c\xbf\xc2\x97","lastName":"*\xc3'
+ b'\xab","age":33554431,"address":{"city":"\\u0007\xc3\xa9\xc2\xb8","country":"'
+ b'"},"createdAt":"4404-12-10T06:01:25+00:00","insurance":true,"cars":[{"brand"'
+ b':"\xc2\x82R\xc2\x97\xc2\x81"},{"maxSpeedKmH":6.964005426591822e+16},{"mode'
+ b'l":"\xc2\xa2"},{"brand":"","maxSpeedKmH":3.954994581569867e+16},{},{"maxSp'
+ b'eedKmH":3.0147995758504154e+192},{"model":"\xf0\xba\xb9\x87\xf3'
+ b'\x8f\x91\x86\\u00125o\xf1\xb3\xa4\x89\xf2\xbb\xa5\x8e\xc2\x9b*\xc2\x9e"},{'
+ b'},{"maxSpeedKmH":2.220446049250313e-16},{"model":"A"}]},{"id":"\xc3'
+ b'\xa3\xc2\xbe\xc2\x80.\xf3\xa9\x93\xb5\xc3\x87\xc3\xb7\xf2\x8e\x84\xaf","add'
+ b'ress":{"number":16350573}},{"id":"","firstName":"","lastName":"","age":0,"ad'
+ b'dress":{},"createdAt":"0180-01-01T00:04:04+00:00","insurance":true,"cars":[]'
+ b'}]').'

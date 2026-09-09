@@ -1,0 +1,23 @@
+Error report Error_-6506807149056014336
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"postcode": "\\u00ef\\u00ca\\ud911\\udf95\\u0001\\u00a4\\u00d6n\\u0094\\udac0\\udcf4\\u00c1\\u00f36\\u00e7\\uf681\\udad2\\udd83", "street": "\\u00e2\\u008b1\\u008c\\u00a5\\u5685", "country": "\\u0099\\u0011K\\u00b2", "city": "0", "number": 30486914}, "createdAt": "0254-05-12T05:03:04.952685Z", "firstName": "", "id": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"","address":{"number":30486914,"street":"\xc3\xa2\xc2\x8b1\xc2\x8c\xc2\xa5\xe5\x9a\x85","postcode":"\xc3\xaf\xc3\x8a\xf1\x94\x9e\x95\\u0001\xc2\xa4\xc3\x96n\xc2\x94\xf3\x80\x83\xb4\xc3\x81\xc3\xb36\xc3\xa7\xef\x9a\x81\xf3\x84\xa6\x83","city":"0","country":"\xc2\x99\\u0011K\xc2\xb2"},"createdAt":"0254-05-12T05:03:04.952685+00:00"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"postcode": "\\u00ef\\u00ca\\ud911\\udf95\\u0001\\u00a4\\u00d'
+ b'6n\\u0094\\udac0\\udcf4\\u00c1\\u00f36\\u00e7\\uf681\\udad2\\udd83", "str'
+ b'eet": "\\u00e2\\u008b1\\u008c\\u00a5\\u5685", "country": "\\u0099\\u0011K\\u'
+ b'00b2", "city": "0", "number": 30486914}, "createdAt": "0254-05-12T05:03:04.9'
+ b'52685Z", "firstName": "", "id": ""}]')' expected, but got '(b'[{"id":"","firstName":"","address":{"number":30486914,"street":"'
+ b'\xc3\xa2\xc2\x8b1\xc2\x8c\xc2\xa5\xe5\x9a\x85","postcode":"\xc3\xaf'
+ b'\xc3\x8a\xf1\x94\x9e\x95\\u0001\xc2\xa4\xc3\x96n\xc2\x94\xf3\x80\x83\xb4\xc3'
+ b'\x81\xc3\xb36\xc3\xa7\xef\x9a\x81\xf3\x84\xa6\x83","city":"0","country":'
+ b'"\xc2\x99\\u0011K\xc2\xb2"},"createdAt":"0254-05-12T05:03:04.952685+00:00'
+ b'"}]').'

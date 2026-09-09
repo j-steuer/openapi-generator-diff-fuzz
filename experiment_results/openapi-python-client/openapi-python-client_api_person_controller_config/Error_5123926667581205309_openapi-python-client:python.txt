@@ -1,0 +1,38 @@
+Error report Error_5123926667581205309
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName": "\\u00d8\\u009c\\udb3a\\udf3d\\ud80d\\uded8", "age": 13041, "cars": [{"maxSpeedKmH": -5.976287516066796e+16, "model": "V\\u00cd"}, {"maxSpeedKmH": 2.5017712553562087e-202, "model": "?\\u001d\\ud8eb\\uded4n&\\uda8d\\udf0b\\u00c6\\u00bam\\u00df\\udb50\\udc73R\\ud8e5\\udfd8", "brand": "\\u00f5\\u00d1"}, {}, {}, {"brand": "F\\u00e4.\\u00ad\\u00e9\\u0096\\u00a1u\\u009c\\u00e8\\u00ade\\u000fW1\\u00ce", "maxSpeedKmH": 1.6114523202145722e+16, "model": "1e100"}, {"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:00Z", "address": {"number": 31484, "postcode": "\\uda45\\uded1\\u009c\\ud968\\udd7c)\\u00d3\\ud844\\uddc2l\\u009a\\u00c7\\uda67\\udf29\\u00f0\\udbd7\\udf56\\udb31\\udd57", "city": "\\uda57\\udf3a\\u00fcc%\\ud8de\\udfd1\\u00de7", "street": "\\u00d8\\u009c\\udb3a\\udf3d\\ud80d\\uded8", "country": "null"}, "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"\xc3\x98\xc2\x9c\xf3\x9e\xac\xbd\xf0\x93\x9b\x98","lastName":"","age":13041,"address":{"number":31484,"street":"\xc3\x98\xc2\x9c\xf3\x9e\xac\xbd\xf0\x93\x9b\x98","postcode":"\xf2\xa1\x9b\x91\xc2\x9c\xf1\xaa\x85\xbc)\xc3\x93\xf0\xa1\x87\x82l\xc2\x9a\xc3\x87\xf2\xa9\xbc\xa9\xc3\xb0\xf4\x85\xbd\x96\xf3\x9c\x95\x97","city":"\xf2\xa5\xbc\xba\xc3\xbcc%\xf1\x87\xaf\x91\xc3\x9e7","country":"null"},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false,"cars":[{"model":"V\xc3\x8d","maxSpeedKmH":-5.976287516066796e+16},{"brand":"\xc3\xb5\xc3\x91","model":"?\\u001d\xf1\x8a\xbb\x94n&\xf2\xb3\x9c\x8b\xc3\x86\xc2\xbam\xc3\x9f\xf3\xa4\x81\xb3R\xf1\x89\x9f\x98","maxSpeedKmH":2.5017712553562087e-202},{},{},{"brand":"F\xc3\xa4.\xc2\xad\xc3\xa9\xc2\x96\xc2\xa1u\xc2\x9c\xc3\xa8\xc2\xade\\u000fW1\xc3\x8e","model":"1e100","maxSpeedKmH":1.6114523202145722e+16},{"brand":"","model":"","maxSpeedKmH":0.0}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"firstName": "\\u00d8\\u009c\\udb3a\\udf3d\\ud80d\\uded8", "age": 13041,'
+ b' "cars": [{"maxSpeedKmH": -5.976287516066796e+16, "model": "V\\u00cd"}, {'
+ b'"maxSpeedKmH": 2.5017712553562087e-202, "model": "?\\u001d\\ud8eb\\uded4n&\\'
+ b'uda8d\\udf0b\\u00c6\\u00bam\\u00df\\udb50\\udc73R\\ud8e5\\udfd8", "brand": "'
+ b'\\u00f5\\u00d1"}, {}, {}, {"brand": "F\\u00e4.\\u00ad\\u00e9\\u0096\\u00a1u'
+ b'\\u009c\\u00e8\\u00ade\\u000fW1\\u00ce", "maxSpeedKmH": 1.611452320214572'
+ b'2e+16, "model": "1e100"}, {"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "'
+ b'createdAt": "2000-01-01T00:00:00Z", "address": {"number": 31484, "postcode":'
+ b' "\\uda45\\uded1\\u009c\\ud968\\udd7c)\\u00d3\\ud844\\uddc2l\\u009a\\u00c7'
+ b'\\uda67\\udf29\\u00f0\\udbd7\\udf56\\udb31\\udd57", "city": "\\uda57\\udf'
+ b'3a\\u00fcc%\\ud8de\\udfd1\\u00de7", "street": "\\u00d8\\u009c\\udb3a\\ud'
+ b'f3d\\ud80d\\uded8", "country": "null"}, "id": "", "insurance": false, "las'
+ b'tName": ""}]')' expected, but got '(b'[{"id":"","firstName":"\xc3\x98\xc2\x9c\xf3\x9e\xac\xbd\xf0\x93\x9b\x98","la'
+ b'stName":"","age":13041,"address":{"number":31484,"street":"\xc3'
+ b'\x98\xc2\x9c\xf3\x9e\xac\xbd\xf0\x93\x9b\x98","postcode":"\xf2\xa1\x9b'
+ b'\x91\xc2\x9c\xf1\xaa\x85\xbc)\xc3\x93\xf0\xa1\x87\x82l\xc2\x9a\xc3\x87\xf2'
+ b'\xa9\xbc\xa9\xc3\xb0\xf4\x85\xbd\x96\xf3\x9c\x95\x97","city":"\xf2'
+ b'\xa5\xbc\xba\xc3\xbcc%\xf1\x87\xaf\x91\xc3\x9e7","country":"null"},"creat'
+ b'edAt":"2000-01-01T00:00:00+00:00","insurance":false,"cars":[{"model":"V\xc3'
+ b'\x8d","maxSpeedKmH":-5.976287516066796e+16},{"brand":"\xc3\xb5\xc3\x91","mo'
+ b'del":"?\\u001d\xf1\x8a\xbb\x94n&\xf2\xb3\x9c\x8b\xc3\x86\xc2\xbam'
+ b'\xc3\x9f\xf3\xa4\x81\xb3R\xf1\x89\x9f\x98","maxSpeedKmH":2.501771255356208'
+ b'7e-202},{},{},{"brand":"F\xc3\xa4.\xc2\xad\xc3\xa9\xc2\x96\xc2\xa1'
+ b'u\xc2\x9c\xc3\xa8\xc2\xade\\u000fW1\xc3\x8e","model":"1e100","maxSpeedKmH'
+ b'":1.6114523202145722e+16},{"brand":"","model":"","maxSpeedKmH":0.0}]}]').'

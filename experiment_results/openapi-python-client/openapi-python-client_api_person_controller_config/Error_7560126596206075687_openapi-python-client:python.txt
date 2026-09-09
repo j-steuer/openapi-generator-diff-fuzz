@@ -1,0 +1,24 @@
+Error report Error_7560126596206075687
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName": "#.)\\u009dq", "age": 19903959}, {"id": ""}, {"cars": []}, {}, {"address": {"country": "\\u00d6\\ud925\\udde4\\u009e\\uda1d\\udfc4\\u0089", "street": "d\\ud819\\udd58\\udafb\\ude84\\udbfc\\udd65\\u00b6\\ud93e\\udc63\\ud88a\\udc05"}, "cars": [{}, {"maxSpeedKmH": 0.0, "brand": "", "model": ""}, {}, {}], "createdAt": "2000-01-01T00:00:00Z", "id": "", "insurance": false}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName":"#.)\xc2\x9dq","age":19903959},{"id":""},{"cars":[]},{},{"id":"","address":{"street":"d\xf0\x96\x95\x98\xf3\x8e\xba\x84\xf4\x8f\x85\xa5\xc2\xb6\xf1\x9f\xa1\xa3\xf0\xb2\xa0\x85","country":"\xc3\x96\xf1\x99\x97\xa4\xc2\x9e\xf2\x97\x9f\x84\xc2\x89"},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false,"cars":[{},{"brand":"","model":"","maxSpeedKmH":0.0},{},{}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"firstName": "#.)\\u009dq", "age": 19903959}, {"id": ""}, {"cars": []},'
+ b' {}, {"address": {"country": "\\u00d6\\ud925\\udde4\\u009e\\uda1d\\udfc4\\u'
+ b'0089", "street": "d\\ud819\\udd58\\udafb\\ude84\\udbfc\\udd65\\u00b6\\ud'
+ b'93e\\udc63\\ud88a\\udc05"}, "cars": [{}, {"maxSpeedKmH": 0.0, "brand": "", '
+ b'"model": ""}, {}, {}], "createdAt": "2000-01-01T00:00:00Z", "id": "", "insur'
+ b'ance": false}]')' expected, but got '(b'[{"firstName":"#.)\xc2\x9dq","age":19903959},{"id":""},{"cars":[]},{},{"id'
+ b'":"","address":{"street":"d\xf0\x96\x95\x98\xf3\x8e\xba\x84\xf4'
+ b'\x8f\x85\xa5\xc2\xb6\xf1\x9f\xa1\xa3\xf0\xb2\xa0\x85","country":"\xc3\x96'
+ b'\xf1\x99\x97\xa4\xc2\x9e\xf2\x97\x9f\x84\xc2\x89"},"createdAt":"2000-01-01T0'
+ b'0:00:00+00:00","insurance":false,"cars":[{},{"brand":"","model":"","maxSpeed'
+ b'KmH":0.0},{},{}]}]').'

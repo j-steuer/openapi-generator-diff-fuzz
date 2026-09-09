@@ -1,0 +1,27 @@
+Error report Error_1793894346052484383
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"postcode": "-script.pyw", "number": 172765, "country": "^H", "street": "\\u009d", "city": "\\u00d6\\u00d0\\u00a3\\udbfa\\udd36fO\\u00d8\\u001d\\uda28\\udda6\\u00a6\\u00e7H\\u008d\\u00fa2x\\ud9c9\\udc2b\\u00da"}, "cars": [{"model": ""}, {"model": ""}, {"maxSpeedKmH": 3.052304411043092e-181, "brand": "\\ud86d\\udec84\\ua360\\u007f"}], "age": 3986, "lastName": "", "createdAt": "2791-07-18T06:12:08Z", "firstName": "\\u00aa\\uda4d\\udcfb\\u00d33\\u0095i\\"\\u00f4", "id": "76\\u0001\\u00ca", "insurance": true}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"76\\u0001\xc3\x8a","firstName":"\xc2\xaa\xf2\xa3\x93\xbb\xc3\x933\xc2\x95i\\"\xc3\xb4","lastName":"","age":3986,"address":{"number":172765,"street":"\xc2\x9d","postcode":"-script.pyw","city":"\xc3\x96\xc3\x90\xc2\xa3\xf4\x8e\xa4\xb6fO\xc3\x98\\u001d\xf2\x9a\x86\xa6\xc2\xa6\xc3\xa7H\xc2\x8d\xc3\xba2x\xf2\x82\x90\xab\xc3\x9a","country":"^H"},"createdAt":"2791-07-18T06:12:08+00:00","insurance":true,"cars":[{"model":""},{"model":""},{"brand":"\xf0\xab\x9b\x884\xea\x8d\xa0\x7f","maxSpeedKmH":3.052304411043092e-181}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"postcode": "-script.pyw", "number": 172765, "country": "^H", '
+ b'"street": "\\u009d", "city": "\\u00d6\\u00d0\\u00a3\\udbfa\\udd36fO\\u00d8\\'
+ b'u001d\\uda28\\udda6\\u00a6\\u00e7H\\u008d\\u00fa2x\\ud9c9\\udc2b\\u00da"}'
+ b', "cars": [{"model": ""}, {"model": ""}, {"maxSpeedKmH": 3.052304411043092e-'
+ b'181, "brand": "\\ud86d\\udec84\\ua360\\u007f"}], "age": 3986, "lastName": ""'
+ b', "createdAt": "2791-07-18T06:12:08Z", "firstName": "\\u00aa\\uda4d\\udcfb\\'
+ b'u00d33\\u0095i\\"\\u00f4", "id": "76\\u0001\\u00ca", "insurance": true}]')' expected, but got '(b'[{"id":"76\\u0001\xc3\x8a","firstName":"\xc2\xaa\xf2\xa3\x93\xbb\xc3'
+ b'\x933\xc2\x95i\\"\xc3\xb4","lastName":"","age":3986,"address":{"number":1727'
+ b'65,"street":"\xc2\x9d","postcode":"-script.pyw","city":"\xc3\x96'
+ b'\xc3\x90\xc2\xa3\xf4\x8e\xa4\xb6fO\xc3\x98\\u001d\xf2\x9a\x86\xa6\xc2\xa6'
+ b'\xc3\xa7H\xc2\x8d\xc3\xba2x\xf2\x82\x90\xab\xc3\x9a","country":"^H"},"create'
+ b'dAt":"2791-07-18T06:12:08+00:00","insurance":true,"cars":[{"model":""},{"mod'
+ b'el":""},{"brand":"\xf0\xab\x9b\x884\xea\x8d\xa0\x7f","maxSpeedKmH":3.0523044'
+ b'11043092e-181}]}]').'

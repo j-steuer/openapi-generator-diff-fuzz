@@ -1,0 +1,14 @@
+Error report Error_-999940105559283685
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": "\\bQ|\\udabc\\udc4f5(B/\\u00fe,\\u0093", "properties": {"\\u00da\\u344e\\u00c5/": {"\\u0000": {"\\u0000": 0, "J\\u00fe": null, "": null}}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": "\\bQ|\\udabc\\udc4f5(B/\\u00fe,\\u0093", "properties": {"\\u00da\\u344e\\u00c5/": {"\\u0000": {"\\u0000": 0, "J\\u00fe": null}}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'Ú㑎Å/': {'\x00': {'\x00': 0, 'Jþ': None, '': None}}} != {'Ú㑎Å/': {'\x00': {'\x00': 0, 'Jþ': None}}}

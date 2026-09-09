@@ -1,0 +1,11 @@
+Error report Error_-9031631022611183366
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'"\\u00b98\\u0012\\u00b0\\u009b\\udbd4\\udd78N"', method=<HTTPMethod.POST: 'POST'>, path='/api/sessions/V%0B%C2%B3%C2%B1w%3A/group', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library kiota:python:
+Error was not unique and occured in other clients.
+Error while building request

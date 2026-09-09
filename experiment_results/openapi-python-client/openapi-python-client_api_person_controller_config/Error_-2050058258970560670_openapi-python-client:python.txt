@@ -1,0 +1,23 @@
+Error report Error_-2050058258970560670
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"firstName": "", "createdAt": "1145-02-20T02:52:01Z"}, {"address": {}, "age": 0, "cars": [], "createdAt": "2000-01-01T00:00:00.0Z", "firstName": "\\u009eI\\u00d9\\u0088\\u0000\\ud987\\udd11\\udacd\\ude64\\u00cbh\\u00d4\\ua51fb\\u00a4\\u00af\\udab0\\udd3f\\udb25\\udee6\\udb93\\uded4yC\\\\AD\\ud842\\udf48\\u00b5P4RY\\ud9f6\\udd6a\\f", "id": "", "insurance": false}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"firstName":"","createdAt":"1145-02-20T02:52:01+00:00"},{"id":"","firstName":"\xc2\x9eI\xc3\x99\xc2\x88\\u0000\xf1\xb1\xb4\x91\xf3\x83\x99\xa4\xc3\x8bh\xc3\x94\xea\x94\x9fb\xc2\xa4\xc2\xaf\xf2\xbc\x84\xbf\xf3\x99\x9b\xa6\xf3\xb4\xbb\x94yC\\\\AD\xf0\xa0\xad\x88\xc2\xb5P4RY\xf2\x8d\xa5\xaa\\f","age":0,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","insurance":false,"cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"firstName": "", "createdAt": "1145-02-20T02:52:01Z"}, {"address": {},'
+ b' "age": 0, "cars": [], "createdAt": "2000-01-01T00:00:00.0Z", "firstName": "'
+ b'\\u009eI\\u00d9\\u0088\\u0000\\ud987\\udd11\\udacd\\ude64\\u00cbh\\u00d4\\u'
+ b'a51fb\\u00a4\\u00af\\udab0\\udd3f\\udb25\\udee6\\udb93\\uded4yC\\\\AD\\ud84'
+ b'2\\udf48\\u00b5P4RY\\ud9f6\\udd6a\\f", "id": "", "insurance": false}]')' expected, but got '(b'[{},{"firstName":"","createdAt":"1145-02-20T02:52:01+00:00"},{"id":"","first'
+ b'Name":"\xc2\x9eI\xc3\x99\xc2\x88\\u0000\xf1\xb1\xb4\x91\xf3\x83\x99\xa4'
+ b'\xc3\x8bh\xc3\x94\xea\x94\x9fb\xc2\xa4\xc2\xaf\xf2\xbc\x84\xbf\xf3\x99\x9b'
+ b'\xa6\xf3\xb4\xbb\x94yC\\\\AD\xf0\xa0\xad\x88\xc2\xb5P4RY\xf2\x8d\xa5\xaa\\f"'
+ b',"age":0,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","insurance":fa'
+ b'lse,"cars":[]}]').'

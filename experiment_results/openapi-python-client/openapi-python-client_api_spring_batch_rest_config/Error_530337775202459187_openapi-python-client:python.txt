@@ -1,0 +1,14 @@
+Error report Error_530337775202459187
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?exitCode=9%F0%92%A5%A6%C3%A16%F0%94%B0%9FM%02%23%F1%81%A7%BB%C2%A6%F1%A9%8F%A8%EB%B9%A0%C3%81%C3%B4%7C%23&jobName=%C3%9A%F3%9D%A7%A3%29%C3%B43%C2%8B2N', query_parameters={'exitCode': '9\U00012966á6\U00014c1fM\x02#\U000419fb¦\U000693e8빠Áô|#', 'jobName': 'Ú\U000dd9e3)ô3\x8b2N'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%C3%9A%F3%9D%A7%A3%29%C3%B43%C2%8B2N&exitCode=9%F0%92%A5%A6%C3%A16%F0%94%B0%9FM%02%23%F1%81%A7%BB%C2%A6%F1%A9%8F%A8%EB%B9%A0%C3%81%C3%B4%7C%23&limitPerJob=3', query_parameters={'jobName': 'Ú\U000dd9e3)ô3\x8b2N', 'exitCode': '9\U00012966á6\U00014c1fM\x02#\U000419fb¦\U000693e8빠Áô|#', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'exitCode': '9\U00012966á6\U00014c1fM\x02#\U000419fb¦\U000693e8빠Áô|#', 'jobName': 'Ú\U000dd9e3)ô3\x8b2N'} expected, but got {'jobName': 'Ú\U000dd9e3)ô3\x8b2N', 'exitCode': '9\U00012966á6\U00014c1fM\x02#\U000419fb¦\U000693e8빠Áô|#', 'limitPerJob': '3'}.

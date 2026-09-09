@@ -1,0 +1,14 @@
+Error report Error_-8729179387112826638
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.DELETE: 'DELETE'>, path='/api/problem/%C3%B9%C3%BD%C3%9A%C3%AB3%C2%B8%C2%87%27%C2%A5%C2%98%F2%99%B6%9B%26', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{}', method=<HTTPMethod.DELETE: 'DELETE'>, path='/api/problem/%C3%B9%C3%BD%C3%9A%C3%AB3%C2%B8%C2%87%27%C2%A5%C2%98%F2%99%B6%9B%26', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b''' expected, but got 'b'{}''.

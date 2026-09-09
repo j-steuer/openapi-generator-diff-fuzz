@@ -1,0 +1,23 @@
+Error report Error_-4565405354865418883
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"age": 465, "address": {"number": -383732, "city": "\\u00bb", "street": "\\u00f6\\u00d2\\u00eb\\u00ba\\u00c3\\ud946\\udfd1U\\u001d\\uda74\\udcc8kR\\ud93a\\udc5d\\u43ece\\u00d4"}, "cars": [{}], "createdAt": "2000-01-02T02:00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": "\\udb31\\udc59=\\ud85b\\udd1c\\u001eU\\u0098\\u0098u!F"}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"id":"","firstName":"","lastName":"\xf3\x9c\x91\x99=\xf0\xa6\xb4\x9c\\u001eU\xc2\x98\xc2\x98u!F","age":465,"address":{"number":-383732,"street":"\xc3\xb6\xc3\x92\xc3\xab\xc2\xba\xc3\x83\xf1\xa1\xaf\x91U\\u001d\xf2\xad\x83\x88kR\xf1\x9e\xa1\x9d\xe4\x8f\xace\xc3\x94","city":"\xc2\xbb"},"createdAt":"2000-01-02T02:00:00+00:00","insurance":false,"cars":[{}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"age": 465, "address": {"number": -383732, "city": "\\u00bb", "stre'
+ b'et": "\\u00f6\\u00d2\\u00eb\\u00ba\\u00c3\\ud946\\udfd1U\\u001d\\uda74\\ud'
+ b'cc8kR\\ud93a\\udc5d\\u43ece\\u00d4"}, "cars": [{}], "createdAt": "2000-01-02'
+ b'T02:00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": '
+ b'"\\udb31\\udc59=\\ud85b\\udd1c\\u001eU\\u0098\\u0098u!F"}]')' expected, but got '(b'[{},{"id":"","firstName":"","lastName":"\xf3\x9c\x91\x99=\xf0\xa6\xb4'
+ b'\x9c\\u001eU\xc2\x98\xc2\x98u!F","age":465,"address":{"number":-383732,"stre'
+ b'et":"\xc3\xb6\xc3\x92\xc3\xab\xc2\xba\xc3\x83\xf1\xa1\xaf\x91U\\u00'
+ b'1d\xf2\xad\x83\x88kR\xf1\x9e\xa1\x9d\xe4\x8f\xace\xc3\x94","city":"'
+ b'\xc2\xbb"},"createdAt":"2000-01-02T02:00:00+00:00","insurance":false,"cars'
+ b'":[{}]}]').'

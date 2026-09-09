@@ -1,0 +1,14 @@
+Error report Error_-2488565097466551853
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "properties": {"x": {"": [-1.8118811938210256e+232, null], "\\ud8d9\\udffds\\u009b": [], "\\u009f\\u0003\\u00e8\\u0002:b:[": {}, "\\u00dej\\uda29\\udd91 \\u00f1N\\ud9bf\\udd68\\udb75\\udc81\\uda5b\\udf75\\u00c2T\\u00ad\\u00a2": {"I\\u0092}": {"\\uda2a\\udf5eZ": 3.411545557520067e+16, "\\u000fe\\u000e2\\ud842\\ude3e\\ud934\\udf34\\u00b3o\\uda21\\udede[": true, "\\u00ff/\\u00e0o_\\u0006s\\u001a\\u0088\\ud9b4\\udf5d\\\\\\u00f5\\u00ec": 2.7093343897718816e+16}}}, "\\udbf9\\udfa4": {"\\ud995\\ude0f": {"\\udb40\\ude1b": -1041, "\\u00da0\\n\\u00dcX?": 1001440944, "l\'\\u0083\\u00d4x\\udb08\\uded3Y\\u00a2\\u000b\\u001dl\\u0006": true}}}, "name": "\\u00b9\\u008d+7\\u00f8\\u00b7\\ud83d\\udd01\'"}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "name": "\\u00b9\\u008d+7\\u00f8\\u00b7\\ud83d\\udd01\'", "properties": {"x": {"\\ud8d9\\udffds\\u009b": [], "\\u009f\\u0003\\u00e8\\u0002:b:[": {}, "\\u00dej\\uda29\\udd91 \\u00f1N\\ud9bf\\udd68\\udb75\\udc81\\uda5b\\udf75\\u00c2T\\u00ad\\u00a2": {"I\\u0092}": {"\\uda2a\\udf5eZ": 3.411545557520067e+16, "\\u000fe\\u000e2\\ud842\\ude3e\\ud934\\udf34\\u00b3o\\uda21\\udede[": true, "\\u00ff/\\u00e0o_\\u0006s\\u001a\\u0088\\ud9b4\\udf5d\\\\\\u00f5\\u00ec": 2.7093343897718816e+16}}}, "\\udbf9\\udfa4": {"\\ud995\\ude0f": {"\\udb40\\ude1b": -1041, "\\u00da0\\n\\u00dcX?": 1001440944, "l\'\\u0083\\u00d4x\\udb08\\uded3Y\\u00a2\\u000b\\u001dl\\u0006": true}}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'x': {'': [-1.8118811938210256e+232, None], '\U000467fds\x9b': [], '\x9f\x03è\x02:b:[': {}, 'Þj\U0009a591 ñN\U0007fd68\U000ed481\U000a6f75ÂT\xad¢': {'I\x92}': {'\U0009ab5eZ': 3.411545557520067e+16, '\x0fe\x0e2𠨾\U0005d334³o\U000986de[': True, 'ÿ/ào_\x06s\x1a\x88\U0007d35d\\õì': 2.7093343897718816e+16}}}, '\U0010e7a4': {'\U0007560f': {'\U000e021b': -1041, 'Ú0\nÜX?': 1001440944, "l'\x83Ôx\U000d22d3Y¢\x0b\x1dl\x06": True}}} != {'x': {'\U000467fds\x9b': [], '\x9f\x03è\x02:b:[': {}, 'Þj\U0009a591 ñN\U0007fd68\U000ed481\U000a6f75ÂT\xad¢': {'I\x92}': {'\U0009ab5eZ': 3.411545557520067e+16, '\x0fe\x0e2𠨾\U0005d334³o\U000986de[': True, 'ÿ/ào_\x06s\x1a\x88\U0007d35d\\õì': 2.7093343897718816e+16}}}, '\U0010e7a4': {'\U0007560f': {'\U000e021b': -1041, 'Ú0\nÜX?': 1001440944, "l'\x83Ôx\U000d22d3Y¢\x0b\x1dl\x06": True}}}

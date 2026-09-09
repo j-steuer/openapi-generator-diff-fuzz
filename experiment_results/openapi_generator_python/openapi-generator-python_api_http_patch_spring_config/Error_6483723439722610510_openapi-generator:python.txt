@@ -1,0 +1,14 @@
+Error report Error_6483723439722610510
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json-patch+json'}, body=b'{}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/1', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/merge-patch+json'}, body=b'{}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/1', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/json-patch+json expected, got application/merge-patch+json

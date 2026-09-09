@@ -1,0 +1,14 @@
+Error report Error_4762026768379006321
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%C3%A6%C2%91%0F%C2%99%F3%AD%A3%94%1C%F2%8D%8C%B0%F3%86%91%98.V%5E%C3%AA%C2%B8/-2.251173503680546e+86/4.210439278980842e-149', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%C3%A6%C2%91%0F%C2%99%F3%AD%A3%94%1C%F2%8D%8C%B0%F3%86%91%98.V%5E%C3%AA%C2%B8/-2.251173503680546e%2B86/4.210439278980842e-149', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/calc/%C3%A6%C2%91%0F%C2%99%F3%AD%A3%94%1C%F2%8D%8C%B0%F3%86%91%98.V%5E%C3%AA%C2%B8/-2.251173503680546e+86/4.210439278980842e-149 expected, but got /api/calc/%C3%A6%C2%91%0F%C2%99%F3%AD%A3%94%1C%F2%8D%8C%B0%F3%86%91%98.V%5E%C3%AA%C2%B8/-2.251173503680546e%2B86/4.210439278980842e-149.

@@ -1,0 +1,14 @@
+Error report Error_1721014894753218932
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"properties": {"\\u0085\\uda4f\\udd8d\\ud98e\\udea3\\u00fa\\u0098\\u0003\\u00b4\\u00d0": {"Y<": [{}]}, "\\u00b2": {"?\\u00ed\\u00cf\\udbc5\\udff3\\u001f\\uda57\\uded8M\\u00d3\\r\\ud817\\udc6eu-\\ud962\\ude06\\u009a\\u0093\\udbe8\\udc69\\ud858\\ude59\\u0087\\u0095\\u0006x": 0.0, "": {}}, "+0.0": {"\\u00a1;\\t\\u00e0\\uda58\\uddd7\\u0013\\u00bf9": [], "": [], "\\u0087\\u00ec": [{"R\\u00d0\\u00d5\\udadd\\udd63\\u00fc\\u00f7\\u00af": "", "\\u001d\\u00ea\\ud99d\\udecaK": 3.73463275202034e+16, "": 3.781997654942399e+16}]}, " \\u0001\\udb10\\udf85\\udad8\\uddc6\\u00b24": {}}, "name": "\\u00f9", "asynchronous": true}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": "\\u00f9", "properties": {"\\u0085\\uda4f\\udd8d\\ud98e\\udea3\\u00fa\\u0098\\u0003\\u00b4\\u00d0": {"Y<": [{}]}, "\\u00b2": {"?\\u00ed\\u00cf\\udbc5\\udff3\\u001f\\uda57\\uded8M\\u00d3\\r\\ud817\\udc6eu-\\ud962\\ude06\\u009a\\u0093\\udbe8\\udc69\\ud858\\ude59\\u0087\\u0095\\u0006x": 0.0}, "+0.0": {"\\u00a1;\\t\\u00e0\\uda58\\uddd7\\u0013\\u00bf9": [], "\\u0087\\u00ec": [{"R\\u00d0\\u00d5\\udadd\\udd63\\u00fc\\u00f7\\u00af": "", "\\u001d\\u00ea\\ud99d\\udecaK": 3.73463275202034e+16}]}, " \\u0001\\udb10\\udf85\\udad8\\uddc6\\u00b24": {}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library kiota:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Unequal values for element 'properties' in body: {'\x85\U000a3d8d\U00073aa3ú\x98\x03´Ð': {'Y<': [{}]}, '²': {'?íÏ\U001017f3\x1f\U000a5ed8MÓ\r\U00015c6eu-\U00068a06\x9a\x93\U0010a069𦉙\x87\x95\x06x': 0.0, '': {}}, '+0.0': {'¡;\tà\U000a61d7\x13¿9': [], '': [], '\x87ì': [{'RÐÕ\U000c7563ü÷¯': '', '\x1dê\U000776caK': 3.73463275202034e+16, '': 3.781997654942399e+16}]}, ' \x01\U000d4385\U000c61c6²4': {}} != {'\x85\U000a3d8d\U00073aa3ú\x98\x03´Ð': {'Y<': [{}]}, '²': {'?íÏ\U001017f3\x1f\U000a5ed8MÓ\r\U00015c6eu-\U00068a06\x9a\x93\U0010a069𦉙\x87\x95\x06x': 0.0}, '+0.0': {'¡;\tà\U000a61d7\x13¿9': [], '\x87ì': [{'RÐÕ\U000c7563ü÷¯': '', '\x1dê\U000776caK': 3.73463275202034e+16}]}, ' \x01\U000d4385\U000c61c6²4': {}}

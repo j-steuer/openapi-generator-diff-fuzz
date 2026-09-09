@@ -1,0 +1,16 @@
+Error report Error_6058913431955918674
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"createdAt": "0273-11-19T09:32:28Z", "cars": [{"model": ""}], "age": 5163}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"age":5163,"createdAt":"0273-11-19T09:32:28+00:00","cars":[{"model":""}]},{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"createdAt": "0273-11-19T09:32:28Z", "cars": [{"model": ""}], "age": 5'
+ b'163}, {}]')' expected, but got '(b'[{},{"age":5163,"createdAt":"0273-11-19T09:32:28+00:00","cars":[{"model":""}'
+ b']},{}]').'

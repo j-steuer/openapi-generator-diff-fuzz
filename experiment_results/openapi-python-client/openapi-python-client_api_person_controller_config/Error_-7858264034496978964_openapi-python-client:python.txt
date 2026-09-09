@@ -1,0 +1,34 @@
+Error report Error_-7858264034496978964
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {"lastName": "\\u00f2", "cars": [{}], "createdAt": "0233-05-24T03:26:11.723434+22:40"}, {"lastName": "\\u00de}\\u00b4\\u0093\\u0013f\\u008d\\u0099\\u0092\\ud93f\\udd60D\\udbd8\\udeeb"}, {"insurance": true}, {"firstName": "\\"\\u00d3\\u00a9\\uda85\\udd5f", "createdAt": "1685-08-27T16:03:54.6+07:50", "lastName": "\\u00d3\\u00af\\u00980\\udaf6\\uddcd\\u0081$\\u001a\\uda31\\ude72\\u009f\\u00f1\\u00f3\\u0003\\u00ae\\u00a7\\u00fb\\u00ba\\udaff\\ude74\\uda85\\ude39\\u00c1$\\udb8c\\ude4d", "insurance": true, "address": {}, "id": "l\\u00e08\\u00ae\\ud821\\udea6\\u00c2\\u0011\\u00c9\\ud97a\\udd7e", "age": 270, "cars": [{}, {"brand": "\\ud98b\\udeb3GY\\u0088n\\uda0a\\udc8f\\u00ed\\u00bc\\u00a9\\u00914*v", "maxSpeedKmH": -3.301308371412712e+16}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{},{"lastName":"\xc3\xb2","createdAt":"0233-05-24T03:26:11.723434+22:40","cars":[{}]},{"lastName":"\xc3\x9e}\xc2\xb4\xc2\x93\\u0013f\xc2\x8d\xc2\x99\xc2\x92\xf1\x9f\xb5\xa0D\xf4\x86\x8b\xab"},{"insurance":true},{"id":"l\xc3\xa08\xc2\xae\xf0\x98\x9a\xa6\xc3\x82\\u0011\xc3\x89\xf1\xae\xa5\xbe","firstName":"\\"\xc3\x93\xc2\xa9\xf2\xb1\x95\x9f","lastName":"\xc3\x93\xc2\xaf\xc2\x980\xf3\x8d\xa7\x8d\xc2\x81$\\u001a\xf2\x9c\x99\xb2\xc2\x9f\xc3\xb1\xc3\xb3\\u0003\xc2\xae\xc2\xa7\xc3\xbb\xc2\xba\xf3\x8f\xb9\xb4\xf2\xb1\x98\xb9\xc3\x81$\xf3\xb3\x89\x8d","age":270,"address":{},"createdAt":"1685-08-27T16:03:54.600000+07:50","insurance":true,"cars":[{},{"brand":"\xf1\xb2\xba\xb3GY\xc2\x88n\xf2\x92\xa2\x8f\xc3\xad\xc2\xbc\xc2\xa9\xc2\x914*v","maxSpeedKmH":-3.301308371412712e+16}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {"lastName": "\\u00f2", "cars": [{}], "createdAt": "0233-05-24T03:26'
+ b':11.723434+22:40"}, {"lastName": "\\u00de}\\u00b4\\u0093\\u0013f\\u008d\\u'
+ b'0099\\u0092\\ud93f\\udd60D\\udbd8\\udeeb"}, {"insurance": true}, {"firstN'
+ b'ame": "\\"\\u00d3\\u00a9\\uda85\\udd5f", "createdAt": "1685-08-27T16:03:5'
+ b'4.6+07:50", "lastName": "\\u00d3\\u00af\\u00980\\udaf6\\uddcd\\u0081$\\u001'
+ b'a\\uda31\\ude72\\u009f\\u00f1\\u00f3\\u0003\\u00ae\\u00a7\\u00fb\\u00ba\\ud'
+ b'aff\\ude74\\uda85\\ude39\\u00c1$\\udb8c\\ude4d", "insurance": true, "addre'
+ b'ss": {}, "id": "l\\u00e08\\u00ae\\ud821\\udea6\\u00c2\\u0011\\u00c9\\ud9'
+ b'7a\\udd7e", "age": 270, "cars": [{}, {"brand": "\\ud98b\\udeb3GY\\u0088n'
+ b'\\uda0a\\udc8f\\u00ed\\u00bc\\u00a9\\u00914*v", "maxSpeedKmH": -3.30130837'
+ b'1412712e+16}]}]')' expected, but got '(b'[{},{"lastName":"\xc3\xb2","createdAt":"0233-05-24T03:26:11.723434+22:40",'
+ b'"cars":[{}]},{"lastName":"\xc3\x9e}\xc2\xb4\xc2\x93\\u0013f\xc2\x8d\xc2\x99'
+ b'\xc2\x92\xf1\x9f\xb5\xa0D\xf4\x86\x8b\xab"},{"insurance":true},{"id":"'
+ b'l\xc3\xa08\xc2\xae\xf0\x98\x9a\xa6\xc3\x82\\u0011\xc3\x89\xf1\xae\xa5\xbe'
+ b'","firstName":"\\"\xc3\x93\xc2\xa9\xf2\xb1\x95\x9f","lastName":"\xc3'
+ b'\x93\xc2\xaf\xc2\x980\xf3\x8d\xa7\x8d\xc2\x81$\\u001a\xf2\x9c\x99\xb2\xc2'
+ b'\x9f\xc3\xb1\xc3\xb3\\u0003\xc2\xae\xc2\xa7\xc3\xbb\xc2\xba\xf3'
+ b'\x8f\xb9\xb4\xf2\xb1\x98\xb9\xc3\x81$\xf3\xb3\x89\x8d","age":270,"address":'
+ b'{},"createdAt":"1685-08-27T16:03:54.600000+07:50","insurance":true,"cars":[{'
+ b'},{"brand":"\xf1\xb2\xba\xb3GY\xc2\x88n\xf2\x92\xa2\x8f\xc3\xad\xc2'
+ b'\xbc\xc2\xa9\xc2\x914*v","maxSpeedKmH":-3.301308371412712e+16}]}]').'

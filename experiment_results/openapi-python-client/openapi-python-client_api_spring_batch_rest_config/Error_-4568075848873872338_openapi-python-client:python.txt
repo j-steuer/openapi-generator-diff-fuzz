@@ -1,0 +1,14 @@
+Error report Error_-4568075848873872338
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%C3%B7%C2%95V%C2%AD%7D~%C2%B3%C3%A4%C3%BB%F2%81%80%B1%C2%B5%F2%A4%AF%A45%E9%8B%A5u', query_parameters={'jobName': '÷\x95V\xad}~³äû\U00081031µ\U000a4be45鋥u'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/jobExecutions?jobName=%C3%B7%C2%95V%C2%AD%7D~%C2%B3%C3%A4%C3%BB%F2%81%80%B1%C2%B5%F2%A4%AF%A45%E9%8B%A5u&limitPerJob=3', query_parameters={'jobName': '÷\x95V\xad}~³äû\U00081031µ\U000a4be45鋥u', 'limitPerJob': '3'})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'jobName': '÷\x95V\xad}~³äû\U00081031µ\U000a4be45鋥u'} expected, but got {'jobName': '÷\x95V\xad}~³äû\U00081031µ\U000a4be45鋥u', 'limitPerJob': '3'}.

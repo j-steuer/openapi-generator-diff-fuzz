@@ -1,0 +1,22 @@
+Error report Error_-2509395417968151872
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"insurance": false, "address": {"postcode": "\\u00f1\\ud8c6\\udf2as\\u0092\\u00e9\\u00b8~+\\u00a3\\u00f7\\u0083\\ud804\\udceb\\\\"}, "lastName": "", "firstName": "\\u008e\\r\\u00cd\\u00ce\\u00f2\\u00e1\\u00cb\\u001e\\u009d", "age": 719496023, "createdAt": "0010-07-13T17:07:00Z", "id": "", "cars": [{"model": ""}]}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id":"","firstName":"\xc2\x8e\\r\xc3\x8d\xc3\x8e\xc3\xb2\xc3\xa1\xc3\x8b\\u001e\xc2\x9d","lastName":"","age":719496023,"address":{"postcode":"\xc3\xb1\xf1\x81\xac\xaas\xc2\x92\xc3\xa9\xc2\xb8~+\xc2\xa3\xc3\xb7\xc2\x83\xf0\x91\x83\xab\\\\"},"createdAt":"0010-07-13T17:07:00+00:00","insurance":false,"cars":[{"model":""}]},{},{},{},{},{},{},{},{},{},{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"insurance": false, "address": {"postcode": "\\u00f1\\ud8c6\\udf2as\\u0092'
+ b'\\u00e9\\u00b8~+\\u00a3\\u00f7\\u0083\\ud804\\udceb\\\\"}, "lastName": ""'
+ b', "firstName": "\\u008e\\r\\u00cd\\u00ce\\u00f2\\u00e1\\u00cb\\u001e\\u00'
+ b'9d", "age": 719496023, "createdAt": "0010-07-13T17:07:00Z", "id": "", "cars"'
+ b': [{"model": ""}]}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]')' expected, but got '(b'[{"id":"","firstName":"\xc2\x8e\\r\xc3\x8d\xc3\x8e\xc3\xb2\xc3\xa1\xc3'
+ b'\x8b\\u001e\xc2\x9d","lastName":"","age":719496023,"address":{"postcode":"'
+ b'\xc3\xb1\xf1\x81\xac\xaas\xc2\x92\xc3\xa9\xc2\xb8~+\xc2\xa3\xc3\xb7\xc2'
+ b'\x83\xf0\x91\x83\xab\\\\"},"createdAt":"0010-07-13T17:07:00+00:00","insur'
+ b'ance":false,"cars":[{"model":""}]},{},{},{},{},{},{},{},{},{},{}]').'

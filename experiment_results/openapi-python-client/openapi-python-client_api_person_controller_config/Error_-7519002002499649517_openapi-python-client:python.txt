@@ -1,0 +1,23 @@
+Error report Error_-7519002002499649517
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName": "eH\\ud9f5\\ude07\\u00c5\\ud995\\udea1\\ud910\\udfbf\\u0083\\u0018-s"}, {}, {"address": {}, "age": -2552, "cars": [{"brand": "eH\\ud9f5\\ude07\\u00c5\\ud995\\udea1\\ud910\\udfbf\\u0083\\u0018-s"}, {}, {"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:00Z", "firstName": "", "id": "", "insurance": true, "lastName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName":"eH\xf2\x8d\x98\x87\xc3\x85\xf1\xb5\x9a\xa1\xf1\x94\x8e\xbf\xc2\x83\\u0018-s"},{},{"id":"","firstName":"","lastName":"","age":-2552,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","insurance":true,"cars":[{"brand":"eH\xf2\x8d\x98\x87\xc3\x85\xf1\xb5\x9a\xa1\xf1\x94\x8e\xbf\xc2\x83\\u0018-s"},{},{"brand":"","model":"","maxSpeedKmH":0.0}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library openapi-python-client:python:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"lastName": "eH\\ud9f5\\ude07\\u00c5\\ud995\\udea1\\ud910\\udfbf\\u008'
+ b'3\\u0018-s"}, {}, {"address": {}, "age": -2552, "cars": [{"brand": "eH\\ud'
+ b'9f5\\ude07\\u00c5\\ud995\\udea1\\ud910\\udfbf\\u0083\\u0018-s"}, {}, {"brand'
+ b'": "", "maxSpeedKmH": 0.0, "model": ""}], "createdAt": "2000-01-01T00:00:00Z'
+ b'", "firstName": "", "id": "", "insurance": true, "lastName": ""}]')' expected, but got '(b'[{"lastName":"eH\xf2\x8d\x98\x87\xc3\x85\xf1\xb5\x9a\xa1\xf1\x94'
+ b'\x8e\xbf\xc2\x83\\u0018-s"},{},{"id":"","firstName":"","lastName":"","age'
+ b'":-2552,"address":{},"createdAt":"2000-01-01T00:00:00+00:00","insurance":tru'
+ b'e,"cars":[{"brand":"eH\xf2\x8d\x98\x87\xc3\x85\xf1\xb5\x9a\xa1'
+ b'\xf1\x94\x8e\xbf\xc2\x83\\u0018-s"},{},{"brand":"","model":"","maxSpeedKmH"'
+ b':0.0}]}]').'
