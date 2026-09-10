@@ -1974,10 +1974,8 @@ class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
 
             try
             {{
-                var response = await api.{method_name}Async({kwargs});
+                await api.{method_name}Async({kwargs});
 
-                Console.WriteLine("Response:");
-                Console.WriteLine(response);
             }}
             catch (Exception ex)
             {{
