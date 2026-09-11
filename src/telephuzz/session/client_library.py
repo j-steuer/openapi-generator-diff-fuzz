@@ -1923,12 +1923,11 @@ class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
 
                 body_kwargs = f"new byte[] {{ {cs_bytes} }}"
 
-                body_kwargs = f"{invocation.body_parameter_name}: {body_kwargs}"
-
             else:
                 body_kwargs = json.dumps(invocation.body)
 
-            kwargs += f"{', ' if query_parameters else ''}{body_kwargs}"
+            body_arg = f"{invocation.body_parameter_name}: {body_kwargs}"
+            kwargs += f"{', ' if query_parameters else ''}{body_arg}"
 
         api = (
             get_config()
