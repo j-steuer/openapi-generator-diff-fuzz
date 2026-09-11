@@ -29,6 +29,7 @@ from telephuzz.session.client_library import (
     OpenAPIVersion,
     OperationIdBasedCLC,
     PythonCLC,
+    SwaggerCodegenCsharpCLC,
     SwaggerCodegenPythonCLC,
 )
 
@@ -215,6 +216,7 @@ def petshop():
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("petshop")
@@ -638,6 +640,7 @@ def spring_batch():
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("spring_batch")
@@ -771,6 +774,7 @@ def http_patch_spring():
         pytest.param(OpenAPIPythonClientCLC, id="openapi-python-client"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("http_patch_spring")
@@ -920,6 +924,7 @@ def cwa_verification():
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen-python"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("cwa_verification")
@@ -966,6 +971,7 @@ def person_controller():
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
         pytest.param(SwaggerCodegenPythonCLC, id="swagger-codegen-python"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("person_controller")
@@ -1277,6 +1283,7 @@ def restcountries():
         pytest.param(OpenAPIGenPythonCLC, id="openapi-gen-python"),
         pytest.param(KiotaPythonCLC, id="kiota-python"),
         pytest.param(OpenAPIGenCsharpCLC, id="openapi-gen-csharp"),
+        pytest.param(SwaggerCodegenCsharpCLC, id="swagger-codegen-csharp"),
     ],
 )
 @pytest.mark.usefixtures("restcountries")
