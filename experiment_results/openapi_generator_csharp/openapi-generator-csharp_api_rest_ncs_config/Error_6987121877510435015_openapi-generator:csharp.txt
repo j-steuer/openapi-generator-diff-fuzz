@@ -1,0 +1,14 @@
+Error report Error_6987121877510435015
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/expint/45090/-5.219924316272125e+16', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/expint/45090/-52199243162721250', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/expint/45090/-5.219924316272125e+16 expected, but got /api/expint/45090/-52199243162721250.

@@ -1,0 +1,14 @@
+Error report Error_-9061806344545251133
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v1/hospitais/%C2%92%07e%C3%A0/hospitaisProximos?raio=-10000000.0', query_parameters={'raio': '-10000000.0'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v1/hospitais/%C2%92%07e%C3%A0/hospitaisProximos?raio=-10000000', query_parameters={'raio': '-10000000'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'raio': '-10000000.0'} expected, but got {'raio': '-10000000'}.

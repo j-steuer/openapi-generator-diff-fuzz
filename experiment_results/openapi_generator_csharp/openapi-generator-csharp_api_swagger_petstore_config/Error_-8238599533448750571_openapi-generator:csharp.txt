@@ -1,0 +1,14 @@
+Error report Error_-8238599533448750571
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%C2%84%C2%BEl&tags=%C2%B4%C3%A9%C2%AD%2F&tags=%C2%84%C2%BEl&tags=%C3%89%C3%A4&tags=%C2%B4%C3%A9%C2%AD%2F', query_parameters={'tags': ['\x84¾l', '´é\xad/', '\x84¾l', 'Éä', '´é\xad/']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%c2%84%C2%BEl%2c%C2%B4%C3%A9%C2%AD%2f%2c%c2%84%C2%BEl%2c%C3%89%C3%A4%2c%C2%B4%C3%A9%C2%AD%2f', query_parameters={'tags': '\x84¾l,´é\xad/,\x84¾l,Éä,´é\xad/'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['\x84¾l', '´é\xad/', '\x84¾l', 'Éä', '´é\xad/']} expected, but got {'tags': '\x84¾l,´é\xad/,\x84¾l,Éä,´é\xad/'}.

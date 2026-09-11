@@ -1,0 +1,11 @@
+Error report Error_4362068916945459412
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"value": -27}', method=<HTTPMethod.POST: 'POST'>, path='/%01%09%C2%BE%3F/transfer', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while normalizing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /\x01\t¾')

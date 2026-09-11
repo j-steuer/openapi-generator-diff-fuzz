@@ -1,0 +1,11 @@
+Error report Error_1419660763309867251
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.DELETE: 'DELETE'>, path='/api/project/%3FV%0B%C2%9EE%40%F3%80%82%8F%19%C2%9F%F2%BE%B1%803d%C3%8C%C3%84X', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while processing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /api/project/')

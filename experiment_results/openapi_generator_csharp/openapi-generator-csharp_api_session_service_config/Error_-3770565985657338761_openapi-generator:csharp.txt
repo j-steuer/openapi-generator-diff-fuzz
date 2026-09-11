@@ -1,0 +1,11 @@
+Error report Error_-3770565985657338761
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/sessions/6d%F2%9B%B9%81%C2%94%3F/custom_gene_list/query?value=.exe&field=c%2C9EX%F1%8D%99%8D', query_parameters={'value': '.exe', 'field': 'c,9EX\U0004d64d'})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while processing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /api/sessions/6d\U0009be41\x94')

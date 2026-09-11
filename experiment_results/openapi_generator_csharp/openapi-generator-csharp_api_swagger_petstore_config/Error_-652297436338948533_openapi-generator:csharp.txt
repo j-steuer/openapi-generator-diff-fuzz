@@ -1,0 +1,14 @@
+Error report Error_-652297436338948533
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=n%C3%92&tags=&tags=%27%C2%9B%F0%99%B7%86%00%C3%88%C3%B0H&tags=%C2%B9%00', query_parameters={'tags': ['nÒ', '', "'\x9b\U00019dc6\x00ÈðH", '¹\x00']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=n%C3%92%2c%2c%27%c2%9b%F0%99%B7%86%00%C3%88%C3%B0H%2c%C2%B9%00', query_parameters={'tags': "nÒ,,'\x9b\U00019dc6\x00ÈðH,¹\x00"})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['nÒ', '', "'\x9b\U00019dc6\x00ÈðH", '¹\x00']} expected, but got {'tags': "nÒ,,'\x9b\U00019dc6\x00ÈðH,¹\x00"}.

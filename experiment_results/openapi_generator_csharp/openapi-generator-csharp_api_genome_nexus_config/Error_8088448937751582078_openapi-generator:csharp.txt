@@ -1,0 +1,11 @@
+Error report Error_8088448937751582078
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[]', method=<HTTPMethod.POST: 'POST'>, path='/annotation?token=%3E%C2%A4%1A%C3%A1-%F0%BE%88%97%C3%B4%C3%B1l%1BJ%C2%80%F0%A5%94%B2&fields=K&isoformOverrideSource=%23%C2%A9%C3%86', query_parameters={'token': '>¤\x1aá-\U0003e217ôñl\x1bJ\x80𥔲', 'fields': 'K', 'isoformOverrideSource': '#©Æ'})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while building request

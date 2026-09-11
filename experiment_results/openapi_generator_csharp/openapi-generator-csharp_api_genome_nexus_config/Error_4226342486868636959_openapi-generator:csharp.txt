@@ -1,0 +1,14 @@
+Error report Error_4226342486868636959
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/%F2%93%AE%99vB?isoformOverrideSource=%1B%C3%8A%19%C3%A6%3C%3A%C2%B9&fields=%C2%8F%F1%B8%B0%9A%23%C2%A1%C3%A0%C2%87&fields=&fields=%C2%B1%C2%A4%C3%A4%C3%80%C3%ACv&fields=%C3%90%F0%B2%B7%96%24%09&fields=', query_parameters={'isoformOverrideSource': '\x1bÊ\x19æ<:¹', 'fields': ['\x8f\U00078c1a#¡à\x87', '', '±¤äÀìv', 'Ð\U00032dd6$\t', '']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/%F2%93%AE%99vB?isoformOverrideSource=%1b%C3%8A%19%C3%A6%3C%3a%C2%B9&fields=%c2%8f%F1%B8%B0%9A%23%C2%A1%C3%A0%c2%87%2c%2c%C2%B1%C2%A4%C3%A4%C3%80%C3%ACv%2c%C3%90%F0%B2%B7%96%24%09%2c', query_parameters={'isoformOverrideSource': '\x1bÊ\x19æ<:¹', 'fields': '\x8f\U00078c1a#¡à\x87,,±¤äÀìv,Ð\U00032dd6$\t,'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'isoformOverrideSource': '\x1bÊ\x19æ<:¹', 'fields': ['\x8f\U00078c1a#¡à\x87', '', '±¤äÀìv', 'Ð\U00032dd6$\t', '']} expected, but got {'isoformOverrideSource': '\x1bÊ\x19æ<:¹', 'fields': '\x8f\U00078c1a#¡à\x87,,±¤äÀìv,Ð\U00032dd6$\t,'}.

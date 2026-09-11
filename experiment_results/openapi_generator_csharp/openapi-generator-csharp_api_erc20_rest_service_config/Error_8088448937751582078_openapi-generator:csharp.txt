@@ -1,0 +1,11 @@
+Error report Error_8088448937751582078
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{}', method=<HTTPMethod.POST: 'POST'>, path='/%C3%BC%F2%AD%92%A7/approveAndCall', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while building request

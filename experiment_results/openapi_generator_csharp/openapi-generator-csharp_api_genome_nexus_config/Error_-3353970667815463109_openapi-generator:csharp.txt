@@ -1,0 +1,14 @@
+Error report Error_-3353970667815463109
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/%06%F1%B3%8F%A5q%C3%B1?isoformOverrideSource=%3C%C2%84%C3%9FP%F0%94%9B%91%C2%BE%C3%9A%C2%AD&fields=%F3%89%90%BA%C2%A1%C2%B8%C2%A2%C3%B9%C2%B4%C3%88%C2%A99%25%F2%8B%A8%AA%C3%93%C3%99%3C4&fields=&fields=%C3%8C%C3%92O%C3%A0%C2%85%C3%B2%01%17', query_parameters={'isoformOverrideSource': '<\x84ßP\U000146d1¾Ú\xad', 'fields': ['\U000c943a¡¸¢ù´È©9%\U0008ba2aÓÙ<4', '', 'ÌÒOà\x85ò\x01\x17']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/%06%F1%B3%8F%A5q%C3%B1?isoformOverrideSource=%3C%c2%84%C3%9FP%F0%94%9B%91%C2%BE%C3%9A%C2%AD&fields=%F3%89%90%BA%C2%A1%C2%B8%C2%A2%C3%B9%C2%B4%C3%88%C2%A99%25%F2%8B%A8%AA%C3%93%C3%99%3C4%2c%2c%C3%8C%C3%92O%C3%A0%c2%85%C3%B2%01%17', query_parameters={'isoformOverrideSource': '<\x84ßP\U000146d1¾Ú\xad', 'fields': '\U000c943a¡¸¢ù´È©9%\U0008ba2aÓÙ<4,,ÌÒOà\x85ò\x01\x17'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'isoformOverrideSource': '<\x84ßP\U000146d1¾Ú\xad', 'fields': ['\U000c943a¡¸¢ù´È©9%\U0008ba2aÓÙ<4', '', 'ÌÒOà\x85ò\x01\x17']} expected, but got {'isoformOverrideSource': '<\x84ßP\U000146d1¾Ú\xad', 'fields': '\U000c943a¡¸¢ù´È©9%\U0008ba2aÓÙ<4,,ÌÒOà\x85ò\x01\x17'}.

@@ -1,0 +1,14 @@
+Error report Error_6520562339759669316
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%C2%82%C2%AA&tags=%0AAO%C3%84t%0Dt&tags=H%F3%9B%B7%89%C3%A6s%F3%80%9B%A4%C3%83%C3%A9%C2%86%F2%9B%86%B5%3E3%05%17%F0%96%9C%A2a%F1%B1%B9%8F%F2%A8%9B%B29%18D%F3%BC%AF%8BX%C3%85%17%C3%B9&tags=%C2%88%C2%97&tags=B&tags=%C2%9A%02', query_parameters={'tags': ['\x82ª', '\nAOÄt\rt', 'H\U000dbdc9æs\U000c06e4Ãé\x86\U0009b1b5>3\x05\x17\U00016722a\U00071e4f\U000a86f29\x18D\U000fcbcbXÅ\x17ù', '\x88\x97', 'B', '\x9a\x02']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%c2%82%C2%AA%2c%0aAO%C3%84t%0dt%2cH%F3%9B%B7%89%C3%A6s%F3%80%9B%A4%C3%83%C3%A9%c2%86%F2%9B%86%B5%3E3%05%17%F0%96%9C%A2a%F1%B1%B9%8F%F2%A8%9B%B29%18D%F3%BC%AF%8BX%C3%85%17%C3%B9%2c%c2%88%c2%97%2cB%2c%c2%9a%02', query_parameters={'tags': '\x82ª,\nAOÄt\rt,H\U000dbdc9æs\U000c06e4Ãé\x86\U0009b1b5>3\x05\x17\U00016722a\U00071e4f\U000a86f29\x18D\U000fcbcbXÅ\x17ù,\x88\x97,B,\x9a\x02'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['\x82ª', '\nAOÄt\rt', 'H\U000dbdc9æs\U000c06e4Ãé\x86\U0009b1b5>3\x05\x17\U00016722a\U00071e4f\U000a86f29\x18D\U000fcbcbXÅ\x17ù', '\x88\x97', 'B', '\x9a\x02']} expected, but got {'tags': '\x82ª,\nAOÄt\rt,H\U000dbdc9æs\U000c06e4Ãé\x86\U0009b1b5>3\x05\x17\U00016722a\U00071e4f\U000a86f29\x18D\U000fcbcbXÅ\x17ù,\x88\x97,B,\x9a\x02'}.

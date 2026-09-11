@@ -1,0 +1,14 @@
+Error report Error_135811555046999385
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=&tags=%C2%84%C2%9E&tags=%E1%96%8F%26%C3%A9%F0%B3%87%80&tags=%2B%F0%9D%9F%A3&tags=&tags=%F0%9D%90%93%F0%9D%90%A1%F0%9D%90%9E+%F0%9D%90%AA%F0%9D%90%AE%F0%9D%90%A2%F0%9D%90%9C%F0%9D%90%A4+%F0%9D%90%9B%F0%9D%90%AB%F0%9D%90%A8%F0%9D%90%B0%F0%9D%90%A7+%F0%9D%90%9F%F0%9D%90%A8%F0%9D%90%B1+%F0%9D%90%A3%F0%9D%90%AE%F0%9D%90%A6%F0%9D%90%A9%F0%9D%90%AC+%F0%9D%90%A8%F0%9D%90%AF%F0%9D%90%9E%F0%9D%90%AB+%F0%9D%90%AD%F0%9D%90%A1%F0%9D%90%9E+%F0%9D%90%A5%F0%9D%90%9A%F0%9D%90%B3%F0%9D%90%B2+%F0%9D%90%9D%F0%9D%90%A8%F0%9D%90%A0&tags=%0F%C3%BAQ%C2%BD%C2%A4%F0%B4%AA%98%F0%9A%A7%99', query_parameters={'tags': ['', '\x84\x9e', 'ᖏ&é\U000331c0', '+𝟣', '', '𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠', '\x0fúQ½¤\U00034a98\U0001a9d9']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%2c%c2%84%c2%9e%2c%E1%96%8F%26%C3%A9%F0%B3%87%80%2c%2b%F0%9D%9F%A3%2c%2c%F0%9D%90%93%F0%9D%90%A1%F0%9D%90%9E+%F0%9D%90%AA%F0%9D%90%AE%F0%9D%90%A2%F0%9D%90%9C%F0%9D%90%A4+%F0%9D%90%9B%F0%9D%90%AB%F0%9D%90%A8%F0%9D%90%B0%F0%9D%90%A7+%F0%9D%90%9F%F0%9D%90%A8%F0%9D%90%B1+%F0%9D%90%A3%F0%9D%90%AE%F0%9D%90%A6%F0%9D%90%A9%F0%9D%90%AC+%F0%9D%90%A8%F0%9D%90%AF%F0%9D%90%9E%F0%9D%90%AB+%F0%9D%90%AD%F0%9D%90%A1%F0%9D%90%9E+%F0%9D%90%A5%F0%9D%90%9A%F0%9D%90%B3%F0%9D%90%B2+%F0%9D%90%9D%F0%9D%90%A8%F0%9D%90%A0%2c%0f%C3%BAQ%C2%BD%C2%A4%F0%B4%AA%98%F0%9A%A7%99', query_parameters={'tags': ',\x84\x9e,ᖏ&é\U000331c0,+𝟣,,𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠,\x0fúQ½¤\U00034a98\U0001a9d9'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['', '\x84\x9e', 'ᖏ&é\U000331c0', '+𝟣', '', '𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠', '\x0fúQ½¤\U00034a98\U0001a9d9']} expected, but got {'tags': ',\x84\x9e,ᖏ&é\U000331c0,+𝟣,,𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠,\x0fúQ½¤\U00034a98\U0001a9d9'}.

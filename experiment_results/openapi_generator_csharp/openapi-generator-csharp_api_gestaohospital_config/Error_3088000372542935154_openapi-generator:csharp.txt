@@ -1,0 +1,14 @@
+Error report Error_3088000372542935154
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v1/hospitais/maisProximo?lat=-1.1&lon=-1.3992114640069606e%2B80&raioMaximo=-6.0811654633854616e%2B16', query_parameters={'lat': '-1.1', 'lon': '-1.3992114640069606e+80', 'raioMaximo': '-6.0811654633854616e+16'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v1/hospitais/maisProximo?lat=-1.1&lon=-1.3992114640069606E%2b80&raioMaximo=-60811654633854616', query_parameters={'lat': '-1.1', 'lon': '-1.3992114640069606E+80', 'raioMaximo': '-60811654633854616'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'lat': '-1.1', 'lon': '-1.3992114640069606e+80', 'raioMaximo': '-6.0811654633854616e+16'} expected, but got {'lat': '-1.1', 'lon': '-1.3992114640069606E+80', 'raioMaximo': '-60811654633854616'}.

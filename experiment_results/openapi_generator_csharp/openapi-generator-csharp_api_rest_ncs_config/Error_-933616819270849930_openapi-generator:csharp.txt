@@ -1,0 +1,14 @@
+Error report Error_-933616819270849930
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/fisher/1/1/-5.574606803474222e-171', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/fisher/1/1/-5.574606803474222E-171', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/fisher/1/1/-5.574606803474222e-171 expected, but got /api/fisher/1/1/-5.574606803474222E-171.

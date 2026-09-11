@@ -1,0 +1,14 @@
+Error report Error_2724382804269378946
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=L%23%C2%A0%3DB%C2%81&tags=%C3%BCY%C3%93%F3%8B%BF%BB', query_parameters={'tags': ['L#\xa0=B\x81', 'üYÓ\U000cbffb']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=L%23%C2%A0%3dB%c2%81%2c%C3%BCY%C3%93%F3%8B%BF%BB', query_parameters={'tags': 'L#\xa0=B\x81,üYÓ\U000cbffb'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['L#\xa0=B\x81', 'üYÓ\U000cbffb']} expected, but got {'tags': 'L#\xa0=B\x81,üYÓ\U000cbffb'}.

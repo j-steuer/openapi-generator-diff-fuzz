@@ -1,0 +1,14 @@
+Error report Error_6430972251253289672
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/bessj/85/2.7883491255870912e-188', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/bessj/85/2.7883491255870912E-188', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/bessj/85/2.7883491255870912e-188 expected, but got /api/bessj/85/2.7883491255870912E-188.

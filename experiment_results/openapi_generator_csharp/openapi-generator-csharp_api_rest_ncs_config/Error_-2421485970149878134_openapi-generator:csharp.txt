@@ -1,0 +1,14 @@
+Error report Error_-2421485970149878134
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/gammq/3.2261375927983864e+16/-0.3333333333333333', query_parameters={})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/gammq/32261375927983864/-0.3333333333333333', query_parameters={})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Path /api/gammq/3.2261375927983864e+16/-0.3333333333333333 expected, but got /api/gammq/32261375927983864/-0.3333333333333333.

@@ -1,0 +1,14 @@
+Error report Error_5215678046123459666
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%C2%BC%C3%94%C2%A8C&tags=%C2%BB%C2%8E%C3%BE&tags=%13%C2%98%F3%8C%81%9FV2%C3%93%C3%85%22&tags=%01%C3%9F%C3%8A%C2%A2%22%C2%80', query_parameters={'tags': ['¼Ô¨C', '»\x8eþ', '\x13\x98\U000cc05fV2ÓÅ"', '\x01ßÊ¢"\x80']})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/pet/findByTags?tags=%C2%BC%C3%94%C2%A8C%2c%C2%BB%c2%8e%C3%BE%2c%13%c2%98%F3%8C%81%9FV2%C3%93%C3%85%22%2c%01%C3%9F%C3%8A%C2%A2%22%c2%80', query_parameters={'tags': '¼Ô¨C,»\x8eþ,\x13\x98\U000cc05fV2ÓÅ",\x01ßÊ¢"\x80'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'tags': ['¼Ô¨C', '»\x8eþ', '\x13\x98\U000cc05fV2ÓÅ"', '\x01ßÊ¢"\x80']} expected, but got {'tags': '¼Ô¨C,»\x8eþ,\x13\x98\U000cc05fV2ÓÅ",\x01ßÊ¢"\x80'}.

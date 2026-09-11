@@ -1,0 +1,14 @@
+Error report Error_6711732110388539662
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path="/v1/hospitais/MultiMatch(values=%5B'1',%20'2',%20'3'%5D)/hospitaisProximos?raio=1.1862093832414178e%2B16", query_parameters={'raio': '1.1862093832414178e+16'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/v1/hospitais/MultiMatch%28values%3D%5B%271%27%2C%20%272%27%2C%20%273%27%5D%29/hospitaisProximos?raio=11862093832414178', query_parameters={'raio': '11862093832414178'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'raio': '1.1862093832414178e+16'} expected, but got {'raio': '11862093832414178'}.

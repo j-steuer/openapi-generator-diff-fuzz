@@ -1,0 +1,11 @@
+Error report Error_-6348504794869253424
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/sessions/%3F/genomic_chart/query?field=%045&value=%14%C2%BEt', query_parameters={'field': '\x045', 'value': '\x14¾t'})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while processing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /api/sessions/')

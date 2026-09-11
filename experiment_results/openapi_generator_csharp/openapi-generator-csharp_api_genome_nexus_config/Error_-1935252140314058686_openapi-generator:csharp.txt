@@ -1,0 +1,14 @@
+Error report Error_-1935252140314058686
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/.exe?fields=%F1%9D%97%B6&fields=&fields=%C3%88%C2%B2%F3%9D%91%8E%C3%97H0k%18%C2%92%C3%B4M%1D%F3%B2%96%80%F3%A2%88%87%7F%F1%8E%93%BF%F0%9C%89%8C%C2%A7%C3%B0%C2%93&fields=y%F3%B2%93%99K&fields=%C3%84%C3%AC%C3%A7&fields=%C3%A6J%02%C2%8E%28&isoformOverrideSource=6%C2%8D%C2%AC%C2%81ChE%C2%82%C2%9F%C3%B7%C2%98%C3%AA&token=%C2%A2s%C3%BC', query_parameters={'fields': ['\U0005d5f6', '', 'È²\U000dd44e×H0k\x18\x92ôM\x1d\U000f2580\U000e2207\x7f\U0004e4ff\U0001c24c§ð\x93', 'y\U000f24d9K', 'Äìç', 'æJ\x02\x8e('], 'isoformOverrideSource': '6\x8d¬\x81ChE\x82\x9f÷\x98ê', 'token': '¢sü'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/.exe?isoformOverrideSource=6%c2%8d%C2%AC%c2%81ChE%c2%82%c2%9f%C3%B7%c2%98%C3%AA&token=%C2%A2s%C3%BC&fields=%F1%9D%97%B6%2c%2c%C3%88%C2%B2%F3%9D%91%8E%C3%97H0k%18%c2%92%C3%B4M%1d%F3%B2%96%80%F3%A2%88%87%7f%F1%8E%93%BF%F0%9C%89%8C%C2%A7%C3%B0%c2%93%2cy%F3%B2%93%99K%2c%C3%84%C3%AC%C3%A7%2c%C3%A6J%02%c2%8e(', query_parameters={'isoformOverrideSource': '6\x8d¬\x81ChE\x82\x9f÷\x98ê', 'token': '¢sü', 'fields': '\U0005d5f6,,È²\U000dd44e×H0k\x18\x92ôM\x1d\U000f2580\U000e2207\x7f\U0004e4ff\U0001c24c§ð\x93,y\U000f24d9K,Äìç,æJ\x02\x8e('})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'fields': ['\U0005d5f6', '', 'È²\U000dd44e×H0k\x18\x92ôM\x1d\U000f2580\U000e2207\x7f\U0004e4ff\U0001c24c§ð\x93', 'y\U000f24d9K', 'Äìç', 'æJ\x02\x8e('], 'isoformOverrideSource': '6\x8d¬\x81ChE\x82\x9f÷\x98ê', 'token': '¢sü'} expected, but got {'isoformOverrideSource': '6\x8d¬\x81ChE\x82\x9f÷\x98ê', 'token': '¢sü', 'fields': '\U0005d5f6,,È²\U000dd44e×H0k\x18\x92ôM\x1d\U000f2580\U000e2207\x7f\U0004e4ff\U0001c24c§ð\x93,y\U000f24d9K,Äìç,æJ\x02\x8e('}.

@@ -1,0 +1,11 @@
+Error report Error_2740361244669230711
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"spender": "\\udaa7\\udf08O\\u00f7\\b\\u00d6\\u00e6\\ud94b\\udf90s\'6", "value": -1261076}', method=<HTTPMethod.POST: 'POST'>, path='/%C2%80%C2%90%C2%9A%C3%9F%19%3F%C2%86%5E%F1%97%88%AB%C2%BD%C3%A4/approve', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while normalizing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('No matching path found for: /\x80\x90\x9aß\x19')

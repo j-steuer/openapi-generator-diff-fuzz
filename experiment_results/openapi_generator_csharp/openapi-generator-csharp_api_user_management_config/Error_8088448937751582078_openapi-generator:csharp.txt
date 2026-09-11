@@ -1,0 +1,11 @@
+Error report Error_8088448937751582078
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'"\\u009e\\udbdf\\udc53\\u0086\\u00e3\\ud976\\udf60\\u00c8\\u0016\\u0091\\u0017Cb\\u008d\\u00ffr\\u00d1"', method=<HTTPMethod.POST: 'POST'>, path='/users/rbac/roles', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while building request

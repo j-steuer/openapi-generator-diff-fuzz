@@ -1,0 +1,11 @@
+Error report Error_8088448937751582078
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/api/calc/%C3%AC%C3%A0D%29%F2%AC%88%A3%C2%81%F2%98%93%B2%C3%AA/0.6004231576652896/2.2250738585072014e-308', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while building request

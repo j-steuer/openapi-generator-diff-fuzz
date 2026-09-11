@@ -1,0 +1,14 @@
+Error report Error_-2012435369708665124
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/%3E%1Bo?fields=%C2%9F%E6%87%82%F2%99%94%B4%C3%A5Y%C3%A8%C3%86%06%C2%9F%C2%83%C3%A7%5B%00%F2%A0%93%9F&fields=%40%C2%9CW%F2%8C%80%A9&fields=%E0%B8%81%E0%B8%B2&fields=&fields=.exe&fields=%16%C3%A1&fields=v.%04%C3%AA%C2%BD%F2%B5%89%A0iB&isoformOverrideSource=&token=%0A%5B%F0%A1%B6%A0J', query_parameters={'fields': ['\x9f懂\U00099534åYèÆ\x06\x9f\x83ç[\x00\U000a04df', '@\x9cW\U0008c029', 'กา', '', '.exe', '\x16á', 'v.\x04ê½\U000b5260iB'], 'isoformOverrideSource': '', 'token': '\n[𡶠J'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/%3E%1Bo?isoformOverrideSource=&token=%0a%5b%F0%A1%B6%A0J&fields=%c2%9f%E6%87%82%F2%99%94%B4%C3%A5Y%C3%A8%C3%86%06%c2%9f%c2%83%C3%A7%5b%00%F2%A0%93%9F%2c%40%c2%9cW%F2%8C%80%A9%2c%E0%B8%81%E0%B8%B2%2c%2c.exe%2c%16%C3%A1%2cv.%04%C3%AA%C2%BD%F2%B5%89%A0iB', query_parameters={'isoformOverrideSource': '', 'token': '\n[𡶠J', 'fields': '\x9f懂\U00099534åYèÆ\x06\x9f\x83ç[\x00\U000a04df,@\x9cW\U0008c029,กา,,.exe,\x16á,v.\x04ê½\U000b5260iB'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'fields': ['\x9f懂\U00099534åYèÆ\x06\x9f\x83ç[\x00\U000a04df', '@\x9cW\U0008c029', 'กา', '', '.exe', '\x16á', 'v.\x04ê½\U000b5260iB'], 'isoformOverrideSource': '', 'token': '\n[𡶠J'} expected, but got {'isoformOverrideSource': '', 'token': '\n[𡶠J', 'fields': '\x9f懂\U00099534åYèÆ\x06\x9f\x83ç[\x00\U000a04df,@\x9cW\U0008c029,กา,,.exe,\x16á,v.\x04ê½\U000b5260iB'}.

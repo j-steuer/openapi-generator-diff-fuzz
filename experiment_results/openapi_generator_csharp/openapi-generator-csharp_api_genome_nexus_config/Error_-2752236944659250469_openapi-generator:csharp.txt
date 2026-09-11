@@ -1,0 +1,14 @@
+Error report Error_-2752236944659250469
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/%C2%B6%C3%94%C2%8F?token=%0E&fields=then&fields=&fields=&isoformOverrideSource=%C2%8C%C2%9B%C3%BE%11%C3%81%C2%BBG%C2%88%18%C2%80%00', query_parameters={'token': '\x0e', 'fields': ['then', '', ''], 'isoformOverrideSource': '\x8c\x9bþ\x11Á»G\x88\x18\x80\x00'})
+Produced Request:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/annotation/genomic/%C2%B6%C3%94%C2%8F?isoformOverrideSource=%c2%8c%c2%9b%C3%BE%11%C3%81%C2%BBG%c2%88%18%c2%80%00&token=%0e&fields=then%2c%2c', query_parameters={'isoformOverrideSource': '\x8c\x9bþ\x11Á»G\x88\x18\x80\x00', 'token': '\x0e', 'fields': 'then,,'})
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Parameters {'token': '\x0e', 'fields': ['then', '', ''], 'isoformOverrideSource': '\x8c\x9bþ\x11Á»G\x88\x18\x80\x00'} expected, but got {'isoformOverrideSource': '\x8c\x9bþ\x11Á»G\x88\x18\x80\x00', 'token': '\x0e', 'fields': 'then,,'}.

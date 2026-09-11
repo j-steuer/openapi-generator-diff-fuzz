@@ -1,0 +1,11 @@
+Error report Error_8631249931870392969
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "", "productType": "BLOOD", "id": ""}', method=<HTTPMethod.POST: 'POST'>, path='/v1/hospitais/%F2%A3%B3%91%F0%97%B1%A0V%F1%90%98%B2%F3%B2%B5%AF%3F%C2%80%F4%88%8F%90%C3%8C/estoque', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library openapi-generator:csharp:
+Error was not unique and occured in other clients.
+Error while normalizing original request. This is likely a bug in TelePhuzz, not in the client:ValueError('Operation at POST /v1/hospitais/\U000a3cd1𗱠V\U00050632\U000f2d6f?\x80\U001083d0Ì/estoque not found.')
