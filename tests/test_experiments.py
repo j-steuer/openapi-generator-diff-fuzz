@@ -171,6 +171,5 @@ def test_swagger_codegen_csharp_3_0(config: Path) -> None:
     fuzzer = TelePhuzz(
         "swagger-codegen:csharp",
         REPORT_PATH / f"swagger-codegen-csharp_{report_suffix}",
-        timeout=60,
     )
     fuzzer.start_fuzzing_session()
