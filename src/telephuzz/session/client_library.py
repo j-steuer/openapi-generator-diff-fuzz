@@ -1921,15 +1921,7 @@ class SwaggerCodegenCsharpCLC(OpenAPIGen, CsharpCLC):
 
                 cs_bytes = ", ".join(f"0x{b:02X}" for b in invocation.body)
 
-                body_kwargs = textwrap.dedent(f"""
-                    new FileParameter(
-                        new MemoryStream(
-                            new byte[] {{ {cs_bytes} }}
-                        ),
-                        "file.bin",
-                        "application/octet-stream"
-                    )
-                    """).strip()
+                body_kwargs = f"new byte[] {{ {cs_bytes} }}"
 
                 body_kwargs = f"{invocation.body_parameter_name}: {body_kwargs}"
 
