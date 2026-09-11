@@ -13,6 +13,8 @@ from telephuzz.openapi_helpers import (
     resolve_schema,
 )
 
+# TODO: mathematical notation of numbers
+
 
 class OpenAPINormalizer:
     """Normalize request bodies according to an OpenAPI specification.
