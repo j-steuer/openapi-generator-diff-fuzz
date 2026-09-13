@@ -1,0 +1,27 @@
+Error report Error_5000238280225488610
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"lastName": "\\u00f6\\u00db\\ud81a\\udf83\\udafa\\udc60R\\ud99a\\udec6\\u00a6\\u00ff\\rVg\\u00ca\\u00ab\\u00c6vq\\ud854\\udf15L"}, {"phone": "\\u00bb@\\ud8b7\\udfba\\udbac\\udd79", "userStatus": 11839, "firstName": "__main__", "password": "0..0", "lastName": "\\u00cb\\udb7f\\udfe9\\uda26\\uddeb(\\u00c5,?\\u0081", "email": "Z\\u0005\\nu\\u0088", "username": "", "id": -612}, {"id": -6828264495052}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"Username":null,"FirstName":null,"LastName":"\xc3\xb6\xc3\x9b\xf0\x96\xae\x83\xf3\x8e\xa1\xa0R\xf1\xb6\xab\x86\xc2\xa6\xc3\xbf\\rVg\xc3\x8a\xc2\xab\xc3\x86vq\xf0\xa5\x8c\x95L","Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":-612,"Username":"","FirstName":"__main__","LastName":"\xc3\x8b\xf3\xaf\xbf\xa9\xf2\x99\xa7\xab(\xc3\x85,?\xc2\x81","Email":"Z\\u0005\\nu\xc2\x88","Password":"0..0","Phone":"\xc2\xbb@\xf0\xbd\xbe\xba\xf3\xbb\x85\xb9","UserStatus":11839},{"Id":-6828264495052,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"lastName": "\\u00f6\\u00db\\ud81a\\udf83\\udafa\\udc60R\\ud99a\\udec6'
+ b'\\u00a6\\u00ff\\rVg\\u00ca\\u00ab\\u00c6vq\\ud854\\udf15L"}, {"phone": "'
+ b'\\u00bb@\\ud8b7\\udfba\\udbac\\udd79", "userStatus": 11839, "firstName": '
+ b'"__main__", "password": "0..0", "lastName": "\\u00cb\\udb7f\\udfe9\\uda2'
+ b'6\\uddeb(\\u00c5,?\\u0081", "email": "Z\\u0005\\nu\\u0088", "username": ""'
+ b', "id": -612}, {"id": -6828264495052}]')' expected, but got '(b'[{"Id":null,"Username":null,"FirstName":null,"LastName":"\xc3\xb6\xc3'
+ b'\x9b\xf0\x96\xae\x83\xf3\x8e\xa1\xa0R\xf1\xb6\xab\x86\xc2\xa6\xc3\xbf\\r'
+ b'Vg\xc3\x8a\xc2\xab\xc3\x86vq\xf0\xa5\x8c\x95L","Email":null,"Password":nul'
+ b'l,"Phone":null,"UserStatus":null},{"Id":-612,"Username":"","FirstName":"__ma'
+ b'in__","LastName":"\xc3\x8b\xf3\xaf\xbf\xa9\xf2\x99\xa7\xab(\xc3\x85,'
+ b'?\xc2\x81","Email":"Z\\u0005\\nu\xc2\x88","Password":"0..0","Phone":"\xc2'
+ b'\xbb@\xf0\xbd\xbe\xba\xf3\xbb\x85\xb9","UserStatus":11839},{"Id":-682826449'
+ b'5052,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password'
+ b'":null,"Phone":null,"UserStatus":null}]')'.

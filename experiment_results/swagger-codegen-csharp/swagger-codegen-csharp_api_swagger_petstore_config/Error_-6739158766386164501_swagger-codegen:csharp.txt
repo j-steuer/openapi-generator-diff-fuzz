@@ -1,0 +1,14 @@
+Error report Error_-6739158766386164501
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"username": "", "phone": "\\u008c\\u00f5\\ud946\\udffc", "password": "\\ud9eb\\udf4bM\\u00e0", "id": -43520562218910, "lastName": "", "firstName": "i\\u00ea\\ud960\\udf98\\u0095\\ud98a\\udc2f", "userStatus": -655861, "email": "U\\ud81d\\ude61T\\u0005\\uda77\\udded\\u00b21\\udbc5\\udf30\\u008c\\ud9de\\udd76\\ud8aa\\udd8b"}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":-43520562218910,"Username":"","FirstName":"i\xc3\xaa\xf1\xa8\x8e\x98\xc2\x95\xf1\xb2\xa0\xaf","LastName":"","Email":"U\xf0\x97\x99\xa1T\\u0005\xf2\xad\xb7\xad\xc2\xb21\xf4\x81\x9c\xb0\xc2\x8c\xf2\x87\xa5\xb6\xf0\xba\xa6\x8b","Password":"\xf2\x8a\xbd\x8bM\xc3\xa0","Phone":"\xc2\x8c\xc3\xb5\xf1\xa1\xaf\xbc","UserStatus":-655861}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'email' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'lastName' only exists in original body.Element 'password' only exists in original body.Element 'phone' only exists in original body.Element 'userStatus' only exists in original body.Element 'username' only exists in original body.Element 'Email' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'LastName' only exists in produced body.Element 'Password' only exists in produced body.Element 'Phone' only exists in produced body.Element 'UserStatus' only exists in produced body.Element 'Username' only exists in produced body.

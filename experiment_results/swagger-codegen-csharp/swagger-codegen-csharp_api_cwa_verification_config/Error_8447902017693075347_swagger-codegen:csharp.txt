@@ -1,0 +1,14 @@
+Error report Error_8447902017693075347
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"registrationToken": "e3188051-cafa-4b0a-8ef9-23cef02cd702"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"_RegistrationToken":"e3188051-cafa-4b0a-8ef9-23cef02cd702","ResponsePadding":null}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'registrationToken' only exists in original body.Element 'ResponsePadding' only exists in produced body.Element '_RegistrationToken' only exists in produced body.

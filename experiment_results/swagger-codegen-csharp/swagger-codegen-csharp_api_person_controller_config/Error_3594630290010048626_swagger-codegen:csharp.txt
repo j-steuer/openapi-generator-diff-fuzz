@@ -1,0 +1,14 @@
+Error report Error_3594630290010048626
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"id": "", "firstName": "\\u00f0", "age": 54743148, "lastName": "P.(\\u00f0\\u00ad\\u0089\\u00e4\\u00db\\u0007\\u00a9\\u00b1pIV\\udb2c\\udef4I", "insurance": false, "createdAt": "1646-04-15T16:23:10-17:47", "address": {"city": "", "country": "\\u00bf\\u00dc\\u00c4\\ud9a0\\ude11"}, "cars": [{"model": ""}, {"model": "\\u00fa@", "maxSpeedKmH": -2.1993107536693509e+170, "brand": ""}, {"model": "\\u00be", "brand": "\\u00e6\\u001c\\ud993\\udeadPf\\ud891\\ude13{", "maxSpeedKmH": 2.220446049250313e-16}, {}, {"model": "\\b\\u00fb\\u00f1\\n", "maxSpeedKmH": 1.7976931348623157e+308}, {"maxSpeedKmH": 1.7976931348623157e+308}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":"","FirstName":"\xc3\xb0","LastName":"P.(\xc3\xb0\xc2\xad\xc2\x89\xc3\xa4\xc3\x9b\\u0007\xc2\xa9\xc2\xb1pIV\xf3\x9b\x8b\xb4I","Age":54743148,"Address":{"Number":null,"Street":null,"Postcode":null,"City":"","Country":"\xc2\xbf\xc3\x9c\xc3\x84\xf1\xb8\x88\x91"},"CreatedAt":"1646-04-16T10:10:10+00:00","Insurance":false,"Cars":[{"Brand":null,"Model":"","MaxSpeedKmH":null},{"Brand":"","Model":"\xc3\xba@","MaxSpeedKmH":"-Infinity"},{"Brand":"\xc3\xa6\\u001c\xf1\xb4\xba\xadPf\xf0\xb4\x98\x93{","Model":"\xc2\xbe","MaxSpeedKmH":2.220446E-16},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":"\\b\xc3\xbb\xc3\xb1\\n","MaxSpeedKmH":"Infinity"},{"Brand":null,"Model":null,"MaxSpeedKmH":"Infinity"}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'age' only exists in original body.Element 'cars' only exists in original body.Element 'createdAt' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'insurance' only exists in original body.Element 'lastName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_2494415835225219602
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u001e\\ud951\\ude26\\u0087{{"}', method=<HTTPMethod.PUT: 'PUT'>, path='/contacts/1', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"\\u001e\xf1\xa4\x98\xa6\xc2\x87{{","Birthday":null,"Work":null,"Phones":null,"Emails":null,"Groups":null,"Favorite":null,"Notes":null}', method=<HTTPMethod.PUT: 'PUT'>, path='/contacts/1', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'name' only exists in original body.Element 'Birthday' only exists in produced body.Element 'Emails' only exists in produced body.Element 'Favorite' only exists in produced body.Element 'Groups' only exists in produced body.Element 'Name' only exists in produced body.Element 'Notes' only exists in produced body.Element 'Phones' only exists in produced body.Element 'Work' only exists in produced body.

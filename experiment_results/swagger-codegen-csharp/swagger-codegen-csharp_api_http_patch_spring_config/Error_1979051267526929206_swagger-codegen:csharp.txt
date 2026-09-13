@@ -1,0 +1,14 @@
+Error report Error_1979051267526929206
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/merge-patch+json'}, body=b'{"T\\u0093\\udb8b\\udc49\\u009c\\u00fe8M\\u0005w\\ud93d\\udfb0\\ud84d\\udff6": [{"": null}, null]}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/167', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/merge-patch+json; charset=utf-8'}, body=b'{"T\xc2\x93\xf3\xb2\xb1\x89\xc2\x9c\xc3\xbe8M\\u0005w\xf1\x9f\x9e\xb0\xf0\xa3\x9f\xb6":[{"":null},null]}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/167', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/merge-patch+json expected, got application/merge-patch+json; charset=utf-8

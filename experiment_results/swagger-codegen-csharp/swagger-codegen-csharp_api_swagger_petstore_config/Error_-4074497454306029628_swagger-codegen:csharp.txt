@@ -1,0 +1,14 @@
+Error report Error_-4074497454306029628
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/json expected, got application/json; charset=utf-8

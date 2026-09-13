@@ -1,0 +1,14 @@
+Error report Error_3211814197266482261
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"responsePadding": "\\ud94b\\udd5d\\u5ab0\\u00cb\\u001b\\uda3b\\udedb\\ud9ce\\udec8\\ud807\\udc28\\ud86a\\udcd6\\u00b7\\u00de\\uda68\\udede\\u0006Z>", "registrationToken": "48200b84-0af4-4019-bc30-459309f04e69"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"_RegistrationToken":"48200b84-0af4-4019-bc30-459309f04e69","ResponsePadding":"\xf1\xa2\xb5\x9d\xe5\xaa\xb0\xc3\x8b\\u001b\xf2\x9e\xbb\x9b\xf2\x83\xab\x88\xf0\x91\xb0\xa8\xf0\xaa\xa3\x96\xc2\xb7\xc3\x9e\xf2\xaa\x8b\x9e\\u0006Z>"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'registrationToken' only exists in original body.Element 'responsePadding' only exists in original body.Element 'ResponsePadding' only exists in produced body.Element '_RegistrationToken' only exists in produced body.

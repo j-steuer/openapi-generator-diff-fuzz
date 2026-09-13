@@ -1,0 +1,17 @@
+Error report Error_-570911416410841025
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id": "\\u00fa;x2\\u0086", "firstName": ""}, {"lastName": "P\\u009b"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":"\xc3\xba;x2\xc2\x86","FirstName":"","LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":"P\xc2\x9b","Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b'[{"id": "\\u00fa;x2\\u0086", "firstName": ""}, {"lastName": "P\\u009b"}]'' expected, but got '(b'[{"Id":"\xc3\xba;x2\xc2\x86","FirstName":"","LastName":null,"Age":null,"Addr'
+ b'ess":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstNa'
+ b'me":null,"LastName":"P\xc2\x9b","Age":null,"Address":null,"CreatedAt":null'
+ b',"Insurance":null,"Cars":null}]')'.

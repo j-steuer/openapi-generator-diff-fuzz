@@ -1,0 +1,32 @@
+Error report Error_4754809271177408660
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"cars": [], "age": 1104484336, "address": {"street": "\\u0015\\u008b\\u00a1", "city": "\\u00f0"}, "insurance": true, "createdAt": "0438-12-29T03:15:33.938+00:35", "id": "\\u0082\\u00f3UJR\\ud8b4\\udeeb\\u00cdW)\'X\\uda83\\udeba\\u00fd\\u00dd/\\u00eb6^\\udb71\\uddea\\udbb6\\udd67$\\u00b9\\udbc2\\udd95C\\ud8ed\\udc3b\\ud96f\\udf1e\\u00ab\\u0088\\u00d6^", "lastName": "\\u00a2\\u00df\\u00be\\udb16\\udcda\\u00f2\\u00d5\\ud997\\udf9ct\\u0004\\u00ce\\u00b66", "firstName": "\\u0013\\ud8e4\\udd99\\u0099\\u00c0"}, {"id": "w\\u00ef\\ud9b9\\uddc5\\u009b", "age": 752, "lastName": "\\u0096#\\udb0e\\udeaa\\udb8b\\udec9\\ud867\\ude39"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":"\xc2\x82\xc3\xb3UJR\xf0\xbd\x8b\xab\xc3\x8dW)\'X\xf2\xb0\xba\xba\xc3\xbd\xc3\x9d/\xc3\xab6^\xf3\xac\x97\xaa\xf3\xbd\xa5\xa7$\xc2\xb9\xf4\x80\xa6\x95C\xf1\x8b\x90\xbb\xf1\xab\xbc\x9e\xc2\xab\xc2\x88\xc3\x96^","FirstName":"\\u0013\xf1\x89\x86\x99\xc2\x99\xc3\x80","LastName":"\xc2\xa2\xc3\x9f\xc2\xbe\xf3\x95\xa3\x9a\xc3\xb2\xc3\x95\xf1\xb5\xbe\x9ct\\u0004\xc3\x8e\xc2\xb66","Age":1104484336,"Address":{"Number":null,"Street":"\\u0015\xc2\x8b\xc2\xa1","Postcode":null,"City":"\xc3\xb0","Country":null},"CreatedAt":"0438-12-29T02:40:33.938+00:00","Insurance":true,"Cars":[]},{"Id":"w\xc3\xaf\xf1\xbe\x97\x85\xc2\x9b","FirstName":null,"LastName":"\xc2\x96#\xf3\x93\xaa\xaa\xf3\xb2\xbb\x89\xf0\xa9\xb8\xb9","Age":752,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"cars": [], "age": 1104484336, "address": {"street": "\\u0015\\u008b\\u00'
+ b'a1", "city": "\\u00f0"}, "insurance": true, "createdAt": "0438-12-29T03:1'
+ b'5:33.938+00:35", "id": "\\u0082\\u00f3UJR\\ud8b4\\udeeb\\u00cdW)\'X\\uda83\\'
+ b'udeba\\u00fd\\u00dd/\\u00eb6^\\udb71\\uddea\\udbb6\\udd67$\\u00b9\\udbc2\\'
+ b'udd95C\\ud8ed\\udc3b\\ud96f\\udf1e\\u00ab\\u0088\\u00d6^", "lastName": "\\u0'
+ b'0a2\\u00df\\u00be\\udb16\\udcda\\u00f2\\u00d5\\ud997\\udf9ct\\u0004\\u00ce'
+ b'\\u00b66", "firstName": "\\u0013\\ud8e4\\udd99\\u0099\\u00c0"}, {"id": "w\\'
+ b'u00ef\\ud9b9\\uddc5\\u009b", "age": 752, "lastName": "\\u0096#\\udb0e\\ude'
+ b'aa\\udb8b\\udec9\\ud867\\ude39"}]')' expected, but got '(b'[{"Id":"\xc2\x82\xc3\xb3UJR\xf0\xbd\x8b\xab\xc3\x8dW)\'X\xf2\xb0\xba'
+ b'\xba\xc3\xbd\xc3\x9d/\xc3\xab6^\xf3\xac\x97\xaa\xf3\xbd\xa5\xa7$\xc2'
+ b'\xb9\xf4\x80\xa6\x95C\xf1\x8b\x90\xbb\xf1\xab\xbc\x9e\xc2\xab'
+ b'\xc2\x88\xc3\x96^","FirstName":"\\u0013\xf1\x89\x86\x99\xc2\x99\xc3\x80",'
+ b'"LastName":"\xc2\xa2\xc3\x9f\xc2\xbe\xf3\x95\xa3\x9a\xc3\xb2\xc3\x95\xf1\xb5'
+ b'\xbe\x9ct\\u0004\xc3\x8e\xc2\xb66","Age":1104484336,"Address":{"Number":nul'
+ b'l,"Street":"\\u0015\xc2\x8b\xc2\xa1","Postcode":null,"City":"\xc3\xb0","Cou'
+ b'ntry":null},"CreatedAt":"0438-12-29T02:40:33.938+00:00","Insurance":true,"Ca'
+ b'rs":[]},{"Id":"w\xc3\xaf\xf1\xbe\x97\x85\xc2\x9b","FirstName":null,"LastName'
+ b'":"\xc2\x96#\xf3\x93\xaa\xaa\xf3\xb2\xbb\x89\xf0\xa9\xb8\xb9","Age":752,"A'
+ b'ddress":null,"CreatedAt":null,"Insurance":null,"Cars":null}]')'.

@@ -1,0 +1,14 @@
+Error report Error_6361521085136681112
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u00fa\\u00cf\\ry\\ud863\\udc1f::", "photoUrls": ["J\\ud928\\udd3f\\u00da(\\u00dd\\u00f3\\u00ed\\u00a3\\u00f9\\u0018\\u00e8\\u00ceN-1*k", "\\u00e34t\\u00d2\\u00bf>", "\\u00cdYe", ""], "tags": [{"name": "/\\uda84\\udd03\\u0002\\u00ef\\u0006\\u00ba\\u00be\\uda17\\udc0a\\u00fc%ET\\u00dc\\u0080\\u00d7\\u008a", "id": 2994268053083895808}, {}, {}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":null,"Id":null,"Name":"\xc3\xba\xc3\x8f\\ry\xf0\xa8\xb0\x9f::","Category":null,"PhotoUrls":["J\xf1\x9a\x84\xbf\xc3\x9a(\xc3\x9d\xc3\xb3\xc3\xad\xc2\xa3\xc3\xb9\\u0018\xc3\xa8\xc3\x8eN-1*k","\xc3\xa34t\xc3\x92\xc2\xbf>","\xc3\x8dYe",""],"Tags":[{"Id":2994268053083895808,"Name":"/\xf2\xb1\x84\x83\\u0002\xc3\xaf\\u0006\xc2\xba\xc2\xbe\xf2\x95\xb0\x8a\xc3\xbc%ET\xc3\x9c\xc2\x80\xc3\x97\xc2\x8a"},{"Id":null,"Name":null},{"Id":null,"Name":null}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

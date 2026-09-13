@@ -1,0 +1,59 @@
+Error report Error_5689503102043672942
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"username": ""}, {"phone": "\\u001b\\udb5c\\udfd6", "userStatus": 10689, "id": 2134, "firstName": "\\uda50\\udddb\\u00c3`", "password": "", "username": "\\u00c6\\u0011\\uda92\\udc4c", "lastName": "\\u00f8\\u00f6Q\\u00f1&"}, {}, {}, {"lastName": "\\u0083\\u00f8", "email": "\\u0013\\u00c2\\ud8f2\\udd1e\\f\\ud8f7\\udd5ah", "userStatus": -2147483647, "firstName": "", "password": "\\t\\u00b2Iy"}, {"phone": "RQ\\u009ck\\ud976\\udc6e\\uda07\\udfc0"}, {"id": 9223372036854775807, "password": "\\"G\\u00da", "username": "-script.pyw", "lastName": "\\ud8b9\\udf8a\\b^\\u00bd\\u00ef\\u00eci\\u00f1\\u0098", "firstName": "\\ud8e9\\udfe9\\udb20\\udf69\\u00af\\u00b3\\u00c5", "userStatus": 31778, "email": "\\ud90f\\udee3", "phone": "\\u00d0R\\udb9a\\uddb0\\u001e\\u0004\\u00c6\\u00c3bg\\u00bd\\ud997\\udeac\\t\\u0001UD\\u0014\\u00fe"}, {"phone": "\\u00ac", "id": -402255, "email": "gK\\u00e5\\u001b\\u001e\\ud895\\udec8\\u00162\\u00e0\\udbbd\\ude6f$", "username": ":\\u00a1\'\\u00fe\\u00cbO\\udb94\\udfeeUW\\u009e\\u0093", "userStatus": -383, "firstName": "b", "password": "(\\u009a\\u000ej\\u00eb\\u0012\\u00b7\\ud8fb\\udf49\\u00a3\\uda87\\ude09\\u00e2\\u00c8a\\u0085\\u0088\\u00d6T\\u00f5", "lastName": "\\u00e4@\\u00d8\\ud991\\udcda\\uda44\\udea1\\ud93f\\ude89\\u00a0\\udb5f\\udc44H\\udb2a\\udc40\\u001cy"}, {}, {}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"Username":"","FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":2134,"Username":"\xc3\x86\\u0011\xf2\xb4\xa1\x8c","FirstName":"\xf2\xa4\x87\x9b\xc3\x83`","LastName":"\xc3\xb8\xc3\xb6Q\xc3\xb1&","Email":null,"Password":"","Phone":"\\u001b\xf3\xa7\x8f\x96","UserStatus":10689},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Username":null,"FirstName":"","LastName":"\xc2\x83\xc3\xb8","Email":"\\u0013\xc3\x82\xf1\x8c\xa4\x9e\\f\xf1\x8d\xb5\x9ah","Password":"\\t\xc2\xb2Iy","Phone":null,"UserStatus":-2147483647},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":"RQ\xc2\x9ck\xf1\xad\xa1\xae\xf2\x91\xbf\x80","UserStatus":null},{"Id":9223372036854775807,"Username":"-script.pyw","FirstName":"\xf1\x8a\x9f\xa9\xf3\x98\x8d\xa9\xc2\xaf\xc2\xb3\xc3\x85","LastName":"\xf0\xbe\x9e\x8a\\b^\xc2\xbd\xc3\xaf\xc3\xaci\xc3\xb1\xc2\x98","Email":"\xf1\x93\xbb\xa3","Password":"\\"G\xc3\x9a","Phone":"\xc3\x90R\xf3\xb6\xa6\xb0\\u001e\\u0004\xc3\x86\xc3\x83bg\xc2\xbd\xf1\xb5\xba\xac\\t\\u0001UD\\u0014\xc3\xbe","UserStatus":31778},{"Id":-402255,"Username":":\xc2\xa1\'\xc3\xbe\xc3\x8bO\xf3\xb5\x8f\xaeUW\xc2\x9e\xc2\x93","FirstName":"b","LastName":"\xc3\xa4@\xc3\x98\xf1\xb4\x93\x9a\xf2\xa1\x8a\xa1\xf1\x9f\xba\x89\xc2\xa0\xf3\xa7\xb1\x84H\xf3\x9a\xa1\x80\\u001cy","Email":"gK\xc3\xa5\\u001b\\u001e\xf0\xb5\x9b\x88\\u00162\xc3\xa0\xf3\xbf\x99\xaf$","Password":"(\xc2\x9a\\u000ej\xc3\xab\\u0012\xc2\xb7\xf1\x8e\xbd\x89\xc2\xa3\xf2\xb1\xb8\x89\xc3\xa2\xc3\x88a\\u0085\xc2\x88\xc3\x96T\xc3\xb5","Phone":"\xc2\xac","UserStatus":-383},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"username": ""}, {"phone": "\\u001b\\udb5c\\udfd6", "userStatus": 10689, '
+ b'"id": 2134, "firstName": "\\uda50\\udddb\\u00c3`", "password": "", "usernam'
+ b'e": "\\u00c6\\u0011\\uda92\\udc4c", "lastName": "\\u00f8\\u00f6Q\\u00f1&"},'
+ b' {}, {}, {"lastName": "\\u0083\\u00f8", "email": "\\u0013\\u00c2\\ud8f2\\u'
+ b'dd1e\\f\\ud8f7\\udd5ah", "userStatus": -2147483647, "firstName": "", "passw'
+ b'ord": "\\t\\u00b2Iy"}, {"phone": "RQ\\u009ck\\ud976\\udc6e\\uda07\\udfc0"},'
+ b' {"id": 9223372036854775807, "password": "\\"G\\u00da", "username": "-scri'
+ b'pt.pyw", "lastName": "\\ud8b9\\udf8a\\b^\\u00bd\\u00ef\\u00eci\\u00f1\\u0098'
+ b'", "firstName": "\\ud8e9\\udfe9\\udb20\\udf69\\u00af\\u00b3\\u00c5", "userS'
+ b'tatus": 31778, "email": "\\ud90f\\udee3", "phone": "\\u00d0R\\udb9a\\uddb'
+ b'0\\u001e\\u0004\\u00c6\\u00c3bg\\u00bd\\ud997\\udeac\\t\\u0001UD\\u0014\\u0'
+ b'0fe"}, {"phone": "\\u00ac", "id": -402255, "email": "gK\\u00e5\\u001b\\u001e'
+ b'\\ud895\\udec8\\u00162\\u00e0\\udbbd\\ude6f$", "username": ":\\u00a1\'\\u'
+ b'00fe\\u00cbO\\udb94\\udfeeUW\\u009e\\u0093", "userStatus": -383, "firstNa'
+ b'me": "b", "password": "(\\u009a\\u000ej\\u00eb\\u0012\\u00b7\\ud8fb\\udf49\\'
+ b'u00a3\\uda87\\ude09\\u00e2\\u00c8a\\u0085\\u0088\\u00d6T\\u00f5", "lastName"'
+ b': "\\u00e4@\\u00d8\\ud991\\udcda\\uda44\\udea1\\ud93f\\ude89\\u00a0\\udb5f'
+ b'\\udc44H\\udb2a\\udc40\\u001cy"}, {}, {}]')' expected, but got '(b'[{"Id":null,"Username":"","FirstName":null,"LastName":null,"Email":null,"Pas'
+ b'sword":null,"Phone":null,"UserStatus":null},{"Id":2134,"Username":"\xc3'
+ b'\x86\\u0011\xf2\xb4\xa1\x8c","FirstName":"\xf2\xa4\x87\x9b\xc3\x83`","Last'
+ b'Name":"\xc3\xb8\xc3\xb6Q\xc3\xb1&","Email":null,"Password":"","Phone":"\\u0'
+ b'01b\xf3\xa7\x8f\x96","UserStatus":10689},{"Id":null,"Username":null,"FirstNa'
+ b'me":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStat'
+ b'us":null},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email'
+ b'":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Username"'
+ b':null,"FirstName":"","LastName":"\xc2\x83\xc3\xb8","Email":"\\u0013\xc3\x82'
+ b'\xf1\x8c\xa4\x9e\\f\xf1\x8d\xb5\x9ah","Password":"\\t\xc2\xb2Iy","Phone":nul'
+ b'l,"UserStatus":-2147483647},{"Id":null,"Username":null,"FirstName":null,"Las'
+ b'tName":null,"Email":null,"Password":null,"Phone":"RQ\xc2\x9ck\xf1'
+ b'\xad\xa1\xae\xf2\x91\xbf\x80","UserStatus":null},{"Id":922337203685477580'
+ b'7,"Username":"-script.pyw","FirstName":"\xf1\x8a\x9f\xa9\xf3\x98\x8d\xa9'
+ b'\xc2\xaf\xc2\xb3\xc3\x85","LastName":"\xf0\xbe\x9e\x8a\\b^\xc2'
+ b'\xbd\xc3\xaf\xc3\xaci\xc3\xb1\xc2\x98","Email":"\xf1\x93\xbb\xa3","Password'
+ b'":"\\"G\xc3\x9a","Phone":"\xc3\x90R\xf3\xb6\xa6\xb0\\u001e\\u0004\xc3\x86'
+ b'\xc3\x83bg\xc2\xbd\xf1\xb5\xba\xac\\t\\u0001UD\\u0014\xc3\xbe","UserStatu'
+ b's":31778},{"Id":-402255,"Username":":\xc2\xa1\'\xc3\xbe\xc3\x8bO\xf3\xb5\x8f'
+ b'\xaeUW\xc2\x9e\xc2\x93","FirstName":"b","LastName":"\xc3\xa4@'
+ b'\xc3\x98\xf1\xb4\x93\x9a\xf2\xa1\x8a\xa1\xf1\x9f\xba\x89\xc2\xa0'
+ b'\xf3\xa7\xb1\x84H\xf3\x9a\xa1\x80\\u001cy","Email":"gK\xc3\xa5\\u001b\\u0'
+ b'01e\xf0\xb5\x9b\x88\\u00162\xc3\xa0\xf3\xbf\x99\xaf$","Password":"('
+ b'\xc2\x9a\\u000ej\xc3\xab\\u0012\xc2\xb7\xf1\x8e\xbd\x89\xc2\xa3\xf2\xb1\xb8'
+ b'\x89\xc3\xa2\xc3\x88a\\u0085\xc2\x88\xc3\x96T\xc3\xb5","Phone":"\xc2\xac","U'
+ b'serStatus":-383},{"Id":null,"Username":null,"FirstName":null,"LastName":null'
+ b',"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Us'
+ b'ername":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"'
+ b'Phone":null,"UserStatus":null}]')'.

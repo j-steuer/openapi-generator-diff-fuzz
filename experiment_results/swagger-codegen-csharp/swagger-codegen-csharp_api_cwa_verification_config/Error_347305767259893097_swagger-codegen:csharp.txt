@@ -1,0 +1,14 @@
+Error report Error_347305767259893097
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"responsePadding": "\\u00c9", "tan": "56099331-4292-41aa-90d0-2cc6d1b1bb88"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan/verify', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"_Tan":"56099331-4292-41aa-90d0-2cc6d1b1bb88","ResponsePadding":"\xc3\x89"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/tan/verify', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'responsePadding' only exists in original body.Element 'tan' only exists in original body.Element 'ResponsePadding' only exists in produced body.Element '_Tan' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_4659121013892862812
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"address": {"number": -476372, "street": ""}, "age": -2816477, "cars": [], "createdAt": "0958-07-30T15:35:03Z", "firstName": "", "id": "", "lastName": "\\u00bd", "insurance": false}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":"","FirstName":"","LastName":"\xc2\xbd","Age":-2816477,"Address":{"Number":-476372,"Street":"","Postcode":null,"City":null,"Country":null},"CreatedAt":"0958-07-30T15:35:03Z","Insurance":false,"Cars":[]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'age' only exists in original body.Element 'cars' only exists in original body.Element 'createdAt' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'insurance' only exists in original body.Element 'lastName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_-4006175328860786712
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"lastName": "\\u0017\\u0083\\u00bd", "address": {}, "insurance": true, "cars": [{"maxSpeedKmH": 3.7740147257023416e+16, "brand": "", "model": "!\\uda7c\\udfb6:"}, {}, {}, {"brand": " o<~\\u00ed\\uda27\\udfac\\u009a\\u0090\\u0084D\\ud8d8\\udd86\\udbc4\\udd8aJ\\u0081)\\u00a1\\u0011\\u009e\\uda5d\\ude84\\u0011\\"\\u00e5\\uda62\\udf9d\\u0011\\u00f0\\u0018\\u001e,1\\udb42\\ude6f\\u00aa\\u00b6", "maxSpeedKmH": -2.508005931824882e-268, "model": "\\u0093"}, {"brand": "", "maxSpeedKmH": 0.0, "model": ""}], "id": "_\\u00de\\u009e\\ud90e\\udc78XK\\u0004J\\ud9a6\\udfc2\\\\\\u00b8", "age": -27171, "firstName": "\\u008ec\\uda98\\udd80\\u00ac\\u00a4\\ud86d\\udf57:j\\u007f\\ud957\\udd30\\u0081\\u0085f^", "createdAt": "0165-10-21T07:27:36+11:31"}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":"_\xc3\x9e\xc2\x9e\xf1\x93\xa1\xb8XK\\u0004J\xf1\xb9\xaf\x82\\\\\xc2\xb8","FirstName":"\xc2\x8ec\xf2\xb6\x86\x80\xc2\xac\xc2\xa4\xf0\xab\x9d\x97:j\x7f\xf1\xa5\xb4\xb0\xc2\x81\\u0085f^","LastName":"\\u0017\xc2\x83\xc2\xbd","Age":-27171,"Address":{"Number":null,"Street":null,"Postcode":null,"City":null,"Country":null},"CreatedAt":"0165-10-20T19:56:36+00:00","Insurance":true,"Cars":[{"Brand":"","Model":"!\xf2\xaf\x8e\xb6:","MaxSpeedKmH":3.774015E+16},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":" o<~\xc3\xad\xf2\x99\xbe\xac\xc2\x9a\xc2\x90\xc2\x84D\xf1\x86\x86\x86\xf4\x81\x86\x8aJ\xc2\x81)\xc2\xa1\\u0011\xc2\x9e\xf2\xa7\x9a\x84\\u0011\\"\xc3\xa5\xf2\xa8\xae\x9d\\u0011\xc3\xb0\\u0018\\u001e,1\xf3\xa0\xa9\xaf\xc2\xaa\xc2\xb6","Model":"\xc2\x93","MaxSpeedKmH":-0.0},{"Brand":"","Model":"","MaxSpeedKmH":0.0}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'age' only exists in original body.Element 'cars' only exists in original body.Element 'createdAt' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'insurance' only exists in original body.Element 'lastName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

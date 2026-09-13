@@ -1,0 +1,14 @@
+Error report Error_1763770534461821050
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"title": "\\u00f4\\u00e1-", "code": "", "idx": -535, "problem": [{}, {"idx": -2686093282811, "problemCode": "\\r", "project": {"problem": [{}, {"title": "d\\u009e", "project": {"title": "\\u1841\\ud8b9\\ude80k", "idx": 2992818}, "problemCode": "", "idx": 13397}, {"idx": 0, "problemCode": "", "project": {"title": "T\\u0000\\u00f7\\u008a\\u00b2"}, "title": ""}], "code": "\\ud8d4\\uddef\\u8e94^\\nI\\u00ca", "idx": -6353, "title": "\\ud9a9\\udc1c\\u00b8W"}, "title": ""}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/project/q%C3%8B%05t', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Idx":-535,"Code":"","Title":"\xc3\xb4\xc3\xa1-","Problem":[{"Idx":null,"Title":null,"Project":null,"ProblemCode":null},{"Idx":-2686093282811,"Title":"","Project":{"Idx":-6353,"Code":"\xf1\x85\x87\xaf\xe8\xba\x94^\\nI\xc3\x8a","Title":"\xf1\xba\x90\x9c\xc2\xb8W","Problem":[{"Idx":null,"Title":null,"Project":null,"ProblemCode":null},{"Idx":13397,"Title":"d\xc2\x9e","Project":{"Idx":2992818,"Code":null,"Title":"\xe1\xa1\x81\xf0\xbe\x9a\x80k","Problem":null},"ProblemCode":""},{"Idx":0,"Title":"","Project":{"Idx":null,"Code":null,"Title":"T\\u0000\xc3\xb7\xc2\x8a\xc2\xb2","Problem":null},"ProblemCode":""}]},"ProblemCode":"\\r"}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/project/q%C3%8B%05t', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'code' only exists in original body.Element 'idx' only exists in original body.Element 'problem' only exists in original body.Element 'title' only exists in original body.Element 'Code' only exists in produced body.Element 'Idx' only exists in produced body.Element 'Problem' only exists in produced body.Element 'Title' only exists in produced body.

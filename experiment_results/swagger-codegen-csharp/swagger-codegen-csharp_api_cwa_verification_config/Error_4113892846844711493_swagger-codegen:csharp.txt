@@ -1,0 +1,14 @@
+Error report Error_4113892846844711493
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"keyDob": "\\udbca\\udecf\\u00c1\\ud903\\udfe1&\\u00c6p\\u0083\\u00fe\\u00cb%\\u00b5\\u00bfi\\u00ab\\u00d4\\u00ee", "keyType": "GUID", "key": "\\u00e5\'N\\u00f1V\\u0005\\u0018\\u0085\\uda46\\udf9c\\u00cf\\u001aj\\b(\\u0016\\u00ce\\u00a1\\u001f\\u0013\\u00ef"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"KeyType":"GUID","Key":"\xc3\xa5\'N\xc3\xb1V\\u0005\\u0018\\u0085\xf2\xa1\xae\x9c\xc3\x8f\\u001aj\\b(\\u0016\xc3\x8e\xc2\xa1\\u001f\\u0013\xc3\xaf","KeyDob":"\xf4\x82\xab\x8f\xc3\x81\xf1\x90\xbf\xa1&\xc3\x86p\xc2\x83\xc3\xbe\xc3\x8b%\xc2\xb5\xc2\xbfi\xc2\xab\xc3\x94\xc3\xae"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'key' only exists in original body.Element 'keyDob' only exists in original body.Element 'keyType' only exists in original body.Element 'Key' only exists in produced body.Element 'KeyDob' only exists in produced body.Element 'KeyType' only exists in produced body.

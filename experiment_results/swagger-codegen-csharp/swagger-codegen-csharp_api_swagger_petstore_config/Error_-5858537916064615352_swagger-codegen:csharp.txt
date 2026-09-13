@@ -1,0 +1,14 @@
+Error report Error_-5858537916064615352
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"tags": [], "category": {"id": 35626176993, "name": "\\u00da\\udbe9\\udf79"}, "name": "\\uda46\\udf0a", "photoUrls": ["\\u00c5\\u00d6\\ud808\\uddd4\\udba9\\udce3\\u00ef", "\\"\\u00fb\\ud9ad\\udd97\\u00cb\\u00fe\\u00ae#"], "id": 27117}', method=<HTTPMethod.POST: 'POST'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":null,"Id":27117,"Name":"\xf2\xa1\xac\x8a","Category":{"Id":35626176993,"Name":"\xc3\x9a\xf4\x8a\x9d\xb9"},"PhotoUrls":["\xc3\x85\xc3\x96\xf0\x92\x87\x94\xf3\xba\x93\xa3\xc3\xaf","\\"\xc3\xbb\xf1\xbb\x96\x97\xc3\x8b\xc3\xbe\xc2\xae#"],"Tags":[]}', method=<HTTPMethod.POST: 'POST'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'category' only exists in original body.Element 'id' only exists in original body.Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_-7816670521301602742
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"keyType": "TELETAN", "key": "t\\udb67\\udd92\\u00d7\\udb8d\\ude54\\u009b\\ud8ff\\udd49I", "keyDob": "\\ud9ae\\udf09\\uda11\\udd3c\\u00ffE1\\uda2a\\udf44\\udba0\\udfb9`\\ud877\\udddc\\u00b8?Y2\\ud804\\udfa2`"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"KeyType":"TELETAN","Key":"t\xf3\xa9\xb6\x92\xc3\x97\xf3\xb3\x99\x94\xc2\x9b\xf1\x8f\xb5\x89I","KeyDob":"\xf1\xbb\xac\x89\xf2\x94\x94\xbc\xc3\xbfE1\xf2\x9a\xad\x84\xf3\xb8\x8e\xb9`\xf0\xad\xb7\x9c\xc2\xb8?Y2\xf0\x91\x8e\xa2`"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'key' only exists in original body.Element 'keyDob' only exists in original body.Element 'keyType' only exists in original body.Element 'Key' only exists in produced body.Element 'KeyDob' only exists in produced body.Element 'KeyType' only exists in produced body.

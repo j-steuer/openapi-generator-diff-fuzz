@@ -1,0 +1,37 @@
+Error report Error_-6952185217211736246
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"createdAt": "0377-03-26T09:53:02.0-20:46", "insurance": false, "cars": [{"brand": "\\u001dn\\u00e3U\\u00b9\\u00e8\\"", "model": ""}, {"maxSpeedKmH": 1.4607122225399368e+16, "model": "\\u00d5\\u00d4\\u00e2\\ud826\\udfee\\u00c4:\\ud938\\udc30\\u00d0\\ud85b\\udebb\\f"}, {}, {}, {"model": "\'\\uda97\\udcbf", "brand": "\\u00a7\\u00e8\\ud917\\udd99}\\u00f3\\udaf3\\ude84\\ud9fe\\ude3d\\u0094"}, {"brand": "i\\udb29\\ude213"}, {"model": "\\udaf5\\udeb0", "maxSpeedKmH": 2.4209499919151956e+16}, {"brand": "\\u518e\\udadd\\udd59", "model": "\\ud943\\udd34\\u00a4D\\udbdd\\udf25\\u00de\\u00fe\\\\Y.A&b\\udb22\\udfc8\\u0014\\ud806\\udec9", "maxSpeedKmH": 1.8593593246726784e+126}]}, {"lastName": "S\\u0091"}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":"0377-03-27T06:39:02+00:00","Insurance":false,"Cars":[{"Brand":"\\u001dn\xc3\xa3U\xc2\xb9\xc3\xa8\\"","Model":"","MaxSpeedKmH":null},{"Brand":null,"Model":"\xc3\x95\xc3\x94\xc3\xa2\xf0\x99\xaf\xae\xc3\x84:\xf1\x9e\x80\xb0\xc3\x90\xf0\xa6\xba\xbb\\f","MaxSpeedKmH":1.4607123E+16},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":"\xc2\xa7\xc3\xa8\xf1\x95\xb6\x99}\xc3\xb3\xf3\x8c\xba\x84\xf2\x8f\xa8\xbd\xc2\x94","Model":"\'\xf2\xb5\xb2\xbf","MaxSpeedKmH":null},{"Brand":"i\xf3\x9a\x98\xa13","Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":"\xf3\x8d\x9a\xb0","MaxSpeedKmH":2.42095E+16},{"Brand":"\xe5\x86\x8e\xf3\x87\x95\x99","Model":"\xf1\xa0\xb4\xb4\xc2\xa4D\xf4\x87\x9c\xa5\xc3\x9e\xc3\xbe\\\\Y.A&b\xf3\x98\xaf\x88\\u0014\xf0\x91\xab\x89","MaxSpeedKmH":"Infinity"}]},{"Id":null,"FirstName":null,"LastName":"S\xc2\x91","Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"createdAt": "0377-03-26T09:53:02.0-20:46", "insurance": false, "cars": [{'
+ b'"brand": "\\u001dn\\u00e3U\\u00b9\\u00e8\\"", "model": ""}, {"maxSpeedKmH'
+ b'": 1.4607122225399368e+16, "model": "\\u00d5\\u00d4\\u00e2\\ud826\\udfee\\'
+ b'u00c4:\\ud938\\udc30\\u00d0\\ud85b\\udebb\\f"}, {}, {}, {"model": "\'\\uda97'
+ b'\\udcbf", "brand": "\\u00a7\\u00e8\\ud917\\udd99}\\u00f3\\udaf3\\ude84\\u'
+ b'd9fe\\ude3d\\u0094"}, {"brand": "i\\udb29\\ude213"}, {"model": "\\udaf5\\u'
+ b'deb0", "maxSpeedKmH": 2.4209499919151956e+16}, {"brand": "\\u518e\\udadd\\u'
+ b'dd59", "model": "\\ud943\\udd34\\u00a4D\\udbdd\\udf25\\u00de\\u00fe\\\\Y.'
+ b'A&b\\udb22\\udfc8\\u0014\\ud806\\udec9", "maxSpeedKmH": 1.859359324672678'
+ b'4e+126}]}, {"lastName": "S\\u0091"}]')' expected, but got '(b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"Crea'
+ b'tedAt":"0377-03-27T06:39:02+00:00","Insurance":false,"Cars":[{"Brand":"\\'
+ b'u001dn\xc3\xa3U\xc2\xb9\xc3\xa8\\"","Model":"","MaxSpeedKmH":null},{"Brand"'
+ b':null,"Model":"\xc3\x95\xc3\x94\xc3\xa2\xf0\x99\xaf\xae\xc3\x84:'
+ b'\xf1\x9e\x80\xb0\xc3\x90\xf0\xa6\xba\xbb\\f","MaxSpeedKmH":1.4607123E+16},{'
+ b'"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"Ma'
+ b'xSpeedKmH":null},{"Brand":"\xc2\xa7\xc3\xa8\xf1\x95\xb6\x99}\xc3\xb3\xf3\x8c'
+ b'\xba\x84\xf2\x8f\xa8\xbd\xc2\x94","Model":"\'\xf2\xb5\xb2\xbf","MaxSpeedK'
+ b'mH":null},{"Brand":"i\xf3\x9a\x98\xa13","Model":null,"MaxSpeedKmH":null},{"B'
+ b'rand":null,"Model":"\xf3\x8d\x9a\xb0","MaxSpeedKmH":2.42095E+16},{"Brand'
+ b'":"\xe5\x86\x8e\xf3\x87\x95\x99","Model":"\xf1\xa0\xb4\xb4\xc2\xa4D'
+ b'\xf4\x87\x9c\xa5\xc3\x9e\xc3\xbe\\\\Y.A&b\xf3\x98\xaf\x88\\u0014\xf0\x91\xab'
+ b'\x89","MaxSpeedKmH":"Infinity"}]},{"Id":null,"FirstName":null,"LastName":"S'
+ b'\xc2\x91","Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Car'
+ b's":null}]')'.

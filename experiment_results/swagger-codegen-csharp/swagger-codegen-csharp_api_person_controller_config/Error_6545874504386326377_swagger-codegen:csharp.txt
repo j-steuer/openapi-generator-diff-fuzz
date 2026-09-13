@@ -1,0 +1,14 @@
+Error report Error_6545874504386326377
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"address": {"postcode": ""}, "firstName": ""}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":null,"FirstName":"","LastName":null,"Age":null,"Address":{"Number":null,"Street":null,"Postcode":"","City":null,"Country":null},"CreatedAt":null,"Insurance":null,"Cars":null}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'firstName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

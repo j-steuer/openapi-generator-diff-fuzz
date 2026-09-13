@@ -1,0 +1,14 @@
+Error report Error_-5425698918914231013
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"cars": [{"maxSpeedKmH": 5e-324, "model": "\\u00a1\\u009d\\udb59\\udfe3\\u0082\\u00f0\\n", "brand": ","}], "lastName": "", "firstName": "\\u00b3", "createdAt": "0363-05-11T18:06:57Z", "age": -425, "insurance": false, "address": {"country": "", "city": "\\u007f\\u0016F\\u00f0..\\u001c\\u009aOD\\ud924\\udeb1\\u00f4\\"O\\"z\\u00e9"}, "id": "\\u00f2\\u00c0"}', method=<HTTPMethod.POST: 'POST'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":"\xc3\xb2\xc3\x80","FirstName":"\xc2\xb3","LastName":"","Age":-425,"Address":{"Number":null,"Street":null,"Postcode":null,"City":"\x7f\\u0016F\xc3\xb0..\\u001c\xc2\x9aOD\xf1\x99\x8a\xb1\xc3\xb4\\"O\\"z\xc3\xa9","Country":""},"CreatedAt":"0363-05-11T18:06:57Z","Insurance":false,"Cars":[{"Brand":",","Model":"\xc2\xa1\xc2\x9d\xf3\xa6\x9f\xa3\xc2\x82\xc3\xb0\\n","MaxSpeedKmH":0.0}]}', method=<HTTPMethod.POST: 'POST'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'age' only exists in original body.Element 'cars' only exists in original body.Element 'createdAt' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'insurance' only exists in original body.Element 'lastName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

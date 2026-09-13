@@ -1,0 +1,27 @@
+Error report Error_8394430724021728250
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {}, {}, {}, {}, {}, {}, {}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b'[{}, {}, {}, {}, {}, {}, {}, {}, {}]'' expected, but got '(b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"Crea'
+ b'tedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastN'
+ b'ame":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars"'
+ b':null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null'
+ b',"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,'
+ b'"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,'
+ b'"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address'
+ b'":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName"'
+ b':null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance"'
+ b':null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"A'
+ b'ddress":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"Firs'
+ b'tName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insu'
+ b'rance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":n'
+ b'ull,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]')'.

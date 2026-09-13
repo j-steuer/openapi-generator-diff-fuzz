@@ -1,0 +1,14 @@
+Error report Error_3516084077823992242
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"address": {}, "age": -27171, "cars": [{"maxSpeedKmH": 3.7740147257023416e+16, "brand": "", "model": "!\\uda7c\\udfb6:"}, {}, {}, {}], "createdAt": "2000-01-01T01:00:00Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":"","FirstName":"","LastName":"","Age":-27171,"Address":{"Number":null,"Street":null,"Postcode":null,"City":null,"Country":null},"CreatedAt":"2000-01-01T01:00:00Z","Insurance":false,"Cars":[{"Brand":"","Model":"!\xf2\xaf\x8e\xb6:","MaxSpeedKmH":3.774015E+16},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/api/person', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'address' only exists in original body.Element 'age' only exists in original body.Element 'cars' only exists in original body.Element 'createdAt' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'insurance' only exists in original body.Element 'lastName' only exists in original body.Element 'Address' only exists in produced body.Element 'Age' only exists in produced body.Element 'Cars' only exists in produced body.Element 'CreatedAt' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'Insurance' only exists in produced body.Element 'LastName' only exists in produced body.

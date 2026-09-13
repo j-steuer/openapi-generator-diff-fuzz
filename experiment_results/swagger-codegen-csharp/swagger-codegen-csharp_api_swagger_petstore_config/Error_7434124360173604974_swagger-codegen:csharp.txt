@@ -1,0 +1,14 @@
+Error report Error_7434124360173604974
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u00c6\\u00c0\\ud9a7\\udf29\\u00c8", "photoUrls": []}', method=<HTTPMethod.POST: 'POST'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":null,"Id":null,"Name":"\xc3\x86\xc3\x80\xf1\xb9\xbc\xa9\xc3\x88","Category":null,"PhotoUrls":[],"Tags":null}', method=<HTTPMethod.POST: 'POST'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_-7582481669570117049
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"id": 1295, "name": "", "tags": [{"name": "\\ud85c\\udea1"}, {"id": -1091159, "name": ".exe"}, {"name": "", "id": 3402708310870415872}, {"name": "R\\u00ae\\u00fcj,\\u00ca\\ufd46", "id": -352}, {"name": "\\uda48\\udcc5\\u0088\\ud9a1\\udcae\\u00d8\\uda2d\\uddc2Kd\\u0080", "id": -953992748323750}, {"id": 3709, "name": ""}, {}, {"id": -950, "name": "P\\u009d"}, {}, {}, {"name": "*\\u00d9_e\\teA]\\u00c6\\uda35\\udcdd"}, {"id": 417626, "name": "\\udbeb\\udc9c\\udb79\\udfa7\\ufacd\\udb8f\\ude25\\u00f4DQ\\u009c\\u00032n\\u0080\\uda60\\udd8d"}], "status": "pending", "photoUrls": [], "category": {"name": "\\u00fa\\udb7c\\ude80*\\u0092\\ud8d0\\uddcc\\u00ad\\u00f0z\\uf5f2\\u001c"}}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":"Pending","Id":1295,"Name":"","Category":{"Id":null,"Name":"\xc3\xba\xf3\xaf\x8a\x80*\xc2\x92\xf1\x84\x87\x8c\xc2\xad\xc3\xb0z\xef\x97\xb2\\u001c"},"PhotoUrls":[],"Tags":[{"Id":null,"Name":"\xf0\xa7\x8a\xa1"},{"Id":-1091159,"Name":".exe"},{"Id":3402708310870415872,"Name":""},{"Id":-352,"Name":"R\xc2\xae\xc3\xbcj,\xc3\x8a\xef\xb5\x86"},{"Id":-953992748323750,"Name":"\xf2\xa2\x83\x85\xc2\x88\xf1\xb8\x92\xae\xc3\x98\xf2\x9b\x97\x82Kd\xc2\x80"},{"Id":3709,"Name":""},{"Id":null,"Name":null},{"Id":-950,"Name":"P\xc2\x9d"},{"Id":null,"Name":null},{"Id":null,"Name":null},{"Id":null,"Name":"*\xc3\x99_e\\teA]\xc3\x86\xf2\x9d\x93\x9d"},{"Id":417626,"Name":"\xf4\x8a\xb2\x9c\xf3\xae\x9e\xa7\xef\xab\x8d\xf3\xb3\xb8\xa5\xc3\xb4DQ\xc2\x9c\\u00032n\xc2\x80\xf2\xa8\x86\x8d"}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'category' only exists in original body.Element 'id' only exists in original body.Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'status' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

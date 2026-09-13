@@ -1,0 +1,14 @@
+Error report Error_-8292403396364490882
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"responsePadding": "\\u00d5*\\ud9c2\\udc26{\\u00f2P1\\u0085\\u00bd<\\u009dc\\udaae\\udef3H\\u009a", "registrationToken": "708cafc9-c610-43ce-a3d5-84d046ab9c1e"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/testresult', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"_RegistrationToken":"708cafc9-c610-43ce-a3d5-84d046ab9c1e","ResponsePadding":"\xc3\x95*\xf2\x80\xa0\xa6{\xc3\xb2P1\\u0085\xc2\xbd<\xc2\x9dc\xf2\xbb\xab\xb3H\xc2\x9a"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/testresult', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'registrationToken' only exists in original body.Element 'responsePadding' only exists in original body.Element 'ResponsePadding' only exists in produced body.Element '_RegistrationToken' only exists in produced body.

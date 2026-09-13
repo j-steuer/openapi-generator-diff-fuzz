@@ -1,0 +1,14 @@
+Error report Error_7060541624675807497
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "#\\u00e6\\udb7f\\udce1", "properties": {}, "asynchronous": false}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"#\xc3\xa6\xf3\xaf\xb3\xa1","Properties":{},"Asynchronous":false}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'name' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.

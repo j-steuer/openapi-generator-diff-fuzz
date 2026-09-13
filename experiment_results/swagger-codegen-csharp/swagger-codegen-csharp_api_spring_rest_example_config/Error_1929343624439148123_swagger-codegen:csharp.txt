@@ -1,0 +1,14 @@
+Error report Error_1929343624439148123
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"title": "", "code": ""}', method=<HTTPMethod.POST: 'POST'>, path='/api/project', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Idx":null,"Code":"","Title":"","Problem":null}', method=<HTTPMethod.POST: 'POST'>, path='/api/project', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'code' only exists in original body.Element 'title' only exists in original body.Element 'Code' only exists in produced body.Element 'Idx' only exists in produced body.Element 'Problem' only exists in produced body.Element 'Title' only exists in produced body.

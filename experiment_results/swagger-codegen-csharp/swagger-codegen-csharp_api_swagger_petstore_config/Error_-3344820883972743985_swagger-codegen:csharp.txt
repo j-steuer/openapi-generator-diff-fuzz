@@ -1,0 +1,14 @@
+Error report Error_-3344820883972743985
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "", "photoUrls": [], "category": {"id": 0, "name": "\\ud8bc\\udd9d\\u00a5\\b\\ud84f\\udfeb\\udabc\\udda6\\u008c\\udba3\\udef2\\u0083tZ\\u00b6\\u00fb"}, "id": 0, "status": "sold", "tags": []}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":"Sold","Id":0,"Name":"","Category":{"Id":0,"Name":"\xf0\xbf\x86\x9d\xc2\xa5\\b\xf0\xa3\xbf\xab\xf2\xbf\x86\xa6\xc2\x8c\xf3\xb8\xbb\xb2\xc2\x83tZ\xc2\xb6\xc3\xbb"},"PhotoUrls":[],"Tags":[]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'category' only exists in original body.Element 'id' only exists in original body.Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'status' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

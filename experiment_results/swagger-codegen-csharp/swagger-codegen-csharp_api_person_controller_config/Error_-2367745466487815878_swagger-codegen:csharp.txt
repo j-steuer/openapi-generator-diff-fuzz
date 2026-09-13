@@ -1,0 +1,15 @@
+Error report Error_-2367745466487815878
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body 'b'[{}]'' expected, but got '(b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"Crea'
+ b'tedAt":null,"Insurance":null,"Cars":null}]')'.

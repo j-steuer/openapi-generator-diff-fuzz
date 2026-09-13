@@ -1,0 +1,14 @@
+Error report Error_7577993864331923824
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"email": "\\u00d2"}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":"\xc3\x92","Password":null,"Phone":null,"UserStatus":null}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'email' only exists in original body.Element 'Email' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'LastName' only exists in produced body.Element 'Password' only exists in produced body.Element 'Phone' only exists in produced body.Element 'UserStatus' only exists in produced body.Element 'Username' only exists in produced body.

@@ -1,0 +1,14 @@
+Error report Error_1242492376263865009
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"work": {"title": "\\u00fe\\u009b`O\\u009aE\\u00aa\\udab7\\udf1a_\\u00ef~"}, "name": "\\u001e\\ud951\\ude26\\u0087{{", "phones": [{}, {"phone": "\\udb6d\\uddd3\\u00c4\\u00a2J9\\ud99d\\udc11\\uda94\\udfcfpT\\b\\u00e1!\\ud89e\\ude9aU\\ud895\\udeb2\\ud910\\udeb3\\u001e\\u00fb"}, {}], "birthday": "0415-01-22"}', method=<HTTPMethod.POST: 'POST'>, path='/contacts', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"\\u001e\xf1\xa4\x98\xa6\xc2\x87{{","Birthday":"0415-01-22","Work":{"Title":"\xc3\xbe\xc2\x9b`O\xc2\x9aE\xc2\xaa\xf2\xbd\xbc\x9a_\xc3\xaf~","Company":null},"Phones":[{"Phone":null,"Type":null},{"Phone":"\xf3\xab\x97\x93\xc3\x84\xc2\xa2J9\xf1\xb7\x90\x91\xf2\xb5\x8f\x8fpT\\b\xc3\xa1!\xf0\xb7\xaa\x9aU\xf0\xb5\x9a\xb2\xf1\x94\x8a\xb3\\u001e\xc3\xbb","Type":null},{"Phone":null,"Type":null}],"Emails":null,"Groups":null,"Favorite":null,"Notes":null}', method=<HTTPMethod.POST: 'POST'>, path='/contacts', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'birthday' only exists in original body.Element 'name' only exists in original body.Element 'phones' only exists in original body.Element 'work' only exists in original body.Element 'Birthday' only exists in produced body.Element 'Emails' only exists in produced body.Element 'Favorite' only exists in produced body.Element 'Groups' only exists in produced body.Element 'Name' only exists in produced body.Element 'Notes' only exists in produced body.Element 'Phones' only exists in produced body.Element 'Work' only exists in produced body.

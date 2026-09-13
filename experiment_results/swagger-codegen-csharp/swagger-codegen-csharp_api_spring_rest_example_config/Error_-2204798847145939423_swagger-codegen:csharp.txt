@@ -1,0 +1,14 @@
+Error report Error_-2204798847145939423
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"pro_idx": -102136, "content": "\\u092a\\u0928\\u094d\\u0939 \\u092a\\u0928\\u094d\\u0939 \\u0924\\u094d\\u0930 \\u0930\\u094d\\u091a \\u0915\\u0943\\u0915\\u0943 \\u0921\\u094d\\u0921 \\u0928\\u094d\\u0939\\u0943\\u0947 \\u0625\\u0644\\u0627 \\u0628\\u0633\\u0645 \\u0627\\u0644\\u0644\\u0647"}', method=<HTTPMethod.POST: 'POST'>, path='/api/subproblem', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"ProIdx":null,"Content":"\xe0\xa4\xaa\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xb9 \xe0\xa4\xaa\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xb9 \xe0\xa4\xa4\xe0\xa5\x8d\xe0\xa4\xb0 \xe0\xa4\xb0\xe0\xa5\x8d\xe0\xa4\x9a \xe0\xa4\x95\xe0\xa5\x83\xe0\xa4\x95\xe0\xa5\x83 \xe0\xa4\xa1\xe0\xa5\x8d\xe0\xa4\xa1 \xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xb9\xe0\xa5\x83\xe0\xa5\x87 \xd8\xa5\xd9\x84\xd8\xa7 \xd8\xa8\xd8\xb3\xd9\x85 \xd8\xa7\xd9\x84\xd9\x84\xd9\x87"}', method=<HTTPMethod.POST: 'POST'>, path='/api/subproblem', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'content' only exists in original body.Element 'pro_idx' only exists in original body.Element 'Content' only exists in produced body.Element 'ProIdx' only exists in produced body.

@@ -1,0 +1,40 @@
+Error report Error_-4457472216982132972
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"firstName": "\\u00bd\\u00e33", "age": -3684}, {"createdAt": "2768-10-22T11:23:15.6Z", "age": -95378, "lastName": "\\u00f2\\u00eb\\u00dc\\u00a5\\ud9f4\\uddba\\u00b7\\u00b1s\\u0003\\udb74\\uded8\\u0010\\u00c6\\u0010", "id": "Z", "cars": [{"model": "\\u00bd&\\u00f4", "brand": ""}], "insurance": false, "address": {}, "firstName": "G"}, {"createdAt": "2139-12-28T22:50:57.004882-17:42", "cars": [{"brand": "\\ud936\\udda2\\u00ea\\udbc8\\ude94\\u00e5\\u0013", "maxSpeedKmH": 2.262356751545562e+16, "model": "\\u00de\\udb84\\udcc5d"}, {"model": "\\u00bd&\\u00f4", "brand": ""}, {"maxSpeedKmH": -3.978368779328332e+16}, {}, {"brand": "\\u0095\\u00c2\\u0006", "maxSpeedKmH": 2.8155722251216644e+16, "model": "\\u00c4\\ud989\\udd99K"}, {}]}, {"age": 0}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":"\xc2\xbd\xc3\xa33","LastName":null,"Age":-3684,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":"Z","FirstName":"G","LastName":"\xc3\xb2\xc3\xab\xc3\x9c\xc2\xa5\xf2\x8d\x86\xba\xc2\xb7\xc2\xb1s\\u0003\xf3\xad\x8b\x98\\u0010\xc3\x86\\u0010","Age":-95378,"Address":{"Number":null,"Street":null,"Postcode":null,"City":null,"Country":null},"CreatedAt":"2768-10-22T11:23:15.6Z","Insurance":false,"Cars":[{"Brand":"","Model":"\xc2\xbd&\xc3\xb4","MaxSpeedKmH":null}]},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":"2139-12-29T16:32:57.004882+00:00","Insurance":null,"Cars":[{"Brand":"\xf1\x9d\xa6\xa2\xc3\xaa\xf4\x82\x8a\x94\xc3\xa5\\u0013","Model":"\xc3\x9e\xf3\xb1\x83\x85d","MaxSpeedKmH":2.2623568E+16},{"Brand":"","Model":"\xc2\xbd&\xc3\xb4","MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":-3.978369E+16},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":"\xc2\x95\xc3\x82\\u0006","Model":"\xc3\x84\xf1\xb2\x96\x99K","MaxSpeedKmH":2.8155723E+16},{"Brand":null,"Model":null,"MaxSpeedKmH":null}]},{"Id":null,"FirstName":null,"LastName":null,"Age":0,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"firstName": "\\u00bd\\u00e33", "age": -3684}, {"createdAt": "2768-10-22'
+ b'T11:23:15.6Z", "age": -95378, "lastName": "\\u00f2\\u00eb\\u00dc\\u00a5\\'
+ b'ud9f4\\uddba\\u00b7\\u00b1s\\u0003\\udb74\\uded8\\u0010\\u00c6\\u0010", "'
+ b'id": "Z", "cars": [{"model": "\\u00bd&\\u00f4", "brand": ""}], "insurance"'
+ b': false, "address": {}, "firstName": "G"}, {"createdAt": "2139-12-28T22:50:5'
+ b'7.004882-17:42", "cars": [{"brand": "\\ud936\\udda2\\u00ea\\udbc8\\ude94\\'
+ b'u00e5\\u0013", "maxSpeedKmH": 2.262356751545562e+16, "model": "\\u00de\\udb'
+ b'84\\udcc5d"}, {"model": "\\u00bd&\\u00f4", "brand": ""}, {"maxSpeedKmH": -3'
+ b'.978368779328332e+16}, {}, {"brand": "\\u0095\\u00c2\\u0006", "maxSpeedKmH"'
+ b': 2.8155722251216644e+16, "model": "\\u00c4\\ud989\\udd99K"}, {}]}, {"age":'
+ b' 0}]')' expected, but got '(b'[{"Id":null,"FirstName":"\xc2\xbd\xc3\xa33","LastName":null,"Age":-3684,"Add'
+ b'ress":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":"Z","FirstNa'
+ b'me":"G","LastName":"\xc3\xb2\xc3\xab\xc3\x9c\xc2\xa5\xf2\x8d\x86\xba'
+ b'\xc2\xb7\xc2\xb1s\\u0003\xf3\xad\x8b\x98\\u0010\xc3\x86\\u0010","Age":-95'
+ b'378,"Address":{"Number":null,"Street":null,"Postcode":null,"City":null,"Coun'
+ b'try":null},"CreatedAt":"2768-10-22T11:23:15.6Z","Insurance":false,"Cars":[{"'
+ b'Brand":"","Model":"\xc2\xbd&\xc3\xb4","MaxSpeedKmH":null}]},{"Id":null,"Firs'
+ b'tName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":"2139-12-2'
+ b'9T16:32:57.004882+00:00","Insurance":null,"Cars":[{"Brand":"\xf1\x9d\xa6\xa2'
+ b'\xc3\xaa\xf4\x82\x8a\x94\xc3\xa5\\u0013","Model":"\xc3\x9e\xf3\xb1\x83\x85d'
+ b'","MaxSpeedKmH":2.2623568E+16},{"Brand":"","Model":"\xc2\xbd&\xc3\xb4","MaxS'
+ b'peedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":-3.978369E+16},{"Bra'
+ b'nd":null,"Model":null,"MaxSpeedKmH":null},{"Brand":"\xc2\x95\xc3\x82\\u00'
+ b'06","Model":"\xc3\x84\xf1\xb2\x96\x99K","MaxSpeedKmH":2.8155723E+16},{"Bra'
+ b'nd":null,"Model":null,"MaxSpeedKmH":null}]},{"Id":null,"FirstName":null,"Las'
+ b'tName":null,"Age":0,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":'
+ b'null}]')'.

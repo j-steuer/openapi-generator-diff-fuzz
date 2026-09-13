@@ -1,0 +1,14 @@
+Error report Error_-889781854365697035
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "name": "__main__", "properties": {"\\ud8d5\\udfee": {"\\udb34\\udfd9\\u009c\\u00c8\\u00112lK\\u0012\\udad7\\udeaf\\u00a5\\u0012\\u008au\\u00af\\u00a1\\ud9e9\\udcdc\\u00f1\\u0016g\\u00ed\\uda0c\\udf05]\\u008f": ["\\u00a3", [647, false, null]]}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"__main__","Properties":{"\xf1\x85\x9f\xae":{"\xf3\x9d\x8f\x99\xc2\x9c\xc3\x88\\u00112lK\\u0012\xf3\x85\xba\xaf\xc2\xa5\\u0012\xc2\x8au\xc2\xaf\xc2\xa1\xf2\x8a\x93\x9c\xc3\xb1\\u0016g\xc3\xad\xf2\x93\x8c\x85]\xc2\x8f":["\xc2\xa3",[647,false,null]]}},"Asynchronous":false}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'name' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.

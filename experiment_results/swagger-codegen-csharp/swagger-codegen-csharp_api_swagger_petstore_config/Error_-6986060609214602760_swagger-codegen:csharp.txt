@@ -1,0 +1,41 @@
+Error report Error_-6986060609214602760
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"email": "\\u0087l\\ud928\\udc70\\udbdb\\udd7a\\u00c6\\udb1f\\udd97I\\u0085\\u0019", "username": "\\u00aa\\udae7\\udf69\\udb23\\udda5k\\u008f\\u00fa\\u0089", "firstName": "LPT1", "phone": ";", "password": "w\\u008c", "id": -626, "userStatus": -1006, "lastName": "\\u00bb\\u00d6I\\udb4d\\udce9\\u00b4\\ud922\\udf83\\t\\u001a"}, {"email": "\\u0012u=C", "lastName": "I\\u00d8", "firstName": "\\u0011\\u0005\\u00dd\\u008a\\u009b\\u00c8\\u00f7\\u00fbd\\udb44\\udf5a", "phone": "\\u00f2\\u00f4(", "username": "\\u00ae\\u00bd\\u00b3", "password": "", "id": 17117, "userStatus": -85}, {"password": "\\"\\u00aeq\\udb2f\\ude1f\\uda62\\ude76", "firstName": "GQ\\u0001\\udb20\\udc32\\u00c775\\uda4f\\udc5a\\u00b0\\udb36\\ude15\\udb82\\udc05", "email": "-script.pyw", "userStatus": -990, "phone": "\\u00b5\\u00f8\\u00e3\\udbf2\\udc72\\u00b2", "username": "\\u00c6T\\u00e0\\ud8b9\\uddd1\\ud8a4\\udd6a\\u0004a\\ud913\\udde4[\\u00fc\\u0081\\u0081\\u0080+\\u00ab\\uda4e\\udfac\\u00a0"}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":-626,"Username":"\xc2\xaa\xf3\x89\xbd\xa9\xf3\x98\xb6\xa5k\xc2\x8f\xc3\xba\xc2\x89","FirstName":"LPT1","LastName":"\xc2\xbb\xc3\x96I\xf3\xa3\x93\xa9\xc2\xb4\xf1\x98\xae\x83\\t\\u001a","Email":"\xc2\x87l\xf1\x9a\x81\xb0\xf4\x86\xb5\xba\xc3\x86\xf3\x97\xb6\x97I\\u0085\\u0019","Password":"w\xc2\x8c","Phone":";","UserStatus":-1006},{"Id":17117,"Username":"\xc2\xae\xc2\xbd\xc2\xb3","FirstName":"\\u0011\\u0005\xc3\x9d\xc2\x8a\xc2\x9b\xc3\x88\xc3\xb7\xc3\xbbd\xf3\xa1\x8d\x9a","LastName":"I\xc3\x98","Email":"\\u0012u=C","Password":"","Phone":"\xc3\xb2\xc3\xb4(","UserStatus":-85},{"Id":null,"Username":"\xc3\x86T\xc3\xa0\xf0\xbe\x97\x91\xf0\xb9\x85\xaa\\u0004a\xf1\x94\xb7\xa4[\xc3\xbc\xc2\x81\xc2\x81\xc2\x80+\xc2\xab\xf2\xa3\xae\xac\xc2\xa0","FirstName":"GQ\\u0001\xf3\x98\x80\xb2\xc3\x8775\xf2\xa3\xb1\x9a\xc2\xb0\xf3\x9d\xa8\x95\xf3\xb0\xa0\x85","LastName":null,"Email":"-script.pyw","Password":"\\"\xc2\xaeq\xf3\x9b\xb8\x9f\xf2\xa8\xa9\xb6","Phone":"\xc2\xb5\xc3\xb8\xc3\xa3\xf4\x8c\xa1\xb2\xc2\xb2","UserStatus":-990}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"email": "\\u0087l\\ud928\\udc70\\udbdb\\udd7a\\u00c6\\udb1f\\udd97I\\u'
+ b'0085\\u0019", "username": "\\u00aa\\udae7\\udf69\\udb23\\udda5k\\u008f\\u00f'
+ b'a\\u0089", "firstName": "LPT1", "phone": ";", "password": "w\\u008c", "id"'
+ b': -626, "userStatus": -1006, "lastName": "\\u00bb\\u00d6I\\udb4d\\udce9\\'
+ b'u00b4\\ud922\\udf83\\t\\u001a"}, {"email": "\\u0012u=C", "lastName": "I\\u'
+ b'00d8", "firstName": "\\u0011\\u0005\\u00dd\\u008a\\u009b\\u00c8\\u00f7\\u00f'
+ b'bd\\udb44\\udf5a", "phone": "\\u00f2\\u00f4(", "username": "\\u00ae\\u00bd'
+ b'\\u00b3", "password": "", "id": 17117, "userStatus": -85}, {"password": "'
+ b'\\"\\u00aeq\\udb2f\\ude1f\\uda62\\ude76", "firstName": "GQ\\u0001\\udb20'
+ b'\\udc32\\u00c775\\uda4f\\udc5a\\u00b0\\udb36\\ude15\\udb82\\udc05", "emai'
+ b'l": "-script.pyw", "userStatus": -990, "phone": "\\u00b5\\u00f8\\u00e3\\udbf'
+ b'2\\udc72\\u00b2", "username": "\\u00c6T\\u00e0\\ud8b9\\uddd1\\ud8a4\\udd'
+ b'6a\\u0004a\\ud913\\udde4[\\u00fc\\u0081\\u0081\\u0080+\\u00ab\\uda4e\\udfa'
+ b'c\\u00a0"}]')' expected, but got '(b'[{"Id":-626,"Username":"\xc2\xaa\xf3\x89\xbd\xa9\xf3\x98\xb6\xa5k\xc2'
+ b'\x8f\xc3\xba\xc2\x89","FirstName":"LPT1","LastName":"\xc2\xbb\xc3\x96I\xf3'
+ b'\xa3\x93\xa9\xc2\xb4\xf1\x98\xae\x83\\t\\u001a","Email":"\xc2\x87l\xf1'
+ b'\x9a\x81\xb0\xf4\x86\xb5\xba\xc3\x86\xf3\x97\xb6\x97I\\u0085\\u0019","Pas'
+ b'sword":"w\xc2\x8c","Phone":";","UserStatus":-1006},{"Id":17117,"Username":'
+ b'"\xc2\xae\xc2\xbd\xc2\xb3","FirstName":"\\u0011\\u0005\xc3\x9d'
+ b'\xc2\x8a\xc2\x9b\xc3\x88\xc3\xb7\xc3\xbbd\xf3\xa1\x8d\x9a","LastName":'
+ b'"I\xc3\x98","Email":"\\u0012u=C","Password":"","Phone":"\xc3\xb2\xc3\xb4(",'
+ b'"UserStatus":-85},{"Id":null,"Username":"\xc3\x86T\xc3\xa0\xf0\xbe'
+ b'\x97\x91\xf0\xb9\x85\xaa\\u0004a\xf1\x94\xb7\xa4[\xc3\xbc\xc2\x81\xc2\x81'
+ b'\xc2\x80+\xc2\xab\xf2\xa3\xae\xac\xc2\xa0","FirstName":"GQ\\u0001\xf3\x98'
+ b'\x80\xb2\xc3\x8775\xf2\xa3\xb1\x9a\xc2\xb0\xf3\x9d\xa8\x95\xf3\xb0\xa0\x85'
+ b'","LastName":null,"Email":"-script.pyw","Password":"\\"\xc2\xaeq\xf3\x9b\xb8'
+ b'\x9f\xf2\xa8\xa9\xb6","Phone":"\xc2\xb5\xc3\xb8\xc3\xa3\xf4\x8c'
+ b'\xa1\xb2\xc2\xb2","UserStatus":-990}]')'.

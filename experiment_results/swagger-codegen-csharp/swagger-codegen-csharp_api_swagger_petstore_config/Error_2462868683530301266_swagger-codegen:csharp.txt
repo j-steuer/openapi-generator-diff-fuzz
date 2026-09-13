@@ -1,0 +1,14 @@
+Error report Error_2462868683530301266
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\udb9e\\udfb7\\uda67\\udd05=\\u0003", "photoUrls": ["\\u001cp\\u000b", "s\\u00a1\\u00a6Y\\ud988\\udf7f{\\u009dh\\ud953\\uddb1\\u00c0\\udba2\\udfc3\\u00af\\u0083\\u00c5\\ud916\\udf5e\\u00a7\\u00f1", "999999999999999999999999999999"], "category": {"id": 35626176993, "name": "\\u00da\\udbe9\\udf79"}, "id": -2457, "status": "available", "tags": [{}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":"Available","Id":-2457,"Name":"\xf3\xb7\xae\xb7\xf2\xa9\xb4\x85=\\u0003","Category":{"Id":35626176993,"Name":"\xc3\x9a\xf4\x8a\x9d\xb9"},"PhotoUrls":["\\u001cp\\u000b","s\xc2\xa1\xc2\xa6Y\xf1\xb2\x8d\xbf{\xc2\x9dh\xf1\xa4\xb6\xb1\xc3\x80\xf3\xb8\xaf\x83\xc2\xaf\xc2\x83\xc3\x85\xf1\x95\xad\x9e\xc2\xa7\xc3\xb1","999999999999999999999999999999"],"Tags":[{"Id":null,"Name":null}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'category' only exists in original body.Element 'id' only exists in original body.Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'status' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

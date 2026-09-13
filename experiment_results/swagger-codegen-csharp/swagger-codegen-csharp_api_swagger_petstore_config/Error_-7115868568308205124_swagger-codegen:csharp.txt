@@ -1,0 +1,14 @@
+Error report Error_-7115868568308205124
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"id": -44352, "userStatus": 510511, "password": "#\\u0080\\u0085\\u00eb\\u00d2\\u00bd", "email": ";\\u0094&\\u00e8\\u0003\\u00d8\\u0010P9(\\uda76\\uddd21DKk\\u00bb", "username": "\\u00db-SwR\\u001f\\uda78\\udeec\\u00e3\\u00be\\u009d\\ub0c5Q Mt\\u0016\\ud90c\\ude5a\\u00d7o\\u00f6\\u00ed/\\u0096", "lastName": "\\u00c5\\u0096\\ud937\\uddccM\\u00c5\\uda77\\udd39-", "phone": "\\u0081\\uda8b\\uddb1\\uda11\\udd88\\u00b4", "firstName": "\\u00fe!\\u00fc\\u00f5\\u00d7\\udb55\\udca5\\u0006\\udb26\\ude9b<"}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":-44352,"Username":"\xc3\x9b-SwR\\u001f\xf2\xae\x8b\xac\xc3\xa3\xc2\xbe\xc2\x9d\xeb\x83\x85Q Mt\\u0016\xf1\x93\x89\x9a\xc3\x97o\xc3\xb6\xc3\xad/\xc2\x96","FirstName":"\xc3\xbe!\xc3\xbc\xc3\xb5\xc3\x97\xf3\xa5\x92\xa5\\u0006\xf3\x99\xaa\x9b<","LastName":"\xc3\x85\xc2\x96\xf1\x9d\xb7\x8cM\xc3\x85\xf2\xad\xb4\xb9-","Email":";\xc2\x94&\xc3\xa8\\u0003\xc3\x98\\u0010P9(\xf2\xad\xa7\x921DKk\xc2\xbb","Password":"#\xc2\x80\\u0085\xc3\xab\xc3\x92\xc2\xbd","Phone":"\xc2\x81\xf2\xb2\xb6\xb1\xf2\x94\x96\x88\xc2\xb4","UserStatus":510511}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'email' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'lastName' only exists in original body.Element 'password' only exists in original body.Element 'phone' only exists in original body.Element 'userStatus' only exists in original body.Element 'username' only exists in original body.Element 'Email' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'LastName' only exists in produced body.Element 'Password' only exists in produced body.Element 'Phone' only exists in produced body.Element 'UserStatus' only exists in produced body.Element 'Username' only exists in produced body.

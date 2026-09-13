@@ -1,0 +1,14 @@
+Error report Error_-8160365910353778072
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/merge-patch+json'}, body=b'{}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/1', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/merge-patch+json; charset=utf-8'}, body=b'{}', method=<HTTPMethod.PATCH: 'PATCH'>, path='/contacts/1', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Content type application/merge-patch+json expected, got application/merge-patch+json; charset=utf-8

@@ -1,0 +1,14 @@
+Error report Error_-4058196891082616546
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"key": "O\\uda6a\\ude6d\\u0013z\\u00c50\\u00c2\\ud9dd\\udddc\\u0002\\u0087\\u00c1\\u00dc\\\\f\\uda99\\udfd4\\ud917\\udc19X\\u001el\\u00c4\\u0086", "keyType": "GUID", "keyDob": ""}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"KeyType":"GUID","Key":"O\xf2\xaa\xa9\xad\\u0013z\xc3\x850\xc3\x82\xf2\x87\x97\x9c\\u0002\xc2\x87\xc3\x81\xc3\x9c\\\\f\xf2\xb6\x9f\x94\xf1\x95\xb0\x99X\\u001el\xc3\x84\xc2\x86","KeyDob":""}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'key' only exists in original body.Element 'keyDob' only exists in original body.Element 'keyType' only exists in original body.Element 'Key' only exists in produced body.Element 'KeyDob' only exists in produced body.Element 'KeyType' only exists in produced body.

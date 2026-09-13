@@ -1,0 +1,27 @@
+Error report Error_-776234242429585425
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"id": 129, "email": "\\ud857\\udf94\\u0016}", "phone": "\\u00cc\\u00be\\u0089\\u00ae", "userStatus": -805, "username": "\\udb42\\udd7fO\\u0091d\\u0013\\u000e\\u00f5\\u0091\\u00b1q\\u00dd\\u00b3^{\\u00fd\\\\\\u0001\\u0088\\u0098h\\u00bc\\ud840\\udca4?\\u00bd\\u0000\\u00f2\\u0004Y", "firstName": "\\u00de\\u00e4Uy\\u007fIN", "lastName": "\\u00c9", "password": "M"}, {"phone": "?\\u0089", "userStatus": 0, "username": "\\u00deF\\u0006\\udb07\\ude4a\\u00e0\\u00ef\\u0002n"}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":129,"Username":"\xf3\xa0\xa5\xbfO\xc2\x91d\\u0013\\u000e\xc3\xb5\xc2\x91\xc2\xb1q\xc3\x9d\xc2\xb3^{\xc3\xbd\\\\\\u0001\xc2\x88\xc2\x98h\xc2\xbc\xf0\xa0\x82\xa4?\xc2\xbd\\u0000\xc3\xb2\\u0004Y","FirstName":"\xc3\x9e\xc3\xa4Uy\x7fIN","LastName":"\xc3\x89","Email":"\xf0\xa5\xbe\x94\\u0016}","Password":"M","Phone":"\xc3\x8c\xc2\xbe\xc2\x89\xc2\xae","UserStatus":-805},{"Id":null,"Username":"\xc3\x9eF\\u0006\xf3\x91\xb9\x8a\xc3\xa0\xc3\xaf\\u0002n","FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":"?\xc2\x89","UserStatus":0}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"id": 129, "email": "\\ud857\\udf94\\u0016}", "phone": "\\u00cc\\u00be\\'
+ b'u0089\\u00ae", "userStatus": -805, "username": "\\udb42\\udd7fO\\u0091d\\'
+ b'u0013\\u000e\\u00f5\\u0091\\u00b1q\\u00dd\\u00b3^{\\u00fd\\\\\\u0001\\u0088'
+ b'\\u0098h\\u00bc\\ud840\\udca4?\\u00bd\\u0000\\u00f2\\u0004Y", "firstName": "'
+ b'\\u00de\\u00e4Uy\\u007fIN", "lastName": "\\u00c9", "password": "M"}, {"phone'
+ b'": "?\\u0089", "userStatus": 0, "username": "\\u00deF\\u0006\\udb07\\ude4'
+ b'a\\u00e0\\u00ef\\u0002n"}]')' expected, but got '(b'[{"Id":129,"Username":"\xf3\xa0\xa5\xbfO\xc2\x91d\\u0013\\u000e\xc3'
+ b'\xb5\xc2\x91\xc2\xb1q\xc3\x9d\xc2\xb3^{\xc3\xbd\\\\\\u0001\xc2\x88'
+ b'\xc2\x98h\xc2\xbc\xf0\xa0\x82\xa4?\xc2\xbd\\u0000\xc3\xb2\\u0004Y","FirstN'
+ b'ame":"\xc3\x9e\xc3\xa4Uy\x7fIN","LastName":"\xc3\x89","Email":"\xf0\xa5'
+ b'\xbe\x94\\u0016}","Password":"M","Phone":"\xc3\x8c\xc2\xbe\xc2\x89\xc2\xae"'
+ b',"UserStatus":-805},{"Id":null,"Username":"\xc3\x9eF\\u0006\xf3\x91\xb9\x8a'
+ b'\xc3\xa0\xc3\xaf\\u0002n","FirstName":null,"LastName":null,"Email":null,"'
+ b'Password":null,"Phone":"?\xc2\x89","UserStatus":0}]')'.

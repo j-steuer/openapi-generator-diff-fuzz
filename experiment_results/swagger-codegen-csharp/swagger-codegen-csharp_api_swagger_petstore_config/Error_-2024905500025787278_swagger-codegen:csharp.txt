@@ -1,0 +1,14 @@
+Error report Error_-2024905500025787278
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"password": "+\\udb4d\\udca0\\u0094\\u0000\\u00f2\\u00b7\\u00f6\\u00b6\\u00c5\\u00b1\\udb5f\\udcf0", "id": -13820341, "email": "\\ff\\u00ca", "phone": "\\u000e\\u00bc", "firstName": "_\\u00d4\\u00e2\\udaff\\udf0b\\u0087 \\u007f\\u0004?\\u0000", "username": "\\udbea\\udd7d\\r7\\udbfe\\udf72l\\udb35\\udf19\\u00a7\\u00e4\\u00f4\\u00ee\\uda97\\udd97", "userStatus": -3883387, "lastName": "\\udbd7\\udf23#L\\ud824\\udf6dC\\ud8b7\\uddb2\\u00f9\\ud873\\udd2a"}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Id":-13820341,"Username":"\xf4\x8a\xa5\xbd\\r7\xf4\x8f\xad\xb2l\xf3\x9d\x9c\x99\xc2\xa7\xc3\xa4\xc3\xb4\xc3\xae\xf2\xb5\xb6\x97","FirstName":"_\xc3\x94\xc3\xa2\xf3\x8f\xbc\x8b\xc2\x87 \x7f\\u0004?\\u0000","LastName":"\xf4\x85\xbc\xa3#L\xf0\x99\x8d\xadC\xf0\xbd\xb6\xb2\xc3\xb9\xf0\xac\xb4\xaa","Email":"\\ff\xc3\x8a","Password":"+\xf3\xa3\x92\xa0\xc2\x94\\u0000\xc3\xb2\xc2\xb7\xc3\xb6\xc2\xb6\xc3\x85\xc2\xb1\xf3\xa7\xb3\xb0","Phone":"\\u000e\xc2\xbc","UserStatus":-3883387}', method=<HTTPMethod.POST: 'POST'>, path='/user', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'email' only exists in original body.Element 'firstName' only exists in original body.Element 'id' only exists in original body.Element 'lastName' only exists in original body.Element 'password' only exists in original body.Element 'phone' only exists in original body.Element 'userStatus' only exists in original body.Element 'username' only exists in original body.Element 'Email' only exists in produced body.Element 'FirstName' only exists in produced body.Element 'Id' only exists in produced body.Element 'LastName' only exists in produced body.Element 'Password' only exists in produced body.Element 'Phone' only exists in produced body.Element 'UserStatus' only exists in produced body.Element 'Username' only exists in produced body.

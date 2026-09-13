@@ -1,0 +1,14 @@
+Error report Error_2170380837664887224
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": "", "properties": {"0": {"\\u00df\\ud919\\udc1f6\\u00b6W\\u00a2\\u1361m\\ud99d\\udc5bu\\u0091\\u00be\\udb1c\\udd39": null}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"","Properties":{"0":{"\xc3\x9f\xf1\x96\x90\x9f6\xc2\xb6W\xc2\xa2\xe1\x8d\xa1m\xf1\xb7\x91\x9bu\xc2\x91\xc2\xbe\xf3\x97\x84\xb9":null}},"Asynchronous":true}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'name' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.

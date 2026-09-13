@@ -1,0 +1,14 @@
+Error report Error_8434018299090918902
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"key": "\\ud955\\ude93", "keyDob": "|\\ud8ce\\udd6b\\uda4d\\udc45\\u00ff\\u00a1\\ud914\\udfb3H\\u00e6", "keyType": "GUID"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"KeyType":"GUID","Key":"\xf1\xa5\x9a\x93","KeyDob":"|\xf1\x83\xa5\xab\xf2\xa3\x91\x85\xc3\xbf\xc2\xa1\xf1\x95\x8e\xb3H\xc3\xa6"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'key' only exists in original body.Element 'keyDob' only exists in original body.Element 'keyType' only exists in original body.Element 'Key' only exists in produced body.Element 'KeyDob' only exists in produced body.Element 'KeyType' only exists in produced body.

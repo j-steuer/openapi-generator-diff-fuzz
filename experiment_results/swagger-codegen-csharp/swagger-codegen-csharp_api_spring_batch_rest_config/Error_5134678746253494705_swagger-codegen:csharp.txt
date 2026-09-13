@@ -1,0 +1,14 @@
+Error report Error_5134678746253494705
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "properties": {"m\\u00aa\\uda4d\\udf1ey\\u0093\\u00ec\\u008f\\u00a9": {"5]": {"\\udb77\\udfb6\\u00f9": "E\\ud828\\udde2"}, "": {}, "\\u00d4\\u00d7": [], "56": {}, "w\\ud9db\\uddb9": {}, "9\\udbec\\udf6a": [null], "\\uda74\\ude08\\u00f1a": [], "\\ud98d\\udca9": []}, "\\u0088+K\\u0011\\uda42\\udd2a\\u00e1\\u009d\\u001d\\ud910\\uddd3": {"\\ud8b3\\uded0[": null, "A": {"P\\ud99c\\udcdf\\u0015\\u00d2\\t\\ud8f0\\udd552\\udaca\\udebc\\u0004\\u00a3\\u00d6\\u00e1\\u00c3V\\u00dat\\ud908\\udc03\\u00bd(\\udaa7\\udc9f\\u0096}\\u00cc\\r\\u00d1": []}, "_\\u0082\\u0019\\b\\u0089": [[], -2.2674348898322e-215]}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":null,"Properties":{"m\xc2\xaa\xf2\xa3\x9c\x9ey\xc2\x93\xc3\xac\xc2\x8f\xc2\xa9":{"5]":{"\xf3\xad\xbe\xb6\xc3\xb9":"E\xf0\x9a\x87\xa2"},"":{},"\xc3\x94\xc3\x97":[],"56":{},"w\xf2\x86\xb6\xb9":{},"9\xf4\x8b\x8d\xaa":[null],"\xf2\xad\x88\x88\xc3\xb1a":[],"\xf1\xb3\x92\xa9":[]},"\xc2\x88+K\\u0011\xf2\xa0\xa4\xaa\xc3\xa1\xc2\x9d\\u001d\xf1\x94\x87\x93":{"\xf0\xbc\xbb\x90[":null,"A":{"P\xf1\xb7\x83\x9f\\u0015\xc3\x92\\t\xf1\x8c\x85\x952\xf3\x82\xaa\xbc\\u0004\xc2\xa3\xc3\x96\xc3\xa1\xc3\x83V\xc3\x9at\xf1\x92\x80\x83\xc2\xbd(\xf2\xb9\xb2\x9f\xc2\x96}\xc3\x8c\\r\xc3\x91":[]},"_\xc2\x82\\u0019\\b\xc2\x89":[[],-2.2674348898322E-215]}},"Asynchronous":true}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.

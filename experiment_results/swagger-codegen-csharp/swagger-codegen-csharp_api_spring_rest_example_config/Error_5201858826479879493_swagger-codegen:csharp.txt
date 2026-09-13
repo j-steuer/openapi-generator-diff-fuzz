@@ -1,0 +1,14 @@
+Error report Error_5201858826479879493
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"project": {"title": "\\uda46\\udfb1\\u00e1\\udab5\\udd03\\u00b8"}, "idx": 26430808805296, "title": "", "problemCode": "\\udbed\\udd67\\u0092"}', method=<HTTPMethod.POST: 'POST'>, path='/api/problem/%C3%BA%C2%AF%C3%93%F1%AD%8C%83%C3%88AR%C2%94%40', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Idx":26430808805296,"Title":"","Project":{"Idx":null,"Code":null,"Title":"\xf2\xa1\xae\xb1\xc3\xa1\xf2\xbd\x94\x83\xc2\xb8","Problem":null},"ProblemCode":"\xf4\x8b\x95\xa7\xc2\x92"}', method=<HTTPMethod.POST: 'POST'>, path='/api/problem/%C3%BA%C2%AF%C3%93%F1%AD%8C%83%C3%88AR%C2%94%40', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'idx' only exists in original body.Element 'problemCode' only exists in original body.Element 'project' only exists in original body.Element 'title' only exists in original body.Element 'Idx' only exists in produced body.Element 'ProblemCode' only exists in produced body.Element 'Project' only exists in produced body.Element 'Title' only exists in produced body.

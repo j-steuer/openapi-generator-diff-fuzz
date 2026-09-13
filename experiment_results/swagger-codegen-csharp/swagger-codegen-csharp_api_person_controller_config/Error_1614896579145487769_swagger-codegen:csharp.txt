@@ -1,0 +1,25 @@
+Error report Error_1614896579145487769
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"country": "\\u00fc\\u00f1\\u00c8\\uda82\\udf20\\uda64\\udd4d\\udb2d\\udfc7", "city": "", "number": 0, "postcode": "e\\u00b2", "street": "\\u0006\\u00d9\\udaa8\\udce9\\u0002o"}, "insurance": true}, {"cars": [{"brand": "", "maxSpeedKmH": 0.0}], "address": {"city": "S\\udbfb\\udffd"}, "firstName": ""}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":{"Number":0,"Street":"\\u0006\xc3\x99\xf2\xba\x83\xa9\\u0002o","Postcode":"e\xc2\xb2","City":"","Country":"\xc3\xbc\xc3\xb1\xc3\x88\xf2\xb0\xac\xa0\xf2\xa9\x85\x8d\xf3\x9b\x9f\x87"},"CreatedAt":null,"Insurance":true,"Cars":null},{"Id":null,"FirstName":"","LastName":null,"Age":null,"Address":{"Number":null,"Street":null,"Postcode":null,"City":"S\xf4\x8e\xbf\xbd","Country":null},"CreatedAt":null,"Insurance":null,"Cars":[{"Brand":"","Model":null,"MaxSpeedKmH":0.0}]}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"country": "\\u00fc\\u00f1\\u00c8\\uda82\\udf20\\uda64\\udd4d'
+ b'\\udb2d\\udfc7", "city": "", "number": 0, "postcode": "e\\u00b2", "street":'
+ b' "\\u0006\\u00d9\\udaa8\\udce9\\u0002o"}, "insurance": true}, {"cars": [{'
+ b'"brand": "", "maxSpeedKmH": 0.0}], "address": {"city": "S\\udbfb\\udffd"},'
+ b' "firstName": ""}]')' expected, but got '(b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":{"Number":'
+ b'0,"Street":"\\u0006\xc3\x99\xf2\xba\x83\xa9\\u0002o","Postcode":"e\xc2\xb2'
+ b'","City":"","Country":"\xc3\xbc\xc3\xb1\xc3\x88\xf2\xb0\xac\xa0\xf2\xa9\x85'
+ b'\x8d\xf3\x9b\x9f\x87"},"CreatedAt":null,"Insurance":true,"Cars":null},{"Id"'
+ b':null,"FirstName":"","LastName":null,"Age":null,"Address":{"Number":null,"St'
+ b'reet":null,"Postcode":null,"City":"S\xf4\x8e\xbf\xbd","Country":null},"Creat'
+ b'edAt":null,"Insurance":null,"Cars":[{"Brand":"","Model":null,"MaxSpeedKmH":0'
+ b'.0}]}]')'.

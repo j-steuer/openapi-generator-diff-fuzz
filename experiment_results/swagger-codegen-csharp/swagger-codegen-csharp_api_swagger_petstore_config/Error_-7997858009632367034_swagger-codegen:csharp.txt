@@ -1,0 +1,14 @@
+Error report Error_-7997858009632367034
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"name": "\\u00efDb\\ud925\\udffb", "photoUrls": ["\\u00c7\\u00ea\\udbce\\udc13\\u00b0\\u00d9\\u0096\\u00a5\\u008ay\\u001c\\r6\\udaf8\\udd44", "\\u00fa\\u00dc", "\\u009c\\udbbe\\udf6e\\u00fa\\u00d8\\u0000", "\\u001e", "\\u00a6\\u0084\\u009b\\u9895"], "tags": [{}, {"name": "\\ud8f0\\udcde\\u0082X\\ud876\\udfbe\\udaf8\\udca2"}, {}, {"id": 463, "name": "\\u00f42B\\u00ebh\\u0010\\u00f0"}], "id": 254903316}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":null,"Id":254903316,"Name":"\xc3\xafDb\xf1\x99\x9f\xbb","Category":null,"PhotoUrls":["\xc3\x87\xc3\xaa\xf4\x83\xa0\x93\xc2\xb0\xc3\x99\xc2\x96\xc2\xa5\xc2\x8ay\\u001c\\r6\xf3\x8e\x85\x84","\xc3\xba\xc3\x9c","\xc2\x9c\xf3\xbf\xad\xae\xc3\xba\xc3\x98\\u0000","\\u001e","\xc2\xa6\xc2\x84\xc2\x9b\xe9\xa2\x95"],"Tags":[{"Id":null,"Name":null},{"Id":null,"Name":"\xf1\x8c\x83\x9e\xc2\x82X\xf0\xad\xae\xbe\xf3\x8e\x82\xa2"},{"Id":null,"Name":null},{"Id":463,"Name":"\xc3\xb42B\xc3\xabh\\u0010\xc3\xb0"}]}', method=<HTTPMethod.PUT: 'PUT'>, path='/pet', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'id' only exists in original body.Element 'name' only exists in original body.Element 'photoUrls' only exists in original body.Element 'tags' only exists in original body.Element 'Category' only exists in produced body.Element 'Id' only exists in produced body.Element 'Name' only exists in produced body.Element 'PhotoUrls' only exists in produced body.Element 'Status' only exists in produced body.Element 'Tags' only exists in produced body.

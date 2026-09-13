@@ -1,0 +1,50 @@
+Error report Error_1688143789078286461
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{}, {}, {"firstName": "\\u00eb\\u00a0\\ud8f9\\udef7\\ud9b5\\udc62"}, {}, {}, {"lastName": "", "insurance": false, "id": "", "age": -110630, "firstName": "\\u00cf\\udb9d\\udcad", "cars": [{"maxSpeedKmH": 2.8794423105639423e+236, "brand": ""}, {"maxSpeedKmH": -3.9295470873605896e+16, "model": "\\ud86d\\udf70\\u00b7\\uda72\\udf61", "brand": ""}, {"brand": "", "maxSpeedKmH": 0.0}], "address": {"number": 138897, "city": "\\uda16\\uddf0\\u00f7\\u00b6", "postcode": "\\u0001\\u00f1D\\udb5e\\udf3d\\uda43\\ude37\'B\\ud99c\\udfef\\"\\u00a9\\ud808\\udd3c#\\ud801\\udd86\\u00d2\\u00e2C\\"$\\udb71\\uddc1J\\u000f\\u00f4\\u00fd\\u0013\\uda0f\\udcc3J", "street": ""}, "createdAt": "0001-11-07T00:45:01+00:01"}, {}, {}, {}, {}, {}, {}, {}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":"\xc3\xab\xc2\xa0\xf1\x8e\x9b\xb7\xf1\xbd\x91\xa2","LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":"","FirstName":"\xc3\x8f\xf3\xb7\x92\xad","LastName":"","Age":-110630,"Address":{"Number":138897,"Street":"","Postcode":"\\u0001\xc3\xb1D\xf3\xa7\xac\xbd\xf2\xa0\xb8\xb7\'B\xf1\xb7\x8f\xaf\\"\xc2\xa9\xf0\x92\x84\xbc#\xf0\x90\x96\x86\xc3\x92\xc3\xa2C\\"$\xf3\xac\x97\x81J\\u000f\xc3\xb4\xc3\xbd\\u0013\xf2\x93\xb3\x83J","City":"\xf2\x95\xa7\xb0\xc3\xb7\xc2\xb6","Country":null},"CreatedAt":"0001-11-07T00:44:01+00:00","Insurance":false,"Cars":[{"Brand":"","Model":null,"MaxSpeedKmH":"Infinity"},{"Brand":"","Model":"\xf0\xab\x9d\xb0\xc2\xb7\xf2\xac\xad\xa1","MaxSpeedKmH":-3.929547E+16},{"Brand":"","Model":null,"MaxSpeedKmH":0.0}]},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]', method=<HTTPMethod.PUT: 'PUT'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{}, {}, {"firstName": "\\u00eb\\u00a0\\ud8f9\\udef7\\ud9b5\\udc62"}, {}, '
+ b'{}, {"lastName": "", "insurance": false, "id": "", "age": -110630, "firstNam'
+ b'e": "\\u00cf\\udb9d\\udcad", "cars": [{"maxSpeedKmH": 2.8794423105639423e+2'
+ b'36, "brand": ""}, {"maxSpeedKmH": -3.9295470873605896e+16, "model": "\\ud'
+ b'86d\\udf70\\u00b7\\uda72\\udf61", "brand": ""}, {"brand": "", "maxSpeedKmH":'
+ b' 0.0}], "address": {"number": 138897, "city": "\\uda16\\uddf0\\u00f7\\u00b6"'
+ b', "postcode": "\\u0001\\u00f1D\\udb5e\\udf3d\\uda43\\ude37\'B\\ud99c\\udf'
+ b'ef\\"\\u00a9\\ud808\\udd3c#\\ud801\\udd86\\u00d2\\u00e2C\\"$\\udb71\\uddc1J'
+ b'\\u000f\\u00f4\\u00fd\\u0013\\uda0f\\udcc3J", "street": ""}, "createdAt": '
+ b'"0001-11-07T00:45:01+00:01"}, {}, {}, {}, {}, {}, {}, {}]')' expected, but got '(b'[{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"Crea'
+ b'tedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastN'
+ b'ame":null,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars"'
+ b':null},{"Id":null,"FirstName":"\xc3\xab\xc2\xa0\xf1\x8e\x9b\xb7\xf1'
+ b'\xbd\x91\xa2","LastName":null,"Age":null,"Address":null,"CreatedAt":null,'
+ b'"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"A'
+ b'ge":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id"'
+ b':null,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt"'
+ b':null,"Insurance":null,"Cars":null},{"Id":"","FirstName":"\xc3\x8f'
+ b'\xf3\xb7\x92\xad","LastName":"","Age":-110630,"Address":{"Number":138897,"St'
+ b'reet":"","Postcode":"\\u0001\xc3\xb1D\xf3\xa7\xac\xbd\xf2\xa0\xb8\xb7\'B'
+ b'\xf1\xb7\x8f\xaf\\"\xc2\xa9\xf0\x92\x84\xbc#\xf0\x90\x96\x86\xc3\x92\xc3'
+ b'\xa2C\\"$\xf3\xac\x97\x81J\\u000f\xc3\xb4\xc3\xbd\\u0013\xf2\x93\xb3\x83J"'
+ b',"City":"\xf2\x95\xa7\xb0\xc3\xb7\xc2\xb6","Country":null},"CreatedAt":"0001'
+ b'-11-07T00:44:01+00:00","Insurance":false,"Cars":[{"Brand":"","Model":null,"M'
+ b'axSpeedKmH":"Infinity"},{"Brand":"","Model":"\xf0\xab\x9d\xb0\xc2\xb7\xf2'
+ b'\xac\xad\xa1","MaxSpeedKmH":-3.929547E+16},{"Brand":"","Model":null,"MaxS'
+ b'peedKmH":0.0}]},{"Id":null,"FirstName":null,"LastName":null,"Age":null,"Addr'
+ b'ess":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"FirstNa'
+ b'me":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"Insuran'
+ b'ce":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age":null'
+ b',"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":null,"F'
+ b'irstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":null,"I'
+ b'nsurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":null,"Age'
+ b'":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null},{"Id":n'
+ b'ull,"FirstName":null,"LastName":null,"Age":null,"Address":null,"CreatedAt":n'
+ b'ull,"Insurance":null,"Cars":null},{"Id":null,"FirstName":null,"LastName":nul'
+ b'l,"Age":null,"Address":null,"CreatedAt":null,"Insurance":null,"Cars":null}]')'.

@@ -1,0 +1,14 @@
+Error report Error_-3592396344791424925
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"idx": 16465, "project": {"idx": 129450, "title": "\\u0016+,\\u00ee\\u00e7|\\u00fe\\u00a3@\\ud9db\\udd80v\\u00d6r\\u00b0\\u00fc\\u001eu?Nb\\u00eb\\u0007\\u0085\\uda56\\udf6f\\u00e1", "code": "\\udbbd\\ude0dhH*\\u00d6f", "problem": [{"idx": -13323, "problemCode": "\\u00c7H\\u00fd\\u0091\\u00e9\\uda2f\\udf23\\ud95e\\udee0\\u008c", "project": {"title": "\\u0093#\\u0098\\u00a1\\u00be\\ud8b2\\udf4b\\u00d12\\udab3\\udc62\\u007ftG\\u00a3\\u0083\\ud822\\udc78\\u00fe\\ud925\\udda1\\u0019p\\u00b7\\u001e\\udbcf\\udd56\\ud93e\\udcd5\\udb0e\\udf6d]\\udbca\\udf78\\u00aem", "code": "\\u008dE", "idx": -35463322845, "problem": [{}]}, "title": ""}]}, "problemCode": "p\\u0089\\u00d3>q", "title": ""}', method=<HTTPMethod.POST: 'POST'>, path='/api/problem/%2B%F1%80%AF%91', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Idx":16465,"Title":"","Project":{"Idx":129450,"Code":"\xf3\xbf\x98\x8dhH*\xc3\x96f","Title":"\\u0016+,\xc3\xae\xc3\xa7|\xc3\xbe\xc2\xa3@\xf2\x86\xb6\x80v\xc3\x96r\xc2\xb0\xc3\xbc\\u001eu?Nb\xc3\xab\\u0007\\u0085\xf2\xa5\xad\xaf\xc3\xa1","Problem":[{"Idx":-13323,"Title":"","Project":{"Idx":-35463322845,"Code":"\xc2\x8dE","Title":"\xc2\x93#\xc2\x98\xc2\xa1\xc2\xbe\xf0\xbc\xad\x8b\xc3\x912\xf2\xbc\xb1\xa2\x7ftG\xc2\xa3\xc2\x83\xf0\x98\xa1\xb8\xc3\xbe\xf1\x99\x96\xa1\\u0019p\xc2\xb7\\u001e\xf4\x83\xb5\x96\xf1\x9f\xa3\x95\xf3\x93\xad\xad]\xf4\x82\xad\xb8\xc2\xaem","Problem":[{"Idx":null,"Title":null,"Project":null,"ProblemCode":null}]},"ProblemCode":"\xc3\x87H\xc3\xbd\xc2\x91\xc3\xa9\xf2\x9b\xbc\xa3\xf1\xa7\xab\xa0\xc2\x8c"}]},"ProblemCode":"p\xc2\x89\xc3\x93>q"}', method=<HTTPMethod.POST: 'POST'>, path='/api/problem/%2B%F1%80%AF%91', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'idx' only exists in original body.Element 'problemCode' only exists in original body.Element 'project' only exists in original body.Element 'title' only exists in original body.Element 'Idx' only exists in produced body.Element 'ProblemCode' only exists in produced body.Element 'Project' only exists in produced body.Element 'Title' only exists in produced body.

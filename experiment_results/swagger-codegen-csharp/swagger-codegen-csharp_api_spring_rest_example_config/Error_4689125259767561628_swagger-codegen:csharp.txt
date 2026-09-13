@@ -1,0 +1,14 @@
+Error report Error_4689125259767561628
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"title": "", "problem": [{"project": {"problem": [{"idx": 3271, "problemCode": "\\ud8f5\\udc12\\u00f9\\ud8ee\\udd03\\u0082:", "title": "Z\\udaef\\udcb2\\u0007vGb\\u000f\\u0093\\udb03\\udee7l\\ud935\\udd52GV\\u00ec\\f![\\u00e0\\u00b4\\u00ea\\u00e8\\u00df\\u00ca\\u0092\\u00d6\\udba7\\udf66\\u00cc\\ud979\\ude3a\\u00c63\\ud9bc\\ude5d"}], "title": "__main__", "idx": 927421, "code": ""}, "idx": -466}, {"title": "\\u00e5\\ud86d\\udc8d"}, {}], "idx": 155, "code": ""}', method=<HTTPMethod.POST: 'POST'>, path='/api/project', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Idx":155,"Code":"","Title":"","Problem":[{"Idx":-466,"Title":null,"Project":{"Idx":927421,"Code":"","Title":"__main__","Problem":[{"Idx":3271,"Title":"Z\xf3\x8b\xb2\xb2\\u0007vGb\\u000f\xc2\x93\xf3\x90\xbb\xa7l\xf1\x9d\x95\x92GV\xc3\xac\\f![\xc3\xa0\xc2\xb4\xc3\xaa\xc3\xa8\xc3\x9f\xc3\x8a\xc2\x92\xc3\x96\xf3\xb9\xbd\xa6\xc3\x8c\xf1\xae\x98\xba\xc3\x863\xf1\xbf\x89\x9d","Project":null,"ProblemCode":"\xf1\x8d\x90\x92\xc3\xb9\xf1\x8b\xa4\x83\xc2\x82:"}]},"ProblemCode":null},{"Idx":null,"Title":"\xc3\xa5\xf0\xab\x92\x8d","Project":null,"ProblemCode":null},{"Idx":null,"Title":null,"Project":null,"ProblemCode":null}]}', method=<HTTPMethod.POST: 'POST'>, path='/api/project', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'code' only exists in original body.Element 'idx' only exists in original body.Element 'problem' only exists in original body.Element 'title' only exists in original body.Element 'Code' only exists in produced body.Element 'Idx' only exists in produced body.Element 'Problem' only exists in produced body.Element 'Title' only exists in produced body.

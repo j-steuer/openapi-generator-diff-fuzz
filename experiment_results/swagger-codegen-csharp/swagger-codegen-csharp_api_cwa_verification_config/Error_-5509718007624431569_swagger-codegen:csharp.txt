@@ -1,0 +1,14 @@
+Error report Error_-5509718007624431569
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"keyDob": "\\u00af(\\ud8c2\\udde2\\u6f6b\\udb63\\udcf6S", "keyType": "TELETAN", "key": "n\\u00a2"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"KeyType":"TELETAN","Key":"n\xc2\xa2","KeyDob":"\xc2\xaf(\xf1\x80\xa7\xa2\xe6\xbd\xab\xf3\xa8\xb3\xb6S"}', method=<HTTPMethod.POST: 'POST'>, path='/version/v1/registrationToken', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'key' only exists in original body.Element 'keyDob' only exists in original body.Element 'keyType' only exists in original body.Element 'Key' only exists in produced body.Element 'KeyDob' only exists in produced body.Element 'KeyType' only exists in produced body.

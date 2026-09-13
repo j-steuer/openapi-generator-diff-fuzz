@@ -1,0 +1,14 @@
+Error report Error_1910567154630127445
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"content": "-Infinity", "pro_idx": -589}', method=<HTTPMethod.POST: 'POST'>, path='/api/subproblem', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"ProIdx":null,"Content":"-Infinity"}', method=<HTTPMethod.POST: 'POST'>, path='/api/subproblem', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'content' only exists in original body.Element 'pro_idx' only exists in original body.Element 'Content' only exists in produced body.Element 'ProIdx' only exists in produced body.

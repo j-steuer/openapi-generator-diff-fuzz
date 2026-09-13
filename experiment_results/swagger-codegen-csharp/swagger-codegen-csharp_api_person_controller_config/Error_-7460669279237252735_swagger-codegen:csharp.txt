@@ -1,0 +1,20 @@
+Error report Error_-7460669279237252735
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"country": "\\u00e9\\u008a", "postcode": "\\u00de", "street": "\\udb1d\\ude7b", "number": 308, "city": ""}, "age": -1874035, "cars": [], "createdAt": "0295-09-11T00:00:03Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":"","FirstName":"","LastName":"","Age":-1874035,"Address":{"Number":308,"Street":"\xf3\x97\x99\xbb","Postcode":"\xc3\x9e","City":"","Country":"\xc3\xa9\xc2\x8a"},"CreatedAt":"0295-09-11T00:00:03Z","Insurance":false,"Cars":[]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"country": "\\u00e9\\u008a", "postcode": "\\u00de", "street":'
+ b' "\\udb1d\\ude7b", "number": 308, "city": ""}, "age": -1874035, "cars": []'
+ b', "createdAt": "0295-09-11T00:00:03Z", "firstName": "", "id": "", "insurance'
+ b'": false, "lastName": ""}]')' expected, but got '(b'[{"Id":"","FirstName":"","LastName":"","Age":-1874035,"Address":{"Number":30'
+ b'8,"Street":"\xf3\x97\x99\xbb","Postcode":"\xc3\x9e","City":"","Country'
+ b'":"\xc3\xa9\xc2\x8a"},"CreatedAt":"0295-09-11T00:00:03Z","Insurance":false,"'
+ b'Cars":[]}]')'.

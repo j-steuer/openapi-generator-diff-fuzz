@@ -1,0 +1,11 @@
+Error report Error_2661825385737233399
+----------------------------
+Requests:
+Original Requests:
+Request(headers={}, body=b'', method=<HTTPMethod.GET: 'GET'>, path='/user/%C2%85', query_parameters={})
+Produced Request:
+Failed to produce request. This could be an error caused by the fuzzer.
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was not unique and occured in other clients.
+Error while building request

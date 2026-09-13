@@ -1,0 +1,25 @@
+Error report Error_71059767541938660
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"username": "-Infinity", "firstName": "\\t\\ud8a8\\udd06m|(\\u001d", "lastName": "\\u00d9", "password": "\\ud900\\udf64\\ud847\\udc39\\u0099", "userStatus": -2442, "phone": "1", "id": 129188, "email": "8"}, {}, {"password": "\\u00ac", "firstName": "\\u0018hH\\u00f1VS\\ud951\\uddd8\\uda28\\udeba\\u00fe\\u0092\\u0005\\u0007", "phone": "\\u00a8", "userStatus": 747453}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":129188,"Username":"-Infinity","FirstName":"\\t\xf0\xba\x84\x86m|(\\u001d","LastName":"\xc3\x99","Email":"8","Password":"\xf1\x90\x8d\xa4\xf0\xa1\xb0\xb9\xc2\x99","Phone":"1","UserStatus":-2442},{"Id":null,"Username":null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":null,"UserStatus":null},{"Id":null,"Username":null,"FirstName":"\\u0018hH\xc3\xb1VS\xf1\xa4\x97\x98\xf2\x9a\x8a\xba\xc3\xbe\xc2\x92\\u0005\\u0007","LastName":null,"Email":null,"Password":"\xc2\xac","Phone":"\xc2\xa8","UserStatus":747453}]', method=<HTTPMethod.POST: 'POST'>, path='/user/createWithList', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"username": "-Infinity", "firstName": "\\t\\ud8a8\\udd06m|(\\u001d", "last'
+ b'Name": "\\u00d9", "password": "\\ud900\\udf64\\ud847\\udc39\\u0099", "user'
+ b'Status": -2442, "phone": "1", "id": 129188, "email": "8"}, {}, {"password": '
+ b'"\\u00ac", "firstName": "\\u0018hH\\u00f1VS\\ud951\\uddd8\\uda28\\udeba\\u00'
+ b'fe\\u0092\\u0005\\u0007", "phone": "\\u00a8", "userStatus": 747453}]')' expected, but got '(b'[{"Id":129188,"Username":"-Infinity","FirstName":"\\t\xf0\xba\x84\x86m|(\\'
+ b'u001d","LastName":"\xc3\x99","Email":"8","Password":"\xf1\x90\x8d\xa4\xf0'
+ b'\xa1\xb0\xb9\xc2\x99","Phone":"1","UserStatus":-2442},{"Id":null,"Username"'
+ b':null,"FirstName":null,"LastName":null,"Email":null,"Password":null,"Phone":'
+ b'null,"UserStatus":null},{"Id":null,"Username":null,"FirstName":"\\u0018hH'
+ b'\xc3\xb1VS\xf1\xa4\x97\x98\xf2\x9a\x8a\xba\xc3\xbe\xc2\x92\\u0005\\u0007","L'
+ b'astName":null,"Email":null,"Password":"\xc2\xac","Phone":"\xc2\xa8","UserSta'
+ b'tus":747453}]')'.

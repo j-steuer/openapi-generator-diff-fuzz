@@ -1,0 +1,14 @@
+Error report Error_9146140380073073921
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"quantity": -598438724, "complete": true, "petId": -3650, "shipDate": "6909-10-14T08:35:30Z", "id": 1720, "status": "approved"}', method=<HTTPMethod.POST: 'POST'>, path='/store/order', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Status":"Approved","Id":1720,"PetId":-3650,"Quantity":-598438724,"ShipDate":"6909-10-14T08:35:30Z","Complete":true}', method=<HTTPMethod.POST: 'POST'>, path='/store/order', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'complete' only exists in original body.Element 'id' only exists in original body.Element 'petId' only exists in original body.Element 'quantity' only exists in original body.Element 'shipDate' only exists in original body.Element 'status' only exists in original body.Element 'Complete' only exists in produced body.Element 'Id' only exists in produced body.Element 'PetId' only exists in produced body.Element 'Quantity' only exists in produced body.Element 'ShipDate' only exists in produced body.Element 'Status' only exists in produced body.

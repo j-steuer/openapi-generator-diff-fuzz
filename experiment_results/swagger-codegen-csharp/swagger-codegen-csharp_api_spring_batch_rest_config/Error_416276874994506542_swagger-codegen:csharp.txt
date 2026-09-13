@@ -1,0 +1,14 @@
+Error report Error_416276874994506542
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": true, "name": "\\udb2f\\udf1d\\u00ebT\\u00a5\\u00da\\u00d8\\u00af\\u0083\\u00a5\\u00f5\\u00f5\\ud97e\\udea4`\\f\\udbd6\\udc1c!7\\uda86\\udc1e\\u40af\\u00bf\\ud842\\udc96\\u0097\\u00f3\\u00a3\\u00c3\\u00ea\\u0006", "properties": {"\\u0002\\u0090Rcm\\u00a1\\u00ff<i\\u00c6\\u2cec\\u00fa\\ud9c2\\uddfc\\u0007\\u00a8\\u00f7\\u00de-\\u00c3\\u00e1\\u00b8\\u0084\\u00fc\\u009c": {"\\u00bc\\u00f9\\u008d\\udab7\\udd2b\\udb27\\udf6b\\u00f9\\u00ddZ=\\u00ef\\u00f4\\uda27\\udc20": [], "\\u00f6\\u00aa\\u00d6\\ud8ba\\udc5e\\u60fc\\u00e0\\u00a7oV)": [null, null, "\\u00eb\\u000b"]}, "\\f*\\u00d1W/\\uda25\\udf2d\\u001b|\\u00e5": {"-script.pyw": [true]}, "\\u008f\\u00aa": {"\\u00ff\\u0005": {"\\u00df\\u00d0": 0}}, "\\u0083": {}}}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"\xf3\x9b\xbc\x9d\xc3\xabT\xc2\xa5\xc3\x9a\xc3\x98\xc2\xaf\xc2\x83\xc2\xa5\xc3\xb5\xc3\xb5\xf1\xaf\xaa\xa4`\\f\xf4\x85\xa0\x9c!7\xf2\xb1\xa0\x9e\xe4\x82\xaf\xc2\xbf\xf0\xa0\xa2\x96\xc2\x97\xc3\xb3\xc2\xa3\xc3\x83\xc3\xaa\\u0006","Properties":{"\\u0002\xc2\x90Rcm\xc2\xa1\xc3\xbf<i\xc3\x86\xe2\xb3\xac\xc3\xba\xf2\x80\xa7\xbc\\u0007\xc2\xa8\xc3\xb7\xc3\x9e-\xc3\x83\xc3\xa1\xc2\xb8\xc2\x84\xc3\xbc\xc2\x9c":{"\xc2\xbc\xc3\xb9\xc2\x8d\xf2\xbd\xb4\xab\xf3\x99\xbd\xab\xc3\xb9\xc3\x9dZ=\xc3\xaf\xc3\xb4\xf2\x99\xb0\xa0":[],"\xc3\xb6\xc2\xaa\xc3\x96\xf0\xbe\xa1\x9e\xe6\x83\xbc\xc3\xa0\xc2\xa7oV)":[null,null,"\xc3\xab\\u000b"]},"\\f*\xc3\x91W/\xf2\x99\x9c\xad\\u001b|\xc3\xa5":{"-script.pyw":[true]},"\xc2\x8f\xc2\xaa":{"\xc3\xbf\\u0005":{"\xc3\x9f\xc3\x90":0}},"\xc2\x83":{}},"Asynchronous":true}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'name' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.

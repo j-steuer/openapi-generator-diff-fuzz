@@ -1,0 +1,20 @@
+Error report Error_1802127337972156629
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'[{"address": {"city": "", "country": "", "postcode": "", "number": 0, "street": ""}, "age": 0, "cars": [{}, {}, {}], "createdAt": "2000-01-01T00:00:01Z", "firstName": "", "id": "", "insurance": false, "lastName": ""}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'[{"Id":"","FirstName":"","LastName":"","Age":0,"Address":{"Number":0,"Street":"","Postcode":"","City":"","Country":""},"CreatedAt":"2000-01-01T00:00:01Z","Insurance":false,"Cars":[{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"MaxSpeedKmH":null}]}]', method=<HTTPMethod.POST: 'POST'>, path='/api/persons', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+- Body '(b'[{"address": {"city": "", "country": "", "postcode": "", "number": 0, "stree'
+ b't": ""}, "age": 0, "cars": [{}, {}, {}], "createdAt": "2000-01-01T00:00:01Z"'
+ b', "firstName": "", "id": "", "insurance": false, "lastName": ""}]')' expected, but got '(b'[{"Id":"","FirstName":"","LastName":"","Age":0,"Address":{"Number":0,"Street'
+ b'":"","Postcode":"","City":"","Country":""},"CreatedAt":"2000-01-01T00:00:01Z'
+ b'","Insurance":false,"Cars":[{"Brand":null,"Model":null,"MaxSpeedKmH":null},{'
+ b'"Brand":null,"Model":null,"MaxSpeedKmH":null},{"Brand":null,"Model":null,"Ma'
+ b'xSpeedKmH":null}]}]')'.

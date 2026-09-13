@@ -1,0 +1,14 @@
+Error report Error_-1369430284629983027
+----------------------------
+Requests:
+Original Requests:
+Request(headers={'content-type': 'application/json'}, body=b'{"asynchronous": false, "properties": {"\\u00b7/\\udb95\\uded8\\u0099\\uda1e\\udc69\\u00f3": {"r\\u00c8": "Z\\u00fa\\u00a4^\\u000e\\u0092\\u00df", "\\u05bf\\u00a4\\udb7a\\udcba>\\udae9\\udcc4\\u00bb\\udb11\\uddac\\u00fd": null, "\\u0082\\udbcf\\uded64\\ud881\\uddcd\\u00fb_\\u009c\\uda84\\udcc1": {}, "HN\\ua1f3\\u0012y\\u00fdi\\u00ef": {"": -374155111, "-script.pyw": null}, "\\ud9e2\\udc23-\\u00b4\\u00d9": []}}, "name": "\\u00ad\\u00c5"}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+Produced Request:
+Request(headers={'content-type': 'application/json; charset=utf-8'}, body=b'{"Name":"\xc2\xad\xc3\x85","Properties":{"\xc2\xb7/\xf3\xb5\x9b\x98\xc2\x99\xf2\x97\xa1\xa9\xc3\xb3":{"r\xc3\x88":"Z\xc3\xba\xc2\xa4^\\u000e\xc2\x92\xc3\x9f","\xd6\xbf\xc2\xa4\xf3\xae\xa2\xba>\xf3\x8a\x93\x84\xc2\xbb\xf3\x94\x96\xac\xc3\xbd":null,"\xc2\x82\xf4\x83\xbb\x964\xf0\xb0\x97\x8d\xc3\xbb_\xc2\x9c\xf2\xb1\x83\x81":{},"HN\xea\x87\xb3\\u0012y\xc3\xbdi\xc3\xaf":{"":-374155111,"-script.pyw":null},"\xf2\x88\xa0\xa3-\xc2\xb4\xc3\x99":[]}},"Asynchronous":false}', method=<HTTPMethod.POST: 'POST'>, path='/jobExecutions', query_parameters={})
+----------------------------
+Error occured in library swagger-codegen:csharp:
+Error was unique and only occured in this client.
+---
+Diff in request found
+---
+Element 'asynchronous' only exists in original body.Element 'name' only exists in original body.Element 'properties' only exists in original body.Element 'Asynchronous' only exists in produced body.Element 'Name' only exists in produced body.Element 'Properties' only exists in produced body.
